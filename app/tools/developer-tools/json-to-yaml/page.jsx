@@ -35,24 +35,25 @@ export default function JsonToYamlPage() {
       </div>
       <SeoContent
         title="JSON to YAML"
-        description="JSON to YAML converts JSON into valid YAML using the js-yaml library, entirely in your browser — nothing is uploaded to a server. Arrays convert into proper YAML list items (- item), nested objects convert at any depth, and every number is written exactly as in your JSON (a 20-digit id or 1.10 is never rounded), and string values are quoted automatically whenever needed (a colon, a leading special character, and similar cases) so the output parses back correctly."
+        description={"JSON to YAML rewrites pasted JSON as YAML, the format of Kubernetes, Docker Compose and GitHub Actions files. Objects become indented mappings and arrays become lists of - items, at any depth; empty objects and arrays are written {} and []. Numbers are copied exactly as in the JSON, so 1.10 and a 20-digit ID are not changed. A string that a YAML reader could take for something else, such as yes, no, 123, a date or text containing a colon followed by a space, is put in single quotes. Long lines are never folded, and the work happens in your browser with js-yaml."}
+        example={{"caption":"A small JSON configuration and the YAML the tool returns (note the quoted version, yes and colon strings):","inputLabel":"JSON","input":"{\n  \"name\": \"api\",\n  \"version\": \"1.10\",\n  \"debug\": false,\n  \"id\": 12345678901234567890,\n  \"answer\": \"yes\",\n  \"ports\": [80, 443],\n  \"note\": \"Time: 10:30\"\n}","outputLabel":"YAML","output":"name: api\nversion: '1.10'\ndebug: false\nid: 12345678901234567890\nanswer: 'yes'\nports:\n  - 80\n  - 443\nnote: 'Time: 10:30'\n"}}
+        howToTitle="How to convert JSON to YAML"
         howTo={[
-          "Paste your JSON into the input box.",
-          "Click 'Convert' to generate YAML.",
-          "The output is copy-paste-ready YAML, including arrays and nested objects.",
-          "Click 'Copy' to copy the result to your clipboard."
+          "Paste JSON into \"JSON Input\".",
+          "Click \"Convert\"; invalid JSON shows the parse error from your browser instead.",
+          "Read the YAML in \"YAML Output\".",
+          "Click \"Copy\", or \"Download\" to get the same YAML as data.yaml.",
         ]}
+        specs={[
+          { label: "Input", value: "JSON text" },
+          { label: "Output", value: "YAML in block style, two-space indentation, file data.yaml" },
+          { label: "Key order", value: "as in the JSON, except keys that are whole numbers, which come first" },
+        ]}
+        privacy={"js-yaml converts your JSON inside the browser tab, and the pasted text is not uploaded; the YAML exists only on this page until you copy or download it. An error, such as a JSON parse error, is reported to us as text with quoted fragments replaced, together with the tool name and your browser version."}
         faqs={[
-          { q: "Is JSON to YAML free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it handle nested JSON objects?", a: "Yes — nested objects convert into properly indented YAML at any depth." },
-          { q: "Does it convert JSON arrays correctly?", a: "Yes — array items are converted into proper YAML list syntax (- item), which parses back as an array, not an object." },
-          { q: "Does it handle values containing special YAML characters, like a colon?", a: "Yes — values are quoted automatically whenever needed (e.g. a string containing \"Note: important\"), since the conversion uses the js-yaml library instead of manual string formatting." }
-        ]}
-        tips={[
-          "Arrays and deeply nested objects both convert correctly — there's no need to restructure your JSON first.",
-          "Values that need quoting (colons, leading special characters, etc.) are quoted automatically.",
-          "The output uses YAML's block style throughout, so it stays readable even for large nested structures.",
-          "It's still worth a quick sanity check in your target application, since some YAML consumers interpret edge cases (like unquoted 'yes'/'no') differently."
+          { q: "Will yes, no or on be read as booleans?", a: "No. The tool quotes such strings, writing 'yes', 'no', 'on', 'off' and 'y', so readers that follow the older YAML 1.1 rules also keep them as text. Real JSON booleans are written true and false." },
+          { q: "Do numbers keep their exact digits?", a: "Yes. A number is written with the exact digits of your JSON: 1.10 stays 1.10 and 12345678901234567890 keeps all its digits. A version stored as a JSON string is quoted in the YAML, so it stays text." },
+          { q: "Can I convert the YAML back to JSON?", a: "Yes, with YAML to JSON. Its reader turns decimals into JSON numbers, so an unquoted 1.10 comes back as 1.1, but the quoted strings this tool writes come back unchanged." },
         ]}
       />
     </div>

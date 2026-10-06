@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { useToolError } from '../../../lib/useToolError';
+import { OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import UploadPrompt from '@/app/components/UploadPrompt';
 
 export default function PptToPdfPage() {
@@ -95,26 +96,27 @@ export default function PptToPdfPage() {
       </div>
       <SeoContent
         title="PowerPoint to PDF"
-        description="PowerPoint to PDF converts your .pptx or .ppt file into a PDF using LibreOffice. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. We tested .pptx files with custom slide backgrounds, two-level bullets, a full-bleed image, overlapping shapes and text boxes, a gradient fill, a table and a pie chart: all of them matched the output of two other online converters. Three disclosed limits. First, text boxes: PowerPoint lets the text of a box set to 'do not wrap' run past the edge of the box, while our converter (LibreOffice) wraps it at the edge. In our test a slide title in such a box, longer than the box, wrapped onto a second line and part of it was hidden behind an overlapping text box — this also happened when converting with the real Segoe UI font, so it is not a font problem. Second, fonts: a font not installed on our conversion servers is substituted with a similar typeface rather than left blank; Segoe UI, which is Windows-only, is replaced by Selawik, Microsoft's open replacement, whose letter widths matched Segoe UI in our measurement (its kerning is not identical). Third, and not a substitution: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your presentation uses them. We measured .pptx only, not the older .ppt format."
+        description={`PowerPoint to PDF turns a presentation into a PDF on our own LibreOffice conversion service. It reads .pptx, .ppt, macro-enabled .pptm, the slide-show files .ppsx, .ppsm and .pps, the templates .potx, .potm and .pot, and OpenDocument .odp and .otp. Every slide in our test decks became one PDF page; hidden slides and speaker notes were not tested. One difference with PowerPoint: a text box set not to wrap and narrower than its text is wrapped at its edge here, so part of the text can end up behind another shape.`}
+        howToTitle="How to convert a PowerPoint presentation to PDF"
         howTo={[
-          "Click the upload area and select a presentation: .pptx, .ppt, macro-enabled .pptm, slide shows .ppsx / .ppsm / .pps, templates .potx / .potm / .pot, or OpenDocument .odp / .otp.",
-          "Click 'Convert to PDF'. Your file is uploaded securely for conversion; once the PDF is ready, click 'Download'.",
-          "Save the resulting PDF file to your device."
+          `Click or drop the deck whose slides you want as PDF pages.`,
+          `Click "Convert to PDF"; the button reads "Converting...", after an upload percentage for a deck over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB.`,
+          `When "PDF ready" is shown, click "Download" to keep the slides as one PDF.`,
         ]}
+        specs={[
+          { label: 'Input formats', value: `.pptx, .ppt, .pptm, .ppsx, .ppsm, .pps, .potx, .potm, .pot, .odp, .otp` },
+          { label: 'Output', value: `One PDF file` },
+          { label: 'Maximum file size', value: `${officeMaxLabel()} per file` },
+          { label: 'Usage limits', value: `Decks over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB count toward a limit per network per hour and per day; smaller ones do not.` },
+        ]}
+        privacy={`Your presentation is uploaded over HTTPS to our server and converted by our LibreOffice service on Railway, without any outside provider. When the deck is bigger than ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB, it is sent in parts to our media service instead; that service drops the deck after the conversion and the PDF once this page has collected it, or after a time limit if it is never collected.`}
         faqs={[
-          { q: "Is PowerPoint to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does PowerPoint to PDF support?", a: ".pptx and the older .ppt, macro-enabled .pptm (macros are not run), slide shows .ppsx / .ppsm / .pps, templates .potx / .potm / .pot, and OpenDocument .odp / .otp — all through the same LibreOffice-based conversion service. We checked that each converts; the fidelity measurement quoted on this page was made on .pptx files." },
-          { q: "Will my presentations be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service, which uses LibreOffice to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
-          { q: "Do I need to install any software to use PowerPoint to PDF?", a: "No, it works directly in your web browser." },
-          { q: "Will each slide become its own PDF page?", a: "Yes. Each slide in your presentation is rendered as one page in the resulting PDF, in its original order." },
-          { q: "Why does this look different from the previous in-browser converter?", a: "This tool now converts presentations server-side with LibreOffice instead of approximating the layout in your browser. The trade-off is that your file is uploaded; in return, layout, images and shapes follow the original presentation, and transitions are rendered as static slides." },
-          { q: "What happens if my presentation uses a font that isn't common?", a: "A font not installed on our conversion servers is substituted with a similar typeface rather than left blank, except Wingdings and Webdings, which can't legally be reproduced and come through as blank boxes instead. Segoe UI, which is Windows-only, is replaced by Selawik, whose letter widths matched Segoe UI in our measurement. A different substitute can be wider or narrower than the original font, which can change where a line breaks." }
+          { q: `Will my fonts look the same in the PDF?`, a: `Yes when our service has the font or a close match. Segoe UI, which only Windows has, is replaced by Selawik, Microsoft's open replacement, whose letter widths matched Segoe UI in our measurement. Another missing font gets a similar typeface, which can move line breaks. Wingdings and Webdings symbols come out blank.` },
+          { q: `Can a text box look different from PowerPoint?`, a: `Yes. When a box is narrower than its text and set not to wrap, PowerPoint lets the text run past the edge, while LibreOffice wraps it. In our test a slide title wrapped onto a second line, partly hidden by another box. Widen such boxes before converting.` },
+          { q: `Are .ppt and OpenDocument files supported?`, a: `Yes. The older .ppt, .pptm, slide shows, templates, .odp and .otp all go through the same LibreOffice service, and we checked that each converts. Our comparison with two other online converters on 18 and 19 September 2026 used .pptx files: backgrounds, bullets, images, shapes, a gradient, a table and a pie chart matched.` },
         ]}
         tips={[
-          "In our tests on .pptx files, images, shapes, gradients, tables and charts matched two other online converters.",
-          "Each slide becomes one page in the PDF, in its original order.",
-          "Make each text box at least as wide as its text: a box set to \"do not wrap\" that is narrower than its text wraps in our converter and can hide part of it behind other shapes.",
-          "Very large presentations or ones with many embedded media files may take a little longer to convert — keep the tab open until the Download button appears."
+          `To share slides as pictures, convert the PDF afterwards with PDF to JPG.`,
         ]}
       />
     </div>

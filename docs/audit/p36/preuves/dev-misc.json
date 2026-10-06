@@ -1,0 +1,113 @@
+{
+  "/tools/developer-tools/cron-expression": [
+    {
+      "claim": "15-minute",
+      "file": "app/tools/developer-tools/cron-expression-builder/page.jsx",
+      "pattern": "\\['Every 15 min','\\*/15 \\* \\* \\* \\*'\\]"
+    }
+  ],
+  "/tools/developer-tools/cron-expression-builder": [
+    {
+      "claim": "15 min",
+      "file": "app/tools/developer-tools/cron-expression-builder/page.jsx",
+      "pattern": "\\['Every 15 min','\\*/15 \\* \\* \\* \\*'\\]"
+    },
+    {
+      "claim": "15 minutes",
+      "file": "app/tools/developer-tools/cron-expression-builder/page.jsx",
+      "pattern": "\\['Every 15 min','\\*/15 \\* \\* \\* \\*'\\]"
+    }
+  ],
+  "/tools/developer-tools/diff-viewer": [
+    {
+      "claim": "1,000,000 characters",
+      "file": "app/components/TextArea.jsx",
+      "pattern": "const LIMIT = 1_000_000;"
+    },
+    {
+      "claim": "20,000 characters",
+      "file": "app/components/TextArea.jsx",
+      "pattern": "const PREVIEW = 20_000;"
+    }
+  ],
+  "/tools/developer-tools/markdown-editor": [
+    {
+      "claim": "1,000,000 characters",
+      "file": "app/components/TextArea.jsx",
+      "pattern": "const LIMIT = 1_000_000;"
+    }
+  ],
+  "/tools/developer-tools/markdown-previewer": [
+    {
+      "claim": "1,000,000 characters",
+      "file": "app/components/TextArea.jsx",
+      "pattern": "const LIMIT = 1_000_000;"
+    }
+  ],
+  "/tools/developer-tools/password-generator": [
+    {
+      "claim": "8 to 64 characters",
+      "file": "app/tools/developer-tools/password-generator/page.jsx",
+      "pattern": "type=\"range\" min=\"8\" max=\"64\""
+    },
+    {
+      "claim": "7,776 words",
+      "file": "app/tools/developer-tools/password-generator/page.jsx",
+      "pattern": "EFF Large Wordlist \\(7,776 words"
+    },
+    {
+      "claim": "7,776-word",
+      "file": "app/tools/developer-tools/password-generator/page.jsx",
+      "pattern": "EFF Large Wordlist \\(7,776 words"
+    },
+    {
+      "claim": "3 to 20 words",
+      "file": "app/tools/developer-tools/password-generator/page.jsx",
+      "pattern": "type=\"range\" min=\"3\" max=\"20\""
+    },
+    {
+      "claim": "6-word",
+      "file": "app/tools/developer-tools/password-generator/page.jsx",
+      "pattern": "Math\\.floor\\(w \\* Math\\.log2\\(EFF_WORDS\\.length\\)"
+    },
+    {
+      "claim": "77 bits",
+      "file": "app/tools/developer-tools/password-generator/page.jsx",
+      "pattern": "Math\\.floor\\(w \\* Math\\.log2\\(EFF_WORDS\\.length\\)"
+    },
+    {
+      "claim": "12.9 bits",
+      "file": "app/tools/developer-tools/password-generator/page.jsx",
+      "pattern": "log2\\(7776\\) ≈ 12\\.92 bits per word"
+    },
+    {
+      "claim": "8 words",
+      "file": "app/tools/developer-tools/password-generator/page.jsx",
+      "pattern": "Math\\.floor\\(w \\* Math\\.log2\\(EFF_WORDS\\.length\\)"
+    },
+    {
+      "claim": "100 bits",
+      "file": "app/tools/developer-tools/password-generator/page.jsx",
+      "pattern": "bits >= 100 \\? 'excellent'"
+    },
+    {
+      "claim": "6 characters",
+      "file": "app/tools/developer-tools/password-generator/page.jsx",
+      "pattern": "replace\\(/\\[0O1lI\\|\\]/g"
+    }
+  ],
+  "/tools/developer-tools/regex-tester": [
+    {
+      "claim": "2 seconds",
+      "file": "app/tools/developer-tools/regex-tester/page.jsx",
+      "pattern": "\\}, 2000\\);"
+    }
+  ],
+  "/tools/developer-tools/uuid-generator": [
+    {
+      "claim": "48 bits",
+      "file": "app/tools/developer-tools/uuid-generator/page.jsx",
+      "pattern": "for \\(let i = 0; i < 6; i\\+\\+\\) b\\[i\\] = Math\\.floor\\(ms"
+    }
+  ]
+}

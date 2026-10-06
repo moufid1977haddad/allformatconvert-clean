@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Subtitle Generator — Build SRT Subtitles Online Free" },
-  description: "Subtitle Generator is a manual SRT subtitle builder — add rows with your own start time, end time, and text for each line.",
+  title: { absolute: "Subtitle Generator — Type Lines, Get SRT and VTT Files" },
+  description: "Type each subtitle with its start and end time and download valid SRT and WebVTT files, sorted by time, with every time checked before export.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/subtitle-generator" },
   openGraph: {
-    title: "Subtitle Generator — Build SRT Subtitles Online Free",
-    description: "Subtitle Generator is a manual SRT subtitle builder — add rows with your own start time, end time, and text for each line.",
+    title: "Subtitle Generator — Type Lines, Get SRT and VTT Files",
+    description: "Type each subtitle with its start and end time and download valid SRT and WebVTT files, sorted by time, with every time checked before export.",
     url: "https://www.onlineconvertools.com/tools/video-tools/subtitle-generator",
   },
 };

@@ -159,24 +159,38 @@ export default function UnitConverterPage() {
       </div>
       <SeoContent
         title="Unit Converter"
-        description="Unit Converter converts between units across twelve categories — Length, Weight, Temperature, Fuel economy, Speed, Area, Volume, Time, Data, Pressure, Energy and Power — entirely in your browser, with results updating instantly as you type. Factors are the exact definitions (1 inch = 25.4 mm, 1 psi = 6894.757… Pa, 1 calorie = 4.184 J)."
+        description={`Unit Converter covers 12 categories: Length, Weight, Temperature, Fuel economy, Speed, Area, Volume, Time, Data, Pressure, Energy and Power. Every factor is an exact definition, such as 1 inch = 25.4 mm, 1 lb = 0.45359237 kg or 1 calorie = 4.184 J, so results are not built on rounded constants. The answer updates as you type and keeps up to 12 significant digits. Temperature and fuel economy use formulas instead of factors, because their scales start at different zeros or run in opposite directions. Money is not covered here: the Currency Converter does that with daily rates.`}
+        example={{
+          caption: 'Six conversions and the result the page shows for each (the page\'s own factors and display code, run in Node on October 6, 2026).',
+          inputLabel: 'Category, value and units',
+          input: 'Length: 1 mile → km\nLength: 1 km → inch\nTemperature: 100 F → C\nFuel economy: 8 L/100 km → mpg (US)\nData: 1 GiB → MB\nPressure: 1 psi → kPa',
+          outputLabel: 'Result',
+          output: '1.609344 km\n39370.0787402 inch\n37.7777777778 C\n29.4018229167 mpg (US)\n1073.741824 MB\n6.89475729317 kPa',
+        }}
+        howToTitle="How to convert units"
         howTo={[
-          "Click a category button (Length, Weight, Temperature, Speed, Area, Volume, Time, Data, Pressure, Energy or Power) to select what you're converting.",
-          "Enter the value you want to convert.",
-          "Choose your source unit in the \"From\" dropdown and your target unit in the \"To\" dropdown.",
-          "Read the converted result, updated instantly below, with the factor for one unit underneath."
+          `Click a category button such as "Length", "Fuel economy" or "Data"; "From" and "To" switch to its first two units.`,
+          `Type the number in "Value": decimals, negative values and forms like 6.02e23 work, and spaces between thousands are ignored.`,
+          `Pick the units in "From" and "To".`,
+          'Read the result; for every category except temperature and fuel economy, the line below it gives the factor for one unit.',
         ]}
+        specs={[
+          { label: 'Categories', value: 'Length, Weight, Temperature, Fuel economy, Speed, Area, Volume, Time, Data, Pressure, Energy, Power' },
+          { label: 'Some of the units', value: 'nm to nautical miles; stone, carat, US and UK tons; Celsius, Fahrenheit, Kelvin, Rankine; L/100 km, km/L, mpg US and UK; bits, kB to PB and KiB to TiB; Pa to MPa, mbar, bar, atm, psi, mmHg, inHg, torr; J to MJ, Wh, kWh, cal, kcal, BTU, eV, ft·lbf; W, kW, MW, hp, metric hp, BTU/h, kcal/h' },
+          { label: 'Precision', value: 'Up to 12 significant digits; scientific notation below 0.000001 and from 1e15 up' },
+          { label: 'Typing', value: 'A single comma counts as a decimal point; a value such as 1,000 is refused as ambiguous, and the page asks you to write 1000 or 1' },
+          { label: 'Checks', value: 'A warning below absolute zero; fuel economy must be above 0' },
+        ]}
+        privacyTitle="Where your values are processed"
+        privacy="Each result is your value multiplied by fixed factors written in the page, or put through the temperature and fuel economy formulas, all in your browser; the values you type are not sent anywhere. Should the converter crash, our error watch sends the cleaned error message with the tool's name and your browser's name and major version, never the value or the units you chose."
         faqs={[
-          { q: "Is Unit Converter free to use?", a: "Yes, it's completely free with no signup and no limits." },
-          { q: "What categories are supported?", a: "Length (nm to nautical miles), Weight (including stone, carat, US and UK tons), Temperature (°C, °F, K, °R), Fuel economy (L/100 km, mpg US and UK, km/L), Speed, Area, Volume, Time, Data (bits and bytes, decimal kB/MB/GB and binary KiB/MiB/GiB), Pressure (Pa, bar, atm, psi, mmHg, inHg, torr), Energy (J, Wh, kWh, cal, kcal, BTU, eV, ft·lbf) and Power (W, kW, hp, metric hp, BTU/h, kcal/h)." },
-          { q: "How accurate are the results?", a: "Factors are the exact definitions (NIST SP 811), and results show up to 12 significant digits, in scientific notation when very large or very small. Month and year are Gregorian averages (365.2425 days a year); calories are thermochemical (4.184 J) and BTU are International Table BTU." },
-          { q: "Is my data private?", a: "Yes, everything is calculated locally in your browser — what you enter is never sent to a server." }
+          { q: 'Is a kilobyte 1000 or 1024 bytes here?', a: '1000. The page follows the SI prefixes: kB, MB, GB, TB and PB are powers of 1000, while KiB, MiB, GiB and TiB are powers of 1024, and bits are listed separately. So 1 GiB converts to 1073.741824 MB.' },
+          { q: 'Are US and UK gallons different?', a: 'Yes. A US gallon is 3.785411784 liters and a UK gallon 4.54609 liters. Volume lists both, along with US and UK pints and fluid ounces, and Fuel economy offers mpg (US) and mpg (UK), which differ for the same reason.' },
+          { q: 'How precise are the results?', a: '12 significant digits at most, from exact definitions in NIST SP 811: 1 psi is 6894.757… Pa and 1 BTU is 1055.05585262 J. A month is one twelfth of a Gregorian year of 365.2425 days, and calories are thermochemical (4.184 J).' },
+          { q: 'Why is there no factor line for temperature?', a: 'No single factor exists. Celsius, Fahrenheit, Kelvin and Rankine start at different zero points, and L/100 km is the inverse of km/L, so the page converts them with formulas and shows only the result.' },
         ]}
         tips={[
-          "Switch categories using the buttons at the top — your \"From\" and \"To\" units reset to that category's first two units.",
-          "For temperature, remember the conversion isn't a simple multiplier like the other categories, since Celsius, Fahrenheit, and Kelvin use different zero points.",
-          "A kB is 1000 bytes and a KiB is 1024: disk makers use the first, many operating systems the second.",
-          "Bookmark this page for quick access to conversions you use often in cooking, DIY, or technical work."
+          'Paste figures written with spaces between thousands, such as 12 500: the page reads them as one number.',
         ]}
       />
     </div>

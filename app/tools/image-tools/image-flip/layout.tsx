@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Flip — Mirror Your Image Horizontally or Vertically" },
-  description: "Image Flip mirrors your image horizontally or vertically, entirely in your browser using the canvas element — your image is never uploaded to a server.",
+  title: { absolute: "Flip Image — Mirror Horizontally, Vertically or Both" },
+  description: "Mirror a picture left to right, top to bottom, or both at once with one click. An exact pixel flip; JPG, PNG and WebP keep their format.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-flip" },
   openGraph: {
-    title: "Image Flip — Mirror Your Image Horizontally or Vertically",
-    description: "Image Flip mirrors your image horizontally or vertically, entirely in your browser using the canvas element — your image is never uploaded to a server.",
+    title: "Flip Image — Mirror Horizontally, Vertically or Both",
+    description: "Mirror a picture left to right, top to bottom, or both at once with one click. An exact pixel flip; JPG, PNG and WebP keep their format.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-flip",
   },
 };

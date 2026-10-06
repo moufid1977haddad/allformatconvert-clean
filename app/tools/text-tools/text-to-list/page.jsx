@@ -39,24 +39,35 @@ export default function TextToListPage() {
       </div>
       <SeoContent
         title="Text to List"
-        description="Text to List turns lines of pasted text into a bullet list, numbered list, or comma-separated list, entirely in your browser."
+        description={"Text to List formats a column of items, one per line, in one of three ways: a bullet list with the • character, a numbered list (1., 2., 3.), or a single line with the items separated by a comma and a space. Blank lines are skipped. Bullet and numbered lists also trim the spaces around each item, while the comma list keeps them. Use it to tidy a list copied from a spreadsheet or an email. It outputs plain text, not a Word or HTML list, and runs in your browser."}
+        example={{
+          caption: "Numbered List: the blank line is skipped and the spaces around Sugar are trimmed.",
+          inputLabel: "Items",
+          input: "Flour\n\n  Sugar \nEggs",
+          outputLabel: "After \"Numbered List\"",
+          output: "1. Flour\n2. Sugar\n3. Eggs",
+        }}
+        howToTitle={"How to turn text into a list"}
         howTo={[
-          "Paste your text into the input field, with one item per line.",
-          "Click \"Bullet List\", \"Numbered List\", or \"Comma List\" to choose your format.",
-          "Empty lines are automatically skipped in the result.",
-          "Click \"Copy\" to copy the formatted list to your clipboard."
+          "Paste your items, one per line.",
+          "Click \"Bullet List\", \"Numbered List\" or \"Comma List\".",
+          "Click \"Copy\" to paste the list elsewhere, or \"Download\" for list.txt."
         ]}
+        specs={[
+          { label: "Formats", value: "• item, 1. item, or item, item, item on one line" },
+          { label: "Blank lines", value: "Skipped in all three formats" },
+          { label: "Spaces", value: "Trimmed in Bullet List and Numbered List, kept in Comma List" },
+          { label: "Output", value: "A single block of formatted text; the download is named list.txt" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Splitting, numbering and joining are done by a few lines of JavaScript in your browser, so your list is not uploaded. If the clipboard refuses a copy, our error log receives \"Copy to the clipboard failed.\" with the tool name and your browser name and version, never the list. Neither the items nor the formatted result are stored after you close the page."}
         faqs={[
-          { q: "Is Text to List free to use?", a: "Yes, it's completely free with no signup and no limits." },
-          { q: "Can I use custom separators?", a: "Not currently — the three available formats are bullet points (•), numbered lines, and a comma-separated list." },
-          { q: "Can I download the result as a Word document or PDF?", a: "Not currently — the only output option is copying the formatted text to your clipboard." },
-          { q: "Is my data private?", a: "Yes, everything happens locally in your browser — what you enter is never sent to a server." }
+          { q: "Can I download the list?", a: "Yes. \"Download\" saves it as list.txt, plain text in UTF-8, and on an iPhone or iPad \"Save / Share\" appears too. There is no Word or PDF output: paste the text into your editor and apply its own list style." },
+          { q: "Does it remove existing bullets or numbers?", a: "No. A line that already starts with a dash or with 1. keeps it, so you would get • - item. Find and Replace can strip a dash marker that every line shares (a dash and a space replaced with nothing); numbers must be removed in your editor." },
+          { q: "Can I choose another separator or bullet?", a: "No. The bullet is always •, numbers are followed by a period and a space, and the comma list uses a comma and a space. For another separator, make a Comma List and replace the commas in Find and Replace." }
         ]}
         tips={[
-          "Put one item per line before pasting for the cleanest conversion — the tool splits on line breaks.",
-          "Blank lines in your input are automatically skipped, so you don't need to clean those up first.",
-          "Use \"Comma List\" to quickly turn a column of items into an inline, comma-separated sentence.",
-          "Paste the copied output directly into a word processor, which will typically auto-format bullet and numbered lists further."
+          "Comma List turns a column of email addresses into one line you can paste into the To field of a mail app that accepts comma-separated addresses."
         ]}
       />
     </div>

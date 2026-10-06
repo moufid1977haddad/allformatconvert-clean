@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Text Truncator — Cut Text to a Set Length Online Free" },
-  description: "Text Truncator is a free online tool. No sign-up, no watermarks, no limits.",
+  title: { absolute: "Text Truncator — Shorten Text to N Characters or Words" },
+  description: "Cut a text to a set number of characters or words and add ... where it was cut. Emoji and accents are never split, and spacing is kept.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/text-truncator" },
   openGraph: {
-    title: "Text Truncator — Cut Text to a Set Length Online Free",
-    description: "Text Truncator is a free online tool. No sign-up, no watermarks, no limits.",
+    title: "Text Truncator — Shorten Text to N Characters or Words",
+    description: "Cut a text to a set number of characters or words and add ... where it was cut. Emoji and accents are never split, and spacing is kept.",
     url: "https://www.onlineconvertools.com/tools/text-tools/text-truncator",
   },
 };

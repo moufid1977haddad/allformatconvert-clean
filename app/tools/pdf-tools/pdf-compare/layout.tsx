@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Compare PDF — Extract the Text Content Online Free" },
-  description: "Compare PDF extracts the text content of two PDF files entirely in your browser, then displays both extractions side by side as text.",
+  title: { absolute: "Compare Two PDFs — Line-by-Line Text Differences" },
+  description: "Find what changed between two versions of a PDF: lines only in one file in red or green, changed words marked, page numbers shown. Read locally by PDF.js.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compare" },
   openGraph: {
-    title: "Compare PDF — Extract the Text Content Online Free",
-    description: "Compare PDF extracts the text content of two PDF files entirely in your browser, then displays both extractions side by side as text.",
+    title: "Compare Two PDFs — Line-by-Line Text Differences",
+    description: "Find what changed between two versions of a PDF: lines only in one file in red or green, changed words marked, page numbers shown. Read locally by PDF.js.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compare",
   },
 };

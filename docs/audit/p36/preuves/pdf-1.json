@@ -1,0 +1,56 @@
+{
+  "/tools/pdf-tools/excel-to-pdf": [
+    { "claim": "30,000 rows", "file": "docs/audit/RAPPORT-p24-couverture-03-10.md", "pattern": "30 000 lignes donnent une page, \\*\\*aucune ligne perdue" }
+  ],
+  "/tools/pdf-tools/html-to-pdf": [
+    { "claim": "5 MB", "file": "lib/urlFetch/snapshot.mjs", "pattern": "htmlBytes: 5 \\* 1024 \\* 1024" },
+    { "claim": "150 resources", "file": "lib/urlFetch/snapshot.mjs", "pattern": "resources: 150\\b" },
+    { "claim": "3 MB", "file": "lib/urlFetch/snapshot.mjs", "pattern": "resourceBytes: 3 \\* 1024 \\* 1024" },
+    { "claim": "25 MB", "file": "lib/urlFetch/snapshot.mjs", "pattern": "totalBytes: 25 \\* 1024 \\* 1024" },
+    { "claim": "5 redirects", "file": "lib/urlFetch/safeFetch.js", "pattern": "MAX_REDIRECTS = 5\\b" },
+    { "claim": "ports 80 and 443", "file": "lib/urlFetch/safeFetch.js", "pattern": "ALLOWED_PORTS = new Set\\(\\['', '80', '443'\\]\\)" },
+    { "claim": "20 conversions an hour", "file": "lib/quota/config.js", "pattern": "URL_PDF_RATE_LIMIT_PER_HOUR = 20;" },
+    { "claim": "60 a day", "file": "lib/quota/config.js", "pattern": "URL_PDF_RATE_LIMIT_PER_DAY = 60;" },
+    { "claim": "300 an hour", "file": "lib/quota/config.js", "pattern": "URL_PDF_GLOBAL_PER_HOUR = 300;" },
+    { "claim": "19 September 2026", "file": "docs/audit/RAPPORT-fidelite-office.md", "pattern": "2026-09-19" }
+  ],
+  "/tools/pdf-tools/epub-to-pdf": [
+    { "claim": "60 seconds", "file": "app/tools/pdf-tools/epub-to-pdf/page.jsx", "pattern": "could not be read \\(its contents are damaged or not standard\\)\\.'\\)\\), 60000" }
+  ],
+  "/tools/pdf-tools/text-to-pdf": [
+    { "claim": "9 to 24 pt", "file": "app/tools/pdf-tools/text-to-pdf/page.jsx", "pattern": "\\[9, 10, 11, 12, 14, 16, 18, 24\\]" }
+  ],
+  "/tools/pdf-tools/jpg-to-pdf": [
+    { "claim": "200 megapixels", "file": "app/tools/pdf-tools/jpg-to-pdf/page.jsx", "pattern": "measured up to 200 megapixels" }
+  ],
+  "/tools/pdf-tools/pdf-to-image": [
+    { "claim": "150 dpi", "file": "app/components/PdfToImages.jsx", "pattern": "\\[150, 'Normal — 150 dpi" },
+    { "claim": "300 dpi", "file": "app/components/PdfToImages.jsx", "pattern": "\\[300, 'High — 300 dpi" },
+    { "claim": "72 dpi", "file": "app/components/PdfToImages.jsx", "pattern": "\\[72, 'Screen — 72 dpi" },
+    { "claim": "60 seconds", "file": "app/components/PdfToImages.jsx", "pattern": "\\|\\| 60000;" },
+    { "claim": "20 seconds", "file": "app/lib/serverPageRender.js", "pattern": "LOCAL_PAGE_LIMIT_LABEL = '20 seconds'" },
+    { "claim": "300 pages", "file": "lib/quota/config.js", "pattern": "PDF_RENDER_PAGES_PER_HOUR = 300;" },
+    { "claim": "1,000 a day", "file": "lib/quota/config.js", "pattern": "PDF_RENDER_PAGES_PER_DAY = 1000;" },
+    { "claim": "44 MB", "file": "app/lib/serverPageRender.js", "pattern": "STAGED_MAX_BYTES = 44 \\* 1024 \\* 1024" },
+    { "claim": "16 pixels", "file": "app/components/PdfToImages.jsx", "pattern": "img\\.width < 16 \\|\\| img\\.height < 16" }
+  ],
+  "/tools/pdf-tools/pdf-to-jpg": [
+    { "claim": "150 dpi", "file": "app/components/PdfToImages.jsx", "pattern": "\\[150, 'Normal — 150 dpi" },
+    { "claim": "300 dpi", "file": "app/components/PdfToImages.jsx", "pattern": "\\[300, 'High — 300 dpi" },
+    { "claim": "72 dpi", "file": "app/components/PdfToImages.jsx", "pattern": "\\[72, 'Screen — 72 dpi" },
+    { "claim": "20 seconds", "file": "app/lib/serverPageRender.js", "pattern": "LOCAL_PAGE_LIMIT_LABEL = '20 seconds'" },
+    { "claim": "300 pages", "file": "lib/quota/config.js", "pattern": "PDF_RENDER_PAGES_PER_HOUR = 300;" },
+    { "claim": "1,000 a day", "file": "lib/quota/config.js", "pattern": "PDF_RENDER_PAGES_PER_DAY = 1000;" },
+    { "claim": "44 MB", "file": "app/lib/serverPageRender.js", "pattern": "STAGED_MAX_BYTES = 44 \\* 1024 \\* 1024" },
+    { "claim": "High (92)", "file": "app/components/PdfToImages.jsx", "pattern": "<option value=\\{92\\}>High \\(92\\)</option>" },
+    { "claim": "Medium (80)", "file": "app/components/PdfToImages.jsx", "pattern": "<option value=\\{80\\}>Medium \\(80\\)" }
+  ],
+  "/tools/pdf-tools/pdf-translate": [
+    { "claim": "20 pages", "file": "lib/quota/pdfTranslate.js", "pattern": "PDF_TRANSLATE_MAX_PAGES = 20;" },
+    { "claim": "20 MB", "file": "app/api/pdf-translate-document/route.ts", "pattern": "MAX_BYTES = 20 \\* 1024 \\* 1024" },
+    { "claim": "20 pages a day", "file": "lib/quota/pdfTranslate.js", "pattern": "PDF_TRANSLATE_PAGES_PER_IP_PER_DAY = 20;" }
+  ],
+  "/tools/pdf-tools/pdf-ai-summary": [
+    { "claim": "8,000 characters", "file": "lib/quota/limits.js", "pattern": "MAX_PROMPT_CHARS = 8000;" }
+  ]
+}

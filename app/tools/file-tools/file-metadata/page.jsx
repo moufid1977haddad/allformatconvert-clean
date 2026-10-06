@@ -73,26 +73,29 @@ export default function FileMetadataPage() {
       </div>
       <SeoContent
         title="File Metadata"
-        description="File Metadata is a free online tool that instantly reveals a file's basic properties — name, size, extension, the type its name suggests, its real format read from its first bytes, and last-modified date, plus the metadata stored inside photos (EXIF, GPS), PDFs, Office documents, ZIP archives and MP3s — read directly in your browser, and warns when the content does not match the extension (a program renamed photo.jpg, for example). Choose any file to see its details in seconds; the file is never sent to a server."
+        description="File Metadata shows what a file really is and what it carries. It lists the name, size, extension, the type the browser guesses from the name, the last-modified date and the real format read from the first bytes (46 known signatures), and warns when the content does not match the extension. It then reads the metadata stored inside photos (EXIF, including the GPS position), PDFs, DOCX, XLSX, PPTX and OpenDocument files, ZIP archives and MP3 ID3 tags. It does not show pixel dimensions or media duration, and old .doc, .xls and .ppt files get no inside metadata."
+        howToTitle="How to view the metadata of a file"
         howTo={[
-          "Click the upload area and select any file from your device.",
-          "The tool reads the file's properties immediately — no extra button to click.",
-          "Review the metadata: name, size, extension, the type given by the name, the real format read from the content, and last modified date.",
-          "Upload a different file at any time to see its metadata instead."
+          "Choose any file; the rows appear as soon as it is read.",
+          "Read the six rows: name, size, extension, type given by the name, real format from the content, and last modified date.",
+          "Check the warning, if one appears, that the content does not match the extension.",
+          "Scroll to the groups of metadata found inside the file, such as Camera (EXIF) or Location (GPS)."
         ]}
+        specs={[
+          { label: "Format detection", value: "46 signatures: images, audio, video, documents, archives and more" },
+          { label: "Inside metadata", value: "JPEG, PNG, TIFF, HEIC and AVIF photos (EXIF, GPS), PDF, DOCX, XLSX, PPTX, OpenDocument, ZIP, MP3 (ID3); WebP photos are not read" },
+          { label: "Not shown", value: "Pixel dimensions, duration, the properties of old .doc, .xls and .ppt files, and PDF or ZIP details of files over 300 MB" },
+          { label: "Files", value: "One file per reading; choosing another replaces the result" }
+        ]}
+        privacy="The file is read by this page through the File API of your browser; it is not uploaded, so a GPS position or an author name found inside stays on your device. Nothing in the file is changed, and no copy of it is kept by the page once you choose another file or leave."
         faqs={[
-          { q: "Is File Metadata free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can inspect." },
-          { q: "What information does it show?", a: "The file's name, size, extension, last-modified date, the MIME type the browser guesses from the name, and the real format detected from the file's first bytes (its signature, or 'magic number'), for about fifty common formats — plus the metadata stored inside the file: camera, date and GPS position of a photo (EXIF), title, author, software, dates and page count of a PDF, Word / Excel / PowerPoint and OpenDocument properties (author, last modified by, company…), the contents of a ZIP, and the ID3 tags of an MP3." },
-          { q: "Can it tell if a file was renamed?", a: "Yes — when the content is, say, a Windows program but the name ends in .jpg, a warning says so. The browser's own type cannot: it is based on the name only." },
-          { q: "Does it show image dimensions or video duration?", a: "Not here: it shows the metadata stored inside photos, PDFs, Office documents, ZIP archives and MP3s, but not pixel dimensions or media duration. For those, Image Metadata and Video Metadata read the picture or the media itself." },
-          { q: "Why check a file's hidden metadata?", a: "Before sharing a file: a photo can carry the GPS position where it was taken, and a Word or PDF document the author's name, company and the software used. This tool shows them, read in your browser." },
-          { q: "Is my file uploaded anywhere?", a: "No. Everything is read locally via the browser's File API — your file never leaves your device." }
+          { q: "Can it tell if a file was renamed?", a: "Yes. When the first bytes show, say, a Windows program while the name ends in .jpg, a warning names the real format and its usual extension. The type the browser gives cannot do this, because it comes from the name only." },
+          { q: "Does it show the GPS location of a photo?", a: "Yes, when the photo stores one: a Location (GPS) group gives latitude and longitude (and altitude when stored), next to the camera, lens and date in Camera (EXIF), for JPEG, PNG, TIFF, HEIC and AVIF files (not WebP). Check it before you share a photo." },
+          { q: "Does it read Word and Excel properties?", a: "Yes. DOCX, XLSX and PPTX show title, author, last modified by, company, pages or words; OpenDocument files show title, author, dates and generator. No for the older .doc, .xls and .ppt formats: their format is recognized, but their inside properties are not read." },
+          { q: "Can it show image dimensions or video length?", a: "No. This tool reads the bytes and the stored properties only. For pixel dimensions, use Image Metadata Viewer, which reads the picture itself; for duration and codecs, use Video Metadata, which reads the video or audio file." }
         ]}
         tips={[
-          "Check the \"last modified\" date to quickly confirm which version of a file you're looking at.",
-          "Trust \"Real format (from content)\" rather than \"Type given by the name\": the latter only repeats what the extension says.",
-          "Plain text files (TXT, CSV, JSON, code) have no signature, so their real format shows as not recognized; that is normal.",
-          "For deeper metadata like camera EXIF data or image dimensions, you'll need a format-specific metadata tool."
+          "A plain text file shows \"Not recognized\" as its real format: text has no signature, so that is normal."
         ]}
       />
     </div>

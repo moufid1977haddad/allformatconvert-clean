@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "File Metadata — Instantly Reveals a File's Basic Properties" },
-  description: "File Metadata instantly reveals a file's basic properties — name, size, MIME type, date, and extension — read directly in your browser.",
+  title: { absolute: "File Metadata Viewer — Real Format, EXIF, PDF, Office Info" },
+  description: "See the name, size, date and real format of a file, read from its first bytes, plus EXIF and GPS, PDF, Office, ZIP or MP3 tags, without uploading it.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/file-metadata" },
   openGraph: {
-    title: "File Metadata — Instantly Reveals a File's Basic Properties",
-    description: "File Metadata instantly reveals a file's basic properties — name, size, MIME type, date, and extension — read directly in your browser.",
+    title: "File Metadata Viewer — Real Format, EXIF, PDF, Office Info",
+    description: "See the name, size, date and real format of a file, read from its first bytes, plus EXIF and GPS, PDF, Office, ZIP or MP3 tags, without uploading it.",
     url: "https://www.onlineconvertools.com/tools/file-tools/file-metadata",
   },
 };

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Audio Transcriber — Convert Speech in an Audio File Online" },
-  description: "Audio Transcriber is a free online tool that converts speech in an audio file into text using OpenAI's Whisper speech recognition model.",
+  title: { absolute: "Audio Transcriber — Audio File to Text, SRT and VTT" },
+  description: "Turn speech in an audio file into text with OpenAI Whisper, then copy it or download TXT, SRT or VTT subtitles with timings. No language to pick.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/audio-transcriber" },
   openGraph: {
-    title: "Audio Transcriber — Convert Speech in an Audio File Online",
-    description: "Audio Transcriber is a free online tool that converts speech in an audio file into text using OpenAI's Whisper speech recognition model.",
+    title: "Audio Transcriber — Audio File to Text, SRT and VTT",
+    description: "Turn speech in an audio file into text with OpenAI Whisper, then copy it or download TXT, SRT or VTT subtitles with timings. No language to pick.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/audio-transcriber",
   },
 };

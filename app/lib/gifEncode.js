@@ -54,6 +54,6 @@ export function sizeProblem(size) {
   if (!size || !size.width || !size.height) return null;
   const mp = (size.width * size.height) / 1e6;
   return size.width * size.height > MAX_ANIMATION_PIXELS
-    ? `This image is ${size.width} × ${size.height} pixels (${mp.toFixed(0)} megapixels): too large for an animation (16 megapixels at most). Make it smaller first with our Image Resizer.`
+    ? `This image is ${size.width} × ${size.height} pixels (${mp.toFixed(0)} megapixels): too large for an animation (${(MAX_ANIMATION_PIXELS / 1e6).toFixed(1)} megapixels at most). Make it smaller first with our Image Resizer.`
     : null;
 }

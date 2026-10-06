@@ -51,24 +51,39 @@ export default function ApiTesterPage() {
       </div>
       <SeoContent
         title="API Tester"
-        description="API Tester sends HTTP requests directly from your browser to the endpoint you specify, using the browser's own fetch() API, and shows the response status and body. Nothing passes through our servers, but since it's a request from your browser, cross-origin APIs that don't send permissive CORS headers will block the response just like on any web page."
+        description={"API Tester sends one HTTP request at a time from your browser, with its built-in fetch(), to the full http:// or https:// address you type, and shows the status code and the response body. The methods are GET, POST, PUT, DELETE and PATCH; headers are written as a JSON object, and a body can be added to every method except GET. A JSON response is re-indented from the text received, so long numbers keep every digit; any other body is shown as plain text. Response headers and timing are not displayed, and requests are not saved. Because the request leaves from your browser, the API's CORS rules decide whether the response can be read."}
+        example={{
+          caption: "How a JSON response body is displayed (the page’s own formatter, run on this body): the 64-bit id and the trailing zero of 1.10 stay exactly as sent.",
+          inputLabel: "Response body as received",
+          input: "{\"id\":9007199254740993,\"price\":1.10,\"tags\":[\"a\",\"b\"]}",
+          outputLabel: "Shown under the status line",
+          output: "{\n  \"id\": 9007199254740993,\n  \"price\": 1.10,\n  \"tags\": [\n    \"a\",\n    \"b\"\n  ]\n}",
+        }}
+        howToTitle={"How to send an API request from your browser"}
         howTo={[
-          "Select the HTTP method (GET, POST, PUT, DELETE, or PATCH) and type the endpoint URL.",
-          "Optionally add request headers as JSON, e.g. {\"Authorization\": \"Bearer token\"}.",
-          "For non-GET methods, add a request body.",
-          "Click 'Send Request' to view the response status and body."
+          "Pick the method in the list (GET, POST, PUT, DELETE or PATCH) and type the full URL of the endpoint, starting with https:// (without it, the request usually goes to this site instead, or fails).",
+          "Optionally fill \"Headers (JSON)\" with an object, for example {\"Authorization\": \"Bearer token\"}.",
+          "For any method other than GET, type the request in \"Body\"; it is sent as application/json unless your headers set Content-Type written with that exact capitalization.",
+          "Click \"Send Request\": the status appears in green below 400, in yellow from 400, or in red if the request failed, with the body underneath.",
         ]}
+        specs={[
+          { label: "Methods", value: "GET, POST, PUT, DELETE and PATCH (HEAD and OPTIONS are not offered)" },
+          { label: "Request headers", value: "A JSON object; if it is not valid JSON, the request is not sent and the parser’s message is shown" },
+          { label: "Request body", value: "Any text, for every method except GET; Content-Type: application/json is added; a Content-Type key in your headers replaces it, but a lowercase content-type is sent alongside it" },
+          { label: "Response shown", value: "Status code and status text, then the body (JSON re-indented, other text as received); response headers are not shown" },
+          { label: "Timeout", value: "None: the page waits until the server answers or the browser gives up" },
+        ]}
+        privacyTitle={"Where your request goes"}
+        privacy={"When the address starts with http:// or https://, the request goes from your browser straight to that API, not through our servers. Without it, the address is usually read as a page of this site (localhost:3000/api fails instead), so the request, headers and body included, reaches our server. A shown error’s cleaned message goes to our error log with the tool’s name and your browser’s name and version; URLs, quoted text and long numbers are removed, but a few characters of a mistyped header can remain."}
         faqs={[
-          { q: "Is API Tester free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I test APIs from different domains?", a: "Yes, but the browser's CORS policy still applies — if the API doesn't send permissive CORS headers, the browser will block reading the response, same as on any web page." },
-          { q: "What HTTP methods are supported?", a: "GET, POST, PUT, DELETE, and PATCH. HEAD and OPTIONS aren't available in the method selector." },
-          { q: "Can I save my requests for later?", a: "No, there's no save or history feature — each request is one-off, and refreshing the page clears everything." }
+          { q: "Can I call an API that does not allow cross-origin requests?", a: "No. The request runs in your browser, so the browser applies the API’s CORS rules: if the API does not allow this site, the response is blocked and only the browser’s network error message appears. Desktop clients such as curl or Postman are not subject to that check." },
+          { q: "Does it show the response headers?", a: "No. The result shows the status code, the status text and the body only. To read a header such as a rate-limit counter, open your browser’s developer tools, where the network panel lists every header of the same request." },
+          { q: "Is a Content-Type header added automatically?", a: "Yes, but only when a body is sent: POST, PUT, DELETE and PATCH requests with a body get Content-Type: application/json, and a key written exactly Content-Type in your headers replaces it; written content-type, both values are sent together. GET requests carry no Content-Type, so they do not trigger an extra CORS preflight." },
+          { q: "Will large numbers in a JSON response be rounded?", a: "No. The body is re-indented from the exact text received instead of being parsed and rewritten, so an id such as 9007199254740993 or a price written 1.10 is shown exactly as the API sent it." },
         ]}
         tips={[
-          "Headers must be valid JSON, e.g. {\"Authorization\": \"Bearer token\"} — invalid JSON will prevent the request from sending.",
-          "CORS restrictions are enforced by the browser, not by this tool, so some APIs are only testable from a server-side tool without those restrictions.",
-          "The response body is pretty-printed automatically when it's valid JSON; otherwise it displays as raw text.",
-          "Since nothing is saved, copy down any request details you want to reuse before navigating away."
+          "If the API returns a JWT, paste it into JWT Decoder to read its claims.",
+          "When only a network error appears, open the same GET address in a new tab: if it loads there, the API is most likely refusing cross-origin reads.",
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Text Reverser — Flip Your Text Three Ways Online Free" },
-  description: "Text Reverser flips your text three ways — character order, word order, or line order — entirely in your browser.",
+  title: { absolute: "Text Reverser — Reverse Letters, Word Order or Line Order" },
+  description: "Write a text backwards letter by letter, reverse the word order of each line, or flip the order of lines. Emoji and accents stay whole.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/text-reverser" },
   openGraph: {
-    title: "Text Reverser — Flip Your Text Three Ways Online Free",
-    description: "Text Reverser flips your text three ways — character order, word order, or line order — entirely in your browser.",
+    title: "Text Reverser — Reverse Letters, Word Order or Line Order",
+    description: "Write a text backwards letter by letter, reverse the word order of each line, or flip the order of lines. Emoji and accents stay whole.",
     url: "https://www.onlineconvertools.com/tools/text-tools/text-reverser",
   },
 };

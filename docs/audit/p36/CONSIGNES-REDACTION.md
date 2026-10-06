@@ -111,3 +111,23 @@ non vérifiables laissés de côté. Message final ≤ 15 lignes : résultat des
 - Les messages d'erreur affichés sont envoyés, nettoyés, à `/api/report-error` (P25) : une page qui dit « nothing is
   sent » doit rester exacte pour le fichier et le texte de l'utilisateur ; ne promets pas « aucune requête » si une erreur
   affichée peut partir.
+
+## Précisions pour les corrections après relecture (06/10)
+- **Réponses de FAQ** : une question fermée (« Can I… ? », « Is… ? », « Does… ? ») ou de quantité commence par Yes / No /
+  le chiffre ; une question « How / What / Why / Which » commence par la réponse directe en une phrase (jamais « It
+  depends », « Once… », « Because… » seul). Règle du gabarit §2d.4 ainsi précisée.
+- **Tablettes Android** : `isMobileDevice` traite une tablette Android sous Chrome / Edge / Samsung Internet comme un
+  ordinateur ; écris les limites « téléphone » comme « on phones, iPhone and iPad » et non « phones and tablets ».
+- **Rapports d'erreur** : quand une page en parle, dire exactement ce qui part : le message nettoyé, le nom de l'outil,
+  le nom et la version du navigateur (`app/lib/reportError.js`) ; ne pas écrire « only the message ». Les plantages non
+  rattrapés sont aussi signalés par `ToolErrorWatch` / `app/error.jsx` sur toutes les pages : ne promets pas « no error
+  reports ».
+- **Sous-titre visible de la page (sous le H1)** : tu peux le corriger s'il est faux, mal écrit (« a AVI ») ou identique
+  à celui d'une page jumelle (contenu dupliqué) — c'est une chaîne d'interface, liste-la.
+- Phrases courtes génériques à bannir partout : « It runs in your browser. », « The conversion runs in your browser. »,
+  « Everything runs in your browser. », « Click "Download" to save the … file. » et toute étape « Click or drop a … on
+  the upload area » reprise telle quelle : dis-le avec ce qui est propre à l'outil.
+- **Textes d'interface invérifiables ou trompeurs** (sous-titres, notes, cartes, messages — jamais les libellés de
+  boutons ni la logique) : le propriétaire refuse toute affirmation non vérifiée ; tu PEUX et DOIS les corriger aussi
+  (« instantly », « in seconds », « about 10–30 seconds », « 100% Private », « every code is scanned back »…), en les
+  remplaçant par une phrase vraie et vérifiable, et les lister dans ton compte rendu.

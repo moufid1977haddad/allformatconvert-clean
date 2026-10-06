@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JSON Minifier — Parse Your JSON Online Free" },
-  description: "JSON Minifier strips whitespace from your JSON using the browser's built-in parser, entirely in your browser — nothing is uploaded.",
+  title: { absolute: "JSON Minifier — One Line, Numbers and Escapes Unchanged" },
+  description: "Compress JSON to one line by removing whitespace outside strings. Checked with JSON.parse; 20-digit ids and 1e21 stay as typed, on your own device.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-minifier" },
   openGraph: {
-    title: "JSON Minifier — Parse Your JSON Online Free",
-    description: "JSON Minifier strips whitespace from your JSON using the browser's built-in parser, entirely in your browser — nothing is uploaded.",
+    title: "JSON Minifier — One Line, Numbers and Escapes Unchanged",
+    description: "Compress JSON to one line by removing whitespace outside strings. Checked with JSON.parse; 20-digit ids and 1e21 stay as typed, on your own device.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-minifier",
   },
 };

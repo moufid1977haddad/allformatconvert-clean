@@ -1,16 +1,13 @@
 import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
-const TITLE = "Code Formatter — JavaScript, TypeScript, JSON, HTML, CSS, SQL, YAML Online";
-const DESCRIPTION = "Code Formatter formats JavaScript, TypeScript, JSX, JSON, HTML, XML, CSS, SCSS, LESS, SQL (20 dialects), YAML, Markdown and GraphQL entirely in your browser, with automatic language detection and errors shown by line and column.";
-
 export const metadata: Metadata = {
-  title: { absolute: TITLE },
-  description: DESCRIPTION,
+  title: { absolute: "Code Formatter — 13 Languages, Auto-Detected, Prettier" },
+  description: "Format JavaScript, TypeScript, JSON, HTML, XML, CSS, SQL, YAML, Markdown or GraphQL in your browser, with the language detected from the code itself.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/code-formatter" },
   openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
+    title: "Code Formatter — 13 Languages, Auto-Detected, Prettier",
+    description: "Format JavaScript, TypeScript, JSON, HTML, XML, CSS, SQL, YAML, Markdown or GraphQL in your browser, with the language detected from the code itself.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/code-formatter",
   },
 };

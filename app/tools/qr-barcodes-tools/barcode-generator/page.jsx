@@ -261,7 +261,7 @@ export default function BarcodeGeneratorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Barcode Generator</h1>
-        <p className="text-neutral-500 text-center mb-8">{ALL.length} barcode types — linear, EAN/UPC/ISBN, GS1 DataBar, Data Matrix, PDF417, Aztec and more. Print sizes in mm, PNG, SVG, PDF, EPS, JPG or GIF, one code or thousands, or straight onto label sheets. Every code is scanned back before you download it.</p>
+        <p className="text-neutral-500 text-center mb-8">{ALL.length} barcode types — linear, EAN/UPC/ISBN, GS1 DataBar, Data Matrix, PDF417, Aztec and more. Print sizes in mm, PNG, SVG, PDF, EPS, JPG or GIF, one code or thousands, or straight onto label sheets. Codes of the {ALL.filter((s) => s.zxing).length} types a browser reader can decode are scanned back before you download them.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Mode">
             {[['single', 'One barcode'], ['batch', 'Many (ZIP or labels)']].map(([id, label]) => (
@@ -444,20 +444,34 @@ export default function BarcodeGeneratorPage() {
       </div>
       <SeoContent
         title="Barcode Generator"
-        description={`Barcode Generator creates ${ALL.length} kinds of barcodes in your browser — Code 128, GS1-128, Code 39, Code 93, Codabar, Interleaved 2 of 5, ITF-14, MSI Plessey, Pharmacode, Code 11, Telepen, PZN, EAN-13, EAN-8, UPC-A, UPC-E, ISBN, ISMN, ISSN with or without EAN-5 and EAN-2 add-ons, the GS1 DataBar family, QR Code, Micro QR, Data Matrix, GS1 DataMatrix, PDF417, MicroPDF417, Aztec and MaxiCode — with print sizes in millimetres or mils, colours, rotation and quiet zones. Download PNG, JPG or GIF with the resolution written in, or vector SVG, PDF and EPS for print; or generate thousands at once from a list or a numbered series into one ZIP, or onto printable label sheets (Avery A4 and US Letter, thermal roll labels) as one PDF. Every code is read back by an independent decoder before it is offered, and nothing is uploaded.`}
+        description={`Barcode Generator draws ${ALL.length} barcode types in your browser with bwip-js: linear codes such as Code 128, Code 39 and ITF-14, retail EAN, UPC, ISBN and ISSN codes with optional EAN-2 or EAN-5 add-ons, the GS1 DataBar family, and 2D codes such as Data Matrix, PDF417, Aztec and QR Code. You set the module width in millimeters, mils or pixels and the print resolution. One code downloads as PNG, JPG, GIF, SVG, PDF or EPS; a list or a numbered series becomes a ZIP of up to ${MAX_BATCH.toLocaleString('en-US')} files or a PDF of label sheets. Before the files appear, zxing-cpp reads the drawing back, for every type a browser decoder exists for.`}
+        howToTitle="How to make a barcode for print"
         howTo={[
-          'Choose the barcode type; the hint under it says what it accepts.',
-          'Type the value, or switch to "Many (ZIP)" and paste one value per line or set up a numbered series.',
-          'Set the size — module width and bar height in millimetres (or mils, or pixels) and the print resolution — and, if you like, colours, rotation and the quiet zone.',
-          'Click Generate: each code is drawn, then scanned back by a separate reader. Download PNG, SVG, PDF, EPS, JPG or GIF, or the ZIP.',
+          `Choose the type in "Barcode type"; the hint under it says what the value must look like.`,
+          `In "One barcode", type the value or click "Use the example"; for many codes, switch to "Many (ZIP or labels)" and paste a list, set up "A numbered series" or use "Import CSV / TSV…".`,
+          `Under "Size", set "Module width", "Resolution (dpi)", "Bar height" and "Rotation"; colors and the text line are under "Text and colours".`,
+          `Click "Generate Barcode" (or "Generate all as ZIP" or "Generate label sheets (PDF)"), then "Download" one file or "Download all" for a ZIP of the six formats.`,
         ]}
-        faqs={SEO.faqs}
+        specs={[
+          { label: 'Output formats', value: 'PNG, JPG and GIF images; SVG, PDF and EPS vector files; a ZIP of one format for a batch; label sheets as one PDF' },
+          { label: 'Batch size', value: `Up to ${MAX_BATCH.toLocaleString('en-US')} codes per ZIP and ${MAX_LABELS.toLocaleString('en-US')} labels per PDF` },
+          { label: 'CSV / TSV import', value: 'Files up to 5 MB; first column the value, second column the text printed under the code' },
+          { label: 'Print size', value: 'Module width in mm, mils or pixels, from 72 to 2400 dpi; PNG and JPG store the resolution, GIF does not' },
+          { label: 'Label stock', value: 'Avery A4 and US Letter sheets, plain paper to cut, thermal rolls from 40 by 30 mm to 4 by 6 in, or your own layout' },
+        ]}
+        privacyTitle="Where your barcodes are made"
+        privacy="Codes are drawn by bwip-js and checked by zxing-cpp inside your browser, and the decoder file comes from this site, not from an outside CDN. Your values and imported files are not uploaded. One exception: when an error is shown, its text goes, cleaned, to our error log with the tool's name and your browser's name and major version, and the message of a batch where every line failed can quote a few of your values."
+        faqs={[
+          { q: 'Does it add the check digit?', a: 'Yes, for EAN-13, EAN-8, UPC-A, UPC-E, ITF-14 and PZN8: type the number without its last digit and it is calculated, or in full and it is verified. Code 93 always gets its two check characters; Code 39 and Interleaved 2 of 5 can add an optional check digit, Code 11 its C check digit (and K over 10 characters), and MSI Plessey offers several Mod 10 and Mod 11 schemes.' },
+          { q: 'Is each barcode checked before download?', a: `Yes, for ${ALL.filter((s) => s.zxing).length} of the ${ALL.length} types: zxing-cpp, a reader separate from the engine that drew the code, must find your value, check digits included, or no file is offered. MSI Plessey, Pharmacode, Code 11 and standalone EAN-5 or EAN-2 are marked as not scanned back, and with the optional Code 39 or ITF check digit only the type is confirmed.` },
+          { q: 'What module width should I use for retail EAN and UPC?', a: '0.33 mm, the default here, is the nominal size, and the page warns below the GS1 minimum of 0.264 mm. PNG, JPG and GIF need a whole number of pixels per module, so the page shows the closest width at your resolution, while SVG, PDF and EPS keep the exact width you typed.' },
+          { q: 'Can I make many barcodes at once?', a: `Yes. In "Many (ZIP or labels)", paste one value per line, import a CSV or TSV file, or number a series with a prefix, a step, zero padding and a suffix. Every code is drawn and, where a reader exists, checked; any value that could not be encoded is listed in errors.txt inside the ZIP.` },
+          { q: 'Can I print barcodes on label sheets?', a: `Yes. Choose "Label sheets (PDF)" under "Output", then a sheet, a roll size or "Custom…", the first free label and the copies of each code. Codes keep the size you set and shrink only when they do not fit, and the page says by how much. Print the PDF at actual size, never fitted to the page.` },
+        ]}
         related={SEO.related}
         tips={[
-          'Use PDF, EPS or SVG for packaging and labels: they print at exactly the size you set.',
-          'Keep the quiet zone (the blank margin); scanners need it — "auto" uses the size each standard recommends.',
-          'Dark bars on a light background: the page refuses inverted or low-contrast colours.',
-          'For GS1 codes, write each Application Identifier in brackets, like (01)09501101530003(17)261231.',
+          'When the yellow note says the module is not a whole number of printer dots, click the button in that note so the bars print evenly.',
+          'For GS1-128, DataBar and GS1 DataMatrix, write each Application Identifier in brackets, such as (01)09501101530003(17)261231.',
         ]}
       />
     </div>

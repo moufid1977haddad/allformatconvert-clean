@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Sepia Filter — Apply a Warm, Vintage Brown Tone Online Free" },
-  description: "Sepia Filter applies a warm, vintage brown tone to your photo using a sepia color matrix, entirely in your browser.",
+  title: { absolute: "Sepia Filter — Vintage Brown Tone With Intensity Slider" },
+  description: "Give a photo the warm brown tone of old prints with the standard sepia matrix, at an intensity from 0 to 100. JPG, PNG and WebP keep their format.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/sepia-filter" },
   openGraph: {
-    title: "Sepia Filter — Apply a Warm, Vintage Brown Tone Online Free",
-    description: "Sepia Filter applies a warm, vintage brown tone to your photo using a sepia color matrix, entirely in your browser.",
+    title: "Sepia Filter — Vintage Brown Tone With Intensity Slider",
+    description: "Give a photo the warm brown tone of old prints with the standard sepia matrix, at an intensity from 0 to 100. JPG, PNG and WebP keep their format.",
     url: "https://www.onlineconvertools.com/tools/image-tools/sepia-filter",
   },
 };

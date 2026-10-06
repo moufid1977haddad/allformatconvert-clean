@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Text to PDF — Convert Plain Text Online Free" },
-  description: "Free Text to PDF: any language (Arabic, Hindi, Bengali, Chinese…) and emoji in colour, with selectable text, word-wrap and page breaks.",
+  title: { absolute: "Text to PDF — TXT to PDF with Emoji and World Scripts" },
+  description: "Put plain text or a .txt file into a PDF with word wrap and page breaks. The PDF is made in your browser unless the text has emoji or a rarer script.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/text-to-pdf" },
   openGraph: {
-    title: "Text to PDF — Convert Plain Text Online Free",
-    description: "Free Text to PDF: any language (Arabic, Hindi, Bengali, Chinese…) and emoji in colour, with selectable text, word-wrap and page breaks.",
+    title: "Text to PDF — TXT to PDF with Emoji and World Scripts",
+    description: "Put plain text or a .txt file into a PDF with word wrap and page breaks. The PDF is made in your browser unless the text has emoji or a rarer script.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/text-to-pdf",
   },
 };

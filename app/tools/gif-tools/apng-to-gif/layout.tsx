@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "APNG to GIF — Decode Every Frame Online Free" },
-  description: "APNG to GIF decodes every frame of your animated PNG and re-encodes it into a real, downloadable animated GIF, in your browser.",
+  title: { absolute: "APNG to GIF Converter — Keeps Frames, Delays and Loops" },
+  description: "Turn an APNG into a GIF for apps that do not show animated PNG. Frame delays, the play count and fully transparent pixels carry over, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/apng-to-gif" },
   openGraph: {
-    title: "APNG to GIF — Decode Every Frame Online Free",
-    description: "APNG to GIF decodes every frame of your animated PNG and re-encodes it into a real, downloadable animated GIF, in your browser.",
+    title: "APNG to GIF Converter — Keeps Frames, Delays and Loops",
+    description: "Turn an APNG into a GIF for apps that do not show animated PNG. Frame delays, the play count and fully transparent pixels carry over, in your browser.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/apng-to-gif",
   },
 };

@@ -3,43 +3,43 @@ import Link from 'next/link';
 import { ToolIcon, CategoryIcon, toolTextColors, categoryColors } from '../../lib/toolIcons';
 
 const tools = [
-  { title: 'Image Compressor', description: 'Compress JPG, PNG and WebP, format kept', href: '/tools/image-tools/image-compressor', group: 'Transform' },
-  { title: 'Image Converter', description: 'Convert between image formats', href: '/tools/image-tools/image-converter', group: 'Transform' },
-  { title: 'Image Resizer', description: 'Resize images to specific dimensions', href: '/tools/image-tools/image-resizer', group: 'Transform' },
-  { title: 'Image Cropper', description: 'Crop images with aspect ratio presets', href: '/tools/image-tools/image-cropper', group: 'Transform' },
-  { title: 'Image Rotate', description: 'Rotate images by any angle', href: '/tools/image-tools/image-rotate', group: 'Transform' },
+  { title: 'Image Compressor', description: 'Compress up to 20 images, format kept', href: '/tools/image-tools/image-compressor', group: 'Transform' },
+  { title: 'Image Converter', description: 'To WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO or PDF', href: '/tools/image-tools/image-converter', group: 'Transform' },
+  { title: 'Image Resizer', description: 'Resize in pixels or by 25, 50 or 75 %', href: '/tools/image-tools/image-resizer', group: 'Transform' },
+  { title: 'Image Cropper', description: 'Crop in pixels or to a preset aspect ratio', href: '/tools/image-tools/image-cropper', group: 'Transform' },
+  { title: 'Image Rotate', description: 'Rotate 90°, 180°, 270° or any angle', href: '/tools/image-tools/image-rotate', group: 'Transform' },
   { title: 'Image Flip', description: 'Flip images horizontally or vertically', href: '/tools/image-tools/image-flip', group: 'Transform' },
-  { title: 'Round Corners', description: 'Add rounded corners to images', href: '/tools/image-tools/round-corners', group: 'Annotate' },
-  { title: 'Add Text to Image', description: 'Overlay text on images', href: '/tools/image-tools/add-text-to-image', group: 'Annotate' },
-  { title: 'Image Editor', description: 'Edit and enhance your images', href: '/tools/image-tools/image-editor', group: 'Annotate' },
-  { title: 'Add Border to Image', description: 'Add decorative borders to images', href: '/tools/image-tools/add-border-to-image', group: 'Annotate' },
-  { title: 'Brightness and Contrast', description: 'Adjust image brightness and contrast', href: '/tools/image-tools/brightness-contrast', group: 'Filters & Effects' },
-  { title: 'Image Comparison', description: 'Compare images with slider', href: '/tools/image-tools/image-comparison', group: 'Analyze & Utilities' },
-  { title: 'Duplicate Image Finder', description: 'Find similar images', href: '/tools/image-tools/duplicate-image-finder', group: 'Analyze & Utilities' },
-  { title: 'Grayscale Converter', description: 'Convert images to grayscale', href: '/tools/image-tools/grayscale-converter', group: 'Filters & Effects' },
-  { title: 'Image Blur', description: 'Add blur effect to images', href: '/tools/image-tools/image-blur', group: 'Filters & Effects' },
-  { title: 'Image Inverter', description: 'Invert image colors', href: '/tools/image-tools/image-inverter', group: 'Filters & Effects' },
-  { title: 'Sepia Filter', description: 'Apply sepia tone effect', href: '/tools/image-tools/sepia-filter', group: 'Filters & Effects' },
-  { title: 'Image Metadata Viewer', description: 'View and remove EXIF data', href: '/tools/image-tools/image-metadata', group: 'Analyze & Utilities' },
-  { title: 'Image Pixelator', description: 'Pixelate/mosaic effect', href: '/tools/image-tools/image-pixelator', group: 'Filters & Effects' },
-  { title: 'Add Noise', description: 'Add film grain effect', href: '/tools/image-tools/add-noise', group: 'Annotate' },
-  { title: 'Add Vignette', description: 'Add vignette effect', href: '/tools/image-tools/add-vignette', group: 'Annotate' },
+  { title: 'Round Corners', description: 'Round the corners, transparent or colored', href: '/tools/image-tools/round-corners', group: 'Annotate' },
+  { title: 'Add Text to Image', description: 'Write text with font, outline and shadow', href: '/tools/image-tools/add-text-to-image', group: 'Annotate' },
+  { title: 'Image Editor', description: 'Adjustments, effects, border and text in one editor', href: '/tools/image-tools/image-editor', group: 'Annotate' },
+  { title: 'Add Border to Image', description: 'Add a solid-color border around an image', href: '/tools/image-tools/add-border-to-image', group: 'Annotate' },
+  { title: 'Brightness and Contrast', description: 'Adjust brightness, contrast and saturation', href: '/tools/image-tools/brightness-contrast', group: 'Filters & Effects' },
+  { title: 'Image Comparison', description: 'Compare two images with a slider and a diff', href: '/tools/image-tools/image-comparison', group: 'Analyze & Utilities' },
+  { title: 'Duplicate Image Finder', description: 'Find exact and resized copies among images', href: '/tools/image-tools/duplicate-image-finder', group: 'Analyze & Utilities' },
+  { title: 'Grayscale Converter', description: 'Grayscale by a chosen method, or black and white', href: '/tools/image-tools/grayscale-converter', group: 'Filters & Effects' },
+  { title: 'Image Blur', description: 'Apply a Gaussian blur to the whole image', href: '/tools/image-tools/image-blur', group: 'Filters & Effects' },
+  { title: 'Image Inverter', description: 'Make a color negative, transparency kept', href: '/tools/image-tools/image-inverter', group: 'Filters & Effects' },
+  { title: 'Sepia Filter', description: 'Apply a sepia tone at a chosen strength', href: '/tools/image-tools/sepia-filter', group: 'Filters & Effects' },
+  { title: 'Image Metadata Viewer', description: 'Read EXIF and GPS data, save a copy without it', href: '/tools/image-tools/image-metadata', group: 'Analyze & Utilities' },
+  { title: 'Image Pixelator', description: 'Pixelate the whole image into square blocks', href: '/tools/image-tools/image-pixelator', group: 'Filters & Effects' },
+  { title: 'Add Noise', description: 'Add mono or color film grain', href: '/tools/image-tools/add-noise', group: 'Annotate' },
+  { title: 'Add Vignette', description: 'Darken the edges with a radial vignette', href: '/tools/image-tools/add-vignette', group: 'Annotate' },
   { title: 'HEIC to JPG', description: 'Convert iPhone HEIC photos to JPG', href: '/tools/image-tools/heic-to-jpg', group: 'Convert Format' },
   { title: 'HEIC to PNG', description: 'Convert iPhone HEIC photos to PNG', href: '/tools/image-tools/heic-to-png', group: 'Convert Format' },
-  { title: 'WebP to PNG', description: 'Convert WebP images to PNG', href: '/tools/image-tools/webp-to-png', group: 'Convert Format' },
-  { title: 'WebP to JPG', description: 'Convert WebP images to JPG', href: '/tools/image-tools/webp-to-jpg', group: 'Convert Format' },
+  { title: 'WebP to PNG', description: 'Convert WebP to PNG, transparency kept', href: '/tools/image-tools/webp-to-png', group: 'Convert Format' },
+  { title: 'WebP to JPG', description: 'Convert WebP to JPG on a background color', href: '/tools/image-tools/webp-to-jpg', group: 'Convert Format' },
   { title: 'PNG to JPG', description: 'Convert PNG to JPG with quality control', href: '/tools/image-tools/png-to-jpg', group: 'Convert Format' },
-  { title: 'JPG to PNG', description: 'Convert JPG to lossless PNG', href: '/tools/image-tools/jpg-to-png', group: 'Convert Format' },
-  { title: 'SVG to PNG', description: 'Rasterize SVG vectors to PNG', href: '/tools/image-tools/svg-to-png', group: 'Convert Format' },
-  { title: 'PNG to ICO', description: 'Create favicon from PNG', href: '/tools/image-tools/png-to-ico', group: 'Convert Format' },
-  { title: 'JPG to WebP', description: 'Convert JPG to modern WebP', href: '/tools/image-tools/jpg-to-webp', group: 'Convert Format' },
-  { title: 'PNG to WebP', description: 'Convert PNG to modern WebP', href: '/tools/image-tools/png-to-webp', group: 'Convert Format' },
-  { title: 'GIF to PNG', description: 'Extract first frame from GIF', href: '/tools/image-tools/gif-to-png', group: 'Convert Format' },
-  { title: 'BMP to PNG', description: 'Convert BMP to compressed PNG', href: '/tools/image-tools/bmp-to-png', group: 'Convert Format' },
-  { title: 'TIFF to PNG', description: 'Convert TIFF images to PNG', href: '/tools/image-tools/tiff-to-png', group: 'Convert Format' },
-  { title: 'TIFF to JPG', description: 'Convert TIFF images to JPG', href: '/tools/image-tools/tiff-to-jpg', group: 'Convert Format' },
-  { title: 'ICO to PNG', description: 'Convert ICO files to PNG', href: '/tools/image-tools/ico-to-png', group: 'Convert Format' },
-  { title: 'Image to Base64', description: 'Convert image to Base64 data URI', href: '/tools/image-tools/image-to-base64', group: 'Analyze & Utilities' },
+  { title: 'JPG to PNG', description: 'Save a JPG photo as a PNG file', href: '/tools/image-tools/jpg-to-png', group: 'Convert Format' },
+  { title: 'SVG to PNG', description: 'Render an SVG to PNG at a chosen size', href: '/tools/image-tools/svg-to-png', group: 'Convert Format' },
+  { title: 'PNG to ICO', description: 'Multi-size favicon .ico from a PNG', href: '/tools/image-tools/png-to-ico', group: 'Convert Format' },
+  { title: 'JPG to WebP', description: 'Convert JPG to WebP, lossy or lossless', href: '/tools/image-tools/jpg-to-webp', group: 'Convert Format' },
+  { title: 'PNG to WebP', description: 'Convert PNG to WebP, transparency kept', href: '/tools/image-tools/png-to-webp', group: 'Convert Format' },
+  { title: 'GIF to PNG', description: 'First frame as PNG, or all frames in a ZIP', href: '/tools/image-tools/gif-to-png', group: 'Convert Format' },
+  { title: 'BMP to PNG', description: 'Convert BMP bitmaps to PNG', href: '/tools/image-tools/bmp-to-png', group: 'Convert Format' },
+  { title: 'TIFF to PNG', description: 'Convert a TIFF page to PNG', href: '/tools/image-tools/tiff-to-png', group: 'Convert Format' },
+  { title: 'TIFF to JPG', description: 'Convert a TIFF page to JPG', href: '/tools/image-tools/tiff-to-jpg', group: 'Convert Format' },
+  { title: 'ICO to PNG', description: 'Largest icon size, or every size, as PNG', href: '/tools/image-tools/ico-to-png', group: 'Convert Format' },
+  { title: 'Image to Base64', description: 'Data URI, img tag, CSS or JSON snippet', href: '/tools/image-tools/image-to-base64', group: 'Analyze & Utilities' },
 ];
 
 export default function ImageToolsPage() {
@@ -47,7 +47,7 @@ export default function ImageToolsPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="image-tools" className={`w-8 h-8 ${categoryColors['image-tools']}`} /> Image Tools</h1>
-        <p className="text-neutral-500 text-center mb-10">All your image tools in one place - {tools.length} tools</p>
+        <p className="text-neutral-500 text-center mb-10">Convert, resize, edit and inspect images - {tools.length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]">
@@ -61,33 +61,33 @@ export default function ImageToolsPage() {
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Tools</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Image Tools is a free online suite of utilities designed to help you edit, convert, and optimize images without downloading any software. Whether you need to resize, compress, or transform your images, our user-friendly platform provides professional-grade results instantly.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Every tool on this page edits the image in your browser, with the canvas API and, for HEIC, TIFF and camera RAW files, decoders that run on the page, so your pictures are not uploaded. The two image tools that use a server, Background Remover and Image Upscaler, are on the AI Tools page. The tools fall into format converters, transforms (resize, crop, rotate, flip), effects and filters, and analysis: metadata, side-by-side comparison and duplicate search.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Tools</h2>
           <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Image Tools website and select the specific tool you need from our collection of image utilities.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Upload your image file by clicking the upload button or dragging and dropping your file onto the workspace.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Adjust the settings and parameters according to your requirements, such as dimensions, quality, or format preferences.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download your processed image to your device or share it directly with others using the provided links.</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Pick a format converter such as HEIC to JPG or PNG to WebP, a transform, an effect, or an analysis tool.</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Open the image from your device; Image Compressor and Image Converter accept several at once.</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Set the options, such as quality, size in pixels, angle or effect strength.</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download the result; with several images, Image Converter offers them in one ZIP.</li>
           </ol>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
           <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is Image Tools completely free to use?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, Image Tools is 100% free with no hidden charges, registration requirements, or premium subscriptions needed to access any of our image editing features.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What image formats does Image Tools support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Image Tools supports all major image formats including JPG, PNG, GIF, WebP, BMP, TIFF, and SVG, allowing you to convert and edit virtually any image type.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my data safe when using Image Tools?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes. Every Image Tool runs entirely in your browser: your images are never uploaded, and nothing is stored or shared. (Background Remover and AI Image Upscaler, in AI Tools, are the exceptions: they use our own server, never a third party, and delete the image after processing.)</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to install any software to use Image Tools?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No installation required. Image Tools is entirely web-based, so you can access it from any device with an internet browser without downloading anything.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Which image formats are supported?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">JPG, PNG, WebP, GIF, BMP, TIFF, HEIC, ICO and SVG have their own converters, and Image Converter also reads PSD and camera RAW files and writes AVIF, ICO and PDF. Each tool page lists what it opens.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Are my images uploaded?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No. The tools listed here process images in your browser. Only Background Remover and Image Upscaler, in AI Tools, send an image to our own server, and the upscaler does so only when it cannot run on your device.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I remove the GPS location from a photo?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes. Image Metadata Viewer shows the EXIF, GPS, IPTC and XMP data of an image and saves a copy without metadata for JPG, PNG and WebP files.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How many images can I process at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">20 in Image Compressor. Image Converter and Duplicate Image Finder also take several images at once; the other tools take one image at a time.</p></div>
           </div>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Compress your images before uploading to websites to improve page load times and reduce bandwidth usage.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the batch processing feature to edit multiple images at once, saving you time on repetitive editing tasks.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Convert images to WebP format for better compression without sacrificing quality, especially for web use.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Take advantage of the resize tool to create multiple versions of your images for different platforms like social media, thumbnails, and print.</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Before posting a photo, check Image Metadata Viewer for GPS coordinates and save a copy without them.</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>PNG to JPG and WebP to JPG let you pick the color that fills transparent areas, since JPG has no transparency.</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>PNG to ICO puts several icon sizes in one .ico file, ready to use as a favicon.</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the difference image in Image Comparison to see which pixels an edit or a compression changed.</li>
           </ul>
         </div>
       </div>

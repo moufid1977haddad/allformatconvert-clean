@@ -1,5 +1,5 @@
 'use client';
-import { headerSize, sizeProblem } from '../../../lib/gifEncode';
+import { headerSize, sizeProblem, MAX_ANIMATION_PIXELS } from '../../../lib/gifEncode';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reportToolError } from '../../../lib/reportError';
@@ -93,27 +93,27 @@ export default function GifToMp4Page() {
       </div>
       <SeoContent
         title="GIF to MP4"
-        description="GIF to MP4 converts your GIF's full animation into a real MP4 (H.264) video, using ffmpeg.wasm entirely in your browser — nothing is uploaded to a server. All frames and their original timing are preserved; since MP4/H.264 requires even pixel dimensions, an odd width or height is automatically scaled down by one pixel."
+        description="GIF to MP4 turns an animated GIF into an MP4 video (H.264, yuv420p, fast start) for sites and apps that take video rather than GIF. ffmpeg.wasm runs on this page and reads the delay of each frame, so a pause in the GIF stays a pause and the last frame keeps its full time. Video has no transparency, so transparent areas become white. An odd width or height is scaled to the even size that H.264 needs. The MP4 holds the animation once and has no sound."
+        howToTitle="How to convert GIF to MP4"
         howTo={[
-          "Click the upload area and select a GIF file from your device.",
-          "Click \"Convert to MP4\" to transcode the full animation locally.",
-          "Preview the resulting MP4 video.",
-          "Click \"Download\" to save it."
+          "Choose the GIF to turn into a video; it shows as a preview before conversion.",
+          "Click \"Convert to MP4\"; the ffmpeg.wasm engine is loaded before each conversion, faster once your browser has cached it.",
+          "Play the video under the button to check the timing.",
+          "Click \"Download\" to save converted.mp4."
         ]}
+        specs={[
+          { label: "Input", value: "GIF (image/gif)" },
+          { label: "Output", value: "MP4 with H.264 video (yuv420p), no audio, saved as converted.mp4" },
+          { label: "Frame size", value: `Up to ${(MAX_ANIMATION_PIXELS / 1e6).toFixed(1)} megapixels per frame, checked before ffmpeg.wasm loads` },
+          { label: "Timing", value: "Each frame keeps its delay; delays under 20 ms count as 100 ms, as in browsers" },
+          { label: "Dimensions", value: "An odd width or height is reduced by one pixel" }
+        ]}
+        privacy="ffmpeg.wasm encodes the MP4 inside this tab, and the GIF never leaves it. The ffmpeg.wasm engine is fetched from unpkg.com for each conversion, unless your browser reuses a cached copy; that request carries nothing about your file. A failed conversion is reported to our error log with the cleaned message, the file extension, a size range and your browser name, never the file or its name."
         faqs={[
-          { q: "Does the output preserve my GIF's full animation?", a: "Yes — every frame and its original timing from the source GIF is carried over into the video, not just a single frame — the last frame keeps its full delay, so a final pause is not cut short." },
-          { q: "What happens to a transparent GIF?", a: "Video has no transparency: transparent areas become white, as the GIF looks on a white web page." },
-          { q: "Will the MP4 loop like my GIF?", a: "The MP4 contains the animation once; a GIF's loop setting has no equivalent in the file. Web pages and most social platforms loop short videos themselves (the loop attribute of the video tag)." },
-          { q: "What format is the output actually in?", a: "A real MP4 file using H.264 video, playable in virtually any video player or website that accepts MP4 uploads." },
-          { q: "Does the video have sound?", a: "No — GIFs never contain audio, so there's nothing to carry over; the output video is silent." },
-          { q: "Is GIF to MP4 free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is my file uploaded anywhere?", a: "No. Conversion happens entirely in your browser via ffmpeg.wasm — nothing is uploaded to a server." }
-        ]}
-        tips={[
-          "The first conversion after loading the page takes longer since the ffmpeg.wasm engine needs to download.",
-          "MP4 is far more widely compatible than GIF for sharing on social platforms or embedding in video players.",
-          "If your GIF has an odd width or height, it's automatically scaled down by one pixel to satisfy H.264's even-dimension requirement — the picture is resized by that one pixel, not cropped, which is not visible.",
-          "For a much smaller file than the original GIF at similar visual quality, MP4/H.264 is typically far more efficient than GIF's format."
+          { q: "Will the MP4 loop like my GIF?", a: "No. The MP4 contains the animation once, because video files have no loop setting. A web page can repeat it with the loop attribute of the video tag, and a video player can be set to repeat it." },
+          { q: "Does the MP4 keep transparency?", a: "No. H.264 video has no transparency, so transparent areas come out white, as the GIF looks on a white page. This was checked with a test GIF that has a transparent background." },
+          { q: "Is the timing of the GIF kept?", a: "Yes. The frame delays are read from the GIF, the frame rate of the video is set on their common time grid, and the last frame is held for its own delay, so the MP4 lasts as long as one play of the GIF." },
+          { q: "Will the size of the picture change?", a: "Yes, by one pixel at most, and only for an odd width or height: H.264 needs even sizes. The picture is scaled to the even size, not cropped." }
         ]}
       />
     </div>

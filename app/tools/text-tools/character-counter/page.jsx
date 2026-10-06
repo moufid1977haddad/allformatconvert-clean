@@ -30,23 +30,37 @@ export default function CharacterCounterPage() {
       </div>
       <SeoContent
         title={"Character Counter"}
-        description={"Character Counter breaks text down into characters, letters, digits, spaces and other symbols, updating live as you type, entirely in your browser. It counts characters the way you see them: an emoji (even a family or a flag), an accented letter written with a combining accent, or a Hindi syllable is one character, not two to eleven code units. Letters and digits of every script count as letters and digits, not as special characters. It also shows the length in UTF-16 code units (what JavaScript and many form limits count) and in UTF-8 bytes (what databases and SMS encodings count)."}
+        description={"Character Counter shows nine counts for the text you type or paste: total characters, letters, digits, spaces, other symbols, characters without spaces, lines, UTF-16 code units and UTF-8 bytes. Characters are counted as you see them, so an emoji with a skin tone, a flag, or an accent typed as a separate mark counts as one. Use it to check a text against a character limit, or the byte size a field will store. It only counts: it does not edit, save or send the text, and it runs in your browser."}
+        example={{
+          caption: "Two lines of text. The line break is one of the 3 spaces, and 👍🏽 is one character but 4 UTF-16 units and 8 bytes.",
+          inputLabel: "Text",
+          input: "Café 👍🏽 #1\nok",
+          outputLabel: "Counts shown",
+          output: "Total Characters: 12\nLetters: 6\nDigits: 1\nSpaces: 3\nOther symbols: 2\nWithout spaces: 9\nLines: 2\nUTF-16 units: 15\nUTF-8 bytes: 20",
+        }}
+        howToTitle={"How to count characters in a text"}
         howTo={[
-          "Type or paste your text into the box.",
-          "Read the counts, which update as you type.",
-          "Compare 'UTF-16 units' or 'UTF-8 bytes' with the limit of the system you're writing for.",
-          "Click 'Clear' to start again."
+          "Paste the text whose length you need to check, or type it in the box.",
+          "Read the nine counts under it; they change with every keystroke.",
+          "Compare \"UTF-16 units\" with a web form's maxlength, or \"UTF-8 bytes\" with a limit expressed in bytes.",
+          "Click \"Clear\" to empty the box."
         ]}
+        specs={[
+          { label: "Counts", value: "Total Characters, Letters, Digits, Spaces, Other symbols, Without spaces, Lines, UTF-16 units, UTF-8 bytes" },
+          { label: "Spaces", value: "Every whitespace character, tabs and line breaks included" },
+          { label: "Lines", value: "Zero for an empty box; a line break at the very end adds one more, empty line" },
+          { label: "Digits", value: "Digits of every script, and number signs such as ½ or ²" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"The counts are recalculated by JavaScript inside this page on each keystroke; the text never leaves your device and is not saved, so a reload empties the box. The page has no error message of its own; if it ever crashed, our error log would receive the error message, the tool name and your browser's name and version, without your text."}
         faqs={[
-          { q: "Is Character Counter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "How are emoji counted?", a: "As one character each, like on your screen — 👍🏽 or 👨‍👩‍👧 count as 1, even though they are made of several code points." },
-          { q: "Are accented and non-Latin letters counted as letters?", a: "Yes — é, ß, я, 日 and every other letter count as letters; digits of any script count as digits." },
-          { q: "Why are there three different lengths?", a: "Characters is what you see; UTF-16 units is what JavaScript's .length and many web forms count; UTF-8 bytes is the storage size used by most databases and files." },
-          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
+          { q: "Does the character count include spaces?", a: "Yes. \"Total Characters\" includes spaces, tabs and line breaks, while \"Without spaces\" leaves all of them out. The \"Spaces\" count covers every kind of whitespace, so a text written on two lines always has at least one: the line break." },
+          { q: "How are emoji and accents counted?", a: "One each, as they appear: 👍🏽 and 👨‍👩‍👧 each count as one character, and so does é typed as e plus a combining accent. This relies on Intl.Segmenter, which Firefox has had since version 125; older Firefox versions count code points instead, so 👨‍👩‍👧 counts as 5 there." },
+          { q: "Is a form's maxlength the same as Total Characters?", a: "No. JavaScript and the maxlength of web forms count UTF-16 code units: a plain letter is 1, but 👍🏽 is 4. A limit set in bytes, as in some databases, file formats and APIs, matches \"UTF-8 bytes\", where é takes 2 and 👍🏽 takes 8." },
+          { q: "Are letters from other alphabets counted as letters?", a: "Yes. é, ß, я, 日 and every other Unicode letter count as letters, and digits of any script count as digits, as do signs like ½ or ². Emoji, punctuation and symbols such as # go to \"Other symbols\"." }
         ]}
         tips={[
-          "Use 'UTF-16 units' to check a limit enforced by a web form or an API written in JavaScript.",
-          "Line count includes the last line even without a final line break."
+          "To count words, sentences and reading time on the same text, paste it into Word Counter."
         ]}
       />
     </div>

@@ -1,0 +1,314 @@
+{
+ "/tools/video-tools/video-compressor": [
+  {
+   "claim": "1 GB",
+   "file": "app/components/MediaServiceTool.jsx",
+   "pattern": "MAX_UPLOAD_MB = 1024"
+  },
+  {
+   "claim": "40 to 50 %",
+   "file": "docs/audit/RAPPORT-p25-decisions-03-10.md",
+   "pattern": "même qualité pour 40.{1,3}\\(H\\.265\\) à 50.{1,3}\\(AV1\\)"
+  },
+  {
+   "claim": "about 40 % for H.265, about 50 % for AV1",
+   "file": "docs/audit/RAPPORT-p25-decisions-03-10.md",
+   "pattern": "même qualité pour 40.{1,3}\\(H\\.265\\) à 50.{1,3}\\(AV1\\)"
+  },
+  {
+   "claim": "2 %",
+   "file": "services/media-processing/app/ffmpeg_ops.py",
+   "pattern": "NOT_SMALLER_RATIO = 0\\.98"
+  },
+  {
+   "claim": "96 kbps",
+   "file": "services/media-processing/app/ffmpeg_ops.py",
+   "pattern": "\"-b:a\", \"96k\""
+  }
+ ],
+ "/tools/video-tools/video-converter": [
+  {
+   "claim": "1 GB",
+   "file": "app/components/MediaServiceTool.jsx",
+   "pattern": "MAX_UPLOAD_MB = 1024"
+  },
+  {
+   "claim": "12 frames",
+   "file": "services/media-processing/app/ffmpeg_ops.py",
+   "pattern": "GIF_DEFAULT_FPS = 12"
+  },
+  {
+   "claim": "640 pixels",
+   "file": "services/media-processing/app/ffmpeg_ops.py",
+   "pattern": "GIF_DEFAULT_MAX_WIDTH = 640"
+  },
+  {
+   "claim": "60 seconds",
+   "file": "services/media-processing/app/ffmpeg_ops.py",
+   "pattern": "GIF_MAX_SECONDS = 60"
+  },
+  {
+   "claim": "0.25× to 4×",
+   "file": "app/tools/video-tools/video-converter/page.jsx",
+   "pattern": "\\['0\\.25', '0\\.25× \\(slow motion\\)'\\].*\\['4', '4× \\(time-lapse\\)'\\]"
+  },
+  {
+   "claim": "0 to 300 %",
+   "file": "app/tools/video-tools/video-converter/page.jsx",
+   "pattern": "min=\"0\" max=\"300\""
+  },
+  {
+   "claim": "up to 10 seconds each",
+   "file": "app/tools/video-tools/video-converter/page.jsx",
+   "pattern": "id=\"vc-fadein\" type=\"number\" min=\"0\" max=\"10\""
+  }
+ ],
+ "/tools/video-tools/video-filter": [
+  {
+   "claim": "1 GB",
+   "file": "app/components/MediaServiceTool.jsx",
+   "pattern": "MAX_UPLOAD_MB = 1024"
+  },
+  {
+   "claim": "160 kbps",
+   "file": "services/media-processing/app/ffmpeg_ops.py",
+   "pattern": "AUDIO_KBPS = \\{\"high\": 160"
+  },
+  {
+   "claim": "150 %",
+   "file": "app/tools/video-tools/video-filter/page.jsx",
+   "pattern": "brightness\\(150%\\)"
+  },
+  {
+   "claim": "200 %",
+   "file": "app/tools/video-tools/video-filter/page.jsx",
+   "pattern": "contrast\\(200%\\)"
+  },
+  {
+   "claim": "300 %",
+   "file": "app/tools/video-tools/video-filter/page.jsx",
+   "pattern": "saturate\\(300%\\)"
+  }
+ ],
+ "/tools/video-tools/video-merger": [
+  {
+   "claim": "2 GB",
+   "file": "app/tools/video-tools/video-merger/page.jsx",
+   "pattern": "mobile \\? 700e6 : 2e9"
+  },
+  {
+   "claim": "700 MB",
+   "file": "app/tools/video-tools/video-merger/page.jsx",
+   "pattern": "mobile \\? 700e6 : 2e9"
+  },
+  {
+   "claim": "60 frames",
+   "file": "app/tools/video-tools/video-merger/page.jsx",
+   "pattern": "Math\\.min\\(60, "
+  }
+ ],
+ "/tools/video-tools/video-resizer": [
+  {
+   "claim": "1 GB",
+   "file": "app/components/MediaServiceTool.jsx",
+   "pattern": "MAX_UPLOAD_MB = 1024"
+  },
+  {
+   "claim": "160 kbps",
+   "file": "services/media-processing/app/ffmpeg_ops.py",
+   "pattern": "AUDIO_KBPS = \\{\"high\": 160"
+  },
+  {
+   "claim": "Vertical 1080×1920",
+   "file": "app/tools/video-tools/video-resizer/page.jsx",
+   "pattern": "'Vertical 1080×1920'"
+  },
+  {
+   "claim": "7680 pixels",
+   "file": "app/tools/video-tools/video-resizer/page.jsx",
+   "pattern": "Math\\.min\\(7680"
+  },
+  {
+   "claim": "720×1280 rather than 1280×720",
+   "file": "app/tools/video-tools/video-resizer/page.jsx",
+   "pattern": "\\['720p', 1280, 720, true\\]"
+  },
+  {
+   "claim": "16 to 7680 pixels",
+   "file": "app/tools/video-tools/video-resizer/page.jsx",
+   "pattern": "min=\"16\" max=\"7680\""
+  },
+  {
+   "claim": "16 × 16 pixels",
+   "file": "services/media-processing/app/ffmpeg_ops.py",
+   "pattern": "w < 16 or h < 16"
+  }
+ ],
+ "/tools/video-tools/video-rotator": [
+  {
+   "claim": "1 GB",
+   "file": "app/tools/video-tools/video-rotator/page.jsx",
+   "pattern": "MAX_SERVICE_BYTES = 1024 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "160 kbps",
+   "file": "services/media-processing/app/ffmpeg_ops.py",
+   "pattern": "AUDIO_KBPS = \\{\"high\": 160"
+  }
+ ],
+ "/tools/video-tools/video-screenshot": [
+  {
+   "claim": "0.04 seconds",
+   "file": "app/tools/video-tools/video-screenshot/page.jsx",
+   "pattern": "step=\"0\\.04\""
+  },
+  {
+   "claim": "90 %",
+   "file": "app/tools/video-tools/video-screenshot/page.jsx",
+   "pattern": "useState\\(90\\)"
+  },
+  {
+   "claim": "From 10 %",
+   "file": "app/tools/video-tools/video-screenshot/page.jsx",
+   "pattern": "min=\"10\" max=\"100\""
+  }
+ ],
+ "/tools/video-tools/video-to-audio": [
+  {
+   "claim": "192 kbps is selected first",
+   "file": "app/lib/audioFormats.js",
+   "pattern": "DEFAULT_AUDIO_KBPS = 192"
+  },
+  {
+   "claim": "128 kbps",
+   "file": "app/lib/audioFormats.js",
+   "pattern": "\\[128, 'Standard — 128 kbps'\\]"
+  },
+  {
+   "claim": "256 or 320 kbps",
+   "file": "app/lib/audioFormats.js",
+   "pattern": "\\[256, .*\\[320, "
+  },
+  {
+   "claim": "128, 192, 256 or 320 kbps",
+   "file": "app/lib/audioFormats.js",
+   "pattern": "\\[128, .*\\[192, .*\\[256, .*\\[320, "
+  },
+  {
+   "claim": "at least 192 kbps",
+   "file": "app/lib/audioFormats.js",
+   "pattern": "Math\\.max\\(kbps, 192\\)"
+  },
+  {
+   "claim": "about 10 MB",
+   "file": "docs/audit/RAPPORT-formats-navigateurs.md",
+   "pattern": "~10,2 Mo sur le réseau"
+  }
+ ],
+ "/tools/video-tools/video-to-gif": [
+  {
+   "claim": "1 GB",
+   "file": "app/components/MediaServiceTool.jsx",
+   "pattern": "MAX_UPLOAD_MB = 1024"
+  },
+  {
+   "claim": "60 seconds",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "GIF_MAX_SECONDS = 60"
+  },
+  {
+   "claim": "0.2 to 60 seconds",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "length < 0\\.2"
+  },
+  {
+   "claim": "160 to 1080 pixels",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "WIDTHS = \\[160,.*1080\\]"
+  },
+  {
+   "claim": "5 to 30 frames",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "FPS = \\[5,.*30\\]"
+  },
+  {
+   "claim": "3 or 5 times",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": ">3 times<[\\s\\S]*>5 times<"
+  },
+  {
+   "claim": "\"3 times\" or \"5 times\"",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": ">3 times<[\\s\\S]*>5 times<"
+  },
+  {
+   "claim": "1 to 15 frames",
+   "file": "app/tools/video-tools/video-to-gif/page.jsx",
+   "pattern": "min=\"1\" max=\"15\""
+  },
+  {
+   "claim": "1 to 10 seconds",
+   "file": "app/tools/video-tools/video-to-gif/page.jsx",
+   "pattern": "min=\"1\" max=\"10\""
+  }
+ ],
+ "/tools/video-tools/video-trimmer": [
+  {
+   "claim": "about 10 MB",
+   "file": "docs/audit/RAPPORT-formats-navigateurs.md",
+   "pattern": "~10,2 Mo sur le réseau"
+  },
+  {
+   "claim": "0.1 seconds",
+   "file": "app/tools/video-tools/video-trimmer/page.jsx",
+   "pattern": "step=\"0\\.1\""
+  },
+  {
+   "claim": "45 seconds",
+   "file": "app/tools/video-tools/video-trimmer/page.jsx",
+   "pattern": "return local > 45;"
+  }
+ ],
+ "/tools/video-tools/video-watermark": [
+  {
+   "claim": "2 minutes",
+   "file": "app/tools/video-tools/video-watermark/page.jsx",
+   "pattern": "MAX_DURATION = 120"
+  },
+  {
+   "claim": "2-minute",
+   "file": "app/tools/video-tools/video-watermark/page.jsx",
+   "pattern": "MAX_DURATION = 120"
+  },
+  {
+   "claim": "3.7 seconds",
+   "file": "app/tools/video-tools/video-trimmer/page.jsx",
+   "pattern": "blink: 3\\.7"
+  },
+  {
+   "claim": "29 seconds",
+   "file": "app/tools/video-tools/video-trimmer/page.jsx",
+   "pattern": "other: 29"
+  },
+  {
+   "claim": "2048 pixels",
+   "file": "app/tools/video-tools/video-watermark/page.jsx",
+   "pattern": "2048 / Math\\.max"
+  },
+  {
+   "claim": "5 to 60 %",
+   "file": "app/tools/video-tools/video-watermark/page.jsx",
+   "pattern": "min=\"5\" max=\"60\""
+  },
+  {
+   "claim": "from 10 %",
+   "file": "app/tools/video-tools/video-watermark/page.jsx",
+   "pattern": "min=\"0\\.1\" max=\"1\""
+  },
+  {
+   "claim": "about 10 MB",
+   "file": "docs/audit/RAPPORT-formats-navigateurs.md",
+   "pattern": "~10,2 Mo sur le réseau"
+  }
+ ]
+}

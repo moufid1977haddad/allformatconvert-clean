@@ -58,24 +58,30 @@ export default function ImageFlipPage() {
       </div>
       <SeoContent
         title="Image Flip"
-        description="Image Flip mirrors your image horizontally or vertically, entirely in your browser using the canvas element — your image is never uploaded to a server. For rotating by a specific angle instead, use the separate Image Rotate tool."
+        description={"Image Flip mirrors a picture. Flip Horizontal swaps left and right, the usual fix for a front-camera photo whose text reads backwards; Flip Vertical swaps top and bottom; Flip Both Ways does the two at once, which equals a half turn. The pixels are moved, not resampled, so nothing gets blurred. Each button works on the original file, so clicks do not add up. A transparent background stays transparent. To turn a picture by an angle instead, use Image Rotate. The flip runs in your browser."}
+        howToTitle={"How to flip an image"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Click 'Flip Horizontal' to mirror left-right, or 'Flip Vertical' to mirror top-bottom.",
-          "Preview the flipped result.",
-          "Click the download button to save your flipped PNG image."
+          "Click the upload box and choose the picture to mirror.",
+          "Click \"Flip Horizontal\", \"Flip Vertical\" or \"Flip Both Ways\"; the flip starts at once.",
+          "Check the mirrored preview below the buttons.",
+          "Click \"Download\" to keep the mirrored copy; JPG, PNG and WebP keep their format, while any other picture is saved as PNG.",
         ]}
+        specs={[
+          { label: "Buttons", value: "Flip Horizontal (left and right swapped), Flip Vertical (top and bottom swapped), Flip Both Ways (a half turn)" },
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF, or any picture the browser can show" },
+          { label: "Output format", value: "JPG remains JPG (quality 92), PNG and WebP keep their format, other types turn into PNG" },
+          { label: "Largest image", value: "268 megapixels" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The mirror image is produced by this page in your browser, and the picture is never transmitted. The flipped copy is only in the tab until you download it. If an error is displayed, we receive the cleaned text of that message, the tool's name and the browser's name and version, not the picture."}
         faqs={[
-          { q: "Is Image Flip really free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "What image formats does Image Flip support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
-          { q: "Can I rotate by a specific angle here?", a: "No, this tool only mirrors horizontally or vertically. Use the separate Image Rotate tool for custom-angle rotation." },
-          { q: "Is my uploaded image data secure and private?", a: "Yes, images are processed entirely in your browser and are never uploaded to a server." }
+          { q: "Can I flip both horizontally and vertically at once?", a: "Yes: click \"Flip Both Ways\". Clicking \"Flip Horizontal\" and then \"Flip Vertical\" does not combine them, because each button starts again from your original file, so the second click gives a vertical flip only." },
+          { q: "Are the pixels resampled when flipping?", a: "No. Each pixel is moved to its mirrored place, so nothing is blurred or shifted, and a PNG result is pixel for pixel the mirror of the original." },
+          { q: "Can I fix a mirrored selfie?", a: "Yes. \"Flip Horizontal\" reverses left and right, so text and logos that appear backwards in a front-camera photo read normally again. The flip is exact, so flipping the result again restores the original layout." },
+          { q: "Is the transparency of a PNG kept?", a: "Yes. Transparent areas stay transparent in PNG and WebP results. Other formats, such as GIF, BMP or AVIF, are saved as PNG, which keeps their transparency too. A JPG has no transparency, so there is nothing to keep." },
         ]}
         tips={[
-          "Use horizontal flip to create a mirror image for design symmetry or artistic compositions.",
-          "Combine a flip with the Image Rotate tool if you need both a mirror and an angle change.",
-          "PNG output preserves transparency, so any transparent background in your source image carries over.",
-          "Flip one image at a time — there's no batch processing built in."
+          "To stand a sideways photo upright rather than mirror it, use Image Rotate.",
         ]}
       />
     </div>

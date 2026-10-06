@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { buildChapterHtml, firstPageShowsCover } from '../../../lib/ebookHtml';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
-import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_HTML_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { formatBytes } from '../../../lib/formatBytes';
 import { useToolError } from '../../../lib/useToolError';
@@ -232,7 +232,7 @@ export default function EpubToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">EPUB to PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert EPUB ebooks to PDF</p>
+        <p className="text-neutral-500 text-center mb-8">Print a DRM-free EPUB ebook as a PDF</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="an EPUB file" />}</p>
@@ -259,24 +259,29 @@ export default function EpubToPdfPage() {
       </div>
       <SeoContent
         title="EPUB to PDF"
-        description="EPUB to PDF parses your ebook's chapters, images, stylesheets, and cover right in your browser, using a dedicated EPUB parser rather than a naive zip-and-concatenate approach; only the extracted content is then sent to our conversion service. The extracted content is assembled into a single clean HTML document, which is then uploaded to our conversion service for high-fidelity PDF rendering with a real browser engine — producing a properly paginated PDF with selectable text, rather than a rough print-dialog approximation."
+        description={`EPUB to PDF turns an .epub ebook into a PDF you can print or read on any PDF viewer. Your browser opens the book and collects its chapters in reading order, with their images, style sheets and embedded fonts (obfuscated fonts excepted), plus the cover. That material is assembled into one HTML document and printed by our Chromium service, with selectable text and each chapter starting on a new page. Text without a font of its own is set in a serif face. Books protected by DRM cannot be opened.`}
+        howToTitle="How to convert an EPUB to PDF"
         howTo={[
-          "Click the upload area and select an EPUB file.",
-          "Click \"Convert to PDF\". The file is parsed locally, then the extracted content is uploaded for PDF rendering.",
-          "Once the PDF is ready, click 'Download'.",
-          "Open the downloaded PDF to confirm it looks right."
+          `Click or drop the DRM-free ebook (.epub) you want to print.`,
+          `Click "Convert to PDF": the button shows "Parsing EPUB file..." while your browser reads the book, then "Rendering PDF..." or, for a large book, the upload and conversion progress.`,
+          `When "PDF ready" appears, click "Download" to save the book as a PDF.`,
         ]}
+        specs={[
+          { label: 'Input format', value: `EPUB (.epub) without DRM` },
+          { label: 'Output', value: `One PDF, cover first when the book has one` },
+          { label: 'Size limit', value: `${officeMaxLabel(MAX_HTML_STAGED_BYTES)} of prepared content (text plus embedded images), which can be larger than the .epub itself` },
+          { label: 'Reading time', value: `The book must open within 60 seconds` },
+          { label: 'Usage limits', value: `Prepared content over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB counts toward a limit per network per hour and per day.` },
+        ]}
+        privacy={`The original EPUB file stays in your browser. Our server receives only the HTML your browser built from it, with the text, images, style sheets and cover, and our Chromium service prints that HTML. When it exceeds ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB, it is uploaded in parts to our media service, which removes it after printing and deletes the PDF when this page has received it, or after a time limit.`}
         faqs={[
-          { q: "Will this reliably convert my EPUB ebook to PDF?", a: "Yes, for unencrypted, standards-compliant EPUB files. The tool properly parses the EPUB's manifest, chapters, images, and stylesheets, rather than just concatenating raw file contents, so formatting and images come through correctly. DRM-protected EPUBs purchased from some stores can't be converted." },
-          { q: "Is EPUB to PDF free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is my file uploaded anywhere?", a: "Partially. Your original EPUB file is parsed entirely in your browser and never uploaded. Only the extracted, cleaned-up HTML (text, images, and cover) is uploaded to our conversion service, purely to render the final PDF with a real browser engine, and it's discarded immediately afterward." },
-          { q: "Will images and formatting be preserved?", a: "Yes. Chapter images and stylesheets declared in the EPUB are extracted and embedded directly into the PDF, along with the cover if one is present." },
-          { q: "Will the text in my PDF be selectable?", a: "Yes. The PDF is rendered from real HTML by a browser engine, not a screenshot, so text stays selectable and searchable." }
+          { q: `Can I convert an EPUB with DRM?`, a: `No. The chapters of a DRM-protected book are encrypted, and this tool has no way to decrypt them. Books without DRM, such as public-domain titles or files you exported yourself, convert as described above.` },
+          { q: `Will the images and the cover be in the PDF?`, a: `Yes. Chapter images, pictures set in style sheets and SVG cover pages are embedded in the HTML before printing. The cover is added as the first page unless the book's first page already shows the same cover image.` },
+          { q: `Does the PDF include every chapter?`, a: `Yes, when the book is intact. A chapter file missing from the book comes out as an empty page, and a damaged book stops with an error message instead of a PDF.` },
+          { q: `Is there a size limit?`, a: `${officeMaxLabel(MAX_HTML_STAGED_BYTES)} of prepared content. Images are counted after they are embedded in the HTML, so an image-heavy book can reach the limit even when the .epub is much smaller; the page then states the prepared size.` },
         ]}
         tips={[
-          "DRM-protected EPUBs from some stores aren't supported — this converter only handles unencrypted files.",
-          "Chapters are separated by page breaks in the resulting PDF for easier navigation.",
-          "Very large books may take a little longer to render — keep the tab open until the Download button appears."
+          `Have a Kindle file instead? Use MOBI to PDF; this page only accepts .epub.`,
         ]}
       />
     </div>

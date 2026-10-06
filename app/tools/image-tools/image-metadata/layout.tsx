@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Metadata Viewer — Read Basic File Information Online" },
-  description: "Image Metadata Viewer reads basic file information from an image you upload — name, size, type, dimensions, and date — in your browser.",
+  title: { absolute: "Image Metadata Viewer — EXIF, GPS, IPTC, XMP and Remover" },
+  description: "See the EXIF, GPS, IPTC, XMP and ICC data in a photo, and remove it from a JPG or PNG without re-encoding. The file is read in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-metadata" },
   openGraph: {
-    title: "Image Metadata Viewer — Read Basic File Information Online",
-    description: "Image Metadata Viewer reads basic file information from an image you upload — name, size, type, dimensions, and date — in your browser.",
+    title: "Image Metadata Viewer — EXIF, GPS, IPTC, XMP and Remover",
+    description: "See the EXIF, GPS, IPTC, XMP and ICC data in a photo, and remove it from a JPG or PNG without re-encoding. The file is read in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-metadata",
   },
 };

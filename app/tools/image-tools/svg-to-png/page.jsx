@@ -7,6 +7,7 @@ import { FileDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
 
+import { CANVAS_MAX_SIDE, CANVAS_MAX_AREA } from '../../../lib/mediaSupport';
 export default function SvgToPngPage() {
   const [file, setFile] = useState(null);
   const [width, setWidth] = useState(512);
@@ -119,24 +120,28 @@ export default function SvgToPngPage() {
       </div>
       <SeoContent
         title="SVG to PNG"
-        description="SVG to PNG rasterizes a vector SVG file into a PNG image at the pixel size you choose: the size starts from the SVG's own proportions (width and height, or viewBox), with the longer side at 512 px, and stays proportional while you edit unless you untick the option, entirely in your browser using the canvas element — your file is never uploaded to a server. Transparency in the SVG is preserved in the PNG output."
+        description={`SVG to PNG turns a vector drawing into a PNG image of the size you choose. When the file is opened, the width and height boxes are filled from the SVG's own width and height, or its viewBox, with the longer side set to 512 pixels; while "Keep the SVG's proportions" is ticked, changing one side updates the other. The background stays transparent, or you can fill it with a colour. Because the SVG is drawn fresh at the chosen size, a large PNG stays sharp. There is no DPI setting: sizes are in pixels. The drawing is rendered by your browser on this page.`}
+        howToTitle="How to convert SVG to PNG"
         howTo={[
-          "Click the upload area and select an SVG file from your device.",
-          "Set your desired output width and height in pixels.",
-          "Click 'Convert to PNG' to render the image.",
-          "Click the download button to save your PNG file."
+          `Pick an .svg file in the upload area; the size boxes fill in from the drawing.`,
+          `Type a value in "Width (px)" or "Height (px)", or click one of the 512, 1024 or 2048 px wide buttons.`,
+          `Under "Background", keep "Transparent" or choose "Colour" and pick it.`,
+          `Click "Convert to PNG", then "Download".`
         ]}
+        specs={[
+          { label: 'Input format', value: `SVG (.svg), one file` },
+          { label: 'Output format', value: `PNG at the width and height you set` },
+          { label: 'Largest PNG', value: `On a computer, ${CANVAS_MAX_SIDE.toLocaleString('en-US')} px per side and ${Math.round(CANVAS_MAX_AREA / 1e6)} megapixels in total; a larger size is refused before drawing` },
+          { label: 'On iPhone and iPad', value: `The same numbers are accepted, but the result is assembled in memory at four bytes per pixel, so a very large PNG can exceed what Safari gives a page` }
+        ]}
+        privacy={`The SVG is loaded as an image by your browser and painted onto a canvas here, so the drawing is not uploaded. If drawing or encoding the PNG fails, the cleaned error, the tool's name and your browser's name and version are sent to our error log; the SVG and its name are not included.`}
         faqs={[
-          { q: "What is the maximum file size I can convert?", a: "There's no fixed size limit — processing happens locally, and SVG files are typically small text-based files anyway." },
-          { q: "Will the conversion maintain transparency?", a: "Yes by default: transparent areas of your SVG stay transparent in the PNG. Choose 'Colour' under Background to fill them with a colour instead (white for a document, for example)." },
-          { q: "Can I convert multiple SVG files at once?", a: "No, only one file can be converted at a time — there's no batch upload." },
-          { q: "Can I set a DPI or background color for the output?", a: "Background colour: yes. DPI: no — you set the size in pixels (or click 512, 1024 or 2048 px wide); for print, 300 dpi means 300 pixels per inch of the printed size." }
+          { q: "Can I set a DPI for printing?", a: `No. The size is set in pixels. For print, multiply the printed width in inches by the dots per inch you need and type the result in "Width (px)".` },
+          { q: "Will the PNG keep the transparent background?", a: `Yes, when "Transparent" is selected under "Background", which is the starting choice. Select "Colour" to fill the transparent parts, for example with white for a document.` },
+          { q: "Can I change the width without changing the height?", a: `Yes. Untick "Keep the SVG's proportions", then type both values; the drawing is stretched to fill them. With the box ticked, one side follows the other.` }
         ]}
         tips={[
-          "Set the width and height to match the resolution you actually need — the SVG is rasterized fresh at those dimensions, so there's no quality loss from scaling up within reason.",
-          "For print use, calculate the pixel dimensions you need at your target DPI and enter those directly.",
-          "Make sure your SVG doesn't rely on external resources (like linked fonts or images) that the browser can't load, since those won't render.",
-          "Convert one file at a time and download each result before starting the next."
+          `For a favicon, convert the SVG to a square PNG at the largest icon size you need here, then build the icon with PNG to ICO.`
         ]}
       />
     </div>

@@ -81,24 +81,31 @@ export default function AddNoisePage() {
       </div>
       <SeoContent
         title="Add Noise"
-        description="Add Noise applies a random film-grain effect to your image by adding random variation to each pixel's brightness, entirely in your browser. It's a single adjustable-intensity effect — not a choice of different noise types — and your image never leaves your device."
+        description={"Add Noise sprinkles random grain over a picture, like the texture of film or of an old print. Each pixel is shifted up or down by a random whole number between minus and plus the intensity you set, on the 0-255 scale. By default the same shift goes to red, green and blue, which gives gray grain; with the color option each channel gets its own shift, which gives colored speckles. The noise is uniform: there is no Gaussian or salt-and-pepper mode. The grain is computed in your browser."}
+        howToTitle={"How to add grain to a photo"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Adjust the intensity slider to control how much grain is added.",
-          "Click 'Add Noise' to apply the effect.",
-          "Click the download button to save your noisy PNG image."
+          "Click the upload box and choose the photo to texture.",
+          "Move the \"Intensity\" slider: it starts at 30, 1 is barely visible and 100 is very coarse.",
+          "Tick \"Colour noise (each colour channel its own grain)\" for colored speckles, or leave it off for gray grain.",
+          "Click \"Add Noise\", look at the preview, then click \"Download\"; a grainy JPG, PNG or WebP keeps its format, while other files come back as PNG.",
         ]}
+        specs={[
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF and other images the browser opens; an animation gives its first frame" },
+          { label: "Output format", value: "JPG stays JPG (quality 92), WebP stays WebP, everything else becomes PNG" },
+          { label: "Intensity", value: "From 1 to 100, the largest shift up or down on the 0-255 scale; default 30" },
+          { label: "Size limit", value: "At most 268 megapixels per photo; on iPhone and iPad, photos above 16.7 megapixels are handled in strips" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"Grain is generated inside this tab, with a random sequence seeded by the browser's own secure generator, and the photo never leaves your device. The result is a temporary file held by the page until you save it. Should an error message appear, its cleaned wording is sent to us for debugging, together with the tool and the browser's name and version; the photo and its name are not part of it."}
         faqs={[
-          { q: "Is Add Noise completely free to use?", a: "Yes, Add Noise is completely free with no watermarks or subscriptions required." },
-          { q: "What image formats does Add Noise support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
-          { q: "Can I choose between different noise types like Gaussian or salt-and-pepper?", a: "No, there's a single grain effect with an adjustable intensity slider — no separate noise-type selector." },
-          { q: "Is my image data secure and private?", a: "Yes — everything happens locally in your browser. Your image is never uploaded to a server." }
+          { q: "Is this Gaussian noise?", a: "No. Each pixel is moved by a whole number picked evenly between minus and plus the intensity, so the noise is uniform. There is no Gaussian, Poisson or salt-and-pepper option; the only choice is gray grain or colored grain." },
+          { q: "Does colored noise change the hue of pixels?", a: "Yes, slightly. With \"Colour noise\" ticked, red, green and blue each get their own random amount, which scatters small colored specks. Without it, the same amount goes to all three, so a pixel only gets lighter or darker." },
+          { q: "Will I get the same grain twice?", a: "No. The random sequence is seeded again from the browser's secure generator on every click, so each run draws a different pattern, even with the same photo and the same settings." },
+          { q: "Does the grain touch transparent areas?", a: "No, not visibly. Only red, green and blue are changed and the alpha channel stays as it was, so fully see-through areas stay see-through; semi-transparent edges get grain like the rest. A PNG stays a PNG and a WebP stays a WebP." },
         ]}
         tips={[
-          "Start with a lower intensity and increase it gradually to find the right balance for your image.",
-          "Add Noise works well on photos with good lighting and clear subjects, since grain can obscure fine detail on darker images.",
-          "Re-upload your original image if you want to try a different intensity from scratch.",
-          "Use a lighter touch on portraits and a heavier one on landscapes or artistic shots for a more dramatic effect."
+          "Raise \"Intensity\" for a coarser grain and click \"Add Noise\" again: the new grain replaces the previous one instead of piling up on it.",
+          "For an old-print look, tone the photo with Sepia Filter first, then add gray grain here.",
         ]}
       />
     </div>

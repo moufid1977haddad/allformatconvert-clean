@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "URL Encoder — Encode and Decodes Text Online Free" },
-  description: "URL Encoder encodes and decodes text using JavaScript's encodeURIComponent and decodeURIComponent, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "URL Encoder — encodeURIComponent, encodeURI or RFC 3986" },
+  description: "Percent-encode a query value, a whole URL or strict RFC 3986 output, and decode %XX with + read as a space. Same calls as JavaScript, run locally.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/url-encoder" },
   openGraph: {
-    title: "URL Encoder — Encode and Decodes Text Online Free",
-    description: "URL Encoder encodes and decodes text using JavaScript's encodeURIComponent and decodeURIComponent, entirely in your browser — nothing is uploaded to a server.",
+    title: "URL Encoder — encodeURIComponent, encodeURI or RFC 3986",
+    description: "Percent-encode a query value, a whole URL or strict RFC 3986 output, and decode %XX with + read as a space. Same calls as JavaScript, run locally.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/url-encoder",
   },
 };

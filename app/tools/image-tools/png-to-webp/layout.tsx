@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PNG to WebP — Convert a PNG Image Online Free" },
-  description: "PNG to WebP converts a PNG image to WebP format entirely in your browser using the HTML canvas — your file is never uploaded to a server.",
+  title: { absolute: "PNG to WebP — Keep Transparency, Lossy or Lossless" },
+  description: "Convert a PNG to WebP and keep its transparent areas. Pick a quality from 1 to 100, or lossless mode for screenshots and logos. The PNG stays local.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/png-to-webp" },
   openGraph: {
-    title: "PNG to WebP — Convert a PNG Image Online Free",
-    description: "PNG to WebP converts a PNG image to WebP format entirely in your browser using the HTML canvas — your file is never uploaded to a server.",
+    title: "PNG to WebP — Keep Transparency, Lossy or Lossless",
+    description: "Convert a PNG to WebP and keep its transparent areas. Pick a quality from 1 to 100, or lossless mode for screenshots and logos. The PNG stays local.",
     url: "https://www.onlineconvertools.com/tools/image-tools/png-to-webp",
   },
 };

@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Math Tools — Number Conversion, Percentage Calculator Online" },
-  description: "Math Tools is a free online calculator suite that helps students, professionals, and educators solve complex mathematical problems instantly.",
+  title: { absolute: "Math Tools: Fractions, Percentages, Statistics, Calculator" },
+  description: "Exact fraction arithmetic with steps, six percentage calculations, 23 statistics, a scientific calculator, Roman numerals and bases 2 to 36.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/math-tools" },
   openGraph: {
-    title: "Math Tools — Number Conversion, Percentage Calculator Online",
-    description: "Math Tools is a free online calculator suite that helps students, professionals, and educators solve complex mathematical problems instantly.",
+    title: "Math Tools: Fractions, Percentages, Statistics, Calculator",
+    description: "Exact fraction arithmetic with steps, six percentage calculations, 23 statistics, a scientific calculator, Roman numerals and bases 2 to 36.",
     url: "https://www.onlineconvertools.com/tools/math-tools",
   },
 };

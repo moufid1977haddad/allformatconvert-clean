@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Compress PDF — Three Levels, Lossless Included" },
-  description: "Compress PDF files with three levels: Extreme, Recommended or Lossless. Images recompressed from their real size on the page, fonts optimised, text never rewritten.",
+  title: { absolute: "Compress PDF — Extreme, Recommended or Lossless" },
+  description: "Shrink a PDF at one of three levels. Large pictures are resampled to their size on the page, fonts are optimized and the text is never rewritten.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compress" },
   openGraph: {
-    title: "Compress PDF — Three Levels, Lossless Included",
-    description: "Compress PDF files with three levels: Extreme, Recommended or Lossless. Images recompressed from their real size on the page, fonts optimised, text never rewritten.",
+    title: "Compress PDF — Extreme, Recommended or Lossless",
+    description: "Shrink a PDF at one of three levels. Large pictures are resampled to their size on the page, fonts are optimized and the text is never rewritten.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-compress",
   },
 };

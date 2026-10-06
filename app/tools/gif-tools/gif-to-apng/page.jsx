@@ -1,5 +1,5 @@
 ﻿'use client';
-import { headerSize, sizeProblem } from '../../../lib/gifEncode';
+import { headerSize, sizeProblem, MAX_ANIMATION_PIXELS } from '../../../lib/gifEncode';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { gifFrames } from '../../../lib/gifFrames';
@@ -93,25 +93,30 @@ export default function GifToApngPage() {
       </div>
       <SeoContent
         title="GIF to APNG"
-        description="GIF to APNG decodes every frame of your GIF (using the gifuct-js library) and re-encodes them into a real, downloadable animated PNG (using upng-js), entirely in your browser — nothing is uploaded to a server. Frame delays are carried over from the original GIF."
+        description="GIF to APNG turns an animated GIF into an animated PNG. It decodes the GIF with gifuct-js, rebuilds every frame the way a GIF player draws it, including optimized GIFs that store only the changed pixels and all three disposal methods, and writes the frames losslessly with upng-js. Frame delays and the play count of the GIF are carried into the APNG. Colors and transparency stay exactly as in the GIF: the tool adds no detail the GIF did not have. The GIF is converted on this page and is not uploaded."
+        howToTitle="How to convert GIF to APNG"
         howTo={[
-          "Click the upload area and select a GIF file from your device.",
-          "Click \"Convert to APNG\" to decode every frame and re-encode them as an animated PNG.",
-          "Preview the resulting APNG and check the frame count.",
-          "Click \"Download\" next to the APNG file (converted.png) to save the result."
+          "Choose an animated .gif; it starts playing in the box.",
+          "Click \"Convert to APNG\".",
+          "Check the result and the number of frames shown under it.",
+          "Click \"Download\" to save converted.png, an animated PNG."
         ]}
+        specs={[
+          { label: "Input", value: "GIF (image/gif)" },
+          { label: "Output", value: "APNG, saved as converted.png" },
+          { label: "Frame size", value: `Up to ${(MAX_ANIMATION_PIXELS / 1e6).toFixed(1)} megapixels per frame, read from the GIF header before decoding` },
+          { label: "Compression", value: "Lossless, with no color reduction" },
+          { label: "Timing", value: "Delays copied from the GIF; a delay of 0 becomes 100 ms" }
+        ]}
+        privacy="The GIF is decoded and the APNG encoded by JavaScript on this page, so your file is not uploaded and the APNG is created on your device. When an error appears, our error log gets that sentence cleaned of names, plus the tool and browser names; the GIF itself is never part of it."
         faqs={[
-          { q: "Does this tool produce a real animated PNG?", a: "Yes — every frame of the source GIF is decoded and re-encoded into the APNG, not just a single snapshot." },
-          { q: "Will colors improve compared to the original GIF?", a: "Colors are carried over as-is from the GIF's existing 256-color-per-frame palette — this tool doesn't add color detail the source GIF didn't have, it just repackages the same frames as APNG." },
-          { q: "Does it handle every kind of GIF correctly?", a: "Yes for standard GIFs: each frame is composited over the previous one as a GIF player does, so optimised GIFs that only store the changed pixels come out complete, and the three disposal methods (leave, restore to background, restore to previous) are applied." },
-          { q: "Is GIF to APNG free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
-          { q: "Is my file uploaded anywhere?", a: "No. Everything runs locally in your browser — your file is never uploaded to a server." }
+          { q: "Will an optimized GIF come out with holes?", a: "No. Each frame is drawn over the previous one, as a GIF player does, so a GIF that stores only the pixels that changed still gives complete frames. The three disposal methods of the GIF format, including restore to background and restore to previous, are applied." },
+          { q: "Does the APNG loop like the GIF?", a: "Yes. The loop count stored in the GIF, in its NETSCAPE2.0 block, is copied: forever stays forever, and a GIF without that block, which plays once, gives an APNG that plays once." },
+          { q: "Is the conversion lossy?", a: "No. The rebuilt frames are stored as full-color PNG data with their alpha channel, so every pixel is kept. The APNG cannot be better than the GIF, though: the palette and the hard transparency of the GIF stay as they were." },
+          { q: "Is there a size limit?", a: `Yes: ${(MAX_ANIMATION_PIXELS / 1e6).toFixed(1)} megapixels per frame at most, taken from the GIF header before anything is decoded. File size and frame count have no fixed cap; long animations take longer.` }
         ]}
         tips={[
-          "Frame delays from the original GIF are preserved, so playback speed should match the source animation.",
-          "APNG supports full color and partial transparency, but this conversion only carries over what was already in the GIF — it won't add detail the source didn't have.",
-          "Large or many-frame GIFs take longer to process since every frame is individually decoded and composited.",
-          "The GIF's number of plays is kept: a GIF that loops forever gives an APNG that loops forever, one made to play once plays once."
+          "Need a GIF again later? APNG to GIF converts in the other direction."
         ]}
       />
     </div>

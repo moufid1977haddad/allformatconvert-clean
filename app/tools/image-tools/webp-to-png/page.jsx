@@ -7,6 +7,8 @@ import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { RASTER_MAX_PIXELS } from '../../../lib/imageOutput';
+import { PHONE_MAX_MP } from '../../../lib/reduceImage';
 export default function WebPtoPNGPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -54,24 +56,27 @@ export default function WebPtoPNGPage() {
       </div>
       <SeoContent
         title="WebP to PNG"
-        description="WebP to PNG converts a WebP image to PNG format entirely in your browser using the HTML canvas — your file is never uploaded to a server. Transparency in the WebP file is preserved in the PNG output."
+        description={`WebP to PNG saves a WebP picture as a PNG, for software that does not read WebP. PNG is lossless, so the image is stored as your browser decodes it, and transparent areas stay transparent. A lossy WebP keeps the compression artifacts it already has: converting does not restore detail. An animated WebP becomes its first frame only, and the page warns you before converting. The PNG keeps the name of the WebP. Each conversion takes one WebP and builds its PNG on this page.`}
+        howToTitle="How to convert WebP to PNG"
         howTo={[
-          "Click the upload area and select a WebP file from your device.",
-          "Click 'Convert' to render it to PNG.",
-          "Preview the converted image.",
-          "Click the download button to save your PNG file."
+          `Choose the WebP picture in the upload area.`,
+          `Click "Convert" and check the preview.`,
+          `Click "Download" for the PNG, which keeps the WebP's name.`
         ]}
+        specs={[
+          { label: 'Input format', value: `WebP (.webp), one file; animated files give their first frame` },
+          { label: 'Output format', value: `PNG, lossless, transparency kept` },
+          { label: 'Largest image', value: `${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels on a computer` },
+          { label: 'On iPhone and iPad', value: `No smaller cap; very large pictures are rebuilt in strips, and ${PHONE_MAX_MP} megapixels is the largest size confirmed on a real iPhone` }
+        ]}
+        privacy={`No upload takes place: your browser decodes the WebP and the PNG is built in memory on this page, by the canvas or, for very large images on iPhone and iPad, by the page's own PNG writer. When an error is shown, its cleaned message, the tool's name and your browser's name and version reach our log.`}
         faqs={[
-          { q: "Is WebP to PNG completely free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "Will the conversion affect my image quality?", a: "No, the pixels are copied as-is with no additional compression applied." },
-          { q: "How many images can I convert at once?", a: "One at a time — there's no batch conversion feature." },
-          { q: "Is my uploaded data secure and private?", a: "Yes, conversion happens entirely in your browser and your file is never uploaded to a server." }
+          { q: "Does the PNG keep the transparent areas?", a: `Yes. WebP and PNG both have an alpha channel, so transparent and semi-transparent pixels stay that way. Partly transparent edge colours can change slightly in the browser's canvas, more for nearly transparent pixels.` },
+          { q: "Does converting restore detail a lossy WebP lost?", a: `No. The PNG stores the WebP exactly as decoded, including any blur or blocks from its compression. It only stops further loss if you edit and save the picture again.` },
+          { q: "Can I convert an animated WebP?", a: `No, not as an animation. The PNG holds the first frame only, and a note says so when you pick the file. To keep every frame, convert the animation to GIF.` }
         ]}
         tips={[
-          "PNG files are typically larger than WebP at the same visual quality, so expect a bigger file size after conversion.",
-          "Use this tool to prepare images for websites or apps that don't yet support WebP.",
-          "Convert one file at a time and download each result before starting the next.",
-          "Download your PNG right away, since nothing is stored anywhere after you leave the page."
+          `To make the PNG smaller afterwards without changing its format, run it through Image Compressor.`
         ]}
       />
     </div>

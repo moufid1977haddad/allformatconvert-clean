@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Statistics Calculator — Compute Count, Sum, Mean, Median," },
-  description: "Statistics Calculator computes count, sum, mean, median, mode, standard deviation, variance, range, minimum, and maximum, in your browser.",
+  title: { absolute: "Statistics Calculator — SD, Quartiles, Skewness, Outliers" },
+  description: "Paste a list of numbers to get the mean, median, mode, sample and population standard deviation, quartiles, IQR, skewness, kurtosis and outliers.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/math-tools/statistics-calculator" },
   openGraph: {
-    title: "Statistics Calculator — Compute Count, Sum, Mean, Median,",
-    description: "Statistics Calculator computes count, sum, mean, median, mode, standard deviation, variance, range, minimum, and maximum, in your browser.",
+    title: "Statistics Calculator — SD, Quartiles, Skewness, Outliers",
+    description: "Paste a list of numbers to get the mean, median, mode, sample and population standard deviation, quartiles, IQR, skewness, kurtosis and outliers.",
     url: "https://www.onlineconvertools.com/tools/math-tools/statistics-calculator",
   },
 };

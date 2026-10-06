@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "GIF Maker — Turn a Sequence Online Free" },
-  description: "GIF Maker turns a sequence of photos or graphics into a real, downloadable animated GIF, entirely in your browser.",
+  title: { absolute: "GIF Maker — Animated GIF from Images, Frame by Frame" },
+  description: "Make an animated GIF from photos or GIF frames in your browser: reorder frames, set each duration, choose fit, crop or stretch, and the number of repeats.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/gif-maker" },
   openGraph: {
-    title: "GIF Maker — Turn a Sequence Online Free",
-    description: "GIF Maker turns a sequence of photos or graphics into a real, downloadable animated GIF, entirely in your browser.",
+    title: "GIF Maker — Animated GIF from Images, Frame by Frame",
+    description: "Make an animated GIF from photos or GIF frames in your browser: reorder frames, set each duration, choose fit, crop or stretch, and the number of repeats.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/gif-maker",
   },
 };

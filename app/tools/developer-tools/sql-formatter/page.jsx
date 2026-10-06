@@ -35,22 +35,36 @@ export default function SqlFormatterPage() {
       </div>
       <SeoContent
         title={"SQL Formatter"}
-        description={"SQL Formatter formats SQL with sql-formatter, the open-source library behind many online SQL beautifiers, entirely in your browser. It parses the query rather than inserting line breaks at keywords, so comments (-- and /* */), string literals with commas or quotes, and function calls such as COUNT(a, b) stay intact. Keywords are upper-cased and clauses indented, with dialect-specific syntax for standard SQL, MySQL, MariaDB, PostgreSQL, SQL Server (T-SQL), Oracle (PL/SQL), SQLite, BigQuery, Snowflake and more."}
+        description={"SQL Formatter lays out a query with the open-source sql-formatter library, in your browser. It tokenizes the SQL for the dialect you pick, puts each clause (SELECT, FROM, WHERE, GROUP BY…) on its own line, indents columns and conditions by 2 spaces and writes keywords in capitals. Text inside comments and string literals is not changed, and a comma inside a function call such as COUNT(a, b) or inside a string stays where it is. Twelve dialects are offered, from standard SQL to Db2. A query the dialect cannot parse gets the library's error message instead of output."}
+        example={{
+          caption: "Standard SQL: the comma inside the string literal does not start a new line.",
+          inputLabel: "Input",
+          input: "select id, count(*) as n from orders o join users u on u.id = o.user_id where o.status = 'paid, shipped' group by id",
+          outputLabel: "Output",
+          output: "SELECT\n  id,\n  count(*) AS n\nFROM\n  orders o\n  JOIN users u ON u.id = o.user_id\nWHERE\n  o.status = 'paid, shipped'\nGROUP BY\n  id",
+        }}
+        howToTitle={"How to format a SQL query"}
         howTo={[
-          "Choose your SQL dialect (standard SQL works for most queries).",
-          "Paste your query into the input box.",
-          "Click 'Format'.",
-          "Click 'Copy' to copy the result."
+          "Choose your database in the dialect list; \"Standard SQL\" is selected by default.",
+          "Paste the query into \"Input\".",
+          "Click \"Format\".",
+          "Click \"Copy\", or \"Download\" to save \"formatted.sql\".",
         ]}
+        specs={[
+          { label: "Dialects", value: "Standard SQL, MySQL, MariaDB, PostgreSQL, SQL Server, Oracle PL/SQL, SQLite, BigQuery, Snowflake, Redshift, Spark, Db2" },
+          { label: "Output", value: "SQL with uppercase keywords and 2-space indentation, saved as formatted.sql" },
+          { label: "Preserved", value: "Comments, string literals, identifiers and the case of function names" },
+          { label: "Errors", value: "sql-formatter's own message, which can run to several lines" },
+        ]}
+        privacyTitle={"Where your query is processed"}
+        privacy={"sql-formatter is a JavaScript library that the page downloads when you first click \"Format\"; your query is parsed and laid out in the browser and is not uploaded. When the library rejects a query, the error text shown is sent to our error log with quoted parts, long numbers and addresses removed, along with the tool name and your browser's name and version."}
         faqs={[
-          { q: "Is SQL Formatter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can formatting break my query?", a: "No — the formatter tokenizes SQL, so text inside comments and strings is never modified; only whitespace and keyword case change." },
-          { q: "Which databases are supported?", a: "Standard SQL, MySQL, MariaDB, PostgreSQL, SQL Server, Oracle PL/SQL, SQLite, BigQuery, Snowflake, Redshift, Spark, Db2 and others, each with its own syntax (backticks, [brackets], $1 parameters…)." },
-          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; the engine is downloaded once when you first click." }
+          { q: "Can formatting break my query?", a: "No. The formatter changes only whitespace and the case of keywords. Comments and string literals, including commas or quotes inside them, are copied as written, so the query returns the same result." },
+          { q: "Which databases are supported?", a: "12: Standard SQL, MySQL, MariaDB, PostgreSQL, SQL Server, Oracle PL/SQL, SQLite, BigQuery, Snowflake, Redshift, Spark and Db2. Code Formatter uses the same engine with a longer list, adding ClickHouse, DuckDB, Trino and Hive among others." },
+          { q: "Does it work with any SQL syntax?", a: "No. Each dialect has its own syntax, so T-SQL square brackets or PostgreSQL :: casts fail under Standard SQL, while MySQL backticks are accepted. Pick your database in the list and click \"Format\" again; the error message often suggests the same." },
         ]}
         tips={[
-          "Pick the dialect of your database so special syntax (MySQL backticks, T-SQL brackets, PostgreSQL :: casts) is recognized.",
-          "If the formatter reports a parse error, the query probably uses syntax of another dialect."
+          "Function names keep the case you typed (count stays count); only keywords such as SELECT and GROUP BY are capitalized.",
         ]}
       />
     </div>

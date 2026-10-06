@@ -75,26 +75,25 @@ export default function TarExtractorPage() {
       </div>
       <SeoContent
         title="TAR Extractor"
-        description="TAR Extractor is a free online tool that extracts files from TAR archives — including gzip-compressed .tar.gz and .tgz — directly in your browser, no software or upload required. Upload a .tar, .tar.gz, or .tgz file to instantly see and download its contents."
+        description="TAR Extractor opens plain .tar archives and gzip-compressed ones (.tar.gz, .tgz) in your browser and lists every file with its folder path. It reads the ustar prefix, PAX extended headers and GNU long-name records, so long paths and accented names come out complete. Hard links are extracted as copies of their target; symbolic links and GNU sparse files are listed as not extracted. Folders are not offered as files. For .tar.bz2, .tar.xz, .tar.zst, or a .gz holding a single file, use ZIP Extractor instead."
+        howToTitle="How to extract a TAR or TAR.GZ file"
         howTo={[
-          "Click the upload area and select a .tar, .tar.gz, or .tgz file from your device.",
-          "Wait a moment while the archive is decompressed (if needed) and parsed locally in your browser.",
-          "Review the list of extracted files with their names.",
-          "Click \"Download\" next to each file to save it individually."
+          "Choose a .tar, .tar.gz or .tgz file; extraction starts at once.",
+          "Wait for \"Extracting...\" to end, then read the list of files, with the folder path shown under each name.",
+          "Click \"Download\" next to a file, or \"Download all\" to get every file in one ZIP."
         ]}
+        specs={[
+          { label: "Input", value: "TAR, TAR.GZ, TGZ (gzip compression only)" },
+          { label: "Output", value: "The original files, one by one or together in extracted-files.zip" },
+          { label: "Not extracted", value: "Symbolic links and GNU sparse files (listed), folders and devices" },
+          { label: "Size limit", value: "None set; the archive is read and decompressed in memory" }
+        ]}
+        privacy="The archive is decompressed with the DecompressionStream of your browser and read by this page; it is not uploaded, and the extracted files are made on your device. An error message, if one appears, is logged for us cleaned of names, along with the tool and browser names; the archive is never sent."
         faqs={[
-          { q: "What archive formats does TAR Extractor support?", a: "Plain TAR (.tar) files, as well as gzip-compressed TAR archives (.tar.gz and .tgz), which are decompressed automatically in your browser. For .tar.bz2, .tar.xz and .tar.zst, use our ZIP Extractor (File Tools), which opens them in your browser too." },
-          { q: "Are long paths and accented file names kept?", a: "Yes. Archives made by GNU tar, macOS tar, Windows tar.exe or Python store long paths and non-ASCII names in extra header records (PAX or GNU long names); those records are read and applied, never offered as files of their own. Folders and links are skipped; only real files are listed." },
-          { q: "Is my uploaded file private?", a: "Yes. The archive is decompressed and parsed entirely in your browser — nothing is uploaded to a server." },
-          { q: "Do I need to install any software?", a: "No, TAR Extractor works directly in your web browser on any device without additional software installation." },
-          { q: "Is there a file size limit?", a: "No hard limit is enforced, but very large archives depend on your browser's available memory since parsing happens locally." }
-        ]}
-        tips={[
-          "TAR Extractor decompresses .tar.gz and .tgz automatically — no need to decompress them yourself first.",
-          "If your file is .tar.bz2, .tar.xz or .tar.zst, open it with the ZIP Extractor (File Tools) instead.",
-          "Files are listed as soon as extraction finishes — download the ones you need individually.",
-          "Very large TAR archives may take a few seconds to parse since everything runs in your browser.",
-          "If extraction returns no files, double-check the archive is a standard TAR (or gzip-compressed TAR) and not corrupted."
+          { q: "Can it open .tar.bz2 or .tar.xz files?", a: "No. This tool decompresses gzip only. ZIP Extractor in File Tools opens .tar.bz2, .tar.xz and .tar.zst, as well as RAR and 7Z archives, in your browser too." },
+          { q: "Are long paths and accented names kept?", a: "Yes. PAX extended headers and GNU long-name records are read and applied to the next file, so names longer than the 100 bytes of the basic header field and non-ASCII names come out complete; those records are never offered as files." },
+          { q: "Are links extracted?", a: "Yes for hard links: each comes out as a copy of the file it points to. No for symbolic links: they are listed under \"Not extracted\" with their target, like GNU sparse files." },
+          { q: "Can it open a single .gz file?", a: "No. A .gz that holds one compressed file rather than a TAR archive is refused with a message pointing to ZIP Extractor, which unpacks single .gz, .bz2, .xz and .zst files." }
         ]}
       />
     </div>

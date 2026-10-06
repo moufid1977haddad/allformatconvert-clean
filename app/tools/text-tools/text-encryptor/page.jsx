@@ -51,24 +51,37 @@ export default function TextEncryptorPage() {
       </div>
       <SeoContent
         title={"Text Encryptor"}
-        description={"Text Encryptor encrypts text with a password using AES-256-GCM, the standard used by browsers, banks and messaging apps, through your browser's built-in Web Crypto API — nothing is uploaded. The key is derived from your password with PBKDF2-SHA-256 and 600,000 iterations (OWASP's 2023 recommendation), with a fresh random salt and IV for every message, so the same text encrypts differently each time. Decryption is authenticated: a wrong password or an altered text is refused, never turned into garbage. The result is Base64 text you can paste anywhere."}
+        description={"Text Encryptor turns a message into Base64 ciphertext that only someone with the password can read, and turns it back. It uses AES-256-GCM through your browser's Web Crypto API, with a key derived from the password by PBKDF2-SHA-256 over 600,000 iterations and a new random salt and IV for each message, so the same text never encrypts the same way twice. Use it for notes or messages sent through a channel you do not fully trust, with the password shared another way. It encrypts text only; File Encryptor handles files."}
+        example={{
+          caption: "Encrypted with the password blue-harbor-42. Your own result will differ, but this one decrypts back to the message with that password.",
+          inputLabel: "Text (Secret Key: blue-harbor-42)",
+          input: "Meet at 6",
+          outputLabel: "Result after \"Encrypt\"",
+          output: "T0NUMa1WBvLr2YnFybvyCCO1NYbVK+A6yHrUtZy1FHedD2vbLXuiD+a6YGuKU6QOoP+BnTHvrSVS",
+        }}
+        howToTitle={"How to encrypt and decrypt text with a password"}
         howTo={[
-          "Paste the text to encrypt, or the encrypted Base64 to decrypt.",
-          "Enter the password.",
-          "Click 'Encrypt' or 'Decrypt'.",
-          "Copy the result."
+          "Paste the message to encrypt, or the Base64 text to decrypt, into the box.",
+          "Type a long passphrase in \"Secret Key\"; the field hides what you type.",
+          "Click \"Encrypt\" or \"Decrypt\"; both stay inactive until the box and the key are filled.",
+          "Click \"Copy\", or \"Download\" to save the result as encrypted.txt, a name kept even after decrypting."
         ]}
+        specs={[
+          { label: "Algorithm", value: "PBKDF2-SHA-256 turns the password into a key over 600,000 iterations, then AES-256-GCM encrypts the message" },
+          { label: "Per message", value: "A random 16-byte salt and a random 12-byte IV" },
+          { label: "Encrypted text", value: "Base64 of the marker OCT1, the salt, the IV, the ciphertext and its tag, so it always starts with T0NU" },
+          { label: "Old format", value: "Texts encrypted with the XOR method used before 29 September 2026 still decrypt, with a warning" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Your browser's Web Crypto API does both the encrypting and the decrypting on this page. The message, the password and the result are never sent to us, so no copy exists that could be recovered. Error messages shown here, such as a wrong-password warning, are reported to our error log with the tool name and your browser name and version, without your text or password."}
         faqs={[
-          { q: "Is Text Encryptor free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "How strong is the encryption?", a: "AES-256-GCM with a PBKDF2-SHA-256 key (600,000 iterations). Security then depends on your password: use a long, unique one." },
-          { q: "What if I forget the password?", a: "The text cannot be recovered — there is no back door." },
-          { q: "Why is the output different each time I encrypt the same text?", a: "A random salt and IV are generated for each message, as they should be; any of the outputs decrypts with the same password." },
-          { q: "Can I still decrypt texts made with the previous version?", a: "Yes — texts encrypted with the old XOR method before 29 September 2026 still decrypt, with a notice recommending to encrypt them again." },
-          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
+          { q: "Is the encryption safe with a short password?", a: "No. AES-256-GCM is not the weak point: a short or common password can still be guessed by trying many candidates, and the 600,000 PBKDF2 iterations only slow each guess down. Use a long passphrase that you do not use anywhere else." },
+          { q: "Will a wrong password give me garbled text?", a: "No, for texts encrypted since 29 September 2026: AES-GCM checks integrity, so a wrong password or a changed text is refused with an error. Base64 in the old XOR format, or any Base64 not made by this tool, cannot be checked, so a wrong password there may show unreadable text with the old-format warning." },
+          { q: "Can you recover my text if I forget the password?", a: "No. We never receive the password or the text. The encrypted text holds everything needed to decrypt it except the password, so without it nobody can read the message." },
+          { q: "Is it normal that the same text encrypts differently each time?", a: "Yes. A new random salt and IV are drawn for every message, so two results never match, which also hides that two messages are identical. Any of those results decrypts with the same password." }
         ]}
         tips={[
-          "Share the password through a different channel than the encrypted text.",
-          "The encrypted text includes everything needed to decrypt it except the password."
+          "Send the password through a different channel than the encrypted text, for example by phone."
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Sign — Let You Draw a Signature Online Free" },
-  description: "Sign a PDF free: draw your signature, type it or upload an image, then drag it anywhere on any page. Nothing is uploaded, it all happens in your browser.",
+  title: { absolute: "Sign PDF — Draw, Type or Upload Your Signature" },
+  description: "Add a drawn, typed or scanned signature to a PDF on the last, first, every or a chosen page, in a corner or dragged to the exact spot you want.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-sign" },
   openGraph: {
-    title: "PDF Sign — Let You Draw a Signature Online Free",
-    description: "Sign a PDF free: draw your signature, type it or upload an image, then drag it anywhere on any page. Nothing is uploaded, it all happens in your browser.",
+    title: "Sign PDF — Draw, Type or Upload Your Signature",
+    description: "Add a drawn, typed or scanned signature to a PDF on the last, first, every or a chosen page, in a corner or dragged to the exact spot you want.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-sign",
   },
 };

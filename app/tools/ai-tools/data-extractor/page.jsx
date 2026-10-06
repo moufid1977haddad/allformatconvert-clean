@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPromptLength } from '@/lib/quota/limits';
+import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 import { readAiJson } from '../../../lib/aiClient';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -59,24 +59,30 @@ export default function DataExtractorPage() {
       </div>
       <SeoContent
         title="Data Extractor"
-        description="Data Extractor is a free online tool that uses OpenAI's GPT-4o mini model to pull structured information out of pasted text. Paste in text containing names, dates, prices, or other details, and the AI returns the extracted data organized as JSON or a table, ready to copy into your own spreadsheet or document."
+        description={`Data Extractor reads text you paste — an email, an invoice copied from a PDF, a product list — and returns the structured information in it, laid out as JSON or as a table when that suits the data. Extraction is done by OpenAI's GPT-4o mini model; your text travels through our server to reach it. The result is plain text that you copy or download as extracted-data.txt; there is no CSV or Excel output, no file picker and no OCR of scanned pages. Each request takes up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters, and the answer is limited to 1,000 tokens.`}
+        howToTitle="How to extract data from text"
         howTo={[
-          "Paste your source text into the input field.",
-          "Click the 'Extract Data' button to send it to the AI.",
-          "Wait a moment while the AI identifies and organizes the relevant data.",
-          "Copy the structured result and paste it into your spreadsheet or document."
+          "Paste the source text into the \"Paste text to extract data from...\" box.",
+          "Optionally start the text with a line naming the fields you want, such as names and amounts.",
+          "Click \"Extract Data\".",
+          "Copy the JSON or table under \"Result\", or click \"Download\" to get extracted-data.txt."
         ]}
+        specs={[
+          { label: "Input", value: `An email, invoice or list pasted as text, up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters` },
+          { label: "Output", value: "JSON or a text table, as plain text; download as extracted-data.txt" },
+          { label: "Not supported", value: "Files, images and scanned documents (no OCR)" },
+          { label: "Usage limits", value: "Per-connection limits by the hour and by the day, in one allowance with the site's other paid tools, and a monthly spending cap for the site" }
+        ]}
+        privacyTitle="Where your text is processed"
+        privacy="Your pasted text is sent to our server and on to OpenAI's GPT-4o mini, which picks out the data and sends it back. We keep neither the text nor the extracted data. Remove anything you would not share with an outside AI provider, such as card numbers, before you paste."
         faqs={[
-          { q: "Is Data Extractor really free to use?", a: "Yes, Data Extractor is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "What input does Data Extractor accept?", a: "You paste plain text directly into the tool. There is no file picker — if your source is a PDF or webpage, copy the text from it first and paste it in. The text you paste is sent to OpenAI through our server to extract the data." },
-          { q: "What format is the extracted data in?", a: "The AI returns the extracted data as readable text formatted as JSON or a table, which you can copy. There is no direct file download to CSV or Excel." },
-          { q: "Can Data Extractor read scanned documents or images?", a: "No, this tool only processes text you paste in — it doesn't perform OCR on images or scanned documents." }
+          { q: "Can I get the result as a CSV or Excel file?", a: "No. The result is plain text, usually JSON or a table, that you copy or download as a .txt file. For a spreadsheet, convert the JSON with JSON to CSV, or paste the table into your spreadsheet app." },
+          { q: "Can it read a PDF or a scanned image?", a: "No. There is no file picker, only a text box. For a PDF with selectable text, copy its text first or use PDF Extract Text; for a scanned PDF, run PDF OCR first, then paste the recognized text here." },
+          { q: "Can I choose which fields are extracted?", a: "Yes. Write them on the first line of your text, for example a line that starts with Extract: followed by customer name, invoice date and total. That line reaches the model with the rest of the text; without it, the model picks the fields it finds." },
+          { q: "How much text can I paste?", a: `${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters of source text; the page measures it and refuses a longer paste with a message. The answer is limited to 1,000 tokens, so a very long list may come back incomplete; extract it in parts.` }
         ]}
         tips={[
-          "Use clear, well-formatted source text for more accurate extraction results.",
-          "Mention what kind of data you want extracted at the start of your pasted text to guide the AI.",
-          "Test with a small sample first to see how the output is structured before processing a larger document.",
-          "Copy the result into a spreadsheet app if you want to convert it into a CSV or table yourself."
+          "Check every number in the result against the source text: a language model can misread or skip a value."
         ]}
       />
     </div>

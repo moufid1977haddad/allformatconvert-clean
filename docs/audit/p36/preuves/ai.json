@@ -1,0 +1,46 @@
+{
+  "/tools/ai-tools/ai-chatbot": [
+    { "claim": "1,000 tokens", "file": "app/api/ai/route.ts", "pattern": "max_tokens: 1000" }
+  ],
+  "/tools/ai-tools/ai-paraphraser": [
+    { "claim": "1,000 tokens", "file": "app/api/ai/route.ts", "pattern": "max_tokens: 1000" }
+  ],
+  "/tools/ai-tools/ai-translator": [
+    { "claim": "1,000 tokens", "file": "app/api/ai/route.ts", "pattern": "max_tokens: 1000" },
+    { "claim": "10 Languages", "file": "app/tools/ai-tools/ai-translator/page.jsx", "pattern": "const languages = \\['English', 'French', 'Spanish', 'German', 'Italian', 'Portuguese', 'Arabic', 'Chinese', 'Japanese', 'Russian'\\];" }
+  ],
+  "/tools/ai-tools/ai-writer": [
+    { "claim": "1,000 tokens", "file": "app/api/ai/route.ts", "pattern": "max_tokens: 1000" }
+  ],
+  "/tools/ai-tools/data-extractor": [
+    { "claim": "1,000 tokens", "file": "app/api/ai/route.ts", "pattern": "max_tokens: 1000" }
+  ],
+  "/tools/ai-tools/text-summarizer": [
+    { "claim": "1,000 tokens", "file": "app/api/ai/route.ts", "pattern": "max_tokens: 1000" }
+  ],
+  "/tools/ai-tools/ai-detector": [
+    { "claim": "96–98 %", "file": "docs/audit/RAPPORT-ai-detector-30-09.md", "pattern": "\\| 96-98 % \\(Booth\\)" }
+  ],
+  "/tools/ai-tools/grammar-fixer": [
+    { "claim": "25 of 25 typical errors", "file": "docs/audit/RAPPORT-deploiement-28-09.md", "pattern": "^\\| en \\| 25/25 \\| \\*\\*25/25\\*\\*, texte juste intact" },
+    { "claim": "40 learner sentences", "file": "docs/audit/RAPPORT-deploiement-28-09.md", "pattern": "exactes / empirées, sur 40 phrases" },
+    { "claim": "29 of 40 learner sentences were corrected exactly in Portuguese", "file": "docs/audit/RAPPORT-deploiement-28-09.md", "pattern": "^\\| pt \\| 29/3 \\| 29/4 \\| 29/3 \\| 29/3" },
+    { "claim": "16 to 17 in German", "file": "docs/audit/RAPPORT-deploiement-28-09.md", "pattern": "^\\| de \\| 10/11 \\| 16/7 \\| 17/2 \\| 16/5" },
+    { "claim": "11 in Spanish", "file": "docs/audit/RAPPORT-deploiement-28-09.md", "pattern": "^\\| es \\| 13/12 \\| 11/15 \\| 11/9 \\| 11/9" },
+    { "claim": "9 in Italian", "file": "docs/audit/RAPPORT-deploiement-28-09.md", "pattern": "^\\| it \\| 8/13 \\| 10/11 \\| 9/5 \\| 9/5" },
+    { "claim": "6 in Arabic", "file": "docs/audit/RAPPORT-deploiement-28-09.md", "pattern": "^\\| ar \\| 5/15 \\| 7/14 \\| 6/4 \\| 6/4" }
+  ],
+  "/tools/ai-tools/image-generator": [
+    { "claim": "5 free images a day", "file": "lib/quota/imageGen.js", "pattern": "IMAGE_GEN_PER_IP_PER_DAY = 5;" }
+  ],
+  "/tools/ai-tools/image-upscaler": [
+    { "claim": "2x or 4x", "file": "app/tools/ai-tools/image-upscaler/page.jsx", "pattern": "\\[2, 4\\]\\.map" },
+    { "claim": "2× or 4×", "file": "app/tools/ai-tools/image-upscaler/page.jsx", "pattern": "\\[2, 4\\]\\.map" },
+    { "claim": "-upscaled-2x or -upscaled-4x", "file": "app/tools/ai-tools/image-upscaler/page.jsx", "pattern": "-upscaled-\\$\\{scale\\}x\\.png" },
+    { "claim": "3000×2000", "file": "app/tools/ai-tools/image-upscaler/page.jsx", "pattern": "3000×2000" }
+  ],
+  "/tools/ai-tools/background-remover": [
+    { "claim": "Safari 16.4 or later", "file": "app/lib/bigImage.js", "pattern": "it needs Safari 16\\.4 or later, or a current Chrome, Edge or Firefox" },
+    { "claim": "1,024 px", "file": "app/tools/ai-tools/background-remover/page.jsx", "pattern": "const RESIZE_TARGET_PX = 1024;" }
+  ]
+}

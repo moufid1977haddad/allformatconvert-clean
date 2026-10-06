@@ -378,26 +378,29 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Sign"
-        description="PDF Sign lets you draw a signature with your mouse or finger, type it in a handwriting font, or upload a photo or scan of it (white paper removed), and stamps it — on a transparent background, cropped to what you drew, without distortion — where you drag it on the page (or into a corner you choose), on the page(s) you choose (last, first, every page or a given page), as the page appears on screen, using the pdf-lib library entirely in your browser — your file is never uploaded to a server. You can only draw a signature, not type or upload an image of one, and it isn't a cryptographic digital signature — just an image placed on the page."
+        description={`PDF Sign places your signature on a PDF as a picture. Draw it with a mouse or finger, type your name in a handwriting font, or upload a PNG, JPG or WebP photo or scan, with the white paper removed by default. A drawn or typed signature is cropped to its ink on a transparent background, while an uploaded image keeps its background unless "Remove white background" is ticked. It keeps its proportions and goes on the last, first, every or a numbered page, in a corner or where you drag it on a page preview. It is an image, not a certificate-based digital signature. PDF.js shows the page preview and pdf-lib stamps the signature, both on your device.`}
+        howToTitle="How to sign a PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Draw your signature with your mouse or finger, type your name (handwriting font), or upload an image of your signature.",
-          "Choose the page, then drag the signature where it goes on the page shown (or pick a corner), and click 'Add Signature to PDF'.",
-          "Click 'Download' next to signed.pdf to save the result."
+          `Choose the PDF to sign.`,
+          `Click "Draw", "Type" or "Upload image" and create your signature; "Clear signature" starts over.`,
+          `Choose the page under "Page", and under "Position" pick a corner or "Where I drag it on the page" to place it on a preview.`,
+          `Click "Add Signature to PDF", then "Download" to save signed.pdf.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF; signature image: PNG, JPG or WebP` },
+          { label: 'Signature', value: `Drawn, typed in a handwriting font, or uploaded` },
+          { label: 'Pages', value: `Last (default), first, every page or a page number` },
+          { label: 'Placement', value: `Bottom right (default), bottom left, bottom centre, top right, or dragged` },
+          { label: 'Result', value: `signed.pdf` },
+        ]}
+        privacy={`Your drawing, typed name or signature photo and the PDF are combined by pdf-lib in this browser tab, and none of them is sent to us. The handwriting font is served by this site, not loaded from Google. A PDF that needs a password to open is refused when you choose it.`}
         faqs={[
-          { q: "Is PDF Sign free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I type my signature or upload an image instead of drawing it?", a: "Yes. 'Type' writes your name in a handwriting font; 'Upload image' takes a PNG, JPG or WebP photo or scan of your signature and, by default, removes the white paper around it so only the ink is added. Everything stays in your browser." },
-          { q: "Can I choose where on the page, or which page, the signature goes?", a: "Yes. Choose the page (last, first, every page or a page number); with 'Where I drag it on the page', the page is shown and you drag the signature to the exact spot and resize it with its round handle. Or pick a corner (bottom right, bottom left, bottom centre or top right): the signature is then placed 36 pt (about 1.3 cm) from the edges, at most 200 x 80 pt." },
-          { q: "Will the signature hide the text under it?", a: "No — only the ink is added, on a transparent background, so anything under or around the strokes stays visible." },
-          { q: "Is this a legally binding digital signature?", a: "No. It's a drawn image placed on the page, not a cryptographic digital signature with identity verification, so it may not satisfy requirements for legally binding e-signatures." }
+          { q: "Is this a legally binding digital signature?", a: `No. It places a picture of your signature on the page, with no certificate, identity check or tamper seal. Check what your document requires: a contract that calls for a certified digital signature needs a dedicated signing service.` },
+          { q: "Can I put the signature in an exact spot?", a: `Yes. Choose "Where I drag it on the page" under Position. The chosen page appears; drag the signature box where it belongs and resize it with its round handle, or use the arrow keys and + or −. With Every page, the same spot is used on each page.` },
+          { q: "Can I upload a photo of my handwritten signature?", a: `Yes. Choose Upload image and pick a PNG, JPG or WebP file. Remove white background is ticked by default, so light paper becomes transparent and only the ink is kept; a dark pen on white paper gives the cleanest result.` },
+          { q: "Will the signature hide the text under it?", a: `Yes, under the ink. For a drawn or typed signature, or an upload with Remove white background ticked, the background around the strokes is transparent and text there stays visible, but a stroke across a word covers it. An upload with that option unticked covers everything under its rectangle.` },
         ]}
-        tips={[
-          "Draw slowly on a larger screen for a cleaner signature, since the canvas captures your exact mouse movement — or upload a scan of your paper signature, signed with a dark pen on white paper.",
-          "Click 'Clear signature' to redraw if you're not happy with the result before adding it to the PDF.",
-          "Pick the corner where the page has room for the signature; the ink is transparent but it still overlaps text drawn in the same place.",
-          "Since this isn't a legally binding e-signature, check whether your document requires a certified digital signature before relying on this for contracts or official use."
-        ]}
+        tips={[]}
       />
     </div>
   );

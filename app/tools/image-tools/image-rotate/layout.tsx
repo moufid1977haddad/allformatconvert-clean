@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Rotate — Turn Your Image Online Free" },
-  description: "Image Rotate turns your image by a preset or custom angle, entirely in your browser — your image is never uploaded to a server.",
+  title: { absolute: "Rotate Image — 90°, 180°, 270° or Any Custom Angle" },
+  description: "Turn a photo clockwise by 90, 180 or 270 degrees, or by any angle to the half degree, with transparent or colored corners, on your own device.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-rotate" },
   openGraph: {
-    title: "Image Rotate — Turn Your Image Online Free",
-    description: "Image Rotate turns your image by a preset or custom angle, entirely in your browser — your image is never uploaded to a server.",
+    title: "Rotate Image — 90°, 180°, 270° or Any Custom Angle",
+    description: "Turn a photo clockwise by 90, 180 or 270 degrees, or by any angle to the half degree, with transparent or colored corners, on your own device.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-rotate",
   },
 };

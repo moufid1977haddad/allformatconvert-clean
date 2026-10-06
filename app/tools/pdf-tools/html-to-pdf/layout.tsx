@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "HTML to PDF — Convert Your HTML Code or File to PDF Online Free" },
-  description: "HTML to PDF converts your HTML code or file to PDF with a real browser engine (Chromium). In our tests CSS grid, flexbox, gradients and tables matched Chrome.",
+  title: { absolute: "HTML to PDF Converter — From a URL, a File or Pasted Code" },
+  description: "Print a public web page, an .html file or pasted HTML to PDF with Chromium on our server. Choose screen width, paper size, margins or one long page.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/html-to-pdf" },
   openGraph: {
-    title: "HTML to PDF — Convert Your HTML Code or File to PDF Online Free",
-    description: "HTML to PDF converts your HTML code or file to PDF with a real browser engine (Chromium). In our tests CSS grid, flexbox, gradients and tables matched Chrome.",
+    title: "HTML to PDF Converter — From a URL, a File or Pasted Code",
+    description: "Print a public web page, an .html file or pasted HTML to PDF with Chromium on our server. Choose screen width, paper size, margins or one long page.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/html-to-pdf",
   },
 };

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "File Splitter — Divide Any File Online Free" },
-  description: "File Splitter is a free online tool that divides any file into smaller, numbered parts by size — entirely in your browser, with nothing uploaded to a server.",
+  title: { absolute: "File Splitter — Split Any File by Size or Into Equal Parts" },
+  description: "Cut a file into numbered parts by size or into equal parts, then join the .part files back into the original, in your browser. Files up to 5 GB.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/file-splitter" },
   openGraph: {
-    title: "File Splitter — Divide Any File Online Free",
-    description: "File Splitter is a free online tool that divides any file into smaller, numbered parts by size — entirely in your browser, with nothing uploaded to a server.",
+    title: "File Splitter — Split Any File by Size or Into Equal Parts",
+    description: "Cut a file into numbered parts by size or into equal parts, then join the .part files back into the original, in your browser. Files up to 5 GB.",
     url: "https://www.onlineconvertools.com/tools/file-tools/file-splitter",
   },
 };

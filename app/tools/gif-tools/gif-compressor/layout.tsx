@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "GIF Compressor — Compress GIF Online Free" },
-  description: "GIF Compressor shrinks your animated GIF's file size while keeping the animation intact, entirely in your browser — nothing is uploaded.",
+  title: { absolute: "GIF Compressor — Lossy Level, Fewer Colors, Smaller Size" },
+  description: "Shrink an animated GIF with gifsicle in your browser: choose the quality, fewer colors or a smaller size, and compare the file size before and after.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/gif-compressor" },
   openGraph: {
-    title: "GIF Compressor — Compress GIF Online Free",
-    description: "GIF Compressor shrinks your animated GIF's file size while keeping the animation intact, entirely in your browser — nothing is uploaded.",
+    title: "GIF Compressor — Lossy Level, Fewer Colors, Smaller Size",
+    description: "Shrink an animated GIF with gifsicle in your browser: choose the quality, fewer colors or a smaller size, and compare the file size before and after.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/gif-compressor",
   },
 };

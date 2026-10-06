@@ -97,7 +97,7 @@ export default function XmlFormatterPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">XML Formatter</h1>
-        <p className="text-neutral-500 text-center mb-8">Format and beautify XML</p>
+        <p className="text-neutral-500 text-center mb-8">Check that XML is well-formed, then indent it</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm text-neutral-500 mb-1">Input</label><TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste XML here..." value={input} onChange={e => setInput(e.target.value)} /></div>
@@ -113,24 +113,34 @@ export default function XmlFormatterPage() {
       </div>
       <SeoContent
         title="XML Formatter"
-        description="XML Formatter re-indents XML using line-based text processing, not a real XML parser, entirely in your browser — nothing is uploaded to a server. It correctly handles the XML declaration and self-closing tags without breaking indentation, and it's scanner-based rather than a plain-text regex: <![CDATA[...]]> sections, <!--...--> comments, and quoted attribute values are recognized as opaque and copied through untouched, so a '><' sequence inside any of them is never mistaken for a real tag boundary. It still doesn't validate whether the XML is well-formed, since it's a text-based indenter, not a true parser."
+        description={"XML Formatter first checks your XML with the validator of fast-xml-parser. If a tag is unclosed or mismatched, it shows Invalid XML with the line and column and produces nothing. Valid XML is then re-indented by 2 spaces per level: a line break is added only between a closing > and the next <, never inside CDATA sections, comments or quoted attribute values, and the XML declaration does not shift the indentation. It does not check a DTD or XSD schema, and the indentation cannot be changed. Validation and indentation both happen in your browser."}
+        example={{
+          caption: "A one-line catalog with a declaration and a self-closing tag.",
+          inputLabel: "Input",
+          input: "<?xml version=\"1.0\"?><catalog><book id=\"b1\"><title>XML Basics</title><tags/></book></catalog>",
+          outputLabel: "Output",
+          output: "<?xml version=\"1.0\"?>\n<catalog>\n  <book id=\"b1\">\n    <title>XML Basics</title>\n    <tags/>\n  </book>\n</catalog>",
+        }}
+        howToTitle={"How to format and validate XML"}
         howTo={[
-          "Paste your XML into the input box.",
-          "Click 'Format' to re-indent it based on nesting depth.",
-          "Review the output for proper structure.",
-          "Click 'Copy' to copy the formatted XML."
+          "Paste XML into \"Input\".",
+          "Click \"Format\".",
+          "If a red Invalid XML line appears, fix the tag at the line and column it gives and click \"Format\" again.",
+          "Click \"Copy\", or \"Download\" to save \"formatted.xml\".",
         ]}
+        specs={[
+          { label: "Input", value: "XML text; the XML declaration and a DOCTYPE are accepted" },
+          { label: "Output", value: "XML indented by 2 spaces per level, saved as formatted.xml" },
+          { label: "Check", value: "Well-formedness only (tags, nesting, characters); several root elements pass; no DTD or XSD validation" },
+          { label: "Known limits", value: "A start tag written over several lines, or an attribute value containing >, shifts the indentation of what follows; lines inside a multi-line CDATA section or comment are re-indented" },
+        ]}
+        privacyTitle={"Where your XML is processed"}
+        privacy={"Validation and indentation both run in this page: fast-xml-parser is downloaded on your first click on \"Format\" and reads the XML on your device, which is not uploaded. An Invalid XML or Error formatting XML message shown on screen is reported to our error log, with quoted tag names, long numbers and addresses removed, plus the tool name and your browser's name and version."}
         faqs={[
-          { q: "Is XML Formatter free to use?", a: "Yes, completely free with no registration required." },
-          { q: "Does it validate whether my XML is well-formed?", a: "No — it's a text-based indenter, not a real XML parser, so it won't catch structural errors like unclosed or mismatched tags." },
-          { q: "Does it handle the XML declaration (<?xml version=\"1.0\"?>) correctly?", a: "Yes — the declaration line is left alone and doesn't affect the indentation of the elements that follow it." },
-          { q: "Is my XML uploaded to a server?", a: "No, formatting happens entirely in your browser." }
-        ]}
-        tips={[
-          "For strict validation of whether your XML is well-formed, use a dedicated XML validator, not this formatter.",
-          "CDATA sections, XML comments, and quoted attribute values are scanned as protected content, so a '><' sequence inside any of them won't get split across lines.",
-          "Indentation uses a fixed 2-space step per nesting level and isn't configurable.",
-          "Copy the result or download it as a file; nothing is saved on a server, and leaving the page before either asks first."
+          { q: "Does it check whether my XML is well-formed?", a: "Yes. Before formatting, the validator looks for unclosed or crossed tags, bad attribute syntax and text before the root element (text after it passes), and reports the first problem with its line and column. It does not compare the XML with a DTD or an XSD schema." },
+          { q: "Can I change the indentation?", a: "No. Each nesting level is indented by 2 spaces and there is no setting to change it. Elements that hold only text, such as a title, stay on one line with their closing tag." },
+          { q: "Are CDATA sections and comments kept?", a: "Yes, their content is never split and no line break is added inside them. One change remains: when a CDATA section or comment spans several lines, each of those lines loses its leading spaces and takes the current indentation." },
+          { q: "Can a multi-line start tag break the indentation?", a: "Yes. When a start tag spans several lines, or one of its attribute values contains a > character, the formatter misses the opening level but still counts the closing tag. Put the tag on one line, or write > as &gt;, and format again." },
         ]}
       />
     </div>

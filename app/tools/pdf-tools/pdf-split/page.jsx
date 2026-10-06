@@ -221,26 +221,30 @@ export default function PdfSplitPage() {
       </div>
       <SeoContent
         title="PDF Split"
-        description="PDF Split cuts a PDF the ways the leading online splitter does for free: custom ranges (each its own PDF, or all merged into one), a new file every N pages, every page as its own PDF, or chosen pages — with a ZIP of all the parts. It uses the pdf-lib library entirely in your browser, so your file is never uploaded, and runs in a Web Worker so the page stays responsive on large files. A range that does not exist in your PDF is refused with the reason, before anything is created."
+        description={`PDF Split turns one PDF into several. There are six modes: custom ranges (each its own file, or merged into one), a new file every N pages, every page on its own, selected pages, odd and even pages in two files, or one file per bookmark at one or two levels. Before you split, a line tells you how many PDFs will be created, and a range that does not exist is refused with the reason. Each part keeps its form fields, title and author, and the bookmarks of its pages. Parts are made by a background worker in your browser with pdf-lib, then offered one by one or as a ZIP.`}
+        howToTitle="How to split a PDF into several files"
         howTo={[
-          "Click the upload area and select a PDF file — the total page count appears once it's read.",
-          "Pick a mode — Custom ranges, Every N pages, Every page, Select pages, Odd / even pages or By bookmarks — and type the ranges or the number of pages per file; the tool says how many PDFs will be created.",
-          "Click 'Split PDF' to generate the files.",
-          "Download each part, or all of them at once as a ZIP."
+          `Choose the PDF; its page count appears once it has been read.`,
+          `Pick "Custom ranges", "Every N pages", "Every page", "Select pages", "Odd / even pages" or "By bookmarks", and fill in the ranges or the pages per file when asked.`,
+          `Click "Split PDF".`,
+          `Click "Download" for a single part, or "Download all" to get every part in one ZIP.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF` },
+          { label: 'Modes', value: `Custom ranges, Every N pages, Every page, Select pages, Odd / even pages, By bookmarks` },
+          { label: 'Part names', value: `Your file name plus the pages (report_1-3.pdf), plus odd or even, or plus a number and the bookmark title` },
+          { label: 'Several parts', value: `One ZIP built in your browser` },
+          { label: 'Size limit', value: `Shown under the title before you choose a file; smaller on phones, iPhone and iPad` },
+        ]}
+        privacy={`Splitting happens in a Web Worker inside your browser, and the ZIP of all the parts is assembled there too; your PDF is not uploaded to our servers. A PDF with print or copy restrictions is decrypted there first, and one that asks for a password to open is refused with a pointer to PDF Unlock.`}
         faqs={[
-          { q: "Can I split a PDF by its bookmarks (chapters)?", a: "Yes: choose By bookmarks. Each top-level bookmark starts a new PDF that runs to the page before the next one, or choose two levels to cut at sections too; the list shows each part and its pages before you split. Pages before the first bookmark get their own file, so no page is lost, and each part is named after its bookmark." },
-          { q: "Is PDF Split free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I click page thumbnails to select what to split?", a: "Not yet — pages are chosen by number (for example 2, 5, 9-12). The page count is shown as soon as the file is read, and the tool tells you before splitting if a page does not exist." },
-          { q: "Can I split a PDF into equal-sized parts automatically?", a: "Yes: choose \"Every N pages\" to get a new PDF every N pages (the last one holds what is left), or \"Every page\" to get one PDF per page." },
-          { q: "Do I get one zip file, or separate downloads?", a: "Both: every part has its own download link, and when there are several you can download them all at once as a ZIP. Each part is named after your file and its pages, for example report_1-3.pdf." },
-          { q: "Is there a page or file-size limit?", a: `Yes: up to ${MAX_PAGES.toLocaleString()} pages and ${MAX_FILE_SIZE_LABEL} on desktop (${MOBILE_MAX_PAGES.toLocaleString()} pages / ${MOBILE_MAX_FILE_SIZE_LABEL} on phones and tablets) -- measured limits to keep splitting reliable in the browser tab rather than risking a crash on an extremely large PDF.` }
+          { q: "Can I split a PDF by chapters?", a: `Yes, if it has bookmarks. Choose By bookmarks: each top-level bookmark starts a new file, or pick two levels to cut at sections too. Pages before the first bookmark get their own file, and each part is named after its bookmark.` },
+          { q: "Can I extract only some pages into one PDF?", a: `Yes. Choose Select pages, type them, for example 2, 5, 9-12, and tick Merge the extracted pages into one PDF. Without that box, each selected page becomes a file of its own.` },
+          { q: "Can I split into parts of equal size?", a: `Yes, by page count. Every N pages makes a new PDF every N pages and the last one holds what is left; the number must be smaller than the page count. Splitting by size in megabytes is not offered.` },
+          { q: "Do I have to download each part separately?", a: `No. When there are two or more parts, Download all saves them in one ZIP named after your file; each part also keeps its own Download button.` },
         ]}
         tips={[
-          "Write \"8-\" to go from page 8 to the end, and tick \"Merge\" to put several ranges or pages into a single PDF, in the order you typed them.",
-          "Page numbers are 1-indexed and match the total page count shown after upload.",
-          "\"Every page\" on a long document creates many files: use \"Download all\" (one ZIP file) instead of clicking each \"Download\".",
-          "The line under the options tells you how many PDFs will be created before you click Split.",
+          `Every page on a long PDF creates many files: take them as one ZIP rather than one by one.`,
         ]}
       />
     </div>

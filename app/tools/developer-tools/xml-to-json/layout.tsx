@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "XML to JSON — Convert XML Into JSON Online Free" },
-  description: "XML to JSON converts XML into JSON, preserving attributes, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "XML to JSON Converter — Attributes Kept, Leading Zeros Too" },
+  description: "Paste XML and get JSON with attributes as @_ keys, repeated tags as arrays and every value kept as text, so 0612 and 1.10 stay intact. In your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/xml-to-json" },
   openGraph: {
-    title: "XML to JSON — Convert XML Into JSON Online Free",
-    description: "XML to JSON converts XML into JSON, preserving attributes, entirely in your browser — nothing is uploaded to a server.",
+    title: "XML to JSON Converter — Attributes Kept, Leading Zeros Too",
+    description: "Paste XML and get JSON with attributes as @_ keys, repeated tags as arrays and every value kept as text, so 0612 and 1.10 stay intact. In your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/xml-to-json",
   },
 };

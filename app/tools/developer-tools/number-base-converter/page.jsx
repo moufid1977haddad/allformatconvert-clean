@@ -7,29 +7,42 @@ export default function NumberBaseConverterDevPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Number Base Converter</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert between binary, octal, decimal, hex and any base from 2 to 36</p>
+        <p className="text-neutral-500 text-center mb-8">Hex, binary, octal and decimal, with 0x, 0b and 0o prefixes</p>
         <BaseConverter />
       </div>
       <SeoContent
-        title="Number Base Converter"
-        description="Number Base Converter shows a number in binary, octal, decimal, hexadecimal and any base from 2 to 36 you choose, live as you type, with fractional parts and numbers of any size converted exactly, entirely in your browser — nothing is uploaded to a server. Pick the base your input is written in, and the results update instantly; negative numbers and fractional parts are handled."
+        title={"Number Base Converter"}
+        description={"This page shows how the converter reads programming notation. Paste a value the way source code writes it, such as 0xFF, 0b1010 or 0o17, with _ digit separators as in 0xFFFF_FFFF, set From Base to match, and read binary, octal, decimal and hexadecimal at once, plus a fifth result for any other base up to 36 that you pick. The arithmetic uses BigInt, so a value like 0xFFFF_FFFF_FFFF_FFFF stays exactly 18446744073709551615 instead of being rounded. A negative value keeps its minus sign; two's complement is not computed. Results update on every keystroke."}
+        example={{
+          caption: "The largest unsigned 64-bit value, typed with its prefix and separators, From Base set to Hexadecimal (16):",
+          inputLabel: "Value",
+          input: "0xFFFF_FFFF_FFFF_FFFF",
+          outputLabel: "Results",
+          output: "Binary (2)        1111111111111111111111111111111111111111111111111111111111111111\nOctal (8)         1777777777777777777777\nDecimal (10)      18446744073709551615\nHexadecimal (16)  FFFFFFFFFFFFFFFF\nBase 36 (36)      3W5E11264SGSF",
+        }}
+        howToTitle={"How to convert hex, binary and octal"}
         howTo={[
-          "Type a number into the Value field.",
-          "Select the base your input is written in from the 'From Base' dropdown (2 to 36).",
-          "Read the binary, octal, decimal and hexadecimal results, plus the base chosen in 'Also convert to', updating live below.",
-          "Change the value or the 'From Base' setting at any time to see updated results instantly."
+          "Set \"From Base\" to the base your value is written in, for example \"Hexadecimal\".",
+          "Type or paste the value in \"Value\"; a matching prefix such as 0xFF, 0b101 or 0o17 and _ separators are accepted.",
+          "Read binary, octal, decimal and hexadecimal at once, and pick an extra base in \"Also convert to\".",
+          "Click \"Copy\" under a result to copy that value."
         ]}
+        specs={[
+          { label: "Input", value: "Digits 0-9 then A-Z up to the chosen base, an optional sign, one point; _ and spaces ignored; prefixes as in 0b101, 0o17 and 0xFF for bases 2, 8 and 16" },
+          { label: "Output", value: "Binary, octal, decimal, hexadecimal, and a fifth card when Also convert to holds another base; upper-case letters unless you untick them" },
+          { label: "Integer size", value: "The code sets no digit cap: integers are exact BigInt values" },
+          { label: "Point", value: "Accepted once; a result that does not end shows its first 40 digits, then …" }
+        ]}
+        privacyTitle={"Where your numbers are processed"}
+        privacy={"Conversion happens in this page with exact integer arithmetic run by your browser, so the values you type are not sent to our servers. The results are page text: if you turn on a translation in the language menu, Google receives them. When the clipboard refuses a copy, we receive that error, the tool's name and your browser's name and version, not your value."}
         faqs={[
-          { q: "What number bases does it support?", a: "Every base from 2 to 36 (digits 0-9 then A-Z), as input and as output. Binary, octal, decimal and hexadecimal are always shown, plus the base you pick in 'Also convert to'." },
-          { q: "Is there a Convert button or a target-base selector?", a: "There's no Convert button: results update as you type. The 'Also convert to' selector adds any base from 2 to 36 to the four usual ones." },
-          { q: "Can I convert negative numbers?", a: "Yes, negative numbers are supported and converted correctly across all four bases." },
-          { q: "Can I convert decimal (fractional) numbers, like 3.5?", a: "Yes. The fractional part is converted exactly; when it does not end in the target base (0.1 in binary is 0.000110011…), 40 digits are shown followed by '…' instead of a rounded value." }
+          { q: "How do I convert hex to binary?", a: "Set From Base to Hexadecimal and type the value, with or without its prefix, as in 0x0F or 0F. The Binary card shows the result at once, without leading zeros: 0x0F gives 1111." },
+          { q: "Does it show two's complement for negative numbers?", a: "No. A negative value is shown with a minus sign in every base, so -1 stays -1 in hex rather than FFFFFFFF. A two's complement pattern needs a fixed width, which this tool does not ask for." },
+          { q: "Can it handle values above 2^64?", a: "Yes. It works with BigInt, so 2^64, written 0x1_0000_0000_0000_0000, converts to 18446744073709551616 exactly, and larger values work the same way. A JavaScript Number would round them." },
+          { q: "Why do I get Not a number in base 16?", a: "The value has a character outside that base's digits, such as G in hex, or a prefix that belongs to another base, such as 0x10 with Binary selected. Below the field, the alert lists what base 16 allows: 0123456789…F." }
         ]}
         tips={[
-          "All four bases update live as you type — there's no need to click a button.",
-          "Set 'From Base' to match how your input is written; entering '10' as hexadecimal gives a different result than entering it as decimal.",
-          "Numbers of any size are exact: 2^64 - 1 shows as FFFFFFFFFFFFFFFF, not rounded.",
-          "The base's own prefix is accepted: 0b101 in binary, 0o17 in octal, 0xFF in hexadecimal."
+          "Untick \"Upper-case letters\" to match code that prints hex in lower case, such as Python's hex()."
         ]}
       />
     </div>

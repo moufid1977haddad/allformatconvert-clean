@@ -162,24 +162,31 @@ export default function PdfNumberPagesPage() {
       </div>
       <SeoContent
         title="PDF Number Pages"
-        description="PDF Number Pages stamps page numbers onto your PDF entirely in your browser using the pdf-lib library — your file is never uploaded to a server. Choose the format (1, 1 / 12, Page 1, Page 1 of 12 or your own text with {n} and {p}), the first number, which pages get a number (from / to, or skip the cover), the position, the margin, the font size and colour, and facing pages for a printed book. Numbers are placed as you see the page, also on pages displayed rotated."
+        description={`PDF Number Pages writes a page number on the pages you choose. Pick a format (1, 1 / 12, Page 1, Page 1 of 12) or type your own text in which {n} becomes the number and {p} the last number used. Set the first number, the first and last page to number or skip the cover, one of six positions, the margin, the size and color, and facing pages for a printed book. Numbers are placed as the page is displayed, also on rotated pages, and characters the standard font cannot write are drawn as an image. Roman numerals are not offered. pdf-lib stamps the numbers inside your browser tab.`}
+        howToTitle="How to add page numbers to a PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Choose a position (top or bottom, left, center or right) and a number format.",
-          "Optionally set the first number, the pages to number (from / to), skip the first page, and the margin, size and colour.",
-          "Click 'Add Page Numbers', then 'Download' to save the result."
+          `Choose the PDF.`,
+          `Pick a position button and a format in "Number format".`,
+          `Optionally set "First number", "From page", "To page (empty = last)", "Margin", the font size slider and "Colour".`,
+          `Click "Add Page Numbers", then "Download" to save the -numbered.pdf file.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF` },
+          { label: 'Formats', value: `1 / 12, 1, Page 1, Page 1 of 12, or custom text with {n} and {p}` },
+          { label: 'Positions', value: `Top or bottom; left, center or right` },
+          { label: 'Margins', value: `Small 18 pt, Recommended 30 pt, Big 54 pt` },
+          { label: 'Font size', value: `6 to 36 pt on the slider` },
+          { label: 'Result', value: `Your file name followed by -numbered.pdf` },
+        ]}
+        privacy={`Numbers are drawn into your PDF by pdf-lib inside this browser tab, and the file is not uploaded. Text that the Helvetica font cannot write, such as Cyrillic, is rendered by your browser into a transparent picture and placed on the page instead.`}
         faqs={[
-          { q: "Is PDF Number Pages free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Which number formats are there?", a: "1, 1 / 12, Page 1, Page 1 of 12, or your own text: {n} is replaced by the page number and {p} by the last number used. Roman numerals are not offered." },
-          { q: "Can I start numbering from a different number or skip a cover page?", a: "Yes. Tick 'Skip the first page (cover)', or set 'From page' and 'To page' to number only part of the document, and set 'First number' to start from any number." },
-          { q: "What does 'Facing pages' do?", a: "In a printed book, numbers sit on the outer edge: with a left or right position, even numbers go to the other side." },
-          { q: "Is my PDF uploaded to a server?", a: "No. Page numbers are added entirely in your browser using the pdf-lib library." }
+          { q: "Can I start numbering on page 2 with the number 1?", a: `Yes. Tick Skip the first page (cover): numbering then starts on page 2, and that page receives the First number, which is 1 by default. To keep the document's own count, so that page 2 shows 2, set First number to 2.` },
+          { q: "Is {p} the total number of pages?", a: `No. {p} is the last number written, not the total number of pages in the file. If you number pages 3 to 10 starting at 1, {p} becomes 8, so Page {n} of {p} reads Page 1 of 8 on page 3.` },
+          { q: "Can numbers alternate sides like in a printed book?", a: `Yes. Tick Facing pages: on even numbers, a number set to the left moves to the right and the reverse. With a right-hand position, numbers then sit on the outer edge; center positions do not move.` },
+          { q: "Can I use Roman numerals?", a: `No. Numbers are always written in digits. A custom text can add words around the number, such as Page {n} or Sheet {n} of {p}, but the number itself cannot be written as i, ii, iii.` },
         ]}
         tips={[
-          "Bottom-center is the most common, professional-looking placement for page numbers.",
-          "Numbers are drawn on top of existing page content: choose the 'Big' margin if they overlap a footer.",
-          "With a cover page skipped, set 'First number' to 1 if the second page should be page 1."
+          `If the number overlaps a footer, try another margin or a top position.`,
         ]}
       />
     </div>

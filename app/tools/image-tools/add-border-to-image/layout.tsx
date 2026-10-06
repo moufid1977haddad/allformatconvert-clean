@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Add Border to Image — Let You Add a Solid-color Border" },
-  description: "Add Border to Image lets you add a solid-color border of any width around a photo, entirely in your browser using the HTML canvas.",
+  title: { absolute: "Add Border to Image — Solid Color Frame, 1 to 100 px" },
+  description: "Put a plain color frame around a photo or logo, from 1 to 100 px wide. Transparent areas stay clear and a JPG stays a JPG, all in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/add-border-to-image" },
   openGraph: {
-    title: "Add Border to Image — Let You Add a Solid-color Border",
-    description: "Add Border to Image lets you add a solid-color border of any width around a photo, entirely in your browser using the HTML canvas.",
+    title: "Add Border to Image — Solid Color Frame, 1 to 100 px",
+    description: "Put a plain color frame around a photo or logo, from 1 to 100 px wide. Transparent areas stay clear and a JPG stays a JPG, all in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/add-border-to-image",
   },
 };

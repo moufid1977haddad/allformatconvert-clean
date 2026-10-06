@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Cron Expression — Turn Five Simple Text Fields Online Free" },
-  description: "Cron Expression turns five simple text fields into a valid cron string as you type, with six one-click presets to get started fast.",
+  title: { absolute: "Cron Expression Explainer — Paste, Check, See Next Runs" },
+  description: "Paste a cron expression or a whole crontab line to read it in plain English, see its next five run times in your time zone and spot invalid fields.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/cron-expression" },
   openGraph: {
-    title: "Cron Expression — Turn Five Simple Text Fields Online Free",
-    description: "Cron Expression turns five simple text fields into a valid cron string as you type, with six one-click presets to get started fast.",
+    title: "Cron Expression Explainer — Paste, Check, See Next Runs",
+    description: "Paste a cron expression or a whole crontab line to read it in plain English, see its next five run times in your time zone and spot invalid fields.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/cron-expression",
   },
 };

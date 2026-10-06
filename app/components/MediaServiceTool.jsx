@@ -132,7 +132,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">{title}</h1>
         <p className="text-neutral-500 text-center mb-2">{subtitle}</p>
-        <p className="text-neutral-400 text-xs text-center mb-8">Files up to {MAX_UPLOAD_MB >= 1024 ? MAX_UPLOAD_MB / 1024 + ' GB' : MAX_UPLOAD_MB + ' MB'} · MP4, MOV, MKV, WebM, AVI, WMV, FLV and more · works in every browser, including Safari and iPhone · files are deleted from our server as soon as you have downloaded the result</p>
+        <p className="text-neutral-400 text-xs text-center mb-8">Files up to {MAX_UPLOAD_MB >= 1024 ? MAX_UPLOAD_MB / 1024 + ' GB' : MAX_UPLOAD_MB + ' MB'} · MP4, MOV, MKV, WebM, AVI, WMV, FLV and more · converted on our video server · the uploaded video is deleted when processing ends, the result once it has been downloaded or after a set time</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !busy && inputRef.current.click()}>

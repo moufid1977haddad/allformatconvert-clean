@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JSON to XML — Recursively Converts JSON Into Nested XML Tags" },
-  description: "JSON to XML recursively converts JSON into nested XML tags — each key becomes a tag name, with objects nesting naturally — entirely in your browser.",
+  title: { absolute: "JSON to XML Converter — Attributes, Arrays, Escaped Text" },
+  description: "Paste JSON and get indented XML under a root element. Arrays become repeated tags, @_ keys become attributes, and & or < are escaped. In your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-xml" },
   openGraph: {
-    title: "JSON to XML — Recursively Converts JSON Into Nested XML Tags",
-    description: "JSON to XML recursively converts JSON into nested XML tags — each key becomes a tag name, with objects nesting naturally — entirely in your browser.",
+    title: "JSON to XML Converter — Attributes, Arrays, Escaped Text",
+    description: "Paste JSON and get indented XML under a root element. Arrays become repeated tags, @_ keys become attributes, and & or < are escaped. In your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-xml",
   },
 };

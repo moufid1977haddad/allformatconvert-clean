@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Resizer — Resize Images Online Free" },
-  description: "Resize JPG, PNG and WebP by pixels or percentage with proportions locked, in the original format. In your browser, no upload.",
+  title: { absolute: "Image Resizer — Resize by Pixels or Percent, Ratio Locked" },
+  description: "Resize a photo by width and height in pixels with the ratio locked, or shrink it by 25, 50 or 75%. Save as JPG, PNG or WebP with a quality setting.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-resizer" },
   openGraph: {
-    title: "Image Resizer — Resize Images Online Free",
-    description: "Resize JPG, PNG and WebP by pixels or percentage with proportions locked, in the original format. In your browser, no upload.",
+    title: "Image Resizer — Resize by Pixels or Percent, Ratio Locked",
+    description: "Resize a photo by width and height in pixels with the ratio locked, or shrink it by 25, 50 or 75%. Save as JPG, PNG or WebP with a quality setting.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-resizer",
   },
 };

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF to Excel — Convert PDF Tables to Editable Excel" },
-  description: "Convert the tables of a PDF into an editable Excel spreadsheet (.xlsx). Free, no signup, files up to 99 MB.",
+  title: { absolute: "PDF to Excel Converter — Tables to an Editable XLSX Free" },
+  description: "Extract the tables of a PDF into an editable .xlsx workbook with real numbers and dates. ConvertAPI does it; a PDF with no table is laid out line by line.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-excel" },
   openGraph: {
-    title: "PDF to Excel — Convert PDF Tables to Editable Excel",
-    description: "Convert the tables of a PDF into an editable Excel spreadsheet (.xlsx). Free, no signup, files up to 99 MB.",
+    title: "PDF to Excel Converter — Tables to an Editable XLSX Free",
+    description: "Extract the tables of a PDF into an editable .xlsx workbook with real numbers and dates. ConvertAPI does it; a PDF with no table is laid out line by line.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-excel",
   },
 };

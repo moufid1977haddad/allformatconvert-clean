@@ -17,7 +17,7 @@ export default function HtmlEntityDecoderPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">HTML Entity Decoder</h1>
-        <p className="text-neutral-500 text-center mb-8">Encode and decode HTML entities</p>
+        <p className="text-neutral-500 text-center mb-8">Turn HTML entities back into readable characters</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" placeholder="Paste HTML here..." value={input} onChange={e => setInput(e.target.value)} />
           <div className="grid grid-cols-2 gap-3">
@@ -30,24 +30,37 @@ export default function HtmlEntityDecoderPage() {
       </div>
       <SeoContent
         title={"HTML Entity Decoder"}
-        description={"HTML Entity Decoder decodes HTML entities — named ones like &nbsp;, &copy; and &euro;, and numeric ones like &#8364; or &#x1F600; — back into characters, entirely in your browser. Named entities are resolved by the browser's own HTML parser (DOMParser, which never runs scripts or loads resources), one entity at a time: everything else in your text, including any HTML tags, is left exactly as written, and each entity is decoded once (&amp;lt; gives &lt;)."}
+        description={"HTML Entity Decoder reads text full of HTML entities, as found in RSS feeds, CMS exports, scraped pages or e-mail source, and writes the real characters. Named entities such as &eacute;, &mdash; or &nbsp; are looked up by your browser's HTML parser, so every name it knows works; numeric ones, decimal (&#8364;) or hex (&#x20AC;), are converted directly. Tags such as <b> are kept exactly, and each entity is decoded once per click. An Encode button is there too, for the opposite direction; both work inside this tab."}
+        example={{
+          caption: "A line copied from a feed's source, decoded with one click:",
+          inputLabel: "Text with entities",
+          input: "Price: &euro;5 &ndash; &copy; 2026 &#x1F600; <b>&amp;lt;b&amp;gt;</b>",
+          outputLabel: "Decode",
+          output: "Price: €5 – © 2026 😀 <b>&lt;b&gt;</b>",
+        }}
+        howToTitle={"How to decode HTML entities"}
         howTo={[
-          "Paste or type text into the input box.",
-          "Click 'Decode' to convert entities (named or numeric) into characters, or 'Encode' to escape & < > \" ' into entities.",
-          "Review the result in the output box.",
-          "Click 'Copy' to copy it to your clipboard."
+          "Paste the text that shows codes such as &amp; or &#39; instead of characters.",
+          "Click \"Decode\" to replace every entity with its character; tags stay in place.",
+          "If the result still shows codes like &lt;, the source was escaped twice: copy the result back into the input box and click \"Decode\" again.",
+          "The clean text lands in the lower box, where \"Copy\" takes it and \"Download\" saves it as decoded.txt."
         ]}
+        specs={[
+          { label: "Named entities", value: "Every name known to your browser's HTML parser, written with its final semicolon (a few old names also work without it)" },
+          { label: "Numeric entities", value: "Decimal and hex, up to U+10FFFF; zero, surrogates and larger codes give the replacement character" },
+          { label: "Tags and other text", value: "Left exactly as written" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Decoding happens in this tab: numeric codes are converted by the page's own script, and each named entity is handed alone to your browser's DOMParser, which does not run scripts or fetch images. What you paste stays in this tab and disappears when it closes; only a crash of the page itself would send us an error report, without your text."}
         faqs={[
-          { q: "Is HTML Entity Decoder free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What are HTML entities?", a: "Codes that represent characters with special meaning in HTML, such as &amp; for an ampersand, &lt; for a less-than sign, or &nbsp; for a non-breaking space." },
-          { q: "Which entities does Decode understand?", a: "Every named HTML5 entity (like &nbsp;, &copy;, &euro;) and every numeric one, decimal (&#8364;) or hexadecimal (&#x20AC;), including emoji code points." },
-          { q: "Are HTML tags in my text removed?", a: "No — only entities are decoded; tags such as <b> stay in the output exactly as written." },
-          { q: "Does it store or upload my data?", a: "No, encoding and decoding both happen entirely in your browser; what you enter is never sent to a server." }
+          { q: "Why does my text still show &amp; after decoding?", a: "It was escaped twice, which some CMS and export scripts do: &amp;amp; decodes to &amp;. Each Decode removes exactly one layer and always reads the input box, so copy the result back into it and decode again to reach the plain character." },
+          { q: "Are HTML tags removed?", a: "No. Only entities change; tags such as <b>, <p> or <a href> stay exactly as written in the output. That keeps the markup intact when you only want readable accents and symbols." },
+          { q: "Is &nbsp; turned into an ordinary space?", a: "No. It becomes a non-breaking space (U+00A0), which looks the same on screen but is a different character, so a search or a comparison with a normal space will not match it." },
+          { q: "Which numeric entities give a replacement character?", a: "Zero, the surrogate range &#xD800; to &#xDFFF; and anything above &#x10FFFF; give �. Codes 128 to 159 give invisible control characters here, whereas browsers display them as Windows-1252 symbols such as an en dash." }
         ]}
         tips={[
-          "Encode then Decode round-trips back to your original text exactly.",
-          "An invalid numeric entity (such as &#0;) is shown as the replacement character �, as browsers do.",
-          "Copy your result right away, since it isn't saved after you leave the page."
+          "Paste the page source, not the rendered page: text copied from a displayed page has no entities left to decode.",
+          "Need the reverse? \"Encode\" on this page escapes the ampersand, angle brackets and quotes."
         ]}
       />
     </div>

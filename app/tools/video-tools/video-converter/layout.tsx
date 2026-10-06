@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Converter — Convert Video to MP4, MOV, GIF, MP3 & More Online Free" },
-  description: "Video Converter turns almost any video into MP4, MOV, MKV, WebM, AVI, GIF and 22 video formats, or extracts the audio as MP3, WAV and more, on our own server. Any browser, files up to 1 GB, deleted after download.",
+  title: { absolute: "Video Converter — MP4, MOV, MKV, WebM, AVI, GIF, MP3 & More" },
+  description: "Convert a video to 22 video formats, an animated GIF or 11 audio formats, with speed, mirror, volume and fade options. Done on our video service.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-converter" },
   openGraph: {
-    title: "Video Converter — Convert Video to MP4, MOV, GIF, MP3 & More Online Free",
-    description: "Video Converter turns almost any video into MP4, MOV, MKV, WebM, AVI, GIF and 22 video formats, or extracts the audio as MP3, WAV and more, on our own server. Any browser, files up to 1 GB, deleted after download.",
+    title: "Video Converter — MP4, MOV, MKV, WebM, AVI, GIF, MP3 & More",
+    description: "Convert a video to 22 video formats, an animated GIF or 11 audio formats, with speed, mirror, volume and fade options. Done on our video service.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-converter",
   },
 };

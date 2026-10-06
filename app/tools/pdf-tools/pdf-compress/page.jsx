@@ -17,9 +17,9 @@ const SERVER_MAX_LABEL = `${Math.round(MAX_PDF_COMPRESS_STAGED_BYTES / MIB)} MB`
 // Same three levels as the reference site (iLovePDF), calibrated against it on the same files
 // (docs/audit/RAPPORT-ecarts-marche.md §3a).
 const LEVELS = [
-  { id: 'extreme', title: 'Extreme', note: 'Smallest file. Images reduced to screen resolution (72 dpi).' },
-  { id: 'recommended', title: 'Recommended', note: 'Good quality, good compression. Images at 150 dpi.' },
-  { id: 'low', title: 'Lossless', note: 'Identical look, nothing re-encoded. Fonts and structure optimised.' },
+  { id: 'extreme', title: 'Extreme', note: 'Smallest file. Larger images reduced to 72 dpi and saved as JPEG.' },
+  { id: 'recommended', title: 'Recommended', note: 'Larger images resampled to 150 dpi and saved as JPEG.' },
+  { id: 'low', title: 'Lossless', note: 'Identical look, images untouched. Fonts and structure optimised.' },
 ];
 
 export default function PdfCompressPage() {
@@ -175,8 +175,8 @@ export default function PdfCompressPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">PDF Compression</h1>
-        <p className="text-neutral-500 text-center mb-2">Reduce PDF file size while keeping it sharp</p>
-        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Files up to {SERVER_MAX_LABEL} are compressed with our full engine (images, fonts and structure). Larger files, up to {browserMaxLabel}{isMobile ? ' on this device' : ''}, get a lighter in-browser optimisation (structure only).</p>
+        <p className="text-neutral-500 text-center mb-2">Reduce PDF file size at the level you choose</p>
+        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Files up to {SERVER_MAX_LABEL} are compressed with our full engine (images, fonts and structure).{isMobile ? ' Larger files cannot be compressed on this device.' : ` Larger files, up to ${browserMaxLabel}, get a lighter in-browser optimisation (structure only).`}</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !loading && inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PDF" />}</p>
@@ -233,26 +233,32 @@ export default function PdfCompressPage() {
       </div>
       <SeoContent
         title="PDF Compress"
-        description={`PDF Compress reduces the size of your PDF with three levels. It recompresses the images from their real size on the page (150 dpi for Recommended, 72 dpi for Extreme), converts Type 1 fonts to the compact CFF format with Adobe's own converter, merges duplicate font subsets and repacks the file's structure. Page text and vector drawings are never rewritten, so text stays exactly as sharp as the original. The Lossless level changes nothing you can see: in our tests every page rendered pixel-identical to the original. Files up to ${SERVER_MAX_LABEL} are processed on our server; larger files get a lighter, structure-only optimisation in your browser.`}
+        description={`PDF Compress makes a PDF smaller on our pdf-tools server, at the level you choose. Recommended and Extreme re-encode the larger pictures as JPEG, resampled from the size they are displayed at on the page (150 dpi and 72 dpi); a picture that needs no resizing is replaced only when its JPEG is clearly smaller, and CMYK, indexed or masked pictures are left as they are. Lossless leaves every picture alone. At every level, Type 1 fonts are converted to the compact CFF format with Adobe's tx, duplicate TrueType subsets are merged and the file structure is repacked. Page text and vector drawings are never rewritten. Files up to ${SERVER_MAX_LABEL} get this full engine.`}
+        howToTitle="How to compress a PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Pick a level: Extreme (smallest), Recommended (balanced) or Lossless (identical look).",
-          "Click 'Compress PDF' and wait for the upload and compression to finish.",
-          "Check the before/after sizes, then click 'Download'."
+          `Choose your PDF; its original size appears under the name.`,
+          `Pick "Extreme", "Recommended" or "Lossless".`,
+          `Click "Compress PDF" and follow the upload and compression bar; "Cancel" stops it.`,
+          `Compare the sizes before and after, then click "Download" to get the -compressed.pdf file.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF` },
+          { label: 'Levels', value: `Extreme (pictures at 72 dpi), Recommended (150 dpi), Lossless (pictures untouched)` },
+          { label: 'Full engine', value: `Files up to ${SERVER_MAX_LABEL}, on our pdf-tools server` },
+          { label: 'Larger files', value: `Files over ${SERVER_MAX_LABEL}: refused on phones, iPhone and iPad; on a computer, only a lighter structure-only optimization runs, in your browser, within the limit shown on the page` },
+          { label: 'Usage limits', value: `Files over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / MIB)} MB are uploaded in chunks; each network may start a limited number of those uploads per hour and per day` },
+          { label: 'No gain', value: `If no smaller file can be made, nothing is offered for download` },
+        ]}
+        privacy={`Files up to ${SERVER_MAX_LABEL} are compressed by our own pdf-tools service on Railway. Up to ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / MIB)} MB, the file passes through our site and the service's temporary folder is deleted when the request ends. A larger file is uploaded in chunks to our media service: the upload is deleted once the compressed file is ready, and that file after your first complete download or when the service's retention time ends. Files over ${SERVER_MAX_LABEL} are handled differently: on a computer, only a lighter optimization runs, in your browser.`}
         faqs={[
-          { q: "Is PDF Compress free to use?", a: "Yes, it's free with no signup required." },
-          { q: "How much will my PDF shrink?", a: "It depends on what the file contains. In our tests on a 15-page research paper, Lossless saved 35%, Recommended 41% and Extreme 43%; on a PDF of six photos, Recommended saved 15% and Extreme 79%. If a level cannot make your file smaller, the page says so and gives you nothing to download rather than a file that isn't smaller." },
-          { q: "Does it reduce quality?", a: "Lossless does not: nothing is re-encoded and pages look identical. Recommended and Extreme recompress images (not text): Recommended keeps images at 150 dpi, which looks sharp on screen and in normal printing; Extreme reduces them to 72 dpi for the smallest file, fine for reading on screen." },
-          { q: "Is my PDF uploaded to a server?", a: `For files up to ${SERVER_MAX_LABEL}, yes: the tools that do real image and font compression don't run in a browser. Your file is sent over HTTPS, compressed, and deleted after you download the result (or automatically after a short time if you don't). Files over ${SERVER_MAX_LABEL} are optimised entirely in your browser and never leave your device.` },
-          { q: "Is there a file-size limit?", a: `${SERVER_MAX_LABEL} for the full engine. Larger files, up to ${MAX_FILE_SIZE_LABEL} and ${MAX_PAGES.toLocaleString()} pages on a computer (${MOBILE_MAX_FILE_SIZE_LABEL} / ${MOBILE_MAX_PAGES.toLocaleString()} pages on phones and tablets), get the in-browser structure-only optimisation.` },
-          { q: "Does it work on password-protected PDFs?", a: "No. Remove the password first with Unlock PDF, then compress the file." }
+          { q: "How much smaller will my PDF get?", a: `0.1% to 78.8% smaller in our test of 23 September 2026, depending on the content and the level: a 15-page research paper lost 35.4% with Lossless, 40.6% with Recommended and 43.0% with Extreme; a PDF of six photos lost only 0.1% with Lossless, 15.2% with Recommended and 78.8% with Extreme. When a level cannot make the file smaller, you get a message and no file.` },
+          { q: "Does Lossless change how my pages look?", a: `No. Lossless re-encodes no picture: it converts Type 1 fonts only after checking that every glyph is still there with the same outline bounds, merges duplicate font subsets and repacks the structure. In the same test, every page of the research paper rendered pixel-identical to the original in two independent renderers.` },
+          { q: "Can I compress a password-protected PDF?", a: `Yes, if it opens without a password. A PDF that asks for a password to open is refused with a message pointing to Unlock PDF; a PDF that opens freely but restricts printing or copying is compressed like any other file.` },
+          { q: "Is there a limit on how often I can compress?", a: `Yes, for large files only. A file over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / MIB)} MB is uploaded through our media service, and each network may start a limited number of those uploads per hour and per day. Smaller files go straight to the compression service without that limit.` },
         ]}
         tips={[
-          "Scanned documents and photo-heavy PDFs shrink the most with Recommended or Extreme.",
-          "Text-only PDFs (reports, papers) often shrink a lot even with Lossless, thanks to font optimisation.",
-          "Want a file under an email limit? Try Extreme first, then check the result before sending.",
-          `For a PDF over ${SERVER_MAX_LABEL}, split it first with PDF Split, then compress each part with the full engine.`
+          `For a PDF made of photos, try Extreme: in our test it saved far more on pictures than Recommended.`,
+          `Over ${SERVER_MAX_LABEL}, split the file with PDF Split and compress each part with the full engine.`,
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Reorder Pages — Let You Rearrange a Pdf's Pages Online" },
-  description: "PDF Reorder Pages lets you rearrange a PDF's pages by typing the new page order as a comma-separated list, in your browser.",
+  title: { absolute: "Reorder PDF Pages — Type the New Page Order" },
+  description: "Rearrange PDF pages by typing their new order, with ranges such as 5-1 to reverse, presets for reverse or odd-then-even, and repeated pages allowed.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-reorder-pages" },
   openGraph: {
-    title: "PDF Reorder Pages — Let You Rearrange a Pdf's Pages Online",
-    description: "PDF Reorder Pages lets you rearrange a PDF's pages by typing the new page order as a comma-separated list, in your browser.",
+    title: "Reorder PDF Pages — Type the New Page Order",
+    description: "Rearrange PDF pages by typing their new order, with ranges such as 5-1 to reverse, presets for reverse or odd-then-even, and repeated pages allowed.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-reorder-pages",
   },
 };

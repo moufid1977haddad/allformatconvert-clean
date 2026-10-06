@@ -96,24 +96,27 @@ export default function Page() {
       </div>
       <SeoContent
         title="AI PDF Summary"
-        description="AI PDF Summary extracts the text of your PDF in your browser, then sends that text (up to 8,000 characters) to our server, which passes it to OpenAI's gpt-4o-mini model for a summary. The page tells you exactly how much of the document the summary covers."
+        description={`AI PDF Summary gives a short summary of what a PDF says. Your browser extracts the text with PDF.js, page by page, until it has ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters, and only that text is sent through our server to OpenAI's gpt-4o-mini model. Above the summary, the page says whether it covers the whole document or roughly how many of its pages. A scanned PDF has no text, so the page asks you to run PDF OCR first.`}
+        howToTitle="How to summarize a PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Click 'Summarize PDF': the text is extracted and sent to the AI model.",
-          "Wait a few seconds for the summary to appear below, with a note on how many pages it covers.",
-          "Click 'Copy Summary' to copy the result to your clipboard."
+          `Click or drop the PDF you want summarized.`,
+          `Click "Summarize PDF".`,
+          `Read the summary and its coverage note, then click "Copy Summary" or "Download" to keep it as a .txt file.`,
         ]}
+        specs={[
+          { label: 'Input format', value: `PDF with a text layer` },
+          { label: 'Text sent', value: `Up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters of extracted text` },
+          { label: 'Output', value: `Summary on the page, to copy or download as a .txt file` },
+          { label: 'Usage limits', value: `Per-network limits per hour and per day, shared with the site's other paid tools, and a monthly budget for the site` },
+        ]}
+        privacy={`The PDF itself is opened by PDF.js on your device and is not uploaded. Its extracted text, up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters, is sent over HTTPS through our server to OpenAI, which writes the summary and returns it to the page.`}
         faqs={[
-          { q: "Is AI PDF Summary free to use?", a: "Yes, it's free with no signup required. Because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "Does it read my entire PDF?", a: "It reads the document's text up to 8,000 characters — the whole file for short documents, the first few pages for longer ones. The page says which, after each summary." },
-          { q: "Is my file uploaded to a server?", a: "The PDF itself stays in your browser. Only the extracted text is sent to our server and forwarded to OpenAI's API to generate the summary." },
-          { q: "Does it work on scanned PDFs?", a: "No. A scanned PDF contains images, not text; the page says so instead of summarizing nothing. Run it through PDF OCR first." }
+          { q: `Does it read my whole PDF?`, a: `Yes for short documents, up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters of text. A longer PDF is read only up to that length, and the note above the summary says it covers the first part, with the approximate number of pages read.` },
+          { q: `Can it summarize a scanned PDF?`, a: `No. A scan holds pictures of pages with no text layer, so nothing can be extracted, and the page says so. Run PDF OCR on it first, then summarize the searchable PDF.` },
+          { q: `Is there a usage limit?`, a: `Yes. Each summary costs us an OpenAI request on up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters, so your network has an hourly and a daily allowance, counted together with the site's other paid AI and conversion tools, and the site has a monthly budget. Reaching one shows how many minutes to wait, or the date the monthly budget resets.` },
         ]}
         tips={[
-          "For a long document, split it with PDF Split and summarize each part.",
-          "Scanned documents need PDF OCR first.",
-          "Treat the summary as a starting point and verify it against the original document.",
-          "Copy the summary right away — it isn't saved anywhere after you leave the page."
+          `For a long document, split it with Split PDF and summarize each part.`,
         ]}
       />
     </div>

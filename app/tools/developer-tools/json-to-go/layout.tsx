@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JSON to Go Struct — Generate a Single Root Struct Online" },
-  description: "JSON to Go Struct generates a single Root struct with one field per top-level JSON key, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "JSON to Go Struct Generator — json Tags and Pointers" },
+  description: "Turn a JSON sample into Go structs with json tags, int64 or float64 fields and pointers for optional keys. Built in your browser with quicktype.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-go" },
   openGraph: {
-    title: "JSON to Go Struct — Generate a Single Root Struct Online",
-    description: "JSON to Go Struct generates a single Root struct with one field per top-level JSON key, entirely in your browser — nothing is uploaded to a server.",
+    title: "JSON to Go Struct Generator — json Tags and Pointers",
+    description: "Turn a JSON sample into Go structs with json tags, int64 or float64 fields and pointers for optional keys. Built in your browser with quicktype.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-go",
   },
 };

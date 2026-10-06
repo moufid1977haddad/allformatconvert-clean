@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PNG to ICO — Convert PNG to a Real Multi-Size ICO Free" },
-  description: "PNG to ICO builds a real, multi-resolution Windows ICO file from your PNG (16, 32, 48, 256px) entirely in your browser.",
+  title: { absolute: "PNG to ICO — Multi-Size favicon.ico, Choose the Sizes" },
+  description: "Build a real multi-resolution favicon.ico from one PNG: pick the icon sizes and fit or crop a non-square image. Made in your browser, never uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/png-to-ico" },
   openGraph: {
-    title: "PNG to ICO — Convert PNG to a Real Multi-Size ICO Free",
-    description: "PNG to ICO builds a real, multi-resolution Windows ICO file from your PNG (16, 32, 48, 256px) entirely in your browser.",
+    title: "PNG to ICO — Multi-Size favicon.ico, Choose the Sizes",
+    description: "Build a real multi-resolution favicon.ico from one PNG: pick the icon sizes and fit or crop a non-square image. Made in your browser, never uploaded.",
     url: "https://www.onlineconvertools.com/tools/image-tools/png-to-ico",
   },
 };

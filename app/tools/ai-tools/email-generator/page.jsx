@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPromptLength } from '@/lib/quota/limits';
+import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 import { readAiJson } from '../../../lib/aiClient';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -69,24 +69,30 @@ export default function EmailGeneratorPage() {
       </div>
       <SeoContent
         title="Email Generator"
-        description="Email Generator is a free online tool that uses OpenAI's GPT-4o mini model to draft a complete email — subject line, greeting, body, and closing — from a short description and a chosen tone. It saves time on routine business emails, follow-ups, and messages without requiring any writing from scratch."
+        description={`Email Generator writes a complete email from a short description: subject line, greeting, body and closing. You choose one of ${tones.length} tones (${tones.join(', ')}) and describe who the email is for and what it must say. The description is sent through our server to OpenAI's GPT-4o mini model, and the draft comes back as plain text to paste into your mail app or download as email.txt. The tool does not send email, does not connect to your inbox and has no template library.`}
+        howToTitle="How to generate an email with AI"
         howTo={[
-          "Select a tone for your email — Professional, Friendly, Formal, Casual, or Persuasive.",
-          "Describe the email you need in the input field.",
-          "Click the 'Generate Email' button to send your description to the AI.",
-          "Copy the generated email to your clipboard and paste it into your email client."
+          "Pick a tone in the \"Tone\" list: \"Professional\", \"Friendly\", \"Formal\", \"Casual\" or \"Persuasive\".",
+          "Describe the email in the \"Describe the email you need...\" box: recipient, purpose and the points to cover.",
+          "Click \"Generate Email\" and wait while it shows \"Generating...\".",
+          "Click \"Copy\" and paste the draft into your email app, or \"Download\" it as email.txt."
         ]}
+        specs={[
+          { label: "Tones", value: tones.join(', ') },
+          { label: "Output", value: "Subject line, greeting, body and closing, as plain text" },
+          { label: "Description length", value: `Up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters` },
+          { label: "Usage limits", value: "An hourly and a daily allowance per connection, shared with the site's other paid tools, plus a monthly budget for the site" }
+        ]}
+        privacyTitle="Where your request is processed"
+        privacy="The tone you pick and your description go to our server, which passes them to OpenAI's GPT-4o mini to write the email. Nothing is sent to any recipient, and we keep neither your description nor the draft. Leave passwords and account numbers out of the description."
         faqs={[
-          { q: "Is Email Generator really free to use?", a: "Yes, Email Generator is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "Can I use generated emails for business purposes?", a: "Yes, the emails generated are suitable for both personal and professional business communications." },
-          { q: "Does Email Generator offer templates I can pick from?", a: "No, there's no template library — you describe the email you need in your own words and choose a tone, and the AI writes a full draft from that." },
-          { q: "Do I need to create an account to use Email Generator?", a: "No account is necessary; you can start generating emails immediately." }
+          { q: "Does it send the email for me?", a: "No. It only writes a draft. Copy it into Gmail, Outlook or any mail app, check names, dates and figures, and send it from there. The page never connects to an email account." },
+          { q: "Does the tone change anything else?", a: "No. Only the tone word in the instruction the model receives changes, for example formal or persuasive; everything else stays the same. Generate the same description in two tones to compare them, since each click produces a new draft." },
+          { q: "How much can I write in the description?", a: `${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters. A few lines with the recipient, the purpose, the key facts and the action you expect are usually enough; a longer description is refused before anything is sent.` }
         ]}
         tips={[
-          "Include key details like the recipient, purpose, and any specific points you want covered in your description.",
-          "Try a different tone if the first draft doesn't match the voice you're going for.",
-          "Review and edit the generated content before sending to make sure it matches your intent.",
-          "Personalize the draft with specific details about your recipient to increase engagement."
+          "Put the facts the email must contain, such as dates, amounts and names, in the description: the model cannot know them otherwise.",
+          "To polish an email you wrote yourself, paste it into Grammar Fixer instead of generating a new one."
         ]}
       />
     </div>

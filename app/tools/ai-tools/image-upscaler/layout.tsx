@@ -3,11 +3,11 @@ import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
   title: { absolute: "AI Image Upscaler — Enlarge Images 2x or 4x with AI" },
-  description: "AI Image Upscaler: enlarge small images 2x or 4x with a super-resolution neural network that rebuilds real detail. Free, no watermark.",
+  description: "Enlarge a JPG, PNG or WebP image 2x or 4x with a super-resolution AI model, on your device with WebGPU or on our own server. PNG output.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/image-upscaler" },
   openGraph: {
     title: "AI Image Upscaler — Enlarge Images 2x or 4x with AI",
-    description: "AI Image Upscaler: enlarge small images 2x or 4x with a super-resolution neural network that rebuilds real detail. Free, no watermark.",
+    description: "Enlarge a JPG, PNG or WebP image 2x or 4x with a super-resolution AI model, on your device with WebGPU or on our own server. PNG output.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/image-upscaler",
   },
 };

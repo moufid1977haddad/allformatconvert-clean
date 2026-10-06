@@ -51,22 +51,34 @@ export default function TextTruncatorPage() {
       </div>
       <SeoContent
         title={"Text Truncator"}
-        description={"Text Truncator shortens text to a number of characters or words, adding \"...\" when it cuts, entirely in your browser. Characters are counted as you see them, so an emoji or an accented letter is never cut in half; word mode keeps your original spacing and line breaks and cuts right after the last word kept. If the text is already within the limit, it is returned unchanged."}
+        description={"Text Truncator shortens a text to a limit you set, counted in characters or in words, for previews, excerpts, captions or form fields. When it cuts, it adds three dots after the kept part, and the dots are not counted in the limit. Characters are counted as they appear, so an emoji or an accented letter is never cut in half. In word mode the original spacing and line breaks are kept up to the last word. A text already within the limit comes back unchanged. The cut is made on your device."}
+        example={{
+          caption: "Limit 4, Type Words: the cut falls right after the fourth word.",
+          inputLabel: "Text",
+          input: "The quick brown fox jumps over the lazy dog.",
+          outputLabel: "Result",
+          output: "The quick brown fox...",
+        }}
+        howToTitle={"How to truncate text"}
         howTo={[
           "Paste your text.",
-          "Enter the limit and choose Characters or Words.",
-          "Click 'Truncate'.",
-          "Copy the result."
+          "Enter the \"Limit\", which starts at 100, and choose Characters or Words in the \"Type\" dropdown.",
+          "Click \"Truncate\".",
+          "Click \"Copy\" for the shortened text, or \"Download\" for truncated.txt."
         ]}
+        specs={[
+          { label: "Units", value: "Characters as displayed, or Words (runs of non-space characters)" },
+          { label: "Limit", value: "Any whole number, 0 included; 0 gives the three dots alone" },
+          { label: "Ellipsis", value: "Three ASCII periods, added only when the text is cut, not counted in the limit" },
+          { label: "Output", value: "The shortened text in a result box; Download saves it as truncated.txt" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"The text is measured and cut by JavaScript in this tab, so it never travels over the network. An invalid limit shows an error message, and that message, with the tool name and browser version but without your text, is recorded in our error log. The shortened text is kept only in the result box until you leave."}
         faqs={[
-          { q: "Is Text Truncator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is the ellipsis counted in the limit?", a: "No — the limit applies to your text; \"...\" is added after the part that is kept, and trailing spaces before it are removed." },
-          { q: "Can it cut an emoji or accented letter in half?", a: "No — it counts user-perceived characters, so multi-part emoji and combining accents stay whole." },
-          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
-        ]}
-        tips={[
-          "Use word mode for previews and excerpts so the text never stops mid-word.",
-          "The limit must be a whole number; 0 keeps nothing but the ellipsis."
+          { q: "Is the ellipsis counted in the limit?", a: "No. The limit applies to your text only and the three dots are added after the kept part, so the result can be three characters longer than the limit. In character mode, spaces just before the cut are removed first." },
+          { q: "Can it cut an emoji or accented letter in half?", a: "No, in current browsers: it counts what you see, so 👍🏽, flags and accents typed as separate marks stay whole. Firefox before version 125 lacks the segmenter used here and counts code points instead, which can split such characters." },
+          { q: "Does word mode stop in the middle of a word?", a: "No. A word is any run of characters between spaces or line breaks, and the cut falls right after the last word kept, with your original spaces and line breaks before it. Punctuation attached to that word stays." },
+          { q: "Can I get the single … character instead of three dots?", a: "No. The tool always adds three ASCII periods, never the single ellipsis character. If your style guide needs it, replace the three dots afterwards with Find and Replace in its default plain-text mode." }
         ]}
       />
     </div>

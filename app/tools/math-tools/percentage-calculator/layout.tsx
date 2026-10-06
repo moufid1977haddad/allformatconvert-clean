@@ -6,10 +6,10 @@ import ToolSeo from '@/app/components/ToolSeo';
 const url = 'https://www.onlineconvertools.com' + SEO.path;
 
 export const metadata: Metadata = {
-  title: { absolute: SEO.title },
-  description: SEO.description,
+  title: { absolute: "Percentage Calculator — % of, % Change, % Difference" },
+  description: "Six percentage calculations on one page: X% of Y, X as a % of Y, % change, reverse %, increase or decrease by %, and % difference, as you type.",
   alternates: { canonical: url },
-  openGraph: { title: SEO.title, description: SEO.description, url },
+  openGraph: { title: "Percentage Calculator — % of, % Change, % Difference", description: "Six percentage calculations on one page: X% of Y, X as a % of Y, % change, reverse %, increase or decrease by %, and % difference, as you type.", url },
 };
 
 // The page is a 'use client' component and can't export metadata itself; this layout hosts it. Its structured data is

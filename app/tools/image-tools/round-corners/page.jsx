@@ -80,24 +80,30 @@ export default function RoundCornersPage() {
       </div>
       <SeoContent
         title="Round Corners"
-        description="Round Corners clips your image to a rounded-rectangle shape at a radius you choose, entirely in your browser using the canvas element — your image is never uploaded to a server. The clipped-away corners become transparent in a PNG, or take a colour you choose — then a JPG stays a JPG."
+        description={"Round Corners clips a picture to a rounded rectangle with true circular arcs, as CSS border-radius draws them. The radius is a percentage of half the shorter side: at 50, the maximum, it equals a quarter of the shorter side, so the result is never a full circle or a pill. The same radius applies to all four corners. The cut corners become transparent, which needs a PNG, or take a color you choose, and then a JPG photo stays a JPG. A WebP or any other format is saved as PNG. The corners are cut in your browser."}
+        howToTitle={"How to round the corners of an image"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Adjust the corner radius slider (1–50%) to set how rounded the corners are.",
-          "Click 'Apply Round Corners' to process the image.",
-          "Click the download button to save your rounded PNG image."
+          "Click the upload box and choose the picture whose corners you want to round.",
+          "Set \"Corner Radius\" between 1 and 50 (default 20).",
+          "Choose \"Transparent corners (PNG)\", or \"Corners in\" and pick the color.",
+          "Click \"Apply Round Corners\", then click \"Download\".",
         ]}
+        specs={[
+          { label: "Radius", value: "1 to 50% of half the shorter side; 50% equals a quarter of the shorter side" },
+          { label: "Output format", value: "PNG with transparent corners; JPG (quality 92) only for a JPG with colored corners; PNG in every other case. \"Corners in\" also fills any transparency of the original" },
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF and other pictures your browser opens" },
+          { label: "Picture limit", value: "At most 268 megapixels" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The corners are cut on a canvas by this page in your browser, and the picture does not leave your device. The rounded copy is kept in the tab until you download it. When an error message is shown, we receive its cleaned text, the tool's name and the browser's name and version."}
         faqs={[
-          { q: "What image formats does Round Corners support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The corners are transparent in a PNG by default; choose a corner colour instead and a JPG stays a JPG (a much lighter file)." },
-          { q: "Is there a file size limit for uploading images?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
-          { q: "Can I adjust the corner radius independently for each corner?", a: "No, the same radius is applied to all four corners — there's no per-corner control." },
-          { q: "Do I need to create an account to use Round Corners?", a: "No, it's completely free with no account or login required." }
+          { q: "Can I make a circle?", a: "No. The largest radius, 50 on the slider, is a quarter of the shorter side, so a square photo gets strongly rounded corners but keeps straight edges between them. A circular crop is not available in this tool." },
+          { q: "Can a rounded JPG stay a JPG?", a: "Yes, with \"Corners in\": pick a color that matches the page where the picture will sit, and the JPG stays a JPG at quality 92. With transparent corners it becomes a PNG, because JPG has no transparency." },
+          { q: "Can each corner have its own radius?", a: "No. The same radius is applied to all four corners. There is no per-corner control and no option to round only the top corners. The radius, in pixels, is set from the shorter side of the picture." },
+          { q: "Is a WebP kept as WebP?", a: "No. A WebP is saved as PNG in both modes. With \"Transparent corners (PNG)\" its transparency is kept; with \"Corners in\" every transparent area is filled with the color." },
         ]}
         tips={[
-          "Use a radius around 10–15% for subtle rounding on profile pictures and thumbnails.",
-          "Try higher radius values (20–30%+) for a softer, more contemporary look.",
-          "Preview the result before downloading to make sure the rounding doesn't cut off important content near the edges.",
-          "With transparent corners the PNG layers well on top of coloured backgrounds; with a corner colour matching your page, a JPG keeps the file small."
+          "To frame and round a picture, add the border first with Add Border to Image, then round the result here.",
         ]}
       />
     </div>

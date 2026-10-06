@@ -32,24 +32,34 @@ export default function JsMinifierPage() {
       </div>
       <SeoContent
         title={"JS Minifier"}
-        description={"JS Minifier compresses JavaScript with Terser, the minifier used by webpack, Vite and most JavaScript minification sites, entirely in your browser. It parses your code first, so the result behaves exactly like the original: automatic semicolon insertion, return statements, regular expressions, template literals and operators such as a - -b are handled correctly, variable names inside functions are shortened, and dead code is removed. Code that doesn't parse is reported with the error position instead of producing a broken file."}
+        description={"JS Minifier compresses JavaScript with Terser in your browser. Terser parses the code first, so the result behaves like the original: code written without semicolons, a return followed by a line break, regular expressions and expressions such as a - -b are handled. Names local to functions are shortened, global names and object properties are kept, unreachable code such as an if (false) block is removed, and every comment is dropped. Modern syntax is accepted, including classes, async functions, optional chaining and BigInt, and so are import and export lines. TypeScript is not: convert it first."}
+        example={{
+          caption: "No semicolons in the input; Terser adds them, puts everything on one line and renames the locals.",
+          inputLabel: "Input",
+          input: "function total(prices) {\n  let sum = 0\n  for (const price of prices) sum += price\n  return sum\n}\nconsole.log(total([1, 2]))",
+          outputLabel: "Minified Output",
+          output: "function total(o){let t=0;for(const l of o)t+=l;return t}console.log(total([1,2]));",
+        }}
+        howToTitle={"How to minify JavaScript"}
         howTo={[
-          "Paste your JavaScript into the input box.",
-          "Click 'Minify'.",
-          "If the code has a syntax error, the message shows where; fix it and minify again.",
-          "Click 'Copy' to copy the minified code."
+          "Paste your script into \"Input\".",
+          "Click \"Minify\".",
+          "Read \"Minified Output\" and the characters-saved line; if the code does not parse, Error: and Terser's message appear instead.",
+          "Click \"Copy\", or \"Download\" to keep \"minified.js\".",
         ]}
+        specs={[
+          { label: "Input", value: "JavaScript, scripts or ES modules" },
+          { label: "Output", value: "Minified JavaScript on one line, saved as minified.js" },
+          { label: "Settings", value: "Compress and mangle on, comments off, top-level names kept" },
+          { label: "Errors", value: "Terser's message, without line or column" },
+        ]}
+        privacyTitle={"Where your script is processed"}
+        privacy={"Terser is downloaded once, on your first click on \"Minify\", and then works on your device: the script is not uploaded. A failed minification is the exception, since the error message shown, with quoted strings, long numbers and addresses replaced, is reported to our error log with the tool's name and your browser's name and version; an unexpected failure of the page is reported the same way."}
         faqs={[
-          { q: "Is JS Minifier free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Will minified code behave the same?", a: "Yes — Terser parses the code and only applies transformations that keep its behaviour, including code written without semicolons." },
-          { q: "Does it rename variables?", a: "Local variables and function parameters are shortened; global names and object properties are kept, so other scripts can still use them." },
-          { q: "Does it support modern JavaScript?", a: "Yes — ES2015+ syntax such as classes, arrow functions, async/await, optional chaining and BigInt." },
-          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; the engine is downloaded once when you first click." }
-        ]}
-        tips={[
-          "Minify a copy: keep your original source for editing.",
-          "A syntax error is reported instead of producing output — the original minifiers of many sites silently output broken code in that case.",
-          "For TypeScript, convert it to JavaScript first with the TypeScript to JS tool."
+          { q: "Will minified code behave the same?", a: "Yes. Terser only applies transformations that keep the behaviour of code it could parse, including code written without semicolons; a return followed by a line break still returns nothing, as in the original." },
+          { q: "Does it rename variables?", a: "Yes, but only local ones: variables and parameters inside functions get one-letter names, as total(prices) becoming total(o) in the example. Top-level names and object properties are kept, so other scripts can still call them." },
+          { q: "Can it minify TypeScript?", a: "No. Type annotations are a syntax error for Terser. Use Code Minifier in TS mode, which removes the types and minifies in one step, or run TypeScript to JavaScript first and paste its output here." },
+          { q: "Does it show where a syntax error is?", a: "No. Only Terser's message is shown, for example Name expected, without its line and column. Paste the code into Code Formatter to see the position of the first syntax error." },
         ]}
       />
     </div>

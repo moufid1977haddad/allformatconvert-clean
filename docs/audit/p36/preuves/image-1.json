@@ -1,0 +1,142 @@
+{
+  "/tools/image-tools/gif-to-png": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/canvasLimit.js",
+      "pattern": "268_435_456"
+    }
+  ],
+  "/tools/image-tools/heic-to-jpg": [
+    {
+      "claim": "24- and 48-megapixel",
+      "file": "app/tools/image-tools/heic-to-jpg/page.jsx",
+      "pattern": "24 and 48 MP photos"
+    }
+  ],
+  "/tools/image-tools/heic-to-png": [
+    {
+      "claim": "8 bits per channel",
+      "file": "app/lib/bigImage.js",
+      "pattern": "Lossless PNG, 8-bit RGB or RGBA"
+    }
+  ],
+  "/tools/image-tools/ico-to-png": [
+    {
+      "claim": "icon-32x32-32bit.png",
+      "file": "app/tools/image-tools/ico-to-png/page.jsx",
+      "pattern": "en\\.bitCount \\+ 'bit'"
+    }
+  ],
+  "/tools/image-tools/image-compressor": [
+    {
+      "claim": "20 images",
+      "file": "app/tools/image-tools/image-compressor/page.jsx",
+      "pattern": "MAX_FILES = 20\\b"
+    },
+    {
+      "claim": "100 KB",
+      "file": "app/tools/image-tools/image-compressor/page.jsx",
+      "pattern": "useState\\('100'\\)"
+    }
+  ],
+  "/tools/image-tools/image-converter": [
+    {
+      "claim": "24 px",
+      "file": "app/tools/image-tools/png-to-ico/page.jsx",
+      "pattern": "ALL_SIZES = \\[16, 24,"
+    },
+    {
+      "claim": "24-megapixel file: about 10 seconds in Chromium and 40 seconds in Firefox",
+      "file": "app/tools/image-tools/image-converter/imageConverter.worker.js",
+      "pattern": "24 MP Bayer file 10 s in Chromium, 40 s in Firefox"
+    },
+    {
+      "claim": "48-megapixel iPhone photos",
+      "file": "app/tools/image-tools/image-converter/config.ts",
+      "pattern": "48 MP \\(8064 x 6048"
+    },
+    {
+      "claim": "256 colours",
+      "file": "app/tools/image-tools/image-converter/page.tsx",
+      "pattern": "256 colours \\(the GIF limit\\)"
+    },
+    {
+      "claim": "72 dpi",
+      "file": "app/tools/image-tools/image-converter/extraFormats.js",
+      "pattern": "at 72 dpi"
+    },
+    {
+      "claim": "16 px up to 256 px",
+      "file": "app/tools/image-tools/image-converter/extraFormats.js",
+      "pattern": "ICO_SIZES = \\[16, 32, 48, 64, 128, 256\\]"
+    },
+    {
+      "claim": "30 megapixels",
+      "file": "app/tools/image-tools/image-converter/config.ts",
+      "pattern": "NATIVE_WEBP_MAX_PIXELS = 30_000_000"
+    }
+  ],
+  "/tools/image-tools/svg-to-png": [
+    {
+      "claim": "1024 or 2048 px",
+      "file": "app/tools/image-tools/svg-to-png/page.jsx",
+      "pattern": "\\[1, 2, 4\\]\\.map\\(\\(k\\) => <button[^\\n]*512 \\* k"
+    },
+    {
+      "claim": "longer side set to 512 pixels",
+      "file": "app/tools/image-tools/svg-to-png/page.jsx",
+      "pattern": "const scale = 512 / Math\\.max\\(w, h\\)"
+    }
+  ],
+  "/tools/image-tools/tiff-to-jpg": [
+    {
+      "claim": "1 to 32-bit integer grey and RGB",
+      "file": "app/lib/tiffDecode.js",
+      "pattern": "2, 4, 6, 10, 12, 14, 24, 32"
+    },
+    {
+      "claim": "8-bit CMYK",
+      "file": "app/lib/tiffDecode.js",
+      "pattern": "can only read correctly at 8 bits per channel"
+    },
+    {
+      "claim": "16-bit TIFF",
+      "file": "app/lib/tiffDecode.js",
+      "pattern": "real 16-bit scanner/sensor/scientific TIFFs"
+    },
+    {
+      "claim": "8 bits per channel",
+      "file": "app/lib/tiffDecode.js",
+      "pattern": "if \\(intp === 5 && ifds\\[0\\]\\.t258 && ifds\\[0\\]\\.t258\\[0\\] !== 8\\)"
+    }
+  ],
+  "/tools/image-tools/tiff-to-png": [
+    {
+      "claim": "1 to 32-bit integer grey and RGB",
+      "file": "app/lib/tiffDecode.js",
+      "pattern": "2, 4, 6, 10, 12, 14, 24, 32"
+    },
+    {
+      "claim": "8-bit CMYK",
+      "file": "app/lib/tiffDecode.js",
+      "pattern": "can only read correctly at 8 bits per channel"
+    },
+    {
+      "claim": "16-bit or other high-depth",
+      "file": "app/lib/tiffDecode.js",
+      "pattern": "real 16-bit scanner/sensor/scientific TIFFs"
+    },
+    {
+      "claim": "8 bits per channel",
+      "file": "app/lib/tiffDecode.js",
+      "pattern": "if \\(bps === 8 \\|\\| bps === 1\\) return;"
+    }
+  ],
+  "/tools/image-tools/bmp-to-png": [
+    {
+      "claim": "32-bit bitmap",
+      "file": "app/tools/image-tools/image-converter/extraFormats.js",
+      "pattern": "32-bit BMP alpha"
+    }
+  ]
+}

@@ -57,7 +57,7 @@ export default function Page() {
       <div className="max-w-2xl mx-auto">
         <Link href="/tools/pdf-tools" className="text-indigo-600 text-sm hover:underline mb-6 inline-block">Back to PDF Tools</Link>
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800">Crop PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Crop and resize PDF pages</p>
+        <p className="text-neutral-500 text-center mb-8">Trim the margins of PDF pages</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="a PDF file" /></p>}
@@ -82,24 +82,29 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Crop"
-        description="PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, using the pdf-lib library entirely in your browser — your file is never uploaded to a server. Margins are measured on the page as you see it: from its current visible area (a page cropped before is cropped further, not reset) and, on pages displayed rotated, from the edges you see on screen. The same margins are applied to every page or to the pages you list; there's no interactive drag-to-select tool or visual preview."
+        description={`PDF Crop cuts the margins of PDF pages by the amounts you type in points (one point is 1/72 inch). It changes each page's crop box, the visible area, so the trimmed part is hidden rather than deleted from the file. Margins are measured on the page as it is displayed, also when the page is rotated or was cropped before, so a second crop cuts further. You can crop every page or only the pages you list. There is no preview and no drag selection. pdf-lib rewrites the crop boxes inside your browser tab.`}
+        howToTitle="How to crop the margins of a PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Enter the top, bottom, left, and right margins (in points) to trim from each page, as the page appears on screen.",
-          "Leave 'Pages' empty for every page, or list pages like 1-3, 5; then click 'Crop PDF'.",
-          "Click 'Download' next to cropped.pdf to save the result."
+          `Choose the PDF to crop.`,
+          `Type the top, bottom, left and right margins to remove, in points.`,
+          `Leave "Pages" empty to crop every page, or list pages such as 1-3, 5.`,
+          `Click "Crop PDF", then "Download" to save cropped.pdf.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF` },
+          { label: 'Margins', value: `In points, zero or more, one set of four per run` },
+          { label: 'Pages', value: `All pages, or a list such as 1-3, 5, 8-` },
+          { label: 'Result', value: `cropped.pdf; the hidden area stays in the file` },
+        ]}
+        privacy={`The PDF is opened and cropped in your browser with pdf-lib; it is not uploaded to our servers. A PDF that opens without a password but carries restrictions is decrypted in the browser first, while one that needs a password to open is refused with a pointer to PDF Unlock.`}
         faqs={[
-          { q: "Is PDF Crop free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I preview or drag to select the crop area?", a: "No — there's no visual crop preview or draggable handles. You enter numeric margins in points for each side." },
-          { q: "Can I crop each page differently?", a: "List the pages in 'Pages' to crop only those; run the tool again on the result for other pages with other margins." },
-          { q: "Is my file uploaded to a server?", a: "No. Cropping happens entirely in your browser using the pdf-lib library." }
+          { q: "Does cropping delete the content outside the new edges?", a: `No. Only the crop box changes, so viewers and printers show the smaller area, but the trimmed content is still in the file and comes back if the crop box is reset. To remove sensitive text for good, use PDF Redact instead.` },
+          { q: "Can I crop each page differently?", a: `Yes, in several runs. List the pages in Pages and crop them with one set of margins, then open the downloaded file again for the next pages and other margins. Every run starts from the page's current visible area.` },
+          { q: "Is the top the edge I see on a rotated page?", a: `Yes. For a page stored sideways and displayed rotated, the tool converts your four margins to the page's own sides, so the top you type is the top you see on screen, and the result matches what a viewer shows.` },
+          { q: "Can the margins be larger than the page?", a: `No. Nothing is saved when the margins would leave no area on a page: the tool names that page and its width and height in points, so you can type smaller values and try again.` },
         ]}
         tips={[
-          "Margins are in points (1 point = 1/72 inch, about 0.35 mm). If the margins would leave nothing of a page, the tool says which page instead of producing a broken file.",
-          "Cropping only adjusts the page's visible crop box — content outside it isn't deleted from the file, just hidden from view.",
-          "Since there's no preview, try small margin values first and check the downloaded result before committing to larger crops.",
-          "Use the same margins across a batch of similarly formatted documents for consistent results."
+          `One inch is 72 points and one centimeter is about 28 points: convert a ruler measurement before typing it.`,
         ]}
       />
     </div>

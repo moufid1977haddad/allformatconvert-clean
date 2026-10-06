@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Unit Converter — Convert Between Units Across Six Categories" },
-  description: "Unit Converter converts between units across six categories — Length, Weight, Temperature, Speed, Area, and Volume — in your browser.",
+  title: { absolute: "Unit Converter — 12 Categories with Exact Factors" },
+  description: "Convert length, weight, temperature, fuel economy, data, pressure, energy, power and more with exact factors, shown to 12 significant digits.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/converter-tools/unit-converter" },
   openGraph: {
-    title: "Unit Converter — Convert Between Units Across Six Categories",
-    description: "Unit Converter converts between units across six categories — Length, Weight, Temperature, Speed, Area, and Volume — in your browser.",
+    title: "Unit Converter — 12 Categories with Exact Factors",
+    description: "Convert length, weight, temperature, fuel economy, data, pressure, energy, power and more with exact factors, shown to 12 significant digits.",
     url: "https://www.onlineconvertools.com/tools/converter-tools/unit-converter",
   },
 };

@@ -6,6 +6,7 @@ import { checkPdfToolsSize, pdfToolsMaxLabel, shouldStage } from '../../../lib/o
 import ProgressBar from '../../../components/ProgressBar';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import { OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import UploadPrompt from '@/app/components/UploadPrompt';
 
 // Real ceiling (hosting-platform payload gate), not the 50 MB the route itself would
@@ -234,27 +235,31 @@ export default function PdfToPdfaPage() {
 
       <SeoContent
         title="PDF to PDF/A"
-        description="PDF to PDF/A converts your document into the ISO-standardized PDF/A archival format — levels 1b, 2b, 3b, 2u, 3u, and for tagged PDFs 2a and 3a — then validates the result with veraPDF — the industry-reference validator built for the PDF Association's own conformance testing. This is the core guarantee: you only get a file back if it's verified compliant. If the conversion doesn't pass validation, you get an explicit error naming which PDF/A rule failed and how many times, not a file that merely claims to be PDF/A — unless you allowed the closest lower level, in which case the page says plainly which level you got and why. For the b and u levels, a PDF that already meets the level keeps its pages as they are (only what PDF/A requires is added: archive metadata, a colour profile, annotation and font details); otherwise Ghostscript rewrites it. Either way the result is delivered only if its text is exactly your PDF's text, checked character by character with two independent text readers — when Ghostscript would alter letters (ligatures such as “fi”, accents, Greek or other scripts), you get an explanation instead of a file whose search and copy-paste would be wrong (u adds the check that every character maps to Unicode text); the a levels keep your PDF's own structure tags, which Ghostscript would drop, so they need a PDF that is already tagged (exported from Word, LibreOffice or Google Docs with accessibility tags). Like the other server tools named in our privacy policy (most tools on this site run in your browser), this one sends your file to a server: it's uploaded securely over HTTPS to our conversion service, and deleted immediately after processing — never stored, logged, or kept around."
+        description={`PDF to PDF/A makes an archival copy of a PDF at the level you choose: 1b, 2b or 3b, the Unicode levels 2u and 3u, or the accessible levels 2a and 3a for PDFs that already carry structure tags. Our pdf-tools service converts the file with Ghostscript, or only adds what is missing when it already meets the level. veraPDF then validates the result, and its text is compared with your PDF's text by two readers. You get a file only when both checks pass. PDF/A-1a is not offered.`}
+        howToTitle="How to convert PDF to PDF/A"
         howTo={[
-          `Click the upload area and select a PDF file, up to ${pdfToolsMaxLabel()}.`,
-          "Choose a PDF/A conformance level: 1b, 2b, 3b, 2u, 3u, or 2a / 3a when your PDF is tagged (the page checks your file before sending it). 2b is the most commonly required for archiving.",
-          "Click 'Convert'. Your file uploads with a real progress bar; a working Cancel button is available the whole time.",
-          "If the result passes veraPDF validation, download it. If not, you'll see exactly which rule failed instead of a silently non-compliant file."
+          `Click or drop the PDF to archive, up to ${pdfToolsMaxLabel()}.`,
+          `Choose a level in "PDF/A conformance"; the accessible levels are switched off when your PDF has no tags.`,
+          `Keep the box for the closest lower level ticked if you accept one, then click the "Convert to PDF/A-…" button.`,
+          `Read the veraPDF verdict; "Download" then keeps the validated PDF/A copy.`,
         ]}
+        specs={[
+          { label: 'Input format', value: `PDF` },
+          { label: 'Output levels', value: `PDF/A-1b, 2b, 3b, 2u, 3u, 2a, 3a` },
+          { label: 'Maximum file size', value: `${pdfToolsMaxLabel()} per file` },
+          { label: 'Tag check', value: `By your browser for files up to ${TAG_CHECK_MAX_BYTES / 1048576} MB, otherwise by our service` },
+          { label: 'Usage limits', value: `Files over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB: a limit per network per hour and per day` },
+        ]}
+        privacy={`Your PDF is sent over HTTPS to our server and on to our pdf-tools service on Railway, where Ghostscript, veraPDF and two text readers work in a temporary folder that is removed afterwards. A file larger than ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB goes in parts through our media service first, which deletes the PDF/A as soon as this page has received it, or after a time limit.`}
         faqs={[
-          { q: "Is PDF to PDF/A free to use?", a: "Yes, completely free with no signup required." },
-          { q: "What does 'verified compliant' actually mean here?", a: "After your file is converted, veraPDF — the reference validator used for official PDF/A conformance testing — checks the result against the full PDF/A specification. Only a file that passes is returned to you." },
-          { q: "What happens if my file doesn't pass?", a: "You get an explicit error listing which PDF/A rule(s) failed and how many times, with no file delivered. This is deliberate: a PDF/A file that only partially complies isn't safe for archiving, so we don't hand one over labeled as compliant." },
-          { q: "Will the text of my PDF stay exactly the same?", a: "Yes, or you get no file. A PDF that already meets the level keeps its pages as they are; when it has to be rewritten by Ghostscript, it doesn't. Either way we compare the text of the result with the text of your PDF, character by character, with two independent text readers, and only deliver it if they are identical: Ghostscript can alter some letters (ligatures such as “fi” or “ti”, accents, Greek or other scripts) while the pages still look right, which would make search and copy-paste give wrong text. In that case the page tells you so, and the reliable way to archive the document is to export it as PDF/A from its original (Word: Save As › PDF › Options › “PDF/A compliant”; LibreOffice: Export as PDF › “Archive (PDF/A, ISO 19005)”)." },
-          { q: "Is my file uploaded to a server?", a: "Yes. This is one of the few tools on this site that actually sends your file to a server, because PDF/A conversion and validation genuinely need Ghostscript and veraPDF, which don't run in a browser. Your file is uploaded securely over HTTPS, processed, and deleted immediately afterward — it is never stored, logged, or kept." },
-          { q: "Which conformance level should I pick?", a: "PDF/A-2b is the most widely accepted for general archiving. PDF/A-1b is the oldest and most restrictive (no transparency). PDF/A-3b adds support for embedding non-PDF/A source files inside the archive. The u levels (2u, 3u) also guarantee that all text can be searched and copied as Unicode. The a levels (2a, 3a) are for accessible archives: they need a tagged PDF and keep its structure (headings, lists, tables, reading order)." },
-          { q: "Why can't I choose PDF/A-2a or 3a for my file?", a: "An a level requires a tagged PDF — one that carries structure tags describing headings, paragraphs, lists and tables. The page reads your file before sending it: if it has no tags, the a levels are switched off and the page says so. Adding tags reliably to an untagged PDF takes commercial software, so we don't pretend to: export your document again with tags turned on (Word: “Document structure tags for accessibility”; LibreOffice: “Universal accessibility (PDF/UA)”), or choose 2u / 3u." },
-          { q: "Do you offer PDF/A-1a?", a: "No. In our tests no open-source tool produced a valid PDF/A-1a, so we don't offer it rather than hand you a file that fails validation. PDF/A-2a covers the same accessibility requirements on a newer base." },
-          { q: "What does 'give me the closest lower level' do?", a: "If the level you chose can't be reached for your file (for example a 2a request on a PDF whose structure doesn't pass), the next lower level is tried — 2a, then 2u, then 2b — and the result says exactly which level you got and why. Untick it to get only the level you asked for, or nothing." },
+          { q: `Is the file checked against the PDF/A standard?`, a: `Yes. veraPDF, an open-source PDF/A validator, checks the converted file at the level you chose. If it fails, you get no file, only the list of failed rules with the number of times each occurred.` },
+          { q: `Will the text of my PDF stay exactly the same?`, a: `Yes, or you get no file. The text of the result is compared with your PDF's text, character by character, by Ghostscript and Poppler. Ghostscript can alter ligatures such as fi, accents or Greek letters while the page still looks right; in that case you get an explanation instead of a file. Exporting PDF/A from the original document is then the reliable route.` },
+          { q: `Can I make PDF/A-2a from any PDF?`, a: `No. The a levels need a tagged PDF, and the page checks your file for tags before sending it. Export the document again with tags: in Word, "Document structure tags for accessibility"; in LibreOffice, "Universal accessibility (PDF/UA)". Otherwise choose 2u or 3u.` },
+          { q: `Can I get a lower level when mine is not reached?`, a: `Yes, for the u and a levels, while the box under the menu stays ticked, as it is by default. A 2a request then tries 2u, then 2b, and the result names the level you got and why the higher one failed. Untick it to receive only the level you asked for.` },
+          { q: `Is PDF/A-1a available?`, a: `No. In our tests no open-source tool produced a valid PDF/A-1a, so the level is not offered; PDF/A-2a covers the same accessibility needs on a newer base.` },
         ]}
         tips={[
-          "PDF/A intentionally disallows some ordinary PDF features (transparency in 1b, JavaScript, external references, unembedded fonts) — a real conversion failure is often the source PDF using one of these.",
-          "This is a one-way, lossy-safe conversion for archiving, not a general-purpose PDF editor — use PDF Editor first for organizing pages or adding content, then convert the result here.",
+          `PDF/A-1b does not allow transparency, so choose 2b or a later level for a PDF with transparent images.`,
         ]}
       />
     </div>

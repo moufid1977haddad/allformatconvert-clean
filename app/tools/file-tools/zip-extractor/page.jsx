@@ -247,8 +247,8 @@ export default function ZipExtractorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">ZIP Extractor</h1>
-        <p className="text-neutral-500 text-center mb-2">Open ZIP, RAR, 7Z, TAR, GZ, ISO and 40+ other archive formats — password-protected and split archives included</p>
-        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Extracted in your browser with 7-Zip and zip.js: the archive is never uploaded. Any archive size; each file up to {maxFileLabel}{isMobile ? ' on this device' : ''}.</p>
+        <p className="text-neutral-500 text-center mb-2">Open ZIP, RAR, 7Z, TAR, GZ and the other archive formats 7-Zip reads — password-protected and split archives included</p>
+        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Extracted in your browser with 7-Zip and zip.js: the archive is never uploaded. No cap on the archive itself, except a compressed TAR, whose inner .tar counts as one file; each file up to {maxFileLabel}{isMobile ? ' on this device' : ''}.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div
             className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition ${dragging ? 'border-indigo-500 bg-indigo-50' : 'border-neutral-200 hover:border-indigo-500'}`}
@@ -313,26 +313,32 @@ export default function ZipExtractorPage() {
       </div>
       <SeoContent
         title="ZIP Extractor"
-        description="ZIP Extractor opens ZIP, RAR (including RAR5), 7Z, TAR, TAR.GZ, TGZ, GZ, BZ2, XZ, ZST, ISO, CAB, WIM, DMG, ARJ, LZH, CPIO, RPM, DEB and many more archive formats directly in your browser, using 7-Zip compiled to WebAssembly and zip.js — nothing is uploaded. Password-protected archives (including encrypted file names) and split archives (.part1.rar, .7z.001, .z01) are supported. The archive is listed first; download any single file, open images, PDFs and text in a new tab, get everything as one ZIP, or save the whole folder structure to your computer."
+        description="ZIP Extractor lists the contents of an archive first, then extracts only what you ask for: one file, everything as one ZIP, or, in Chrome and Edge on a computer, everything into a folder with its structure. ZIP files go through zip.js, which also decodes file names from older tools; other archives go through 7-Zip 24.09 compiled to WebAssembly, which reads RAR and RAR5, 7Z, TAR, GZ, BZ2, XZ, ZST, CAB, LZH and the other formats 7-Zip supports. Password-protected and split archives work. Images, PDFs, text, audio and video can be opened in a new tab."
+        howToTitle="How to open a ZIP, RAR or 7Z archive"
         howTo={[
-          "Drop the archive on the page, or click to choose it. For a split archive, select all of its parts at once.",
-          "If the archive is password-protected, type the password when asked.",
-          "The archive's files are listed with their folders and sizes — nothing is extracted yet.",
-          "Click Download on any file, or Open to view an image, PDF or text file; or get everything with \"Download all as ZIP\" or (Chrome and Edge) \"Save all to a folder\"."
+          "Drop the archive on the box or click it to choose the file; for a split archive, select all its parts together.",
+          "If asked, type the password and click \"Unlock\".",
+          "Read the list of files with their paths and sizes; nothing is extracted yet.",
+          "Click \"Download\" or \"Open\" on a file, or use \"Download all as ZIP\" or \"Save all to a folder\"."
         ]}
+        specs={[
+          { label: "Formats tested here", value: "ZIP, RAR, RAR5, 7Z (also split), CAB, LZH" },
+          { label: "Other formats", value: "TAR, GZ, BZ2, XZ, ZST and the other archive types 7-Zip 24.09 reads" },
+          { label: "Per extracted file", value: `Up to ${MAX_FILE_LABEL} on a computer, ${MOBILE_MAX_FILE_LABEL} on phones, iPhone and iPad` },
+          { label: "Compressed TAR", value: "A .tar.gz, .tgz, .tar.bz2, .tar.xz or .tar.zst unpacks its inner .tar in memory, with the same per-file limit" },
+          { label: "Archive size", value: "No cap for other archives: they are read from disk in pieces" },
+          { label: "\"Download all as ZIP\"", value: `Streamed to disk in Chrome and Edge on a computer; elsewhere built in memory up to ${ZIP_IN_MEMORY_LABEL}, then streamed through a service worker` }
+        ]}
+        privacy="The archive is read in pieces by a Web Worker in your browser, with 7-Zip (served from this site) and zip.js; it is not uploaded, and the password stays in this tab. If the archive cannot be opened, our error log receives the cleaned message, the archive's extension, a size range and your browser name, never the archive or its name."
         faqs={[
-          { q: "Which archive formats can it open?", a: "ZIP (with zip.js) and every format the 7-Zip program reads: RAR and RAR5, 7Z, TAR, GZ/TGZ, BZ2, XZ, ZST, LZMA, ISO, CAB, WIM, DMG, VHD, ARJ, LZH, CPIO, RPM, DEB, CHM, MSI and more. The format is detected from the file's contents, not its name." },
-          { q: "Can it open password-protected archives?", a: "Yes — ZIP (AES and the older ZipCrypto), RAR and 7Z, even when the file names themselves are encrypted. You are asked for the password; it stays inside your browser tab." },
-          { q: "How do I extract a split (multi-part) archive?", a: "Select every part together — for example archive.part1.rar, archive.part2.rar… or archive.7z.001, archive.7z.002… or archive.z01, archive.z02, archive.zip. The tool starts from the first part and reads the others automatically. If a part is missing, it says so." },
-          { q: "Is there a size limit?", a: `Not on the archive: it is read from your disk piece by piece, and files are extracted only when you ask for them. Each file must fit in the tab's memory: up to ${MAX_FILE_LABEL} per file on a computer (${MOBILE_MAX_FILE_LABEL} on phones and tablets). "Download all as ZIP" streams to disk in Chrome and Edge; other browsers build the ZIP in memory up to ${ZIP_IN_MEMORY_LABEL} and, beyond that, stream it to your downloads without holding it (checked in Firefox with a 2.2 GB ZIP).` },
-          { q: "Are my files uploaded?", a: "No. The archive is opened and extracted entirely in your browser; its files are never sent to a server." },
-          { q: "Why are ZIP file names sometimes garbled elsewhere but not here?", a: "Older tools (including Windows' built-in compressed folders) store names in a legacy code page without saying so. This tool reads them the way the ZIP specification says (UTF-8 when valid, otherwise IBM code page 437), so accented names come out right." },
-          { q: "What engines does it use?", a: "zip.js for ZIP files, and 7-Zip 24.09 by Igor Pavlov compiled to WebAssembly (the 7z-wasm package, GNU LGPL with the unRAR restriction — see /wasm/7zz-LICENSE.txt) for everything else." }
+          { q: "Can it open password-protected archives?", a: "Yes: ZIP with AES or the older ZipCrypto, RAR and 7Z, including archives whose file names are encrypted. Type the password when asked and click \"Unlock\"; it is used only inside this tab, and a wrong one shows \"Wrong password — try again\"." },
+          { q: "Can it open a split (multi-part) archive?", a: "Yes. Select every part at once, for example name.part1.rar and name.part2.rar, name.7z.001 and name.7z.002, or name.z01, name.z02 and name.zip. The tool starts from the first part and reads the others; a missing part is reported." },
+          { q: "Is there a size limit?", a: `Yes, per extracted file: ${MAX_FILE_LABEL} on a computer and ${MOBILE_MAX_FILE_LABEL} on phones, iPhone and iPad. Archives themselves have no cap, except compressed TAR files such as .tar.gz, whose inner .tar must be unpacked in memory first and has the same limit.` },
+          { q: "Can I extract just one file?", a: "Yes. Click its \"Download\": only that file is extracted, so a large archive is not unpacked whole. \"Open\" shows images, PDFs, text, audio and video in a new tab instead of saving them." },
+          { q: "Are accented ZIP file names shown correctly?", a: "Yes. zip.js reads names as UTF-8 when they are valid UTF-8, and otherwise as IBM code page 437, as the ZIP specification says, so names written by older tools come out right." }
         ]}
         tips={[
-          "Only need one file from a big archive? Click its Download: only that file is extracted.",
-          "\"Save all to a folder\" (Chrome and Edge) writes the files straight to your disk with their folder structure.",
-          "If extraction fails, check that the file is really an archive: the contents are read, so a renamed file is recognised anyway."
+          "A .gz that holds a single file, which TAR Extractor refuses, opens here."
         ]}
       />
     </div>

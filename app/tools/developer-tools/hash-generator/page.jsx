@@ -167,8 +167,8 @@ export default function HashGeneratorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Hash Generator</h1>
-        <p className="text-neutral-500 text-center mb-2">MD5, SHA-1, SHA-2, SHA-3, BLAKE2, BLAKE3, RIPEMD-160, CRC32 and xxHash — for text or files of any size</p>
-        <p className="text-neutral-500 text-xs text-center mb-8">Everything is computed in your browser: nothing is uploaded. No file size limit — large files are read in pieces.</p>
+        <p className="text-neutral-500 text-center mb-2">MD5, SHA-1, SHA-2, SHA-3, BLAKE2, BLAKE3, RIPEMD-160, CRC32 and xxHash — for text or files, which are read in pieces</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">Everything is computed in your browser: nothing is uploaded. The tool sets no file size cap: large files are read in pieces.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-5">
           <div role="radiogroup" aria-label="What to hash" className="grid grid-cols-2 gap-2">
             {[['text', 'Text'], ['files', 'Files']].map(([id, label]) => (
@@ -242,7 +242,7 @@ export default function HashGeneratorPage() {
                 onDrop={(e) => { e.preventDefault(); setDragging(false); if (!busy) addFiles(e.dataTransfer.files); }}
               >
                 <p className="text-neutral-600">Drop files here, or click to choose</p>
-                <p className="text-neutral-500 text-xs mt-1">Any type, any size, several at once</p>
+                <p className="text-neutral-500 text-xs mt-1">Any type, no size cap set by the tool, several at once</p>
                 <input ref={inputRef} type="file" multiple className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} />
               </div>
               {files.length > 0 && (
@@ -287,23 +287,37 @@ export default function HashGeneratorPage() {
         </div>
       </div>
       <SeoContent
-        title="Hash Generator"
-        description="Hash Generator computes MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-512, Keccak-256, BLAKE2b, BLAKE3, RIPEMD-160, CRC32, CRC32C, xxHash64, XXH3 and XXH128 for text or for files of any size, entirely in your browser — nothing is uploaded. Hash several files at once, add an HMAC key, paste a published checksum to verify a download, and save the results as a checksums.txt that sha256sum -c can check."
+        title={"Hash Generator"}
+        description={`Hash Generator computes ${HASH_ALGORITHMS.length} hashes and checksums (MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-512, Keccak-256, BLAKE2b-512, BLAKE3, RIPEMD-160, CRC32, CRC32C, xxHash64, XXH3-64 and XXH128) for typed text or for files. Text is hashed as UTF-8 while you type. Files are read in 8 MiB pieces by background workers, several files in one run, and the tool sets no size cap. Paste a published checksum to see which ticked algorithm matches, add an HMAC key to sign data, and save file results as checksums.txt. Web Workers in your own tab compute every hash.`}
+        howToTitle={"How to generate or check a hash"}
         howTo={[
-          "Choose Text or Files.",
-          "Tick the algorithms you need (MD5, SHA-1, SHA-256, SHA-512 and CRC32 are ticked by default).",
-          "Type or paste text — it is hashed as you type — or drop one or more files and click Hash.",
-          "To verify a download, paste the checksum published with it in \"Expected hash\": the matching algorithm turns green.",
-          "Copy any value, or download every result as checksums.txt."
+          "Choose \"Text\" or \"Files\", then tick the algorithms you need: MD5, SHA-1, SHA-256, SHA-512 and CRC32 are ticked at first, and \"Select all\" ticks every one.",
+          "Type or paste text and the results appear as you type; for files, drop or choose them, then click the button that starts with Hash and counts the files you added.",
+          "To verify a download, paste its published checksum into \"Expected hash, to verify (optional)\": the matching value turns green.",
+          "\"Copy\" copies one value; in Files mode, \"Copy all\" copies every checksum line and \"Download\" saves them as checksums.txt."
         ]}
-        faqs={SEO.faqs}
+        specs={[
+          { label: "Algorithms", value: `${HASH_ALGORITHMS.length}: MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-512, Keccak-256, BLAKE2b-512, BLAKE3, RIPEMD-160, CRC32, CRC32C, xxHash64, XXH3-64, XXH128` },
+          { label: "Output format", value: "Hex lowercase, hex uppercase or Base64 on screen; checksums.txt always uses lowercase hex" },
+          { label: "File size", value: "The tool sets no cap: files are streamed in 8 MiB pieces" },
+          { label: "Web Crypto path", value: "SHA-1, SHA-256, SHA-384 and SHA-512 use your browser's native code for files up to 700 MiB on a computer and 100 MiB on phones, iPhone and iPad; everything else goes through hash-wasm" },
+          { label: "HMAC", value: "Offered for MD5, SHA-1, the SHA-2 and SHA3 variants, BLAKE2b-512 and RIPEMD-160; the others are skipped while a key is set" }
+        ]}
+        privacy={"Hashing runs in Web Workers inside your browser tab: your files and text are not sent to us, and the HMAC key stays in the page. If you turn on a translation in the language menu, Google receives the page's visible text, which includes the hash values shown. When the red error box shows a message, we receive that message, the tool's name and your browser's name and version."}
+        faqs={[
+          { q: "Which hash should I use: MD5, SHA-1 or SHA-256?", a: "Use the one the publisher lists, since a checksum can only be compared with the same algorithm. For new uses pick SHA-256: practical collisions are known for MD5 and SHA-1, not for SHA-256. MD5 and CRC32 still catch accidental corruption of a copy." },
+          { q: "Is there a file size limit?", a: "No. The tool sets no cap: files are read in 8 MiB pieces by background workers. Files up to 700 MiB (100 MiB on phones, iPhone and iPad) are also loaded whole once, so SHA-1 and SHA-256/384/512 can use the faster Web Crypto. Speed depends on your device." },
+          { q: "How do I verify a downloaded file?", a: "Choose \"Files\", add the file, and paste the publisher's checksum, in hex or Base64, into \"Expected hash, to verify (optional)\". After hashing, the matching algorithm turns green if it is ticked; if none matches, the tool names the algorithms that give a hash of that length." },
+          { q: "Can sha256sum -c check the checksums.txt file?", a: "Yes for its SHA256 lines, and md5sum -c reads the MD5 lines. Each command checks only its own algorithm, so lines for CRC32, xxHash, BLAKE3, Keccak-256 or an HMAC are for reading. Tick only SHA-256 to get a file that sha256sum -c reads completely." },
+          { q: "What does the HMAC key do?", a: "With a key, each eligible algorithm computes an HMAC, such as HMAC-SHA256, the keyed hash used to sign API requests and webhooks. Keccak-256, BLAKE3, CRC32, CRC32C and the xxHash family are not offered with a key and are skipped until you clear it." },
+          { q: "Why does my text give a different hash elsewhere?", a: "A hidden difference in the bytes is the usual cause: the box hashes exactly its UTF-8 text, so a trailing newline, Windows line endings or another encoding elsewhere change the result. Compare the byte count shown above the results." }
+        ]}
         example={SEO.example}
         related={SEO.related}
         tips={[
           "Avoid MD5 and SHA-1 for anything security-sensitive — they are fine as checksums against accidental corruption, not against tampering. Use SHA-256 or better.",
-          "None of these are appropriate for storing passwords — use a slow, salted algorithm such as bcrypt or Argon2.",
           "CRC32 and xxHash are checksums built for speed, not security: good for spotting corrupted copies, useless against deliberate changes.",
-          "Hashing the same file twice always gives the same result; a one-byte change gives a completely different one."
+          "Before hashing a large file, untick the algorithms you do not need: each one ticked adds work for the browser."
         ]}
       />
     </div>

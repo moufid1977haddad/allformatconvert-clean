@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Excel to CSV — Read an Uploaded .xlsx, .xls, or .ods File Online" },
-  description: "Excel to CSV reads an uploaded .xlsx, .xls, or .ods file and converts every sheet to comma-separated CSV text (zipped when there's more than one), entirely in your browser.",
+  title: { absolute: "Excel to CSV — Every Sheet, Comma or Semicolon, XLSX/XLS/ODS" },
+  description: "Convert an .xlsx, .xls or .ods workbook to CSV, one file per sheet and zipped if there are several. Choose comma, semicolon, tab or pipe. In your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/excel-to-csv" },
   openGraph: {
-    title: "Excel to CSV — Read an Uploaded .xlsx, .xls, or .ods File Online",
-    description: "Excel to CSV reads an uploaded .xlsx, .xls, or .ods file and converts every sheet to comma-separated CSV text (zipped when there's more than one), entirely in your browser.",
+    title: "Excel to CSV — Every Sheet, Comma or Semicolon, XLSX/XLS/ODS",
+    description: "Convert an .xlsx, .xls or .ods workbook to CSV, one file per sheet and zipped if there are several. Choose comma, semicolon, tab or pipe. In your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/excel-to-csv",
   },
 };

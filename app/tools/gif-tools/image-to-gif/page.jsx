@@ -121,25 +121,32 @@ export default function ImageToGifPage() {
       </div>
       <SeoContent
         title="Image to GIF"
-        description="Image to GIF turns a batch of photos already sitting on your device into one animated GIF file, processed entirely client-side with the gifenc library so nothing leaves your browser. Playback uses a single adjustable delay you control with a slider, and colors are quantized per-frame to a 256-color palette. The GIF takes the size of your first image; an image of another shape is fitted inside it without distortion (transparent around it), cropped to fill it, or stretched, as you choose. Transparent areas of PNG images stay transparent."
+        description="Image to GIF is the simple way to turn a handful of pictures into a looping GIF: add them, set one delay, click once. The first image sets the shape and size of the GIF, scaled down to 1920 px on its longest side if needed. Pictures of another shape are fitted with transparent borders, cropped to fill, or stretched. Unlike GIF Maker, transparency is kept: mostly transparent pixels stay transparent. The GIF loops forever and every frame lasts the same time. An animated GIF or WebP you add counts as its first frame only. gifenc encodes the GIF in this tab."
+        howToTitle="How to turn images into a GIF"
         howTo={[
-          "Click the upload area and add two or more images.",
-          "Remove any image you don't want with the \"x\" on its thumbnail — the rest keep their order.",
-          "Set your frame delay using the slider.",
-          "Click \"Create GIF\", then preview and download the resulting animated GIF file."
+          "Click \"Click to add images\" and choose at least two pictures, in the order they should play.",
+          "Remove a picture with the x on its thumbnail; the others keep their order.",
+          "Choose \"Images of another shape than the first\" and set \"Frame Delay\" with the slider.",
+          "Click \"Create GIF\" and check the preview and the frame count.",
+          "Click \"Download\" to keep the looping GIF, named animated.gif."
         ]}
+        specs={[
+          { label: "Input", value: "JPG, PNG, WebP, BMP, GIF (first frame only) and other images your browser opens" },
+          { label: "Output", value: "Looping GIF, saved as animated.gif" },
+          { label: "GIF size", value: "That of the first image, at most 1920 px on the longest side" },
+          { label: "Each picture", value: "Up to 100 megapixels" },
+          { label: "Delay", value: "One delay for every frame, 50 to 1000 ms" },
+          { label: "Transparency", value: "Kept as 1-bit: each pixel fully transparent or fully opaque" }
+        ]}
+        privacy="Your pictures are decoded by the browser and the GIF is encoded with gifenc on this page, so they are not uploaded. Should an error appear, we receive its cleaned text, the tool name and the browser name and version, but no picture and no file name."
         faqs={[
-          { q: "Does this create a downloadable GIF file directly?", a: "Yes — click \"Create GIF\" and a \"Download\" button appears with the finished, real animated GIF file." },
-          { q: "What image formats can I upload?", a: "Any format your browser supports, including JPG, PNG, BMP, GIF, and WebP." },
-          { q: "Will photos look as good as flat graphics or icons?", a: "Simple, flat-color images tend to look best. The underlying encoder doesn't apply dithering, so photos or gradients with fine color detail may show some visible color banding after being reduced to a 256-color palette." },
-          { q: "Is Image to GIF free to use?", a: "Yes, it's completely free with no account creation or login required." },
-          { q: "Is my data private?", a: "Yes. Everything happens locally in your browser — nothing is uploaded to a server." }
+          { q: "Can I use a transparent PNG?", a: "Yes. Transparency is kept the way GIF allows it: a pixel is either fully transparent or fully opaque, so mostly transparent pixels become transparent and soft edges turn hard. The borders added around a picture of another shape are transparent too." },
+          { q: "Can I use an animated GIF as input?", a: "No, only its first frame is used here. To split an animated GIF into its frames and mix them with photos, use GIF Maker, which takes up to 300 frames from each GIF." },
+          { q: "Can I change the order or give frames different durations?", a: "No. Pictures play in the order you added them and share one \"Frame Delay\"; removing one keeps the others in order. GIF Maker has reordering, per-frame durations, a background color and a repeat setting." },
+          { q: "Will photos look smooth?", a: "No, not always. Each frame is reduced to a palette of up to 256 colors without dithering, so skies, skin and gradients can show bands, while logos, icons and flat drawings usually come out clean." }
         ]}
         tips={[
-          "The GIF takes the first image's shape and size (at most 1920 px on a side, like ezgif): put the image with the shape you want first, and choose \"Crop to fill\" if you don't want transparent borders.",
-          "High-resolution photos and large batches take longer to quantize and encode; downscale first if the conversion feels slow.",
-          "Expect some color banding on photos with smooth gradients or skin tones, since the 256-color palette is applied per frame without dithering.",
-          "The finished GIF and its frame count are shown before you download, so you can re-run with a different delay if the timing feels off."
+          "Put the picture with the shape you want first: it decides the size of the GIF."
         ]}
       />
     </div>

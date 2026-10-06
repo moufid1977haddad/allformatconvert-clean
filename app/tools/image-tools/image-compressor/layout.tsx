@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Compressor — Compress Images Online Free" },
-  description: "Compress JPG, PNG, WebP, AVIF and SVG in your browser, format and transparency kept: MozJPEG for photos, smart palettes for PNG, SVGO for SVG. Batch and ZIP download.",
+  title: { absolute: "Image Compressor — JPG, PNG, WebP, AVIF and SVG, Format Kept" },
+  description: "Compress up to 20 images at once, each kept in its own format, by quality or to a size in KB. MozJPEG, PNG palettes and SVGO, all in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-compressor" },
   openGraph: {
-    title: "Image Compressor — Compress Images Online Free",
-    description: "Compress JPG, PNG, WebP, AVIF and SVG in your browser, format and transparency kept: MozJPEG for photos, smart palettes for PNG, SVGO for SVG. Batch and ZIP download.",
+    title: "Image Compressor — JPG, PNG, WebP, AVIF and SVG, Format Kept",
+    description: "Compress up to 20 images at once, each kept in its own format, by quality or to a size in KB. MozJPEG, PNG palettes and SVGO, all in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-compressor",
   },
 };

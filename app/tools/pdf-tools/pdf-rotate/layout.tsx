@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Rotate — Rotate Every Page Online Free" },
-  description: "PDF Rotate rotates every page of a PDF by a fixed angle you choose — 90°, 180°, or 270° — using the pdf-lib library entirely in your browser.",
+  title: { absolute: "Rotate PDF Pages — All Pages or Just the Ones You List" },
+  description: "Turn PDF pages 90° clockwise, 180° or 90° counter-clockwise, on every page or only those you list; the angle adds to each page's current turn.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-rotate" },
   openGraph: {
-    title: "PDF Rotate — Rotate Every Page Online Free",
-    description: "PDF Rotate rotates every page of a PDF by a fixed angle you choose — 90°, 180°, or 270° — using the pdf-lib library entirely in your browser.",
+    title: "Rotate PDF Pages — All Pages or Just the Ones You List",
+    description: "Turn PDF pages 90° clockwise, 180° or 90° counter-clockwise, on every page or only those you list; the angle adds to each page's current turn.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-rotate",
   },
 };

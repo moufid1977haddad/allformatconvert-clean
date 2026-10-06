@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { transcribeAudio, checkAudioSize, audioMaxLabel } from '../../../lib/officeUpload';
+import { OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { encryptedMusicMessage } from '../../../lib/mediaSupport';
 import TranscriptExports from '../../../components/TranscriptExports';
 import { useToolError } from '../../../lib/useToolError';
@@ -61,25 +62,32 @@ export default function AudioTranscriberPage() {
       </div>
       <SeoContent
         title="Audio Transcriber"
-        description="Audio Transcriber is a free online tool that converts speech in an audio file into text using OpenAI's Whisper speech recognition model. Upload an audio file and the tool automatically detects the spoken language and returns an editable text transcript — no manual settings required."
+        description={`Audio Transcriber turns the speech in a recorded audio file into text with OpenAI's Whisper model. Pick a file and transcription starts at once; Whisper works out the spoken language, so there is nothing to set. Files up to ${audioMaxLabel()} are accepted: up to ${OFFICE_STAGED_THRESHOLD_BYTES / 1048576} MB they go through our server, larger ones are first uploaded in parts to our media service. You get the transcript as read-only text, plus TXT, SRT and VTT downloads with start and end times. It does not record from a microphone; for live dictation, use Audio to Text.`}
+        howToTitle="How to transcribe an audio file"
         howTo={[
-          "Click the upload area and select an audio file (MP3, WAV, M4A, and similar formats).",
-          "Transcription starts automatically as soon as the file is uploaded.",
-          "Wait while the audio is processed using AI-powered speech recognition.",
-          "Copy the transcript, or download it as a TXT file or as SRT / VTT subtitles with timings."
+          "Click the upload area and choose an audio file, such as MP3, WAV or M4A.",
+          "Wait while \"Transcribing...\" is shown; there is no button to press.",
+          "Read the text under \"Transcript\" and click \"Copy\" to copy it.",
+          "Click \"Download\" next to the .txt, .srt or .vtt file, or \"Download all\" for a ZIP of the files."
         ]}
+        specs={[
+          { label: "Input", value: "Audio files such as MP3, WAV and M4A, passed to Whisper unchanged" },
+          { label: "Maximum file size", value: `${audioMaxLabel()} per file` },
+          { label: "Output", value: "Text, TXT, SRT and VTT (subtitles when Whisper returns timed segments)" },
+          { label: "Language", value: "Detected by Whisper; the page has no language setting" },
+          { label: "Usage limits", value: "Transcriptions per connection are limited per hour and per day, in one allowance with the site's other paid tools, under a monthly site budget; large files also count toward the upload service's own limits" }
+        ]}
+        privacyTitle="Where your audio is processed"
+        privacy={`The audio is not processed in your browser but sent to our server: a file up to ${OFFICE_STAGED_THRESHOLD_BYTES / 1048576} MB goes from there to OpenAI's Whisper API. A larger file is first uploaded in parts to our media service on Railway, read from there by our server, and deleted from the service once the transcript is done. We store neither the audio nor the text.`}
         faqs={[
-          { q: "Is Audio Transcriber really free to use?", a: "Yes, Audio Transcriber is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "What audio formats does Audio Transcriber support?", a: "It accepts common audio formats such as MP3, WAV, and M4A, and most other formats your browser can select as an audio file." },
-          { q: "How large can my audio file be?", a: `Uploads are limited to ${audioMaxLabel()} — the maximum the transcription engine (OpenAI Whisper) itself accepts. For longer recordings, split the audio into smaller segments and transcribe each one separately.` },
-          { q: "Can I get subtitles (SRT or VTT)?", a: "Yes. Besides the plain text, you can download the transcript as SRT or WebVTT subtitles: each line comes with its start and end time, as detected by the speech recognition model, ready for YouTube, VLC or a video editor." },
-          { q: "Is my audio data private?", a: "Your audio file is sent directly to the transcription API to generate the transcript. It is not stored on our servers." }
+          { q: "How large can the audio file be?", a: `${audioMaxLabel()}, the most OpenAI's Whisper accepts in one request. Split a longer recording into parts and transcribe them one by one; a compressed MP3 holds far more minutes than a WAV file of the same size.` },
+          { q: "Can I make subtitles for a video?", a: "Yes, from its sound track: extract the audio with Video to Audio, then transcribe it here. Each line of the SRT and WebVTT files carries the start and end time of one of Whisper's segments, ready for YouTube, VLC or a video editor." },
+          { q: "Do I have to choose the language?", a: "No. The page sends no language setting, and Whisper works out the spoken language itself. The transcript is written in that language and is not translated; for a translation, paste the text into AI Translator." },
+          { q: "Does it accept MP3, WAV and M4A files?", a: "Yes, these are the types named on the upload area. Our server hands your recording to Whisper untouched, and when Whisper rejects a type, its message is shown on the page. Encrypted music downloads, from Apple Music or QQ Music for example, are stopped before upload with an explanation." },
+          { q: "Can I edit the transcript on the page?", a: "No. The transcript box is read-only. Copy the text, or download the TXT file, and correct names and technical terms in any text editor or word processor." }
         ]}
         tips={[
-          "For best accuracy, use audio that is clear with minimal background noise.",
-          "Audio Transcriber works well for interviews, meetings, lectures, and podcasts.",
-          "Review and manually correct the transcript afterward, especially for technical terms or proper nouns.",
-          "Split long recordings into shorter clips if you hit the file size limit."
+          "If a recording is over the size limit, convert it to MP3 with Audio Converter or cut it into parts with Audio Splitter."
         ]}
       />
     </div>

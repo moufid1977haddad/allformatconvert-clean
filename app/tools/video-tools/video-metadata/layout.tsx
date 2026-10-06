@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Metadata — Read a Video File's Basic Properties Online" },
-  description: "Video Metadata shows a video's codecs, bitrate, frame rate, resolution, rotation, audio tracks, subtitles and tags — read in your browser, nothing uploaded.",
+  title: { absolute: "Video Metadata Viewer — Codecs, Frame Rate, GPS Removal" },
+  description: "Read a video's codecs, resolution, frame rate, rotation, audio and subtitle tracks with ffprobe in your browser, or save a copy without metadata.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-metadata" },
   openGraph: {
-    title: "Video Metadata — Read a Video File's Basic Properties Online",
-    description: "Video Metadata shows a video's codecs, bitrate, frame rate, resolution, rotation, audio tracks, subtitles and tags — read in your browser, nothing uploaded.",
+    title: "Video Metadata Viewer — Codecs, Frame Rate, GPS Removal",
+    description: "Read a video's codecs, resolution, frame rate, rotation, audio and subtitle tracks with ffprobe in your browser, or save a copy without metadata.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-metadata",
   },
 };

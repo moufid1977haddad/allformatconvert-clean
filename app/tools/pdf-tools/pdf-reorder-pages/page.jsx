@@ -112,25 +112,29 @@ export default function PdfReorderPagesPage() {
       </div>
       <SeoContent
         title="PDF Reorder Pages"
-        description="PDF Reorder Pages lets you rearrange a PDF's pages by typing the new page order as a comma-separated list, using the pdf-lib library entirely in your browser — your file is never uploaded to a server. There are no page thumbnails or drag-and-drop; the field is pre-filled with the original order for you to edit."
+        description={`PDF Reorder Pages builds a new PDF from the page order you type. The field starts with every page in its current order; edit it to 3, 1, 2, use a range such as 5-1 to run backwards, or click a preset for reverse order or odd pages followed by even ones. A page can appear twice, and a page you leave out is dropped, which the page lists before you save. A number that does not exist stops the tool with a message. Form fields, title, author and bookmarks follow their pages. Your browser copies the pages into the new file in that order.`}
+        howToTitle="How to change the order of PDF pages"
         howTo={[
-          "Click the upload area and select a PDF file — the total page count and a pre-filled order field appear.",
-          "Edit the comma-separated list of page numbers into your desired order (e.g. 3, 1, 2).",
-          "Click 'Reorder Pages' to build the PDF in that order.",
-          "Click 'Download' to save the result."
+          `Choose the PDF; the order field fills with every page in its current order.`,
+          `Edit "New page order (e.g. 3, 1, 2)", or click "Reverse order" or "Odd pages, then even".`,
+          `Check the notes under the field for left-out or repeated pages, then click "Reorder Pages".`,
+          `The "Download" button then gives the -reordered.pdf copy in your new order.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF` },
+          { label: 'Order', value: `Pages and ranges in either direction, such as 3, 1, 2 or 10-1` },
+          { label: 'Presets', value: `Reverse order; Odd pages, then even` },
+          { label: 'Missing pages', value: `Left out of the result and listed before saving` },
+          { label: 'Result', value: `Your file name followed by -reordered.pdf` },
+        ]}
+        privacy={`pdf-lib copies the pages into a new document in the order you typed, inside this browser tab; your PDF is not sent anywhere. A PDF that only restricts printing or copying is decrypted locally first, and one that asks for a password to open is refused with a pointer to PDF Unlock.`}
         faqs={[
-          { q: "Is PDF Reorder Pages free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I drag and drop page thumbnails to reorder them?", a: "Not here: you type the new order (3, 1, 2), ranges included (5-1 reverses five pages), or use Reverse order / Odd pages, then even. For thumbnails you drag, use Organize PDF." },
-          { q: "Can I leave out pages I don't want in the final PDF?", a: "Yes — a page you don't include is left out, and the page lists the left-out pages before you save. Form fields, the title and author, and bookmarks follow their pages." },
-          { q: "Is my file uploaded to a server?", a: "No, everything happens locally in your browser using the pdf-lib library." }
+          { q: "Can I reverse the page order of a PDF?", a: `Yes. Click Reverse order and the field lists the pages from last to first, or type a backwards range such as 9-1. Then click Reorder Pages to build the reversed PDF and download it.` },
+          { q: "Can I type a page number that does not exist?", a: `No. Nothing is built: a number past the last page, or text that is not a page or a range, shows a message under the field, and the button stays disabled until the order is valid.` },
+          { q: "Can I put the same page in twice?", a: `Yes. A page listed more than once is copied each time, and the note under the field counts the repeats so you can check them before saving.` },
+          { q: "Is there a thumbnail view for reordering?", a: `No, not on this page. The PDF Editor shows a thumbnail of every page with up and down arrows, and PDF Organize moves pages in a numbered list with buttons.` },
         ]}
-        tips={[
-          "The order field starts pre-filled with the original sequence (1, 2, 3, ...) — edit only the numbers you want to move.",
-          "Leaving a page number out of the list removes that page from the output, so double-check the list includes every page you want to keep.",
-          "Page numbers are 1-indexed and must reference valid pages in the source document; invalid ones are skipped.",
-          "Since there's no preview, download and check the result on a short document before relying on it for something important."
-        ]}
+        tips={[]}
       />
     </div>
   );

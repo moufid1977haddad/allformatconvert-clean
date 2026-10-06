@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Audio Compressor — Compress Audio Online Free" },
-  description: "Audio Compressor reduces an audio file's size by re-encoding it at a lower bitrate (64–320 kbps) using ffmpeg.wasm in your browser (Opus is encoded by our own server, then deleted).",
+  title: { absolute: "Audio Compressor — Shrink Audio Files by Bitrate" },
+  description: "Make an audio file smaller at 64 to 320 kbps, in mono or at a lower sample rate. Shows both sizes; never above the source bitrate when it can be read.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-compressor" },
   openGraph: {
-    title: "Audio Compressor — Compress Audio Online Free",
-    description: "Audio Compressor reduces an audio file's size by re-encoding it at a lower bitrate (64–320 kbps) using ffmpeg.wasm in your browser (Opus is encoded by our own server, then deleted).",
+    title: "Audio Compressor — Shrink Audio Files by Bitrate",
+    description: "Make an audio file smaller at 64 to 320 kbps, in mono or at a lower sample rate. Shows both sizes; never above the source bitrate when it can be read.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-compressor",
   },
 };

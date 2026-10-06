@@ -60,24 +60,37 @@ export default function UuidGeneratorPage() {
       </div>
       <SeoContent
         title="UUID Generator"
-        description="UUID Generator creates version 4 (random) or version 7 (time-ordered) UUIDs, up to 1000 at a time, lowercase or uppercase, with or without hyphens or braces, using the Web Crypto API's crypto.getRandomValues() for cryptographically strong randomness, entirely in your browser — nothing is uploaded to a server. Versions 1, 3 and 5 are not offered."
+        description={"UUID Generator creates universally unique identifiers in bulk, from 1 to 1000 per click. Version 4 draws 122 random bits from crypto.getRandomValues. Version 7 (RFC 9562) starts with the creation time in milliseconds, then a counter that keeps UUIDs made in the same millisecond in order, then random bits, so the values sort by creation time. The nil UUID is the all-zero value. Each can be shown in uppercase, without hyphens, or wrapped in braces as Windows GUIDs are written. Every UUID has its own copy button, and the whole list downloads as uuids.txt. Versions 1, 3 and 5 are not offered."}
+        example={{
+          caption: "Three v7 UUIDs made in one click by the page’s own code on 5 October 2026: the first at 23:53:33.378 UTC (01A10E7C-A9C2), the last two 7 ms later in the same millisecond (A9C9), so the counter goes from 763F to 7640.",
+          inputLabel: "Settings",
+          input: "Count: 3\nVersion: v7 — time-ordered (sorts by creation time)\nUppercase: on",
+          outputLabel: "Generated",
+          output: "01A10E7C-A9C2-71FE-80DC-FE755DC9B402\n01A10E7C-A9C9-763F-B7D8-A1053E7D9895\n01A10E7C-A9C9-7640-BC7C-6260183A54D4",
+        }}
+        howToTitle={"How to generate UUIDs in bulk"}
         howTo={[
-          "Set how many UUIDs you want (1 to 1000) and choose v4 (random), v7 (time-ordered) or the nil UUID, and the format.",
-          "Click 'Generate' to create that many random UUIDs.",
-          "Click 'Copy' next to any UUID to copy it to your clipboard.",
-          "Generating again replaces the current list — copy anything you need first."
+          "Enter how many you need in \"Count\", from 1 to 1000.",
+          "Choose the \"Version\": v4 for random IDs, v7 for IDs that sort by creation time, or the nil UUID.",
+          "Tick \"Uppercase\", \"Hyphens\" or \"{Braces} (GUID)\" to match the format your system expects.",
+          "Click \"Generate\", then \"Copy\" next to a UUID, or \"Download\" to save the whole list as uuids.txt.",
         ]}
+        specs={[
+          { label: "Versions", value: "v4 (random), v7 (time-ordered, RFC 9562) and the nil UUID" },
+          { label: "Count per click", value: "1 to 1000; the nil UUID is always a single value" },
+          { label: "Formats", value: "Lower or upper case, with or without hyphens, optional braces" },
+          { label: "Randomness", value: "crypto.getRandomValues; a v4 UUID carries 122 random bits" },
+          { label: "Download", value: "uuids.txt, one UUID per line" },
+        ]}
+        privacyTitle={"Where your UUIDs are generated"}
+        privacy={"UUIDs are generated in your browser with crypto.getRandomValues and are not sent to our servers or recorded. A v7 UUID contains the time it was made, to the millisecond, so anyone who sees it can read when it was created; choose v4 when that matters. The list disappears on reload unless you download or copy it."}
         faqs={[
-          { q: "What is a UUID?", a: "A 128-bit identifier designed to be unique across systems without central coordination — commonly used for database keys, request IDs, and API resource identifiers." },
-          { q: "Is the UUID Generator free to use?", a: "Yes, completely free with no registration required." },
-          { q: "What UUID version does this generate?", a: "Version 4 (random) and version 7 (RFC 9562: a millisecond timestamp first, so the UUIDs sort by creation time — a better database key than v4), plus the nil UUID. Versions 1, 3 and 5 aren't offered." },
-          { q: "Are these UUIDs safe to use as unguessable tokens?", a: "Yes — they're generated with the Web Crypto API's cryptographically secure random number generator, not Math.random(), so they aren't predictable." }
+          { q: "Is v7 better than v4 for database keys?", a: "Yes, in most cases: its first 48 bits are the creation time, so new keys sort after older ones and are added at the end of an index ordered by key, instead of at random places. Use v4 when the creation time must not be visible." },
+          { q: "Are these UUIDs safe to use as secret tokens?", a: "No, only v4 ones are: their 122 random bits come from the browser’s cryptographic generator. A v7 UUID reveals its creation time and, for IDs made in the same millisecond, a counter that goes up by one, so part of it can be guessed." },
+          { q: "Can it output GUIDs with braces?", a: "Yes. Tick \"{Braces} (GUID)\" to wrap each value in curly braces, and \"Uppercase\" if your system expects capital letters, as in {01A10E7C-A9C2-71FE-80DC-FE755DC9B402}. The braces are added after the other options, so they also work with hyphens turned off." },
         ]}
         tips={[
-          "Copy each UUID you need right away, since generating a new batch replaces the current list without saving the old one.",
-          "Up to 1000 UUIDs per click; the download button saves them all as a text file.",
-          "Choose v7 for database primary keys: new rows land at the end of the index instead of at random places.",
-          "Uppercase, no hyphens or {braces} match what some systems (Windows registry GUIDs, compact ids) expect."
+          "Generating again replaces the list, so download uuids.txt first if you still need the earlier batch.",
         ]}
       />
     </div>

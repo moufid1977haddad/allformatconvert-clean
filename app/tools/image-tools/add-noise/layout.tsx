@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Add Noise — Apply a Random Film-grain Effect Online Free" },
-  description: "Add Noise applies a random film-grain effect to your image by adding random variation to each pixel's brightness, entirely in your browser.",
+  title: { absolute: "Add Noise to Image — Film Grain, Gray or Color" },
+  description: "Sprinkle film grain on a photo: uniform random noise with an intensity from 1 to 100, gray or colored. Full size kept; JPG, PNG and WebP keep their format.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/add-noise" },
   openGraph: {
-    title: "Add Noise — Apply a Random Film-grain Effect Online Free",
-    description: "Add Noise applies a random film-grain effect to your image by adding random variation to each pixel's brightness, entirely in your browser.",
+    title: "Add Noise to Image — Film Grain, Gray or Color",
+    description: "Sprinkle film grain on a photo: uniform random noise with an intensity from 1 to 100, gray or colored. Full size kept; JPG, PNG and WebP keep their format.",
     url: "https://www.onlineconvertools.com/tools/image-tools/add-noise",
   },
 };

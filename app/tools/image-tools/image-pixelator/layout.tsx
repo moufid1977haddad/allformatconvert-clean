@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Pixelator — Pixelate Images Online Free" },
-  description: "Image Pixelator applies a mosaic effect across your image by averaging blocks of pixels at a size you choose, in your browser.",
+  title: { absolute: "Pixelate Image — Mosaic Blocks in Pixels or Percent" },
+  description: "Pixelate a whole picture into averaged square blocks of 2 to 50 px, or 1 to 20% of the shorter side. JPG, PNG and WebP keep their format.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-pixelator" },
   openGraph: {
-    title: "Image Pixelator — Pixelate Images Online Free",
-    description: "Image Pixelator applies a mosaic effect across your image by averaging blocks of pixels at a size you choose, in your browser.",
+    title: "Pixelate Image — Mosaic Blocks in Pixels or Percent",
+    description: "Pixelate a whole picture into averaged square blocks of 2 to 50 px, or 1 to 20% of the shorter side. JPG, PNG and WebP keep their format.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-pixelator",
   },
 };

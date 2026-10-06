@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Number Pages — Stamp a “current / Total” Label (e.g" },
-  description: "PDF Number Pages stamps a current/total label onto every page of your PDF, entirely in your browser — your file is never uploaded.",
+  title: { absolute: "Add Page Numbers to PDF — Formats, Range, Margins" },
+  description: "Number PDF pages as 1, 1 / 12, Page 1, Page 1 of 12 or your own text, choose where numbering starts and stops, skip a cover, then save the copy.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-number-pages" },
   openGraph: {
-    title: "PDF Number Pages — Stamp a “current / Total” Label (e.g",
-    description: "PDF Number Pages stamps a current/total label onto every page of your PDF, entirely in your browser — your file is never uploaded.",
+    title: "Add Page Numbers to PDF — Formats, Range, Margins",
+    description: "Number PDF pages as 1, 1 / 12, Page 1, Page 1 of 12 or your own text, choose where numbering starts and stops, skip a cover, then save the copy.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-number-pages",
   },
 };

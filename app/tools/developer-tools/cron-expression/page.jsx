@@ -23,7 +23,7 @@ export default function CronExpressionPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Cron Expression</h1>
-        <p className="text-neutral-500 text-center mb-8">Build and validate cron expressions</p>
+        <p className="text-neutral-500 text-center mb-8">Paste a cron expression and read it in plain English</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <CronPaste onFields={(f) => applyPreset(f.join(' '))} />
           <div className="grid grid-cols-5 gap-2">
@@ -45,24 +45,38 @@ export default function CronExpressionPage() {
       </div>
       <SeoContent
         title="Cron Expression"
-        description="Cron Expression turns five simple text fields — minute, hour, day, month, weekday — into a valid cron string as you type, with six one-click presets (every minute, hour, day, week, month, year) to get started fast. Everything runs in your browser: there's no syntax validation, no next-run-time preview, and no calendar or dropdown pickers, so whatever you type in each field is joined as-is into the output."
+        description={"Cron Expression reads a standard five-field cron schedule (minute, hour, day of month, month, day of week) and tells you what it means. Paste a whole expression, a macro such as @daily or a complete crontab line: the schedule is split into the five boxes, a command after the five fields is left out, and the result is described in plain English with the next five run times in your time zone. A value out of range, such as 99 in the minute field, is reported instead of described. Quartz or Spring expressions with six or seven fields are explained, not read. Six presets fill in schedules from every minute to once a year."}
+        example={{
+          caption: "A crontab line, with the next runs computed as if it were pasted on 6 October 2026 at 12:00 UTC; they are listed for a visitor in UTC whose browser is set to US English (the page uses your zone and language).",
+          inputLabel: "Pasted in \"Paste a whole expression\"",
+          input: "30 2 * * 1 /usr/local/bin/backup.sh",
+          outputLabel: "What the page shows",
+          output: "Boxes: 30 2 * * 1\nNote: The first 5 fields are the schedule; the rest (“/usr/local/bin/backup.sh”) looks like the command of a crontab line and was left out.\nAt 02:30, only on Monday\nNext runs (your time zone):\nMon, Oct 12, 2026, 02:30 AM\nMon, Oct 19, 2026, 02:30 AM\nMon, Oct 26, 2026, 02:30 AM\nMon, Nov 2, 2026, 02:30 AM\nMon, Nov 9, 2026, 02:30 AM",
+        }}
+        howToTitle={"How to read a cron expression in plain English"}
         howTo={[
-          "Type values into the Minute, Hour, Day, Month, and Weekday fields, or click a preset below to fill them in automatically.",
-          "Watch the generated cron expression update live as you type.",
-          "Click 'Copy' to copy the expression to your clipboard.",
-          "Paste it into your cron job, task scheduler, or scheduling library."
+          "Paste your expression, a macro such as @hourly, or a line copied from your crontab into \"Paste a whole expression\".",
+          "Check the five boxes (\"Minute\", \"Hour\", \"Day\", \"Month\", \"Weekday\"): they now hold the schedule, and each can be edited.",
+          "Read the plain-English line and the list under \"Next runs (your time zone):\"; a red message gives the wrong value and the range it should be in.",
+          "Click \"Copy\" to put the five-field expression on your clipboard.",
         ]}
+        specs={[
+          { label: "Format read", value: "Standard cron with five fields: minute, hour, day of month, month, day of week" },
+          { label: "Macros", value: "@yearly, @annually, @monthly, @weekly, @daily, @midnight, @hourly (@reboot has no schedule to show)" },
+          { label: "Not read", value: "Six- or seven-field Quartz and Spring expressions (seconds first): a note explains how to shorten them; for AWS expressions, whose sixth field is the year, delete that year field and lower a numeric day of week by one (AWS counts 1 as Sunday) or write it as a name such as MON" },
+          { label: "Next runs", value: "Five, computed from your device’s clock in its time zone" },
+          { label: "Presets", value: "Every minute, Every hour, Every day at midnight, Every week, Every month, Every year" },
+        ]}
+        privacyTitle={"Where your schedule is processed"}
+        privacy={"The expression is checked and described in your browser by the cron-parser and cronstrue libraries, which load just after the page appears. The schedule and the command of a pasted crontab line are never sent to our servers. The next run times use your device’s clock and time zone, and nothing is saved, so copy the expression before you leave."}
         faqs={[
-          { q: "What is a cron expression?", a: "A string of five space-separated fields — minute, hour, day of month, month, and day of week — that defines when a scheduled task should run." },
-          { q: "Is Cron Expression free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it validate my expression or show upcoming run times?", a: "Yes. Under the expression it says in plain English when it runs and lists the next five runs in your time zone; an invalid field is reported instead." },
-          { q: "Can I paste an existing cron expression to see what it means in plain English?", a: "Yes. Paste it in 'Paste a whole expression': it is split into the five fields and described. Macros such as @daily are expanded, the command of a crontab line is left out, and a 6- or 7-field Quartz expression is explained rather than misread." }
+          { q: "Can I paste a line straight from my crontab?", a: "Yes. The first five fields are kept as the schedule and the rest, such as /usr/local/bin/backup.sh, is treated as the command: it is left out and a note under the box says so. A line that starts with a macro such as @daily is expanded and its command dropped; the note then gives only the meaning of the macro." },
+          { q: "Does it read Quartz or Spring expressions with seconds?", a: "No. An expression with six or seven fields whose extra fields look like Quartz values is not split into the boxes. The note asks you to drop the seconds field (the first) and the year field (the seventh) to read the rest as standard cron." },
+          { q: "Are the next runs shown in UTC?", a: "No. They are computed from your browser’s clock and shown in your local time zone. A server set to UTC runs the same expression at UTC times, so shift the hours if your server’s zone differs from yours." },
+          { q: "Does it catch values that are out of range?", a: "Yes. A value outside a field’s range, such as 99 in the minute field, replaces the description with a red message giving the parser’s reason, here the expected range 0-59." },
         ]}
         tips={[
-          "Presets fill in all five fields at once for common schedules like 'every hour' or 'every month' — a fast starting point you can then tweak.",
-          "Cron fields are minute (0-59), hour (0-23), day of month (1-31), month (1-12), and day of week (0-6, Sunday=0).",
-          "Since there's no validation, test your expression in your actual scheduler or a dedicated cron-syntax checker before relying on it in production.",
-          "Use */n syntax (e.g. */5 in the minute field) for interval-based schedules like 'every 5 minutes.'"
+          "Writing a new schedule rather than reading one? Cron Expression Builder adds presets for weekdays at 09:00 and for a 15-minute interval.",
         ]}
       />
     </div>

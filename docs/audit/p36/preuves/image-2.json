@@ -1,0 +1,344 @@
+{
+  "/tools/image-tools/add-border-to-image": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    },
+    {
+      "claim": "1 to 100 px",
+      "file": "app/tools/image-tools/add-border-to-image/page.jsx",
+      "pattern": "type=\"range\" min=\"1\" max=\"100\""
+    }
+  ],
+  "/tools/image-tools/add-noise": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "16.7 megapixels",
+      "file": "app/lib/bigImage.js",
+      "pattern": "CANVAS_MAX_PIXELS = 16_777_216"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    }
+  ],
+  "/tools/image-tools/add-text-to-image": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "10 to 800 px",
+      "file": "app/tools/image-tools/add-text-to-image/page.jsx",
+      "pattern": "min=\"10\" max=\"800\""
+    },
+    {
+      "claim": "800 px",
+      "file": "app/tools/image-tools/add-text-to-image/page.jsx",
+      "pattern": "max=\"800\""
+    },
+    {
+      "claim": "0 to 30 px",
+      "file": "app/tools/image-tools/add-text-to-image/page.jsx",
+      "pattern": "min=\"0\" max=\"30\""
+    },
+    {
+      "claim": "1.2 times",
+      "file": "app/tools/image-tools/add-text-to-image/page.jsx",
+      "pattern": "fontSize \\* 1\\.2"
+    }
+  ],
+  "/tools/image-tools/add-vignette": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    }
+  ],
+  "/tools/image-tools/brightness-contrast": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    },
+    {
+      "claim": "0 to 200%",
+      "file": "app/tools/image-tools/brightness-contrast/page.jsx",
+      "pattern": "type=\"range\" min=\"0\" max=\"200\""
+    }
+  ],
+  "/tools/image-tools/duplicate-image-finder": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "64 bits",
+      "file": "app/lib/imageSimilarity.js",
+      "pattern": "64-bit dHash"
+    },
+    {
+      "claim": "3 differing bits",
+      "file": "app/tools/image-tools/duplicate-image-finder/page.jsx",
+      "pattern": "<option value=\\{3\\}>Strict"
+    }
+  ],
+  "/tools/image-tools/grayscale-converter": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    }
+  ],
+  "/tools/image-tools/image-blur": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "16.7 megapixels",
+      "file": "app/lib/bigImage.js",
+      "pattern": "CANVAS_MAX_PIXELS = 16_777_216"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    },
+    {
+      "claim": "1 to 20 px",
+      "file": "app/tools/image-tools/image-blur/page.jsx",
+      "pattern": "type=\"range\" min=\"1\" max=\"20\""
+    },
+    {
+      "claim": "20 px",
+      "file": "app/tools/image-tools/image-blur/page.jsx",
+      "pattern": "max=\"20\""
+    },
+    {
+      "claim": "48 megapixel",
+      "file": "docs/audit/RAPPORT-p17-30-09.md",
+      "pattern": "Image Blur 48 Mpx \\| PASS"
+    }
+  ],
+  "/tools/image-tools/image-comparison": [
+    {
+      "claim": "100 MP",
+      "file": "app/tools/image-tools/image-comparison/page.jsx",
+      "pattern": "> 100_000_000"
+    },
+    {
+      "claim": "100 megapixels",
+      "file": "app/tools/image-tools/image-comparison/page.jsx",
+      "pattern": "100 megapixels at most"
+    }
+  ],
+  "/tools/image-tools/image-cropper": [
+    {
+      "claim": "16.7 megapixels",
+      "file": "app/lib/bigImage.js",
+      "pattern": "CANVAS_MAX_PIXELS = 16_777_216"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    }
+  ],
+  "/tools/image-tools/image-editor": [
+    {
+      "claim": "16.7 megapixels",
+      "file": "app/lib/bigImage.js",
+      "pattern": "CANVAS_MAX_PIXELS = 16_777_216"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    },
+    {
+      "claim": "100 megapixels",
+      "file": "app/tools/image-tools/image-editor/page.tsx",
+      "pattern": "100 megapixels at most"
+    },
+    {
+      "claim": "0 to 20 px",
+      "file": "app/tools/image-tools/image-editor/page.tsx",
+      "pattern": "aria-label=\"Pixelate\" type=\"range\" min=\"0\" max=\"20\""
+    },
+    {
+      "claim": "0 to 100 px",
+      "file": "app/tools/image-tools/image-editor/page.tsx",
+      "pattern": "aria-label=\"Corner Radius\" type=\"range\" min=\"0\" max=\"100\""
+    },
+    {
+      "claim": "12 to 72 px",
+      "file": "app/tools/image-tools/image-editor/page.tsx",
+      "pattern": "aria-label=\"Text Size\" type=\"range\" min=\"12\" max=\"72\""
+    }
+  ],
+  "/tools/image-tools/image-flip": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    }
+  ],
+  "/tools/image-tools/image-inverter": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    }
+  ],
+  "/tools/image-tools/image-metadata": [],
+  "/tools/image-tools/image-pixelator": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    },
+    {
+      "claim": "2 to 50 px",
+      "file": "app/tools/image-tools/image-pixelator/page.jsx",
+      "pattern": "min=\"2\" max=\"50\""
+    },
+    {
+      "claim": "50 px",
+      "file": "app/tools/image-tools/image-pixelator/page.jsx",
+      "pattern": "max=\"50\""
+    },
+    {
+      "claim": "1 to 20%",
+      "file": "app/tools/image-tools/image-pixelator/page.jsx",
+      "pattern": "min=\"1\" max=\"20\""
+    },
+    {
+      "claim": "2 px",
+      "file": "app/tools/image-tools/image-pixelator/page.jsx",
+      "pattern": "Math\\.max\\(2,"
+    }
+  ],
+  "/tools/image-tools/image-resizer": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "16,383 pixels",
+      "file": "app/lib/bigImage.js",
+      "pattern": "WEBP_MAX_SIDE = 16383"
+    },
+    {
+      "claim": "25, 50 or 75%",
+      "file": "app/tools/image-tools/image-resizer/page.jsx",
+      "pattern": "PERCENTS = \\[25, 50, 75\\]"
+    },
+    {
+      "claim": "50%",
+      "file": "app/tools/image-tools/image-resizer/page.jsx",
+      "pattern": "useState\\(50\\)"
+    },
+    {
+      "claim": "32,767 pixels",
+      "file": "app/lib/mediaSupport.js",
+      "pattern": "CANVAS_MAX_SIDE = 32767"
+    },
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/mediaSupport.js",
+      "pattern": "CANVAS_MAX_AREA = 268435456"
+    }
+  ],
+  "/tools/image-tools/image-rotate": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    }
+  ],
+  "/tools/image-tools/round-corners": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    },
+    {
+      "claim": "1 to 50%",
+      "file": "app/tools/image-tools/round-corners/page.jsx",
+      "pattern": "type=\"range\" min=\"1\" max=\"50\""
+    },
+    {
+      "claim": "50%",
+      "file": "app/tools/image-tools/round-corners/page.jsx",
+      "pattern": "\\(radius / 100\\) \\* Math\\.min\\(W, H\\) / 2"
+    }
+  ],
+  "/tools/image-tools/sepia-filter": [
+    {
+      "claim": "268 megapixels",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "RASTER_MAX_PIXELS = 268435456"
+    },
+    {
+      "claim": "quality 92",
+      "file": "app/lib/imageOutput.js",
+      "pattern": "encodeRasterLike\\(raster, sourceType, quality = 92\\)"
+    }
+  ]
+}

@@ -20,7 +20,7 @@ export function splitCron(text) {
   if (parts.length < 5) return { fields: null, note: `A cron expression has 5 fields (minute hour day month weekday); this one has ${parts.length}.` };
   if (parts.length === 5) return { fields: parts, note: '' };
   if (parts.length <= 7 && parts.slice(5).every((p) => FIELD.test(p))) {
-    return { fields: null, note: `This expression has ${parts.length} fields: seconds and/or year (Quartz, Spring, AWS). This tool reads the standard 5-field cron; drop the seconds field (first) and the year field (seventh) to read it here.` };
+    return { fields: null, note: `This expression has ${parts.length} fields. This tool reads the standard 5-field cron. Quartz and Spring put seconds first: drop the seconds field (first) and the year field (seventh). AWS puts the year sixth: drop it, and lower a numeric weekday by one (AWS counts 1 as Sunday) or write the day as a name such as MON.` };
   }
   return { fields: parts.slice(0, 5), note: `The first 5 fields are the schedule; the rest (“${parts.slice(5).join(' ').slice(0, 60)}”) looks like the command of a crontab line and was left out.` };
 }

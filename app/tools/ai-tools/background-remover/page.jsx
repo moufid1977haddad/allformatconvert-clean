@@ -223,7 +223,7 @@ export default function BackgroundRemoverPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Background Remover</h1>
-        <p className="text-neutral-500 text-center mb-8">Remove any background instantly with AI</p>
+        <p className="text-neutral-500 text-center mb-8">Remove the background from a photo with AI, at full resolution</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {preview ? <img src={preview} className="max-h-48 mx-auto rounded-lg" alt="original" /> : <div><p className="text-neutral-500 text-sm"><UploadPrompt what="an image" /></p><p className="text-neutral-500 text-xs mt-1">JPG, PNG, WEBP supported</p></div>}
@@ -253,25 +253,33 @@ export default function BackgroundRemoverPage() {
       </div>
       <SeoContent
         title="Background Remover"
-        description="Background Remover is a free online tool that instantly removes the background from an image using an AI segmentation model that runs on our own infrastructure, giving you a transparent PNG in one click. Perfect for product photos, portraits, and professional graphics, with no software installation required."
+        description={`Background Remover cuts the main subject out of a photo and gives you a transparent PNG at the photo's original resolution. Choose a photo of up to ${(MAX_REMOVEBG_ORIGINAL_BYTES / (1024 * 1024)).toFixed(0)} MB, from a phone or a camera, as JPG, PNG, WebP or another type your browser reads. Your browser sends only a JPEG copy of at most ${RESIZE_TARGET_PX.toLocaleString('en-US')} pixels on the longest side to our own AI service, which returns a mask; the cut-out, the edge clean-up and the PNG are then made on your device from the original. When a photo has several separate subjects, only the largest one is kept. The tool does not add a new background.`}
+        howToTitle="How to remove the background from a photo"
         howTo={[
-          "Click the upload area and select a photo from your device.",
-          "Click 'Remove Background' and wait a few seconds while the background is automatically detected and removed.",
-          "Preview the result against the checkered transparency background.",
-          "Click 'Download' next to the PNG file to save your transparent image."
+          "Click the upload area and choose a photo.",
+          "Click \"Remove Background\" and wait while the progress bar fills.",
+          "Check the cut-out on the checkered preview under \"Result\".",
+          "Click \"Download\" to save the transparent PNG, named after your photo with -no-background added."
         ]}
+        specs={[
+          { label: "Input formats", value: "JPG, PNG, WEBP and other images your browser can open" },
+          { label: "Maximum file size", value: `${(MAX_REMOVEBG_ORIGINAL_BYTES / (1024 * 1024)).toFixed(0)} MB per photo, on a computer or a phone` },
+          { label: "Output", value: "PNG with transparency, same width and height as the original" },
+          { label: "Sent to the server", value: `A JPEG copy, ${RESIZE_TARGET_PX.toLocaleString('en-US')} px at most on the longest side` },
+          { label: "Browsers", value: "Writing the PNG needs Safari 16.4 or later, or a current Chrome, Edge or Firefox" },
+          { label: "Usage limits", value: "A per-connection hourly and daily limit, shared with the site's other paid tools, and a monthly budget for the site" }
+        ]}
+        privacyTitle="Where your photo is processed"
+        privacy={`Your original photo never leaves your device; only a JPEG copy, at most ${RESIZE_TARGET_PX.toLocaleString('en-US')} px on its longest side, is sent to our server, which passes it to our own background-removal service on Railway. That service works in memory, writes nothing to disk and returns only a mask. No third party receives the image. The final PNG is assembled in your browser from the original file.`}
         faqs={[
-          { q: "Is Background Remover completely free to use?", a: "Yes, Background Remover is free to use with no account creation or watermarks on your downloaded image." },
-          { q: "What image formats does Background Remover support?", a: "The tool accepts common image formats like JPG and PNG, and always outputs the result as a transparent PNG file." },
-          { q: "How long does it take to remove a background?", a: "Most images are processed in a few seconds. It can take noticeably longer for the first request in a while, since the background-removal service needs a moment to wake up after sitting idle." },
-          { q: "Do I need to install any software or create an account?", a: "No, Background Remover works entirely online with no downloads, installations, or account requirements." },
-          { q: "How large can an uploaded photo be?", a: `Up to ${(MAX_REMOVEBG_ORIGINAL_BYTES / (1024 * 1024)).toFixed(0)} MB — matching the highest limit offered by remove.bg, Pixian, and PhotoRoom. Your photo is resized in the browser before upload for fast, private processing, and the result is delivered at your original photo's full resolution, not a reduced one.` }
+          { q: "Is the result smaller than my photo or watermarked?", a: "No. The PNG keeps your photo's full width and height, and nothing is drawn on it. The mask and the edge clean-up are computed on reduced copies and stretched to full size; edge pixels take the subject's color, which reduces, but does not fully remove, the old background's tint along the edges." },
+          { q: "Can I upload a PNG or a WebP?", a: `Yes. Any image your browser can open is accepted, up to ${(MAX_REMOVEBG_ORIGINAL_BYTES / (1024 * 1024)).toFixed(0)} MB: JPG, PNG and WebP everywhere, and other formats where the browser supports them. The result is always a transparent PNG.` },
+          { q: "Can I put a color or another picture behind the subject?", a: "No, this tool only makes the background transparent. Open the PNG in an image editor that supports layers and place the subject on the new background there." },
+          { q: "Can it keep two separate subjects?", a: "No. The service keeps only the largest connected subject in the photo, so two people standing apart, or an object separate from the main subject, can disappear. Crop the photo around what you want with Image Cropper, then run it again." },
+          { q: "Is there a limit on cut-outs?", a: "Yes. A limited number per hour and per day for each connection, counted together with the site's other paid tools, within a monthly budget for the site. When a limit is reached, the page says when to try again." }
         ]}
         tips={[
-          "For best results, use images with clear contrast between the subject and background.",
-          "Simple, uniform backgrounds are removed more cleanly than busy or low-contrast ones.",
-          "If the automatic result isn't clean around fine details like hair, try a higher-resolution source image.",
-          "Download your result right after processing, since the image isn't saved on our server."
+          "A bigger file does not improve the cut-out itself: the mask is computed from the reduced copy, while the PNG keeps your full resolution."
         ]}
       />
     </div>

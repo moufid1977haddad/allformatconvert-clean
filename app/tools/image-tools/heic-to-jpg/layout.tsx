@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "HEIC to JPG — Convert an Iphone HEIC Photo Online Free" },
-  description: "HEIC to JPG converts an iPhone HEIC photo to standard JPG format entirely in your browser — your photo is never uploaded to a server.",
+  title: { absolute: "HEIC to JPG Converter — Pick the JPEG Quality, Free" },
+  description: "Turn an iPhone HEIC or HEIF photo into a JPG with a quality slider. Read by the browser itself, or by heic2any where it cannot. Never uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/heic-to-jpg" },
   openGraph: {
-    title: "HEIC to JPG — Convert an Iphone HEIC Photo Online Free",
-    description: "HEIC to JPG converts an iPhone HEIC photo to standard JPG format entirely in your browser — your photo is never uploaded to a server.",
+    title: "HEIC to JPG Converter — Pick the JPEG Quality, Free",
+    description: "Turn an iPhone HEIC or HEIF photo into a JPG with a quality slider. Read by the browser itself, or by heic2any where it cannot. Never uploaded.",
     url: "https://www.onlineconvertools.com/tools/image-tools/heic-to-jpg",
   },
 };

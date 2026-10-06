@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF to Word — Convert Your PDF to an Editable .docx Online Free" },
-  description: "PDF to Word converts a PDF to an editable .docx, .doc (Word 97-2003) or .rtf. In our tests on Word-exported PDFs, headings, tables, columns and lists were kept; scanned PDFs are not supported.",
+  title: { absolute: "PDF to Word Converter — Editable DOCX, DOC or RTF Free" },
+  description: "Convert a PDF to an editable Word document in .docx, .doc (Word 97-2003) or .rtf format. ConvertAPI does the work; .doc is finished by our LibreOffice.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-word" },
   openGraph: {
-    title: "PDF to Word — Convert Your PDF to an Editable .docx Online Free",
-    description: "PDF to Word converts a PDF to an editable .docx, .doc (Word 97-2003) or .rtf. In our tests on Word-exported PDFs, headings, tables, columns and lists were kept; scanned PDFs are not supported.",
+    title: "PDF to Word Converter — Editable DOCX, DOC or RTF Free",
+    description: "Convert a PDF to an editable Word document in .docx, .doc (Word 97-2003) or .rtf format. ConvertAPI does the work; .doc is finished by our LibreOffice.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-word",
   },
 };

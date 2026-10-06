@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JSON to Rust Struct — Generate a Single Root Struct" },
-  description: "JSON to Rust Struct generates a single Root struct with one field per top-level JSON key, entirely in your browser.",
+  title: { absolute: "JSON to Rust Struct Generator — serde Derive Ready" },
+  description: "Paste JSON to get Rust structs that derive Serialize and Deserialize, with snake_case fields, serde renames and Option for missing keys. In-browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-rust" },
   openGraph: {
-    title: "JSON to Rust Struct — Generate a Single Root Struct",
-    description: "JSON to Rust Struct generates a single Root struct with one field per top-level JSON key, entirely in your browser.",
+    title: "JSON to Rust Struct Generator — serde Derive Ready",
+    description: "Paste JSON to get Rust structs that derive Serialize and Deserialize, with snake_case fields, serde renames and Option for missing keys. In-browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-rust",
   },
 };

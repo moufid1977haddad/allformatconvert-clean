@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPromptLength } from '@/lib/quota/limits';
+import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 import { readAiJson } from '../../../lib/aiClient';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -44,7 +44,7 @@ export default function AITranslatorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">AI Translator</h1>
-        <p className="text-neutral-500 text-center mb-8">Translate text to any language with AI</p>
+        <p className="text-neutral-500 text-center mb-8">Translate text into {languages.length} languages with AI</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Target Language</label>
@@ -69,24 +69,32 @@ export default function AITranslatorPage() {
       </div>
       <SeoContent
         title="AI Translator"
-        description="AI Translator is a free online translation tool powered by OpenAI's GPT-4o mini model. It automatically detects the language of your input text and translates it into the target language you choose from the dropdown — no software installation or subscription required."
+        description={`AI Translator translates text you paste into one of ${languages.length} target languages: ${languages.join(', ')}. You do not pick the source language: the model reads it from the text itself. It uses OpenAI's GPT-4o mini through our server and returns only the translation, which you can copy or download as translation.txt. It works on plain text, up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters per request; to translate a PDF file, use PDF Translate. Machine translation can miss nuance, so have contracts and other important documents checked by a fluent speaker.`}
+        howToTitle="How to translate text with AI"
         howTo={[
-          "Choose your target language from the dropdown menu.",
-          "Paste or type the text you want to translate into the input box.",
-          "Click the Translate button to send it to the AI.",
-          "Copy your translated text from the output box below."
+          "Choose a language in the \"Target Language\" list.",
+          "Paste your text into the \"Paste text to translate...\" box.",
+          "Click \"Translate\"; the button reads \"Translating...\" until the result is ready.",
+          "Copy the text under \"Result\" with \"Copy\", or click \"Download\" to get translation.txt."
         ]}
+        specs={[
+          { label: "Target languages", value: languages.join(', ') },
+          { label: "Source language", value: "Not chosen: the model reads it from your text" },
+          { label: "Length", value: `Up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters per request; the translation itself is limited to 1,000 tokens` },
+          { label: "Output", value: "Plain text, copied or downloaded as a .txt file" },
+          { label: "Usage limits", value: "Requests per connection are capped per hour and per day, in one allowance with the site's other paid tools, within a monthly budget for the site" }
+        ]}
+        privacyTitle="Where your text is translated"
+        privacy="Translation does not happen in your browser: your text and the chosen language are sent to our server, which passes them to OpenAI's GPT-4o mini, and the translation comes back to the page. We keep no copy of either text, in an account or on our server."
         faqs={[
-          { q: "Is AI Translator really free to use?", a: "Yes, AI Translator is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "How many languages does AI Translator support?", a: "You can translate into 10 target languages from the dropdown: English, French, Spanish, German, Italian, Portuguese, Arabic, Chinese, Japanese, and Russian. The source language is detected automatically." },
-          { q: "Is my translated text kept private?", a: "Your text is sent to OpenAI's API to generate the translation. It is not stored on our servers or shared for any purpose beyond producing your translation." },
-          { q: "Can AI Translator handle technical or specialized terminology?", a: "The underlying AI model generally handles technical and industry-specific vocabulary well, but for critical documents you should always have a translation reviewed by a fluent speaker." }
+          { q: "Which target languages are offered?", a: `${languages.length}: ${languages.join(', ')}. Any other target is refused by the server. The text you paste may be in another language; the model reads it and writes the translation in the one you picked.` },
+          { q: "Do I need to say what language my text is in?", a: "No. There is no source-language setting, and the page does not display a detected language. The model reads your text as it is and writes the translation in the language chosen in the list." },
+          { q: "How long a text can I translate at once?", a: `${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters in the source text. The translation is capped at 1,000 tokens, so a long passage can come back incomplete; translate long texts a few paragraphs at a time and check the end of each result.` },
+          { q: "Can I translate a PDF or a Word file here?", a: "No, this page takes pasted text only. For a PDF, use PDF Translate, which works from the PDF file itself. For a Word document, copy its text and paste it into the box above." }
         ]}
         tips={[
-          "For better translations of complex sentences, break them into shorter, simpler phrases rather than translating entire paragraphs at once.",
-          "Always proofread translated content, especially for formal or professional communication.",
-          "Use the copy button to quickly copy translated text to your clipboard.",
-          "When translating between languages with very different grammar, review the output carefully to make sure the meaning matches your original intent."
+          "Check names, figures and dates in the result against your original: they should come through unchanged.",
+          "To spot a change in meaning, translate the result back into the original language and compare the two versions."
         ]}
       />
     </div>

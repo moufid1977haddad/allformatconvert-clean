@@ -61,24 +61,32 @@ export default function RomanNumeralConverterPage() {
       </div>
       <SeoContent
         title="Roman Numeral Converter"
-        description="Roman Numeral Converter converts between Arabic numbers (1–3999) and Roman numerals instantly and bidirectionally as you type, entirely in your browser."
+        description={`Roman Numeral Converter works both ways as you type: a whole number from 1 to 3999 becomes its Roman numeral, and a numeral becomes its number. Lowercase letters are accepted and shown in capitals. Only the standard form is read, the one the converter itself writes, so IIII, IM, VX or MMMM are flagged instead of being turned into 4, 999, 5 or 4000. Zero, decimals, exponents and numbers above 3999 have no standard numeral and get a message, and the Copy Roman Numeral button copies the numeral only.`}
+        example={{
+          caption: 'Four entries and what the page shows (the page\'s own conversion code, run in Node on October 6, 2026).',
+          inputLabel: 'You type',
+          input: 'Number: 2026\nNumber: 3999\nRoman Numeral: mcmxciv\nRoman Numeral: IIII',
+          outputLabel: 'The other field shows',
+          output: 'MMXXVI\nMMMCMXCIX\n1994 (the numeral is shown as MCMXCIV)\nnothing, and the message: “IIII” is not a valid Roman numeral (standard form, 1 to 3999 — for example 4 is IV, not IIII).',
+        }}
+        howToTitle="How to convert numbers to Roman numerals"
         howTo={[
-          "Type a number (1–3999) into the Number field, or a Roman numeral into the Roman Numeral field.",
-          "The opposite field updates automatically as you type — no button needed.",
-          "Lowercase Roman numerals (e.g., \"iv\") are accepted and converted to uppercase automatically.",
-          "Click \"Copy Roman Numeral\" to copy the Roman numeral result to your clipboard."
+          `Type a whole number in "Number (1-3999)", or a numeral in "Roman Numeral".`,
+          'The other field fills in as you type, and a red message explains any value that cannot convert.',
+          `Click "Copy Roman Numeral" to copy the numeral to your clipboard.`,
         ]}
+        specs={[
+          { label: 'Range', value: '1 to 3999, I to MMMCMXCIX' },
+          { label: 'Letters', value: 'I, V, X, L, C, D and M, in capitals or lowercase, in standard subtractive form only' },
+          { label: 'Refused with a message', value: 'IIII, IM, VX, MMMM and other non-standard numerals; 0, decimals such as 12.5, exponents such as 1e3, numbers above 3999' },
+          { label: 'Copy', value: 'Copies the numeral only, not the number' },
+        ]}
+        privacyTitle="Where your numbers are processed"
+        privacy="Both directions are computed by this page in your browser, and nothing you type is sent. If copying to the clipboard fails, the page sends the fixed text Copy to the clipboard failed to our error log, with the tool's name and your browser's name and major version."
         faqs={[
-          { q: "What's the maximum number this converter handles?", a: "1 to 3,999 (MMMCMXCIX) — standard Roman numerals have no symbol for zero or numbers beyond this range." },
-          { q: "Does it validate strict Roman numeral syntax?", a: "No — it calculates a value using standard subtractive/additive rules for any combination of valid letters (I, V, X, L, C, D, M), even unconventional ones like \"IIII\", so it won't flag historically non-standard combinations as errors." },
-          { q: "Can I convert decimals or fractions?", a: "No, only whole numbers convert — Roman numerals don't represent fractional values." },
-          { q: "Is Roman Numeral Converter free to use?", a: "Yes, it's completely free with no signup required." }
-        ]}
-        tips={[
-          "Type into either field — the tool detects which direction to convert automatically.",
-          "The Copy button only copies the Roman numeral value, not the Arabic number — copy the number field's text manually if you need that instead.",
-          "Lowercase input like \"xiv\" works fine and converts the same as \"XIV\".",
-          "For checking tattoo designs or historical dates, double-check against a reference chart since this tool doesn't flag non-standard letter combinations as invalid."
+          { q: 'Does it accept IIII for 4?', a: 'No. A numeral is accepted only if it is exactly the standard form the converter writes for that number, so 4 must be IV and 999 must be CMXCIX, not IM. The page says the numeral is not valid rather than guessing a value for it.' },
+          { q: 'What is the largest number it converts?', a: '3999, written MMMCMXCIX. In standard form no letter repeats more than three times, so MMMM for 4000 is refused, and zero and fractions have no standard numeral either; each of these gets a message instead of a result.' },
+          { q: 'Can I type lowercase numerals?', a: 'Yes. mcmxciv is read as MCMXCIV and gives 1994, and the Roman Numeral field switches your letters to capitals as you type, so you can copy the standard spelling straight away.' },
         ]}
       />
     </div>

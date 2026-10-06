@@ -16,17 +16,29 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF to Image"
-        description={'PDF to Image turns each page of your PDF into a PNG, JPG, WebP, TIFF or BMP picture, or extracts the photos and images embedded in it, in your browser with PDF.js — on a computer the PDF is not uploaded. On iPhone and iPad only, a page the device cannot draw within 20 seconds is drawn by our own PDF service instead (the page says so): the PDF is sent there, then deleted. Choose Normal (150 dpi), High (300 dpi, for printing) or Screen (72 dpi) and all pages or only some. Download each picture, or all of them in one ZIP.'}
-        howTo={['Click or drop a PDF on the upload area.', 'Choose "Pages to images" to turn each page into a picture, or "Extract images" to take out the photos and pictures inside the PDF.', 'Pick the format, the resolution (Normal 150 dpi, High 300 dpi for printing, or Screen 72 dpi) and, if you want, only some pages, like 1-3, 5.', 'Click "Convert pages" (or "Extract images"), then "Download" under each picture or "Download all" for one ZIP file.']}
-        faqs={[
-          { q: 'Is PDF to Image free?', a: 'Yes, free and with no sign-up. On a computer it runs in your browser: no upload and no daily limit. On an iPhone or iPad, pages drawn by our PDF service are limited to 300 an hour.' },
-          { q: 'Which formats can I get?', a: 'PNG (lossless, the default), JPG, WebP, TIFF and BMP. JPG and WebP have a quality setting.' },
-          { q: 'What is the difference between the two modes?', a: '"Pages to images" makes one picture per page, exactly as the page looks. "Extract images" takes out the pictures placed inside the PDF (photos, scans, logos) at their own resolution, one file per picture — text and drawings are not included.' },
-          { q: 'Which resolution should I choose?', a: 'Normal (150 dpi) is sharp on screens. High (300 dpi) is for printing. A page too large for your device to draw at once is rendered at the highest resolution that fits, and the page says so.' },
-          { q: 'Can I convert only some pages?', a: 'Yes: type pages and ranges such as 1-3, 5, 8- in the Pages box. Leave it empty for every page.' },
-          { q: 'My PDF has a password. What can I do?', a: 'A password-protected PDF cannot be read until it is unlocked. Use our PDF Unlock tool with the password, then convert the unlocked file.' }
+        description={'PDF to Image turns PDF pages into pictures, or takes out the pictures a PDF contains. Five formats are offered: lossless PNG, the default, JPG and WebP with a quality setting, TIFF and BMP. Pages are drawn at 150, 300 or 72 dpi; extracted pictures keep the size at which they were stored. PDF.js does the work in the browser tab. On iPhone and iPad only, a page the device cannot draw in time is drawn by our own PDF service instead, and the page says so.'}
+        howToTitle="How to convert PDF pages to images"
+        howTo={[
+          'Click or drop the PDF whose pages or pictures you want as image files.',
+          'In "Mode", keep "Pages to images" or choose "Extract images".',
+          'Set the "Format", the "Resolution", the "Quality" for JPG or WebP, and the "Pages" if you want only some of them.',
+          'Click "Convert pages" or "Extract images", then "Download" under a picture, or "Download all" for a ZIP.',
         ]}
-        tips={['PNG keeps text perfectly crisp; JPG or WebP make much smaller files for photos and scans.', 'TIFF is accepted by most print shops and fax software; the page preview is not shown for TIFF, but the file is complete.', 'Very long PDFs: convert a range of pages at a time to keep your device responsive.']}
+        specs={[
+          { label: 'Output formats', value: 'PNG, JPG, WebP, TIFF, BMP' },
+          { label: 'Several pictures', value: 'One ZIP file with the download-all button' },
+          { label: 'Resolution', value: 'Normal 150 dpi, High 300 dpi or Screen 72 dpi, for pages' },
+          { label: 'Time per page', value: '60 seconds on a computer or Android device; on iPhone and iPad, 20 seconds, after which, or at once if drawing fails, our service draws that page and the following ones' },
+          { label: 'On iPhone and iPad', value: 'Pages drawn by our service: 300 pages an hour and 1,000 a day per visitor; PDF up to 44 MB' },
+        ]}
+        privacy={'On a computer or an Android device, the PDF is read and drawn inside this browser tab and is not uploaded. On iPhone and iPad, when a page fails or is not drawn within 20 seconds, the PDF is sent to our own PDF service, which draws that page and every page after it with Poppler; the page tells you, and the copy is deleted after the run. "Extract images" never uses the service.'}
+        faqs={[
+          { q: 'Can I extract the images from a PDF instead of whole pages?', a: 'Yes. Choose "Extract images" in "Mode": each picture placed in the PDF is saved as its own file at the size it was stored at. Text and vector drawings are left out, and tiny pictures under 16 pixels on a side are skipped.' },
+          { q: 'Which resolution should I choose?', a: '150 dpi, the "Normal" setting, suits screens. 300 dpi, "High", is meant for printing. 72 dpi, "Screen", gives the smallest files. A page too large for your device to draw at once is rendered at the highest resolution that fits, and the page says so.' },
+          { q: 'Can I convert only some pages?', a: 'Yes. Type pages and ranges in the "Pages" box, such as 1-3, 5 or 8- for page eight to the end; leave it empty to convert every page.' },
+          { q: 'Can I convert a password-protected PDF?', a: 'No, not until it is unlocked. Remove the password with PDF Unlock, which needs the password, then convert the unlocked file here.' },
+        ]}
+        tips={['A TIFF result has no preview on the page, but the file is complete and downloads normally.']}
       />
     </div>
   );

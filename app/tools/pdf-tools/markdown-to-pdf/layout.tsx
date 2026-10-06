@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Markdown to PDF — Convert Markdown to a PDF File Online Free" },
-  description: "Markdown to PDF online free: turn a .md file or pasted Markdown into a real PDF file with selectable text, tables, code blocks and clickable links.",
+  title: { absolute: "Markdown to PDF — .md Files with Tables and Code to PDF" },
+  description: "Turn a .md file or pasted Markdown into a PDF with GitHub tables, task lists and code blocks. A4 by default, or Letter, Legal, A3 or A5.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/markdown-to-pdf" },
   openGraph: {
-    title: "Markdown to PDF — Convert Markdown to a PDF File Online Free",
-    description: "Markdown to PDF online free: turn a .md file or pasted Markdown into a real PDF file with selectable text, tables, code blocks and clickable links.",
+    title: "Markdown to PDF — .md Files with Tables and Code to PDF",
+    description: "Turn a .md file or pasted Markdown into a PDF with GitHub tables, task lists and code blocks. A4 by default, or Letter, Legal, A3 or A5.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/markdown-to-pdf",
   },
 };

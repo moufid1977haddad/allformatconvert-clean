@@ -62,24 +62,35 @@ export default function TextRepeaterPage() {
       </div>
       <SeoContent
         title="Text Repeater"
-        description="Text Repeater duplicates any text a set number of times with your choice of separator, entirely in your browser."
+        description={"Text Repeater copies a word, a line or a whole paragraph a chosen number of times, from 1 to 100, and joins the copies with a new line, a space, a comma followed by a space, or nothing at all. It is handy for test data, for filling a field to check its limit, or for building a repeated pattern. The text is repeated exactly as typed, line breaks included. There is no custom separator, and a count outside 1 to 100 is refused with a message. All copies are joined on your device, not on a server."}
+        example={{
+          caption: "Repeat count 3 with the Comma separator: each comma is followed by a space.",
+          inputLabel: "Text",
+          input: "Hip hip hooray!",
+          outputLabel: "Result",
+          output: "Hip hip hooray!, Hip hip hooray!, Hip hip hooray!",
+        }}
+        howToTitle={"How to repeat text"}
         howTo={[
-          "Enter or paste your text into the input field.",
-          "Set how many times to repeat it (1–100) using the number input.",
-          "Choose a separator: New Line, Space, Comma, or None.",
-          "Click \"Repeat\" and copy your result from the output box."
+          "Type or paste the text to repeat.",
+          "Set \"Repeat count\" to a whole number from 1 to 100; it starts at 3.",
+          "Choose \"New Line\", \"Space\", \"Comma\" or \"None\" in the \"Separator\" dropdown.",
+          "Click \"Repeat\", then \"Copy\" the result or \"Download\" it as repeated.txt."
         ]}
+        specs={[
+          { label: "Repetitions", value: "1 to 100, whole numbers only" },
+          { label: "Separators", value: "New Line, Space, Comma (a comma and a space), None" },
+          { label: "Output", value: "One string of joined copies, available through Copy or as the file repeated.txt" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"The copies are joined by one line of JavaScript in this page, so your text stays in your browser and is never transmitted. A count outside the allowed range shows a red message on the page, which is not sent anywhere."}
         faqs={[
-          { q: "Is Text Repeater free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "How many times can I repeat text?", a: "From 1 up to 100 repetitions." },
-          { q: "Can I use a custom separator?", a: "Not currently — choose from New Line, Space, Comma, or None; there's no field for a custom delimiter." },
-          { q: "Is my data private?", a: "Yes, everything is processed locally in your browser — what you enter is never sent to a server." }
+          { q: "How many times can I repeat a text?", a: "100 times at most, and at least once. A count of 0, a decimal or a number above 100 is refused with the message Enter a whole number of repetitions from 1 to 100, and no result is made." },
+          { q: "Can I use my own separator, such as a semicolon?", a: "No. Only the four presets exist. Choose New Line, copy the result, then replace the line breaks with your separator in your editor. With None the copies touch each other, leaving no boundary to replace." },
+          { q: "Is there a space after the comma?", a: "Yes. Comma joins the copies with a comma and a space, as in a, a, a. To get copies without that space, end your own text with a comma, pick None, then delete the comma left at the very end." }
         ]}
         tips={[
-          "Use Text Repeater to quickly generate repetitive test data for development or QA work.",
-          "Combine the Comma separator with short text to build a quick comma-separated list.",
-          "Copy the output directly into spreadsheets or code editors for seamless integration.",
-          "For a custom separator beyond the four presets, generate with \"None\" and then find-and-replace in your destination editor."
+          "To fill a field up to a known length, repeat a short word and check the total in Character Counter."
         ]}
       />
     </div>

@@ -35,22 +35,37 @@ export default function MarkdownEditorPage() {
       </div>
       <SeoContent
         title="Markdown Editor"
-        description={"Markdown Editor renders Markdown live as you type with marked, a CommonMark and GitHub Flavored Markdown parser, entirely in your browser: headings, emphasis, links, images, block quotes, ordered and nested lists, task lists, tables, fenced code blocks, strikethrough and horizontal rules. HTML written inside the Markdown is rendered too, after DOMPurify removes anything that could run code (scripts, event handlers, javascript: links). Download your Markdown as a .md file or the rendered page as .html (or both in one ZIP); leaving the page with unsaved changes asks first."}
+        description={"Markdown Editor is a two-pane writing page: you type Markdown on the left and the preview on the right is rebuilt after each change. The text is parsed with marked, which follows CommonMark and GitHub Flavored Markdown, so tables, task lists, fenced code and strikethrough work. HTML typed inside the Markdown is kept after DOMPurify strips scripts, event handlers and javascript: links. When the draft is ready, save it as document.md, save the generated HTML as document.html (the body content, without a head section), or take both in one ZIP. There is no formatting toolbar and no autosave."}
+        example={{
+          caption: "A task list and a table typed in the left pane; below is the HTML that marked produces with the page’s settings (the page then passes it through DOMPurify).",
+          inputLabel: "Markdown",
+          input: "## Tasks\n\n- [x] Draft\n- [ ] Review\n\n| Step | Owner |\n|---|---|\n| Draft | Ana |",
+          outputLabel: "HTML (document.html)",
+          output: "<h2>Tasks</h2>\n<ul>\n<li><input checked=\"\" disabled=\"\" type=\"checkbox\"> Draft</li>\n<li><input disabled=\"\" type=\"checkbox\"> Review</li>\n</ul>\n<table>\n<thead>\n<tr>\n<th>Step</th>\n<th>Owner</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Draft</td>\n<td>Ana</td>\n</tr>\n</tbody></table>",
+        }}
+        howToTitle={"How to write Markdown and download it"}
         howTo={[
-          "Type or paste Markdown into the left-hand text area.",
-          "Watch the rendered preview update instantly on the right as you type.",
-          "Use any standard Markdown: # headings, **bold**, *italic*, [links](url), tables, ``` code blocks, - lists.",
-          "Download document.md (your Markdown) or document.html (the rendered page), or both as a ZIP."
+          "Replace the sample text in the \"Markdown\" pane with your own writing.",
+          "Check the \"Preview\" pane on the right; it is rebuilt after each change.",
+          "Click \"Download\" on the document.md row to save your Markdown, or on the document.html row to save the generated HTML.",
+          "Click \"Download all\" to get both files in document.zip.",
         ]}
+        specs={[
+          { label: "Syntax", value: "CommonMark plus GitHub Flavored Markdown: tables, task lists, strikethrough, fenced code" },
+          { label: "HTML inside Markdown", value: "Allowed; DOMPurify removes scripts, event handlers and javascript: links" },
+          { label: "Downloads", value: "document.md (your text), document.html (body content only, no head or charset tag), document.zip (both)" },
+          { label: "Length", value: "The tool sets no size cap; past 1,000,000 characters the left box shows only the beginning while the preview uses the whole text" },
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Your Markdown is turned into HTML by code running in the page (marked, then DOMPurify) and is not sent to our servers or stored anywhere. Images you link to are loaded by your browser from the sites that host them, so those sites see the request. The downloads are built in the browser from your text."}
         faqs={[
-          { q: "Is Markdown Editor free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I copy the rendered HTML or download my Markdown file?", a: "Yes — download your Markdown as document.md, the rendered page as document.html, or both in one ZIP. You can also select and copy text from either pane." },
-          { q: "What Markdown syntax does it support?", a: "CommonMark plus GitHub Flavored Markdown: headings, bold, italic, strikethrough, links, images, block quotes, ordered, bullet, nested and task lists, tables, inline code, fenced code blocks and horizontal rules." },
-          { q: "Is my text uploaded to a server?", a: "No, rendering happens entirely in your browser." }
+          { q: "Is my draft saved if I close the tab?", a: "No. Nothing is stored, in your browser or on a server. Once you have changed the sample, the browser asks before you leave until you download one of the files or copy the whole text, so download document.md first." },
+          { q: "Does the HTML download include styles?", a: "No. document.html holds only the HTML generated from your Markdown, without a head section, stylesheet or charset tag. For a complete page with a UTF-8 declaration, paste the same Markdown into Markdown to HTML." },
+          { q: "Can I use HTML tags inside the Markdown?", a: "Yes. Tags such as details or kbd are kept in the preview and in document.html, but DOMPurify first removes script elements, attributes such as onclick and javascript: links." },
+          { q: "Does it support tables and task lists?", a: "Yes. GitHub Flavored Markdown is on, so pipe tables, - [ ] task lists (shown as disabled checkboxes), ~~strikethrough~~ and fenced code blocks with a language name are converted." },
         ]}
         tips={[
-          "HTML inside your Markdown is rendered, but scripts and event handlers are removed before display.",
-          "Nothing is saved on a server: download your file before leaving — the page asks first if you haven't."
+          "Need a PDF of the finished document? Paste the same Markdown into Markdown to PDF.",
         ]}
       />
     </div>

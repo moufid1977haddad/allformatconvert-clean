@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "File Encryptor — Obfuscate Any File Online Free" },
-  description: "File Encryptor is a free online tool that obfuscates any file with a password-based XOR cipher, entirely in your browser — no upload, no software installation.",
+  title: { absolute: "File Encryptor — AES-256 Password Encryption in Your Browser" },
+  description: "Encrypt any file with a password using AES-256-GCM, or decrypt a .encrypted file, in your browser. The key comes from PBKDF2 with 600,000 iterations.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/file-encryptor" },
   openGraph: {
-    title: "File Encryptor — Obfuscate Any File Online Free",
-    description: "File Encryptor is a free online tool that obfuscates any file with a password-based XOR cipher, entirely in your browser — no upload, no software installation.",
+    title: "File Encryptor — AES-256 Password Encryption in Your Browser",
+    description: "Encrypt any file with a password using AES-256-GCM, or decrypt a .encrypted file, in your browser. The key comes from PBKDF2 with 600,000 iterations.",
     url: "https://www.onlineconvertools.com/tools/file-tools/file-encryptor",
   },
 };

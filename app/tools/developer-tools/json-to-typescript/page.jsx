@@ -35,24 +35,38 @@ export default function JsonToTypescriptPage() {
       </div>
       <SeoContent
         title={"JSON to TypeScript"}
-        description={"JSON to TypeScript generates TypeScript interfaces from a JSON sample, entirely in your browser — nothing is uploaded to a server. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own named interface, every element of an array is examined and merged (so an array of objects becomes Item[]), fields missing from some elements become optional (field?:), null values are typed, and keys that aren't valid identifiers (\"first-name\") are quoted so the code compiles."}
+        description={"JSON to TypeScript reads a JSON sample and writes the TypeScript interfaces that describe it, using the quicktype-core engine in your browser. Every nested object becomes its own exported interface, and every element of an array is examined: a key that some elements lack gets a question mark, and a value that is sometimes null is typed with null in a union. Keys that are not valid identifiers, such as first-name, are written in quotes. It generates types only: no classes, no runtime checks, and no enums, dates or UUID types guessed from string values."}
+        example={{
+          caption: "Two array elements: nickname is null in one, team exists only in the second.",
+          inputLabel: "JSON Input",
+          input: "[{\"id\": 1, \"name\": \"Ada\", \"nickname\": null},\n {\"id\": 2, \"name\": \"Lin\", \"nickname\": \"lin\", \"team\": {\"name\": \"core\", \"size\": 4}}]",
+          outputLabel: "TypeScript Output",
+          output: "export interface Root {\n    id:       number;\n    name:     string;\n    nickname: null | string;\n    team?:    Team;\n}\n\nexport interface Team {\n    name: string;\n    size: number;\n}",
+        }}
+        howToTitle={"How to generate TypeScript interfaces from JSON"}
         howTo={[
-          "Paste a JSON object or array (an API response, a config file) into the input box.",
-          "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",
-          "Review the output — fields missing from some elements or holding null are marked optional.",
-          "Click 'Copy' to copy the code into your project."
+          "Paste a JSON object, or an array of several representative objects, into \"JSON Input\".",
+          "Click \"Convert\"; the engine loads on the first click, then the interfaces fill \"TypeScript Output\".",
+          "Check the optional keys and the null unions against the data your code will really receive.",
+          "Click \"Copy\", or \"Download\" to save the code as \"types.ts\".",
         ]}
+        specs={[
+          { label: "Input", value: "JSON text: an object, or an array of objects whose elements are merged; an array of plain values gives an empty output" },
+          { label: "Output", value: "Exported TypeScript interfaces, one per nested object, saved as types.ts" },
+          { label: "Optional keys", value: "A question mark when a key is missing from some array elements; null in a union when a value is null" },
+          { label: "Not generated", value: "Classes, runtime validation, enums, date or UUID types (strings stay string)" },
+        ]}
+        privacyTitle={"Where your JSON is processed"}
+        privacy={"The interfaces are generated in your browser: the page fetches the quicktype engine on your first click, and your JSON is not uploaded, nor is the TypeScript it produces. If an error message appears, a shortened copy of that message, with quoted text, long numbers and addresses removed, is sent to our error log together with the tool's name and your browser's name and version, so the tool can be fixed."}
         faqs={[
-          { q: "Is JSON to TypeScript free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it generate nested interfaces for nested JSON?", a: "Yes — each nested object becomes its own named interface, referenced from its parent; arrays of objects become arrays of that interface." },
-          { q: "What if my JSON has field names with hyphens or spaces?", a: "They are written as quoted property names (\"first-name\": string;), which is valid TypeScript." },
-          { q: "Are optional fields detected?", a: "Yes — a field that is missing from some elements of an array is marked optional with ?, and a null value is reflected in the type." },
-          { q: "Can I download the generated code as a file?", a: "No, there's only a 'Copy' button — paste the copied code into a file yourself." }
+          { q: "Does it detect optional fields?", a: "Yes, when you paste an array. All elements are merged: a key missing from some of them is written with a question mark, and a key that is null in some of them gets null in its type, for example null | string. With a single object, every key it contains is required." },
+          { q: "How are nested objects and arrays typed?", a: "Each nested object becomes a separate exported interface named after its key, such as Team for a team key, and an array of objects becomes an array of that interface. Arrays of strings or numbers become string[] or number[]." },
+          { q: "What happens to keys with hyphens or spaces?", a: "They keep their exact spelling as quoted property names, which is valid TypeScript, so the interface matches the JSON without any renaming. Keys that are valid identifiers, like nickname, are written without quotes." },
+          { q: "Can I save the result as a .ts file?", a: "Yes. After a conversion, a row named types.ts appears under the output with a \"Download\" button; on iPhone and iPad a \"Save / Share\" button is added next to it. \"Copy\" puts the same code on the clipboard." },
         ]}
         tips={[
-          "Paste an array with several representative elements: the more samples, the more precise the optional fields and unions.",
-          "Rename the Root interface to something specific to your data.",
-          "Types are inferred from the sample only — a field that is always a string in your sample is typed string."
+          "Rename the Root interface after pasting it into your project; the name comes from the tool, not from your data.",
+          "If the result is an Invalid JSON message, open the same text in JSON Formatter, which points to the line and column of the mistake.",
         ]}
       />
     </div>

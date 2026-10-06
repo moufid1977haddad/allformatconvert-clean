@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Code Minifier — Strip Comments and Collapses Whitespace" },
-  description: "Code Minifier strips comments and collapses whitespace for JS, TS, CSS, and HTML entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "Code Minifier — JavaScript, TypeScript, CSS and HTML" },
+  description: "Minify JS or TS with Terser, CSS with CSSO, and HTML by removing comments and extra spaces, all in your browser, and count the characters removed.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/code-minifier" },
   openGraph: {
-    title: "Code Minifier — Strip Comments and Collapses Whitespace",
-    description: "Code Minifier strips comments and collapses whitespace for JS, TS, CSS, and HTML entirely in your browser — nothing is uploaded to a server.",
+    title: "Code Minifier — JavaScript, TypeScript, CSS and HTML",
+    description: "Minify JS or TS with Terser, CSS with CSSO, and HTML by removing comments and extra spaces, all in your browser, and count the characters removed.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/code-minifier",
   },
 };

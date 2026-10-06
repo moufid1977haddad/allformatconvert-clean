@@ -93,26 +93,32 @@ function ResizerControls({ params, setParams, disabled, file }) {
 
 const seo = {
   title: 'Video Resizer',
-  description: 'Video Resizer changes the width and height of a video, or crops it to any area you draw (free or 1:1, 16:9, 9:16, 4:5, 4:3), on our ffmpeg server, so it works in any browser, including Safari on iPhone, and runs faster than the video plays. Keep the whole picture with black bars (Fit), crop the edges (Fill) or stretch it to the exact size. You get an H.264 + AAC MP4 with the original sound, the format every phone and computer plays.',
+  description: `Video Resizer gives a video a new width and height, or crops it to an area you choose. To resize, type the size or click a preset: 480p, 720p, 1080p and 4K follow your video's orientation, and there are square, vertical, 4:5 portrait, story and 4:3 sizes. If the new shape differs, choose Fit (black bars), Fill (edges cut off) or Stretch. To crop, move and size a box over the picture, freely or in a fixed shape (1:1, 16:9, 9:16, 4:5, 4:3); the kept area is not scaled. ffmpeg does the work on our video service and returns an MP4.`,
+  howToTitle: 'How to resize or crop a video',
   howTo: [
-    'Select or drop a video file (MP4, MOV, MKV, WebM, AVI and more, up to 1 GB).',
-    'Enter the new width and height, or click a preset (480p, 720p, 1080p, square, vertical). 480p, 720p and 1080p keep your video’s orientation: a vertical video becomes 480×854, 720×1280 or 1080×1920.',
-    'Choose Fit, Fill or Stretch for a video of another shape, then click "Resize Video" and follow the real progress.',
-    'Preview and download the resized MP4.',
+    `Choose or drop a video file; when your browser can read its size, the page shows it and says whether the video is vertical, square or horizontal.`,
+    `On "Resize", type a "Width" and a "Height" or click a preset such as "720p", then choose Fit, Fill or Stretch for a different shape.`,
+    `To crop instead, click "Crop", drag the box or type "Left", "Top", "Width" and "Height", or click "Whole picture" to start again.`,
+    `Click "Resize Video"; a waiting line appears when the service is busy, then the processing percentage.`,
+    `Play the result and click "Download": the MP4 name carries its new size, or -cropped and the kept size.`,
   ],
+  specs: [
+    { label: 'Input formats', value: `MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS` },
+    { label: 'Output', value: `MP4 at the new size or the cropped area (H.264 video, AAC sound at 160 kbps)` },
+    { label: 'New size', value: `16 to 7680 pixels per side, even numbers only (odd values are rounded)` },
+    { label: 'Crop area', value: `At least 16 × 16 pixels, even sides; the kept pixels are not scaled` },
+    { label: 'Maximum file size', value: `1 GB on a computer or a phone` },
+    { label: 'Usage limits', value: `A set number of resizes per hour and per day for each internet connection on our video service; no account` },
+  ],
+  privacy: `Resizing and cropping happen on our video service on Railway: the page uploads the video there in pieces, directly, not through the website's server. When ffmpeg is done, the service deletes your original; it deletes the resized MP4 once this page has downloaded it, or after a set time if the job is abandoned. Our service's logs list the job's operation, size range, status and timings, not your file. If resizing fails, the cleaned message, its error type, the tool name, your browser and version, the file type and a size range are reported to us.`,
   faqs: [
-    { q: 'Does it preserve aspect ratio automatically?', a: 'Yes, by default: when the new size has another shape than your video, the whole picture is kept with black bars (Fit). You can also crop the edges instead (Fill), or stretch it to the exact size (Stretch).' },
-    { q: 'Can I crop a video?', a: 'Yes: choose "Crop", then move and resize the box over the picture (or type its position and size in pixels), freely or in a fixed shape (1:1, 16:9, 9:16, 4:5, 4:3). Everything outside the box is removed; the kept area keeps its full resolution, with the original sound, as an MP4.' },
-    { q: 'Does the resized video have audio?', a: 'Yes — the original sound is kept (re-encoded in AAC, like the picture in H.264).' },
-    { q: 'What output format do I get?', a: 'An MP4 (H.264 video, AAC audio), which plays on iPhone, Android, Mac, Windows and every browser. Width and height are rounded to even numbers, as H.264 requires.' },
-    { q: 'Is my file uploaded anywhere?', a: 'Yes, to our own video service, because resizing a video needs a real video encoder. The original is deleted as soon as the resize ends, and the result right after your download (or after 15 minutes if you never download it).' },
-    { q: 'How long does it take?', a: 'Usually less than the length of the video, plus the upload. It no longer has to play the whole video in your browser.' },
+    { q: 'Can I make a video 9:16 for Reels, TikTok or Shorts?', a: `Yes. Click "Vertical 1080×1920" and choose Fill to cut the sides of a horizontal video, or Fit to keep the whole picture with black bars above and below. With "Crop" and the 9:16 shape you choose which part of the picture stays.` },
+    { q: 'Does it keep the aspect ratio?', a: `Yes with Fit, the default: the whole picture is scaled to fit the new size and black bars fill the rest. Fill keeps the ratio too but cuts the edges, and Stretch changes the ratio to match the exact width and height.` },
+    { q: 'Can I make a video bigger than the original?', a: `Yes, up to 7680 pixels per side, but enlarging adds no detail. The 480p, 720p, 1080p and 4K presets follow your video's orientation, so a vertical video gets 720×1280 rather than 1280×720.` },
+    { q: 'Is the sound kept?', a: `Yes. The first audio track is encoded again as AAC at 160 kbps, next to the H.264 picture. Extra audio tracks and subtitles are left out.` },
   ],
   tips: [
-    'To avoid black bars without cropping, divide your video\'s width and height by the same number.',
-    'For Instagram Reels, TikTok or Shorts, use the vertical 1080×1920 preset with Fill.',
-    'Making a video smaller than its original size also makes the file much lighter.',
-    'Use the presets for common platform sizes instead of typing custom numbers.',
+    `To avoid black bars without cropping, divide your video's width and height by the same number.`,
   ],
 };
 
@@ -122,7 +128,7 @@ export default function VideoResizerPage() {
       op="convert"
       tool="video-resizer"
       title="Video Resizer"
-      subtitle="Resize or crop a video — any browser, up to 1 GB, MP4 out"
+      subtitle="Change a video's width and height, or crop it to the area you draw"
       buttonLabel="Resize Video"
       initialParams={{ w: 1280, h: 720, mode: 'fit', edit: 'resize', crop: null, ratio: 'free' }}
       buildParams={(p) => {

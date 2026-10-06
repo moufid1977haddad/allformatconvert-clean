@@ -61,7 +61,7 @@ export default function FindReplacePage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Find and Replace</h1>
-        <p className="text-neutral-500 text-center mb-8">Find and replace text instantly</p>
+        <p className="text-neutral-500 text-center mb-8">Replace every match, as plain text or a regular expression</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-40 resize-none" placeholder="Paste your text here..." value={text} onChange={e => setText(e.target.value)} />
           <div className="grid grid-cols-2 gap-3">
@@ -103,24 +103,38 @@ export default function FindReplacePage() {
       </div>
       <SeoContent
         title="Find and Replace"
-        description={"Find and Replace searches your text for every match of your \"Find\" term and swaps it with your replacement text, entirely in your browser. By default, \"Find\" is treated as plain literal text — characters like . * + ( ) [ ] match themselves, not regex syntax. Check \"Use regular expression\" to opt into full regex matching, including capture groups and backreferences in the replacement."}
+        description={"Find and Replace swaps every occurrence of a search term in your text for a replacement in one pass, shows the result in a separate box and says how many replacements were made. By default the search and the replacement are plain text, so characters such as . ( ) and $1 mean themselves. Tick Use regular expression for JavaScript patterns with capture groups, Ignore case to match any case, and Whole words only to skip matches inside longer words, in any alphabet except for a regex that the Unicode mode refuses, where only the common scripts count. Your original text is not changed, and your text never leaves your device."}
+        example={{
+          caption: "Plain text with \"Ignore case\" and \"Whole words only\" ticked: USDT is left alone and the $ is inserted as typed. The page shows 2 replacement(s) made.",
+          inputLabel: "Text (Find: USD, Replace with: US$)",
+          input: "Total: 5 USD. Tax: 1 usd. USDT is not a match.",
+          outputLabel: "Result",
+          output: "Total: 5 US$. Tax: 1 US$. USDT is not a match.",
+        }}
+        howToTitle={"How to find and replace text"}
         howTo={[
-          "Paste your text into the main text box.",
-          "Enter your search text in the \"Find\" field and your replacement text in the \"Replace with\" field.",
-          "Check \"Use regular expression\" only if you want regex matching — leave it unchecked for plain literal text.",
-          "Click \"Replace All\" to replace every match in one pass, then copy your updated text from the output field."
+          "Paste your text into the first box.",
+          "Fill in \"Find\" and \"Replace with\"; leave \"Replace with\" empty to delete every match.",
+          "Tick \"Use regular expression\", \"Ignore case\" or \"Whole words only\" if needed.",
+          "Click \"Replace All\", check the count, then click \"Copy\" or \"Download\" to keep replaced.txt."
         ]}
+        specs={[
+          { label: "Search modes", value: "Plain text (default) or JavaScript regular expression" },
+          { label: "Options", value: "Ignore case; Whole words only (letters, digits and marks of any script)" },
+          { label: "Regex flags", value: "g always; i with Ignore case; u with Whole words only, except for a pattern the u flag refuses, which then runs without it; never m or s" },
+          { label: "Output", value: "A separate Result box with the count; Copy, or Download as replaced.txt" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Matching and replacing use your browser's own regular-expression engine; your text is never uploaded. When a regular expression is invalid, the error shown on the page is reported to our error log with the tool name and browser version, and that error can contain part of your pattern."}
         faqs={[
-          { q: "Does this tool support regular expressions?", a: "Yes, as an opt-in — check \"Use regular expression\" to have the \"Find\" field interpreted as a regex, with special characters like . * + ( ) [ ] ^ $ taking on their regex meaning. Leave it unchecked for plain literal matching." },
-          { q: "Do I need to escape special characters by default?", a: "No — with \"Use regular expression\" unchecked (the default), your search text is matched literally, so characters like . and ( match themselves." },
-          { q: "Is matching case-sensitive?", a: "Yes, always — there's no case-insensitive option." },
-          { q: "Is my data private?", a: "Yes, all text processing happens locally in your browser — nothing is uploaded to a server." }
+          { q: "Is the search case-sensitive?", a: "Yes, by default: USD does not match usd. Tick \"Ignore case\" to match both. In plain-text mode the replacement is still inserted exactly as you typed it, whatever the case of the match." },
+          { q: "Can I use capture groups like $1?", a: "Yes, with \"Use regular expression\" ticked: $1 inserts the first captured group and $& the whole match, as in JavaScript. Without regex mode, $1 and $& are inserted literally, so a price written as US$ stays intact." },
+          { q: "Do ^ and $ match the start of each line?", a: "No. The pattern runs without the multiline flag, so ^ matches only the very start of the text and $ only its end. To act on each line, match the line break itself, written \\n in regex mode. The replacement field cannot insert a line break." },
+          { q: "Does Whole words only work with accented and non-Latin words?", a: "Yes. A match is skipped when a letter, digit, combining mark or underscore of any script touches it, so café is not found inside cafés. One exception: a regex the Unicode mode refuses, such as a\\-b, falls back to the letters of the common scripts only." },
+          { q: "Can I undo a replacement?", a: "Yes, in effect: your original text stays unchanged in the first box and the result goes to a separate box. Change the options and click \"Replace All\" again for a new result." }
         ]}
         tips={[
-          "Leave \"Use regular expression\" unchecked for straightforward text replacement — no need to escape special characters.",
-          "Enable regex mode for advanced patterns, like using groups such as (\\w+) with backreferences in your replacement text.",
-          "\"Replace All\" always replaces every match in one click — there's no separate single-replacement mode.",
-          "Keep a copy of your original text before replacing, since there's no undo button."
+          "Build and test a complex pattern in Regex Tester first, then paste it into the Find field here."
         ]}
       />
     </div>

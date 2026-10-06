@@ -29,7 +29,7 @@ export default function CodeFormatterPage() {
     const target = lang === 'auto' ? detectLanguage(input) : lang;
     setUsed(target);
     if (!target) {
-      const msg = 'Error: The language could not be recognised. Choose it in the Language list.';
+      const msg = 'Error: The language could not be recognized. Choose it in the Language list.';
       reportShownMessage(msg);
       setOutput(msg);
       return;
@@ -86,24 +86,38 @@ export default function CodeFormatterPage() {
       </div>
       <SeoContent
         title={"Code Formatter"}
-        description={"Code Formatter formats JavaScript, TypeScript, JSX, JSON, HTML, XML, CSS, SCSS, LESS, SQL, YAML, Markdown and GraphQL entirely in your browser. The language is detected from your code, or you choose it. JavaScript, TypeScript, JSX, HTML, CSS, SCSS, LESS, YAML, Markdown and GraphQL are formatted by Prettier, the formatter most JavaScript projects use; XML by Prettier's XML plugin; SQL by sql-formatter, with 20 dialects (standard SQL, MySQL, MariaDB, PostgreSQL, SQLite, SQL Server T-SQL, Oracle PL/SQL, BigQuery, Snowflake, Redshift and more). JSON is validated and re-indented from your original text, so every number (including 20-digit ids and values like 1.10), escape and key order stays exactly as written. A syntax error is shown with its line and column and the lines around it."}
+        description={`Code Formatter beautifies ${LANGUAGES.length} languages in your browser and works out which one you pasted. JavaScript, TypeScript, JSX, HTML, CSS, SCSS, LESS, YAML, Markdown and GraphQL go through Prettier 3; XML through Prettier's XML plugin after a well-formedness check; SQL through sql-formatter, with ${SQL_DIALECTS.length} dialects; JSON through the site's own re-indenter, which keeps every number, escape and key order as written. Prettier applies its own style, so quotes, semicolons and line wrapping can change. When the engine reports a syntax error, nothing is formatted and the output shows the message with its position whenever the engine gives one.`}
+        example={{
+          caption: "Auto-detect reads this as GraphQL; the line under the output says Formatted as GraphQL (detected).",
+          inputLabel: "Input",
+          input: "query{user(id:1){name,friends(first:2){name}}}",
+          outputLabel: "Output",
+          output: "query {\n  user(id: 1) {\n    name\n    friends(first: 2) {\n      name\n    }\n  }\n}",
+        }}
+        howToTitle={"How to format code online"}
         howTo={[
-          "Paste your code into the input box.",
-          "Leave the Language list on 'Auto-detect', or choose the language (for SQL, also choose the SQL dialect).",
-          "Click 'Format'.",
-          "Click 'Copy' to copy the result, or download it as a file."
+          "Paste your code into \"Input\".",
+          "Leave \"Auto-detect\" in the Language list, or pick the language; for SQL, a \"SQL dialect\" list appears.",
+          "Click \"Format\".",
+          "Check the line under the output, which names the language used, then click \"Copy\" or \"Download\".",
         ]}
+        specs={[
+          { label: "Languages", value: `${LANGUAGES.map((l) => l.label).join(', ')}` },
+          { label: "SQL dialects", value: `${SQL_DIALECTS.length}: ${SQL_DIALECTS.map((d) => d.label).join(', ')}` },
+          { label: "Style", value: "Prettier with a print width of 80 and 2-space indentation (XML text content kept as written); JSON indented by 2 spaces; SQL keywords in capitals" },
+          { label: "Detection", value: "Mostly reads the first 4,000 characters (JSON is checked on the whole text); a wrong guess is fixed by choosing the language" },
+        ]}
+        privacyTitle={"Where your code is processed"}
+        privacy={"Formatting happens in the browser: each formatter (Prettier with the plugin a language needs, or sql-formatter) is fetched the first time you format that language, and your code is never uploaded. If formatting fails, the first line of the error, such as Line 3, column 12: Unexpected token, goes to our error log with the tool name and your browser's name and version, cleaned of quoted text, long numbers and addresses."}
         faqs={[
-          { q: "Is Code Formatter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Which languages are supported?", a: "JavaScript, TypeScript, JSX (React), JSON, HTML, XML, CSS, SCSS, LESS, SQL (20 dialects, including MySQL, PostgreSQL, SQLite, SQL Server T-SQL, Oracle PL/SQL and BigQuery), YAML, Markdown and GraphQL." },
-          { q: "How is the language detected?", a: "From the code itself: its first characters (a tag, a brace, a SQL or GraphQL keyword) and marks only one language has (type annotations for TypeScript, $variables for SCSS, key: value lines for YAML…). The result says which language was used; if it guessed wrong, choose the language in the list and click 'Format' again." },
-          { q: "Does formatting change my code?", a: "Its meaning, never. JSON: only whitespace changes, numbers are not re-serialized, so large integers and trailing zeros are preserved. JavaScript, TypeScript, CSS and the others are printed in Prettier's standard style, which can also change quotes, add semicolons or wrap long lines. Accents and emoji are kept as typed." },
-          { q: "What happens when my code has a syntax error?", a: "Nothing is formatted; the result shows the line and column of the first error (for example 'Line 3, column 12: Unexpected token') with the lines around it." },
-          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; each language's formatter is downloaded once, the first time you format that language." }
+          { q: "Can it detect the language automatically?", a: "Yes, from the text itself: its first characters (a tag, a brace, a SQL or GraphQL keyword) and marks only one language has, such as type annotations for TypeScript or $variables for SCSS. If the guess is wrong, pick the language and click \"Format\" again." },
+          { q: "Will formatting change my code?", a: "No for JSON: only whitespace changes, and numbers such as 1.10 or 20-digit ids are copied as written. Yes in style for the others: Prettier can switch quote marks, add semicolons and wrap long lines, and SQL keywords are capitalized." },
+          { q: "Does it show where a syntax error is?", a: "Yes, when the engine reports a position: the output starts with the line and column and the message, then shows the lines around it with a caret. Nothing is formatted. A few errors come without a position and are shown as a message only." },
+          { q: "Which SQL dialects are supported?", a: `${SQL_DIALECTS.length}, chosen in the "SQL dialect" list that appears for SQL, among them MySQL, PostgreSQL, SQLite, SQL Server (T-SQL), Oracle (PL/SQL), BigQuery, Snowflake, ClickHouse and DuckDB. SQL Formatter uses the same engine with a shorter list.` },
         ]}
         tips={[
-          "Minified JavaScript, CSS, HTML or JSON becomes readable in one click.",
-          "SQL keywords are written in capitals; choose your database's dialect so its own syntax (backquotes, [brackets], ::casts) is understood."
+          "Paste a minified JavaScript, CSS or HTML file to make it readable before you debug it.",
+          "For JSON with 4-space or tab indentation, or sorted keys, use JSON Formatter, which has those options.",
         ]}
       />
     </div>

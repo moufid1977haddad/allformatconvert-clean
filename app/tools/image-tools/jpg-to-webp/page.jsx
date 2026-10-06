@@ -7,6 +7,9 @@ import { canEncodeImageType, checkedDataURL, assertCanvasSize } from '../../../l
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { RASTER_MAX_PIXELS } from '../../../lib/imageOutput';
+import { WEBP_MAX_SIDE } from '../../../lib/bigImage';
+import { PHONE_MAX_MP } from '../../../lib/reduceImage';
 export default function JPGtoWebPPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -53,24 +56,28 @@ export default function JPGtoWebPPage() {
       </div>
       <SeoContent
         title="JPG to WebP"
-        description="JPG to WebP converts a JPG image to WebP format entirely in your browser — your file is never uploaded to a server. Choose the quality (80 by default) or lossless mode, which keeps every pixel; in Safari, which has no WebP encoder of its own, the file is made by libwebp compiled to WebAssembly, the encoder Squoosh uses."
+        description={`JPG to WebP re-encodes a JPG or JPEG photo as a WebP image. Choose a quality from 1 to 100 (it starts at 80), or tick "Lossless", which stores the decoded JPEG pixels exactly but makes a larger file. After converting, the page shows the old and the new size in KB, so you can try another quality and compare. On a computer, Chrome, Edge and Firefox use their own WebP encoder for the lossy mode; Safari and every browser on iPhone and iPad have none, so there libwebp compiled to WebAssembly makes the file, and lossless mode always uses libwebp. One photo per conversion.`}
+        howToTitle="How to convert JPG to WebP"
         howTo={[
-          "Click the upload area and select a JPG file from your device.",
-          "Click 'Convert' to render it to WebP.",
-          "Preview the converted image.",
-          "Click the download button to save your WebP file."
+          `Open a .jpg or .jpeg photo in the upload area.`,
+          `Move the "Quality" slider, or tick "Lossless" for an exact copy of the pixels.`,
+          `Click "Convert" and compare the two sizes shown in KB.`,
+          `Click "Download" to keep the WebP, which takes the photo's name.`
         ]}
+        specs={[
+          { label: 'Input format', value: `JPG, JPEG (.jpg, .jpeg)` },
+          { label: 'Output format', value: `WebP, lossy (quality 1 to 100) or lossless` },
+          { label: 'Largest photo', value: `${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels on a computer, and at most ${WEBP_MAX_SIDE.toLocaleString('en-US')} px on each side (a limit of WebP)` },
+          { label: 'On iPhone and iPad', value: `The whole photo is encoded by libwebp in memory; ${PHONE_MAX_MP} megapixels is the largest photo size confirmed on a real iPhone` }
+        ]}
+        privacy={`The photo is not uploaded. It is decoded by your browser and encoded to WebP on this page, by the browser's encoder or by libwebp, a WebAssembly file downloaded from our site the first time it is needed. If an error message is shown, its cleaned text, the tool's name and your browser's name and version are logged so that we can fix the cause.`}
         faqs={[
-          { q: "Is JPG to WebP really free to use?", a: "Yes, it's completely free with no watermarks added." },
-          { q: "What file size limits does this tool support?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
-          { q: "Can I adjust the WebP quality or compression level?", a: "Yes — a quality slider from 1 to 100 (80 by default), or 'Lossless', which keeps the decoded JPEG's pixels exactly (a larger file — for a photo, a high quality is usually the better choice)." },
-          { q: "Can I convert multiple images at once?", a: "No, only one file can be converted at a time — there's no batch upload." }
+          { q: "Is lossless WebP a good choice for a photo?", a: `No, not for saving space. Lossless keeps the decoded JPEG pixels exactly, but the file is larger than a lossy WebP of the same photo. Use it only when the pixels must not change at all.` },
+          { q: "Why is my photo refused?", a: `It is too long or too large. ${WEBP_MAX_SIDE.toLocaleString('en-US')} pixels is the widest or tallest a WebP image can be, and a longer photo gets a message asking for JPG, PNG or AVIF instead; on a computer, a photo over ${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels is refused as too large for a browser.` },
+          { q: "Can Safari make a real WebP file?", a: `Yes. Safari cannot encode WebP itself, so the page loads libwebp, the encoder Squoosh uses, as WebAssembly and makes a real WebP file with it, not a PNG renamed.` }
         ]}
         tips={[
-          "WebP files are typically smaller than JPG at similar visual quality, which helps page load speed.",
-          "Keep a backup of your original JPG file before converting, in case you need it later.",
-          "WebP is supported by all current major browsers, so it's safe to use for most web projects.",
-          "Convert one file at a time and download each result before starting the next."
+          `If the WebP comes out larger than the JPG, lower "Quality" and convert again; the KB figures show the difference right away.`
         ]}
       />
     </div>

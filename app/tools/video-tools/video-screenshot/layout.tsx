@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Screenshot — Capture the Current Frame Online Free" },
-  description: "Video Screenshot captures the current frame of a video as a PNG or JPG image, entirely in your browser — pause or seek, then capture stills.",
+  title: { absolute: "Video Screenshot — Save a Frame as PNG, JPG or WebP" },
+  description: "Grab any frame of a video as a PNG, JPG or WebP image at the video's own resolution. Jump to an exact second and capture as many stills as you need.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-screenshot" },
   openGraph: {
-    title: "Video Screenshot — Capture the Current Frame Online Free",
-    description: "Video Screenshot captures the current frame of a video as a PNG or JPG image, entirely in your browser — pause or seek, then capture stills.",
+    title: "Video Screenshot — Save a Frame as PNG, JPG or WebP",
+    description: "Grab any frame of a video as a PNG, JPG or WebP image at the video's own resolution. Jump to an exact second and capture as many stills as you need.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-screenshot",
   },
 };

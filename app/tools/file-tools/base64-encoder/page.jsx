@@ -84,25 +84,38 @@ export default function FileBase64EncoderPage() {
         </div>
       </div>
       <SeoContent
-        title="File to Base64"
-        description="File to Base64 is a free online tool that instantly converts any file into a Base64-encoded data URL, right in your browser. Upload a file and get a ready-to-use Base64 string for embedding in HTML, CSS, JSON, or API payloads — nothing is ever uploaded to a server."
+        title={"File to Base64"}
+        description={"File to Base64 turns the bytes of any file, whether a PDF, a ZIP, a font or a recording, into Base64 text. Choose Data URL, which adds the data:<type>;base64, prefix for an src attribute or a CSS url(), or Raw Base64, the payload alone for JSON or an API request. When your browser gives the file no type, the tool reads it from the file's first bytes for common formats such as PNG, JPEG, HEIC, PDF, ZIP or MP4. It only encodes: there is no way back from Base64 to a file on this page. The file never leaves your device."}
+        example={{
+          caption: "A text file named hello.txt that contains the word hello and nothing else (browsers give a .txt file the type text/plain):",
+          inputLabel: "File content",
+          input: "hello",
+          outputLabel: "Result",
+          output: "Data URL:\ndata:text/plain;base64,aGVsbG8=\n\nRaw Base64:\naGVsbG8=\n\nDownloaded as hello.txt.base64.txt",
+        }}
+        howToTitle={"How to convert a file to Base64"}
         howTo={[
-          "Click the upload area and select any file from your device.",
-          "The file is encoded to Base64 automatically the moment it's selected — no extra button to click.",
-          "Review the encoded string in the output box.",
-          "Click \"Copy Base64\" to copy the result to your clipboard."
+          "Click the dashed area to pick a file, or drop the file on it; on a phone, tap the area.",
+          "Encoding starts as soon as the file is chosen, and the result shows in the form you picked last, \"Data URL\" for the first file.",
+          "Switch to \"Raw Base64\" if you need the text without the data: prefix.",
+          "\"Copy Base64\" puts the whole text on the clipboard; \"Download\" gives a file named after yours plus .base64.txt."
         ]}
+        specs={[
+          { label: "Input", value: "One file of any type at a time; an empty file is refused with a message" },
+          { label: "Output", value: "Data URL or Raw Base64 text, copied or downloaded as a .txt file" },
+          { label: "File size", value: "The tool sets no size cap; every three bytes of the file become four characters of text" },
+          { label: "Large results", value: `The box previews the first ${PREVIEW_CHARS.toLocaleString('en-US')} characters, while Copy Base64 and Download give the whole text` }
+        ]}
+        privacy={"Your browser's FileReader turns the file into Base64 on your device: the file and its Base64 text are not sent to us, and nothing is kept once you leave the page. When an error is shown, such as an empty file or a file that cannot be read, we receive that message with file names removed, the tool's name and your browser's name and version."}
         faqs={[
-          { q: "Is File to Base64 free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can encode." },
-          { q: "Is my file uploaded anywhere?", a: "No. The file is read and encoded locally using the browser's FileReader API — it never leaves your device." },
-          { q: "What kinds of files can I encode?", a: "Any file type — images, PDFs, documents, and more — one file at a time." },
-          { q: "What does the output look like?", a: "A full data URL (data:<mime-type>;base64,<data>) ready to paste into an src attribute, or the raw Base64 alone for a JSON payload or API call — switch with the Data URL / Raw Base64 buttons. When the browser does not know the file's type, it is read from the file's content." }
+          { q: "How much bigger is the Base64 than the file?", a: "About a third bigger, because every three bytes become four characters. Data URL also adds the data:<type>;base64, prefix. The counter above the result gives the exact number of characters for your file and the format you chose." },
+          { q: "Why does my data URL say application/octet-stream?", a: "Neither your browser nor the tool recognized the file's type, so the generic type stays. When the browser gives no type, the tool checks the first bytes for common images, audio, video, PDF, Office, archive and font formats before falling back to it." },
+          { q: "Can I turn Base64 back into a file here?", a: "No, this page only encodes. Base64 Encoder decodes Base64 into text and tells you when the bytes are binary rather than text, but it does not rebuild the original file for you to download." },
+          { q: "Can I encode several files at once?", a: "No. The tool takes one file at a time, whether you pick it or drop it. Choosing another file replaces the previous result, so copy or download each result before moving on." }
         ]}
         tips={[
-          "Use the Base64 output directly as an image or CSS background src to avoid an extra HTTP request for small assets.",
-          "Base64 is a third larger than the file. For large files the box shows a preview; use Download .txt to keep the whole text.",
-          "Base64 is an encoding, not encryption — don't use it to hide or protect sensitive data.",
-          "Choose \"Raw Base64\" when you only need the payload without the \"data:mime/type;base64,\" prefix."
+          "For a picture, Image to Base64 can also write an HTML img tag, a CSS background-image line or a JSON object.",
+          "Choose \"Raw Base64\" before copying when an API field expects only the encoded bytes."
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Text to List — Turn Lines of Pasted Text Online Free" },
-  description: "Text to List turns lines of pasted text into a bullet list, numbered list, or comma-separated list, entirely in your browser.",
+  title: { absolute: "Text to List — Bullet, Numbered or Comma-Separated List" },
+  description: "Turn lines of text into a bullet list with •, a numbered list, or one comma-separated line. Blank lines are skipped. Copy it or save a .txt file.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/text-to-list" },
   openGraph: {
-    title: "Text to List — Turn Lines of Pasted Text Online Free",
-    description: "Text to List turns lines of pasted text into a bullet list, numbered list, or comma-separated list, entirely in your browser.",
+    title: "Text to List — Bullet, Numbered or Comma-Separated List",
+    description: "Turn lines of text into a bullet list with •, a numbered list, or one comma-separated line. Blank lines are skipped. Copy it or save a .txt file.",
     url: "https://www.onlineconvertools.com/tools/text-tools/text-to-list",
   },
 };

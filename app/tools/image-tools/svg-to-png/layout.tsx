@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "SVG to PNG — Rasterize a Vector SVG File Online Free" },
-  description: "SVG to PNG rasterizes a vector SVG file into a PNG image at the exact pixel width and height you specify, in your browser.",
+  title: { absolute: "SVG to PNG — Choose the Pixel Size and Background, Free" },
+  description: "Rasterize an SVG into a PNG at the width and height you set, or 512, 1024 or 2048 px wide, on a transparent or coloured background. In-browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/svg-to-png" },
   openGraph: {
-    title: "SVG to PNG — Rasterize a Vector SVG File Online Free",
-    description: "SVG to PNG rasterizes a vector SVG file into a PNG image at the exact pixel width and height you specify, in your browser.",
+    title: "SVG to PNG — Choose the Pixel Size and Background, Free",
+    description: "Rasterize an SVG into a PNG at the width and height you set, or 512, 1024 or 2048 px wide, on a transparent or coloured background. In-browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/svg-to-png",
   },
 };

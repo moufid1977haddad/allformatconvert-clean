@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PNG to JPG — Convert a PNG Image Online Free" },
-  description: "PNG to JPG converts a PNG image to JPG format entirely in your browser using the HTML canvas — your file is never uploaded to a server.",
+  title: { absolute: "PNG to JPG Converter — Pick the Background for Transparency" },
+  description: "Convert a PNG to JPG with a quality slider (92 to start) and the colour of your choice for transparent areas. The PNG stays on your device.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/png-to-jpg" },
   openGraph: {
-    title: "PNG to JPG — Convert a PNG Image Online Free",
-    description: "PNG to JPG converts a PNG image to JPG format entirely in your browser using the HTML canvas — your file is never uploaded to a server.",
+    title: "PNG to JPG Converter — Pick the Background for Transparency",
+    description: "Convert a PNG to JPG with a quality slider (92 to start) and the colour of your choice for transparent areas. The PNG stays on your device.",
     url: "https://www.onlineconvertools.com/tools/image-tools/png-to-jpg",
   },
 };

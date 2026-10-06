@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "CSS Formatter — Format CSS Online Free" },
-  description: "CSS Formatter expands or minifies CSS entirely in your browser using simple pattern-based rules, rather than a full CSS parser.",
+  title: { absolute: "CSS Formatter and Minifier — js-beautify and CSSO" },
+  description: "Beautify CSS with 2-space indentation, or minify it with CSSO, which merges duplicate rules and shortens colors, with both engines running on your device.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/css-formatter" },
   openGraph: {
-    title: "CSS Formatter — Format CSS Online Free",
-    description: "CSS Formatter expands or minifies CSS entirely in your browser using simple pattern-based rules, rather than a full CSS parser.",
+    title: "CSS Formatter and Minifier — js-beautify and CSSO",
+    description: "Beautify CSS with 2-space indentation, or minify it with CSSO, which merges duplicate rules and shortens colors, with both engines running on your device.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/css-formatter",
   },
 };

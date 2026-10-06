@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Lorem Ipsum Generator — Placeholder Text Online Free" },
-  description: "Lorem Ipsum is a free online tool. No sign-up, no watermarks, no limits.",
+  title: { absolute: "Lorem Ipsum Generator — Exact Words, Sentences, Paragraphs" },
+  description: "Generate an exact number of Lorem ipsum words, sentences or paragraphs, opening with the start of the classic passage. Same request, same text.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/lorem-ipsum" },
   openGraph: {
-    title: "Lorem Ipsum Generator — Placeholder Text Online Free",
-    description: "Lorem Ipsum is a free online tool. No sign-up, no watermarks, no limits.",
+    title: "Lorem Ipsum Generator — Exact Words, Sentences, Paragraphs",
+    description: "Generate an exact number of Lorem ipsum words, sentences or paragraphs, opening with the start of the classic passage. Same request, same text.",
     url: "https://www.onlineconvertools.com/tools/text-tools/lorem-ipsum",
   },
 };

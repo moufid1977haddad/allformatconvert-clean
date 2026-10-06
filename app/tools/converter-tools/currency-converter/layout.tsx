@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Currency Converter — Convert Between 24 Major World" },
-  description: "Currency Converter converts between 166 world currencies, with their full names, using daily exchange rates fetched directly in your browser.",
+  title: { absolute: "Currency Converter — Daily Rates and 10-Year Rate History" },
+  description: "Convert an amount between world currencies at the rate ExchangeRate-API publishes daily, then chart the pair over 1 week to 10 years. Free, no account.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/converter-tools/currency-converter" },
   openGraph: {
-    title: "Currency Converter — Convert Between 24 Major World",
-    description: "Currency Converter converts between 166 world currencies, with their full names, using daily exchange rates fetched directly in your browser.",
+    title: "Currency Converter — Daily Rates and 10-Year Rate History",
+    description: "Convert an amount between world currencies at the rate ExchangeRate-API publishes daily, then chart the pair over 1 week to 10 years. Free, no account.",
     url: "https://www.onlineconvertools.com/tools/converter-tools/currency-converter",
   },
 };

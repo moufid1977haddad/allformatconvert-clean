@@ -188,7 +188,7 @@ export default function CsvToExcelPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">CSV to Excel</h1>
         <p className="text-neutral-500 dark:text-neutral-400 text-center mb-2">Convert CSV to Excel format</p>
-        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports CSVs up to {effectiveMaxRowsLabel} rows (including the header row){isMobile ? ' on this device' : ''} (files up to {MAX_FILE_SIZE_LABEL}). Conversion runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports CSVs up to {effectiveMaxRowsLabel} rows (including the header row){isMobile ? ' on this device' : ''} (files up to {MAX_FILE_SIZE_LABEL}). The conversion runs in a background worker; the Cancel button stops it.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || <UploadPrompt what="a .csv file" />}</p>
@@ -211,7 +211,7 @@ export default function CsvToExcelPage() {
             disabled={converting}
           />
           {timeEstimate && !converting && !error && (
-            <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
+            <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimate from our tests on a desktop computer: {timeEstimate}</p>
           )}
           {!converting && (
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
@@ -261,28 +261,33 @@ export default function CsvToExcelPage() {
       </div>
       <SeoContent
         title="CSV to Excel"
-        description="CSV to Excel builds an .xlsx or legacy .xls workbook from a CSV file (or pasted CSV text) using the xlsx library entirely in your browser, then offers it for download — your data is never uploaded to a server. The file is read and parsed off the main thread in a Web Worker, so the page stays responsive even on large files. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it if the guess is wrong. The file's character encoding is detected too — Excel's classic CSV export is Windows-1252, not UTF-8, and its accents come through intact — and whole columns of numbers become real number cells, European decimal commas included (12,5 → 12.5); values with a leading zero, like phone numbers, stay text."
+        description={"CSV to Excel builds an Excel workbook from a .csv file or from CSV text you paste. You choose .xlsx (Excel 2007 and later) or the older .xls format. The separator (comma, semicolon, tab or pipe) and, for a file, the character encoding are detected, and both can be changed. Columns that hold only numbers become number cells, European decimal commas included, while codes with a leading zero such as 007 stay text. The workbook has a single sheet named Sheet1 and no formatting. The CSV is parsed and the workbook written by a worker in your browser."}
+        example={{"caption":"A semicolon CSV pasted into the box, and the status line and cells of the .xlsx the tool returns (read back cell by cell):","inputLabel":"CSV","input":"Product;Price;Code\nCafé;12,5;007\nThé;3;010","outputLabel":"Workbook","output":"Excel file ready: 3 rows. 1 column read as numbers (decimal comma: 12,5 → 12.5).\n\nSheet \"Sheet1\":\nA1 Product (text) · B1 Price (text) · C1 Code (text)\nA2 Café (text) · B2 12.5 (number) · C2 007 (text)\nA3 Thé (text) · B3 3 (number) · C3 010 (text)"}}
+        howToTitle="How to convert CSV to Excel"
         howTo={[
-          "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
-          "The delimiter is detected automatically — check the dropdown and correct it if needed.",
-          "Choose .xlsx or legacy .xls as the output format.",
-          "Click 'Convert' to build the workbook, then 'Download' to save it.",
-          "Open it in Excel or any compatible spreadsheet app."
+          "Choose a .csv file in the upload area, or paste CSV text into the box below it.",
+          "Check \"Delimiter:\" and, for a file, \"Encoding:\"; each shows what was detected and can be changed.",
+          "Pick .xlsx or .xls under \"Output format:\" and keep or untick \"Numbers as number cells\".",
+          "Click the \"Convert to\" button, which names the chosen format; \"Cancel\" stops a long conversion.",
+          "Click \"Download\" to save converted.xlsx or converted.xls.",
         ]}
+        specs={[
+          { label: "Input", value: `.csv file up to ${MAX_FILE_SIZE_LABEL}, or pasted CSV text` },
+          { label: "Output", value: "XLSX (Excel 2007+) or XLS (Excel 97-2003), one sheet named Sheet1" },
+          { label: "Rows on a computer", value: `${MAX_ROWS.toLocaleString('en-US')}, header row included` },
+          { label: "Rows on phones, iPhone and iPad", value: `${MOBILE_MAX_ROWS.toLocaleString('en-US')}, header row included` },
+          { label: "Excel limits checked", value: ".xls holds 65,536 rows and 256 columns; any cell holds 32,767 characters" },
+        ]}
+        privacy={"The CSV is read and the workbook is written by a background worker inside your browser; the file you choose and the text you paste are not uploaded. When something goes wrong, we receive an error report: the error text with file names and quoted text removed, the tool name, and your browser name and version."}
         faqs={[
-          { q: "Does it support file upload, or only pasted text?", a: "Both — upload a .csv file, or paste CSV text directly into the box." },
-          { q: "What output format does it produce?", a: "Your choice of .xlsx (Excel 2007+) or legacy .xls (Excel 97-2003), picked from a dropdown before converting." },
-          { q: "Is my data uploaded to a server?", a: "No, the workbook is built entirely in your browser using the xlsx library, in a background Web Worker so the page never freezes." },
-          { q: "Does it handle CSV values that contain commas, like quoted fields?", a: "Yes — a value wrapped in double quotes (e.g. \"Smith, John\") is parsed as a single field and its comma is preserved intact, rather than being split into extra columns." },
-          { q: "Does it support semicolon- or tab-delimited files, not just commas?", a: "Yes — the delimiter (comma, semicolon, tab, or pipe) is auto-detected from the file, which matters for European CSVs that commonly use semicolons. A dropdown lets you override the detected delimiter if it's ever wrong." },
-          { q: "Why is there a row limit, if Excel itself allows over a million rows per sheet?", a: `Excel's own format allows up to 1,048,576 rows per sheet, but converting a file anywhere near that size in a browser tab risks running out of memory and crashing the tab rather than just being slow. ${MAX_ROWS_LABEL} rows is the limit we've measured to convert reliably on desktop; beyond that, split your CSV into smaller files first. The count includes the header row, the same way Excel itself counts it as row 1.` },
-          { q: "Why is the row limit lower on my phone?", a: `On phones and tablets the cap is ${MOBILE_MAX_ROWS_LABEL} rows instead of ${MAX_ROWS_LABEL}. Mobile browser tabs get killed at a much lower memory ceiling than desktop tabs, and large CSVs also produce large .xlsx downloads that are impractical to save on a phone — the lower cap keeps mobile conversions reliable.` }
+          { q: "Can I open a semicolon CSV saved by Excel in Europe?", a: "Yes. The separator is detected from the first lines, so a file such as Name;Price keeps its columns, and a decimal comma like 12,5 becomes the number 12.5 in its cell. If a column is split in the wrong place, choose the separator yourself in \"Delimiter:\"." },
+          { q: "Will accents from an Excel CSV come out right?", a: "Yes, in most cases. A file in UTF-8, or one with a byte order mark, is recognised; otherwise the tool assumes the Windows code page of your browser language, which is what Excel uses when it saves CSV. If accents still look wrong, pick another code page under \"Encoding:\" and convert again." },
+          { q: "Are numbers turned into real number cells?", a: "Yes, for columns where every value is a number. A column with a code that starts with zero, such as 007 or 02134, or a value with more than 15 significant digits stays text so nothing is lost. Untick \"Numbers as number cells\" to keep every cell as text." },
+          { q: "How many rows can I convert?", a: `${MAX_ROWS.toLocaleString('en-US')} rows on a computer and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} on phones, iPhone and iPad, counting the header row; a file can be up to ${MAX_FILE_SIZE_LABEL}, and pasted text has the same row limit. The .xls format stops at 65,536 rows and 256 columns, so choose .xlsx for larger sheets.` },
         ]}
         tips={[
-          "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and stay in a single cell.",
-          "The first line becomes the first row of the sheet as-is — include a header row yourself if you want column labels.",
-          "Check the downloaded file's column alignment for CSVs with unusual formatting before relying on it.",
-          "The delimiter dropdown shows what was auto-detected — double check it on unusual files, and switch it manually if a column split looks wrong."
+          "A cell longer than 32,767 characters stops the conversion with its row and column named; shorten that value and convert again.",
+          "To turn a workbook back into CSV, with a semicolon or tab separator, use Excel to CSV.",
         ]}
       />
     </div>

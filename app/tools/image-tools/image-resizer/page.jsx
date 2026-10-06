@@ -180,23 +180,30 @@ export default function ImageResizerPage() {
       </div>
       <SeoContent
         title="Image Resizer"
-        description="Image Resizer changes the size of a JPG, PNG or WebP image by exact pixels or by percentage, with the proportions locked by default so nothing gets stretched, and keeps the image in its original format. Everything happens in your browser — your image is never uploaded."
+        description={"Image Resizer changes the pixel size of a picture. By pixels, you type a width or a height and, with Keep proportions on (the default), the other side follows so nothing is stretched. By percentage, one click picks 25, 50 or 75% smaller. Do not enlarge, also on by default, stops a small image from being blown up. The result keeps the original format, or you can save it as JPG, PNG or WebP and set the quality for JPG and WebP. GIF, BMP and other formats are saved as PNG. One image per run, resized in your browser."}
+        howToTitle={"How to resize an image"}
         howTo={[
-          'Click the upload area and choose an image.',
-          "Choose 'By pixels' and type the new width (the height follows), or 'By percentage'.",
-          "Click 'Resize' and check the new size.",
-          'Download the resized image, in the same format as the original.'
+          "Click the upload box and choose the image; its size in pixels and its weight appear under it.",
+          "Choose \"By pixels\" and type a \"Width (px)\" or \"Height (px)\", or choose \"By percentage\" and pick how much smaller (25, 50 or 75%).",
+          "Optionally set \"Save as\" and \"Quality\".",
+          "Click \"Resize\", check the new size and weight, then click \"Download\".",
         ]}
+        specs={[
+          { label: "Input formats", value: "JPG, PNG and WebP keep their format by default; GIF, BMP, AVIF and other images are saved as PNG, with a note" },
+          { label: "Output formats", value: "Same format as the original, JPG, PNG or WebP; quality 10 to 100 for JPG and WebP (default 92)" },
+          { label: "Largest result", value: "32,767 pixels per side and 268 megapixels in total" },
+          { label: "WebP result", value: "At most 16,383 pixels on either side" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The picture is redrawn at its new size by this page in your browser, and it is not sent to a server, Safari included for WebP. The resized file waits in the tab until you download it. When the page displays an error, the cleaned text of that message is reported to us with the tool's name and your browser's name and version."}
         faqs={[
-          { q: 'Will my image be stretched?', a: "No: 'Keep proportions' is on by default, so changing the width changes the height with it. Turn it off only if you really want a different shape." },
-          { q: 'What format is the result?', a: 'The same as your original: a JPG stays JPG, a PNG stays PNG (with its transparency), a WebP stays WebP. On Safari, which cannot write WebP, a WebP is saved as PNG and the page says so.' },
-          { q: 'Can it enlarge an image?', a: "Yes, if you untick 'Do not enlarge'. For enlarging small photos with real detail, use our AI Image Upscaler instead." },
-          { q: 'Is my image uploaded?', a: 'No. Resizing happens entirely in your browser.' }
+          { q: "Will my image be stretched?", a: "No, not by default: \"Keep proportions\" is ticked, so typing a new width recalculates the height from the original ratio, and the reverse. Untick it only if you want another shape; the image is then squeezed to the size you type." },
+          { q: "Can it make an image bigger?", a: "Yes, in \"By pixels\" mode once you untick \"Do not enlarge if the image is smaller\". Enlarging only spreads the existing pixels and adds no detail; AI Image Upscaler is the tool that rebuilds detail." },
+          { q: "Does it keep my format?", a: "Yes, by default: a JPG stays JPG, a PNG stays PNG with its transparency, a WebP stays WebP, Safari included. GIF and other formats become PNG, with a note. \"Save as\" can also convert to JPG, where transparent areas turn white." },
+          { q: "Does resizing make the file smaller?", a: "Yes, usually, when you shrink the picture, because there are fewer pixels to store; the new weight is shown before you download. For a JPG or WebP, lowering \"Quality\" makes it lighter still." },
         ]}
         tips={[
-          'For a lighter file, resize first, then run the result through Image Compressor.',
-          'Social media: 1080 px wide suits most feeds.',
-          "Use 'By percentage' to halve a photo in one click."
+          "To halve a photo, choose \"By percentage\", keep 50% selected and click \"Resize\".",
         ]}
       />
     </div>

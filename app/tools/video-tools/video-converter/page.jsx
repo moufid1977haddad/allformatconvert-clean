@@ -42,28 +42,34 @@ const HEIGHTS = [['', 'Keep original resolution'], ['2160', 'Limit to 2160p (4K)
 
 const seo = {
   title: 'Video Converter',
-  description: 'Video Converter turns almost any video into MP4, H.265 (HEVC), AV1, MOV, MKV, WebM, AVI, WMV, FLV, MPEG, VOB, TS, M2TS, 3GP, 3G2 and more (22 video formats) or an animated GIF, and extracts the audio as MP3, M4A, AAC, WAV, AIFF, OGG, Opus, FLAC, WMA, AC3 or AMR. It runs on our server, so it works in any browser including Safari and iPhone, handles files up to 1 GB, and shows real progress. Your file is deleted from our server as soon as you have downloaded the result.',
+  description: `Video Converter changes the format of a video with ffmpeg on our video service. The 22 video outputs include MP4 (H.264), H.265 and AV1 in MP4, MOV, MKV, WebM (VP9), AVI, WMV, FLV, MPG, VOB, TS, M2TS, 3GP, M4V and OGV. It can also turn the video into an animated GIF, or keep only the sound as MP3, M4A, AAC, WAV, AIFF, OGG, Opus, FLAC, WMA, AC3 or AMR. For MP4, MOV and M4V results, extra settings change the speed, mirror the picture, set the volume and add fades. It accepts video files only; for an audio file, use Audio Converter.`,
+  howToTitle: 'How to convert a video to another format',
   howTo: [
-    'Select or drop a video file (up to 1 GB).',
-    'Choose the output format, the quality, and an optional maximum resolution.',
-    'Click "Convert" and follow the real progress: upload, waiting line if the service is busy, then conversion.',
-    'Preview the result and download it — the file name always carries the real extension.',
+    `Choose or drop a video file: MP4, MOV, MKV, WebM, AVI or another video type.`,
+    `Pick the target in "Convert to": a video format, "Animated GIF", or a format under "Audio only".`,
+    `Set "Quality" and, for video, an optional "Resolution" limit; for MP4, H.265, AV1, MOV or M4V, "More options: speed, mirror, volume, fades, exact quality" adds edits, but our video service refuses a "Resolution" limit combined with a speed or a mirror.`,
+    `Click "Convert" and follow the upload, the waiting line and the conversion percentage.`,
+    `Click "Download": the file name ends with the real extension, plus a tag such as -h265 or -av1 when the extension alone does not show the codec.`,
   ],
+  specs: [
+    { label: 'Input formats', value: `Video files only: MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS` },
+    { label: 'Video output', value: `MP4 (H.264), H.265, AV1, MOV, MKV, WebM (VP9), AVI, AVI (XviD), WMV, ASF, FLV, F4V, MPG, MPEG, VOB, TS, M2TS, MTS, 3GP, 3G2, M4V, OGV` },
+    { label: 'GIF and audio output', value: `Animated GIF; MP3, M4A, AAC, WAV, AIFF, OGG, Opus, FLAC, WMA, AC3, AMR` },
+    { label: 'Maximum file size', value: `1 GB on a computer or a phone; our video service also sets a maximum duration and a time limit per conversion` },
+    { label: 'Editing (MP4, H.265, AV1, MOV, M4V)', value: `Speed from 0.25× to 4× with the pitch kept, mirror, volume from 0 to 300 %, fade in and fade out of up to 10 seconds each, exact CRF` },
+    { label: 'Usage limits', value: `Each internet connection can convert a set number of files per hour and per day on our video service; no account` },
+  ],
+  privacy: `The video is uploaded in pieces from this page directly to our video service on Railway, where ffmpeg converts it. The original is erased when the conversion is over, and the converted file once this page has fetched it; an abandoned job is cleared after a set time. The logs record what was done, a size range, the job status and timings, never the file's name or content. When a failure is shown, its cleaned message, the error type, the tool, your browser and version, the file extension and a size range are sent to us.`,
   faqs: [
-    { q: 'Which formats can I convert to?', a: 'Video: MP4 (H.264), H.265 / HEVC, AV1, MOV, MKV, WebM, AVI, AVI (XviD), WMV, ASF, FLV, F4V, MPG, MPEG, VOB, TS, M2TS, MTS, 3GP, 3G2, M4V, OGV. Animated GIF. Audio only: MP3, M4A, AAC, WAV, AIFF, OGG, Opus, FLAC, WMA, AC3, AMR.' },
-    { q: 'Can the converted video be larger than the original?', a: 'Not by design: the encoder is given a size ceiling taken from your own file, so a converted video does not exceed the original. The one exception is the MPEG-2 family (MPG, MPEG, VOB), an old codec that needs about twice the data of H.264 for the same picture; on demanding footage it can come out a few percent larger. The page always shows the real before and after sizes.' },
-    { q: 'Which format should I pick: H.265 or AV1?', a: 'H.265 (HEVC) and AV1 are newer codecs designed to give smaller files than H.264 at similar quality, and they take longer to encode. H.265 plays on most phones and recent computers; AV1 plays in current Chrome, Firefox and Edge, while older devices and many TVs cannot play it. When in doubt, choose MP4 (H.264), which plays everywhere.' },
-    { q: 'Can I change the speed, mirror the video or fade it in and out?', a: 'Yes, for MP4 (H.264, H.265 or AV1), MOV and M4V results: "More options" sets the speed (0.25× to 4×, the sound keeps its pitch), a mirror (left-right, top-bottom or both), the volume (0 to 300 %), a fade in and a fade out of up to 10 seconds (sound, and the picture too if you tick it), and an exact quality value (CRF) instead of the three quality levels.' },
-    { q: 'Which formats can I convert from?', a: 'Any video or audio file that ffmpeg can read: MP4, MOV (including iPhone videos), MKV, WebM, AVI, WMV, FLV, MPEG, TS, 3GP, OGV and many more.' },
-    { q: 'How large a file can I convert?', a: 'Up to 1 GB. The file is uploaded in pieces, straight to the video service, and resumes after a dropped connection.' },
-    { q: 'Is my video kept?', a: 'No. The original is deleted the moment conversion ends, and the result is deleted right after your download (or after 15 minutes if you never download it). Nothing about your file is logged.' },
-    { q: 'Why can some conversions take longer?', a: 'H.265, AV1, WebM (VP9) and OGV (Theora) are far slower to encode than MP4, because they squeeze more out of every byte. The progress bar shows the real percentage, and a very long file may be stopped by our time limit.' },
+    { q: 'Can I convert a video to MP3?', a: `Yes. Choose MP3, or another format under "Audio only": the first audio track is kept and the picture is dropped. MP3 uses the "Quality" setting, while WAV and FLAC are written without loss. A video without sound gives an error message instead of an empty file.` },
+    { q: 'Can the converted file be larger than the original?', a: `Yes, sometimes. A larger MP4, H.265, AV1, MOV, M4V, MKV, WebM, FLV, F4V, TS, M2TS, MTS, 3GP or 3G2 result is encoded again with stronger compression, up to 3 tries; if the last is still larger, you get it and the page shows "Larger by". AVI, XviD, WMV, ASF, MPG, MPEG, VOB and OGV get a bitrate taken from your file. An exact CRF, GIF and audio are never retried.` },
+    { q: 'Is H.265 or AV1 better than MP4 (H.264)?', a: `No, not for compatibility: MP4 (H.264) is the one to pick when the file must play everywhere. H.265 and AV1 are newer codecs; in our two test clips both gave smaller files than H.264. H.265 plays on most phones and computers, AV1 on recent browsers and devices. AV1 is written in MP4 only.` },
+    { q: 'Can I turn a whole video into a GIF here?', a: `Yes, with fixed settings: the converter makes a GIF of the entire video at 12 frames per second and at most 640 pixels wide. To choose a start, a length of up to 60 seconds, the width and the frame rate, use Video to GIF instead.` },
+    { q: 'Is there a limit?', a: `Yes: 1 GB per file, plus a maximum duration and a time limit per conversion set on our video service, and a set number of conversions per hour and per day for each internet connection. The page tells you which limit was reached.` },
   ],
   tips: [
-    'MP4 (H.264) is the safest choice for sharing: it plays on every device.',
-    'Use "Small file" or a lower resolution when the result must fit an email or chat limit.',
-    'To keep just the sound of a video, pick MP3 or M4A.',
-    'Keep the tab open while it works; you can cancel at any time.',
+    `For a phone or TV that cannot open a file, convert it to "MP4 (H.264) — plays everywhere".`,
+    `Choose "Small file" or a lower "Resolution" when the result must fit an email or chat attachment limit.`,
   ],
 };
 
@@ -73,7 +79,7 @@ export default function VideoConverterPage() {
     <MediaServiceTool
       op="convert"
       title="Video Converter"
-      subtitle="Convert video to MP4, MOV, MKV, WebM, AVI, GIF, MP3 and more — any browser, up to 1 GB"
+      subtitle="Convert video to MP4, MOV, MKV, WebM, AVI, GIF, MP3 and more — on our video service, up to 1 GB"
       buttonLabel="Convert"
       initialParams={{ target: 'mp4', quality: 'medium', maxHeight: '', flip: '', speed: '1', volume: '100', fadeIn: '0', fadeOut: '0', fadeVideo: false, crf: '' }}
       buildParams={(p) => {

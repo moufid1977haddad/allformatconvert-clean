@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video to GIF — Clip Any Video into an Animated GIF" },
-  description: "Turn a clip of any video (MP4, MOV, WebM…) into an animated GIF: choose start, length up to 60 s, width and frame rate. Any browser, iPhone included.",
+  title: { absolute: "Video to GIF — MP4, MOV, WebM, AVI or MKV to Animated GIF" },
+  description: "Turn a clip of an MP4, MOV, WebM, AVI, MKV or WMV video into an animated GIF with six settings: start, length, width, frame rate, plays, compression.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/video-to-gif" },
   openGraph: {
-    title: "Video to GIF — Clip Any Video into an Animated GIF",
-    description: "Turn a clip of any video (MP4, MOV, WebM…) into an animated GIF: choose start, length up to 60 s, width and frame rate. Any browser, iPhone included.",
+    title: "Video to GIF — MP4, MOV, WebM, AVI or MKV to Animated GIF",
+    description: "Turn a clip of an MP4, MOV, WebM, AVI, MKV or WMV video into an animated GIF with six settings: start, length, width, frame rate, plays, compression.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/video-to-gif",
   },
 };

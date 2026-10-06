@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Audio Trimmer — Cut a Section Out Online Free" },
-  description: "Audio Trimmer cuts a section out of an audio file using ffmpeg.wasm's fast stream-copy trimming, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "Audio Trimmer — Keep Start to End, Add Fade In & Out" },
+  description: "Keep the part of an audio file between a start and an end set to a tenth of a second, with optional fades. Without fades the sound is copied as is.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-trimmer" },
   openGraph: {
-    title: "Audio Trimmer — Cut a Section Out Online Free",
-    description: "Audio Trimmer cuts a section out of an audio file using ffmpeg.wasm's fast stream-copy trimming, entirely in your browser — nothing is uploaded to a server.",
+    title: "Audio Trimmer — Keep Start to End, Add Fade In & Out",
+    description: "Keep the part of an audio file between a start and an end set to a tenth of a second, with optional fades. Without fades the sound is copied as is.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-trimmer",
   },
 };

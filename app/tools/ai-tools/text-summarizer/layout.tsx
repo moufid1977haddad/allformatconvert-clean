@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Text Summarizer — Summarize Text Online Free" },
-  description: "Text Summarizer uses an AI language model to condense long documents and articles into a concise summary while preserving key points.",
+  title: { absolute: "Text Summarizer — Summarize Pasted Text with AI" },
+  description: "Paste an article, meeting notes or a report and get a concise summary of its key points, ready to copy or to save as a .txt file.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/text-summarizer" },
   openGraph: {
-    title: "Text Summarizer — Summarize Text Online Free",
-    description: "Text Summarizer uses an AI language model to condense long documents and articles into a concise summary while preserving key points.",
+    title: "Text Summarizer — Summarize Pasted Text with AI",
+    description: "Paste an article, meeting notes or a report and get a concise summary of its key points, ready to copy or to save as a .txt file.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/text-summarizer",
   },
 };

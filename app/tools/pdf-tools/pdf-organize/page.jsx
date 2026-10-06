@@ -134,27 +134,29 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Organize"
-        description="PDF Organize lets you reorder, rotate, duplicate and remove pages within a single PDF, and insert blank pages, using Up, Down, Rotate, Duplicate, Blank after and Remove buttons next to a list of pages, entirely in your browser using the pdf-lib and PDF.js libraries — your file is never uploaded to a server. It only reorders and removes pages within one file; it does not merge, split, compress, or rotate PDFs. Form fields on the pages you keep still work, with their values, and the document title and author are kept; removed pages are truly removed from the file, not just hidden."
+        description={`PDF Organize lists the pages of one PDF by number and lets you rework it page by page: Up and Down move a page, Rotate turns it 90° clockwise, Duplicate adds a copy right after it, Blank after inserts an empty page of the same size, and Remove drops it. Nothing changes until you apply the changes. Form fields, the title and author, and bookmarks follow the pages you keep. The list shows page numbers, not thumbnails, and it works on a single file; to join files, use Merge PDF. pdf-lib rebuilds the list you arranged into a new file inside your browser.`}
+        howToTitle="How to organize the pages of a PDF"
         howTo={[
-          "Click the upload area and select a PDF file — its pages appear in a numbered list.",
-          "Use 'Up' and 'Down' next to each page to change its position, 'Rotate' to turn it 90°, 'Duplicate' to copy it, 'Blank after' to insert an empty page, or 'Remove' to drop it.",
-          "Click 'Apply Changes' to build the reordered PDF.",
-          "Click 'Download' next to organized.pdf to save the result."
+          `Choose the PDF; each page appears as a row, from Page 1 to the last.`,
+          `Use "Up", "Down", "Rotate", "Duplicate", "Blank after" or "Remove" on any row.`,
+          `Click "Apply Changes" to build the PDF.`,
+          `Get organized.pdf, in the new order, with the "Download" button.`,
         ]}
+        specs={[
+          { label: 'Input', value: `One PDF` },
+          { label: 'Per page', value: `Up, Down, Rotate (90° clockwise), Duplicate, Blank after, Remove` },
+          { label: 'Blank pages', value: `Same size as the page before them, or A4 at the very start` },
+          { label: 'Kept', value: `Form fields, title and author, bookmarks of kept pages` },
+          { label: 'Result', value: `organized.pdf` },
+        ]}
+        privacy={`PDF.js counts the pages and pdf-lib builds the reorganized file, both inside your browser; the PDF is not sent to our servers. A file that asks for a password to open cannot be read here and has to be unlocked first.`}
         faqs={[
-          { q: "Is PDF Organize free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I merge multiple PDFs or split one into several files?", a: "No — this tool only reorders and removes pages inside a single PDF. Use the Merge PDF or Split PDF tools for those tasks." },
-          { q: "Can I rotate or compress pages here?", a: "Rotate: yes, each click on 'Rotate' turns that page 90° clockwise. Compression: use the Compress PDF tool." },
-          { q: "Can I add a blank page or repeat a page?", a: "Yes — 'Blank after' inserts an empty page the size of that page, and 'Duplicate' adds a copy of the page right after it." },
-          { q: "Are form fields and bookmarks kept?", a: "Form fields on the kept pages are kept and still fillable. Bookmarks (the outline) are kept too and follow their pages to their new positions; a bookmark pointing to a page you removed is dropped, and the bookmarks under it move up a level." },
-          { q: "Is my file uploaded to a server?", a: "No. Everything happens locally in your browser using the pdf-lib and PDF.js libraries." }
+          { q: "Can I drag thumbnails to reorder pages?", a: `No. Pages are listed as Page 1, Page 2 and so on, and you move them with Up and Down. To see thumbnails while you reorder, rotate or delete pages, use the PDF Editor, which shows each page with arrow buttons.` },
+          { q: "Are the bookmarks of removed pages kept?", a: `No. A bookmark that points to a removed page is dropped, and the bookmarks under it move up one level. The others follow their pages to the new positions, and form fields on the pages you keep still work with their values.` },
+          { q: "Is a blank page the size of the page next to it?", a: `Yes. A blank page takes the visible size and rotation of the real page before it in the list. If you put it before every real page, it is an A4 page, 595 by 842 points.` },
+          { q: "Can I combine two PDFs here?", a: `No. This page changes one file only. Merge PDF joins several files; you can then open the merged PDF here to fine-tune its page order, rotate pages or add blank ones.` },
         ]}
-        tips={[
-          "Pages are listed by their original page number, so you can track which page you're moving even after reordering.",
-          "Use 'Remove' to drop pages you don't want — removed pages aren't included in the downloaded file.",
-          "Changes only take effect after clicking 'Apply Changes'; reordering the list alone doesn't modify the file.",
-          "For combining multiple files or splitting one PDF into parts, use the Merge PDF or Split PDF tools instead."
-        ]}
+        tips={[]}
       />
     </div>
   );

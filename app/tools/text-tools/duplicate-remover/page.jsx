@@ -49,23 +49,37 @@ export default function DuplicateRemoverPage() {
       </div>
       <SeoContent
         title={"Duplicate Remover"}
-        description={"Duplicate Remover deletes repeated lines from a block of text, keeping the first occurrence of each line in its original order, entirely in your browser. Windows (CRLF), Mac and Unix line endings are all recognised, so a line is never kept twice just because one copy ends differently. Options make the comparison ignore upper/lower case or surrounding spaces, and remove empty lines; the number of lines removed is shown."}
+        description={"Duplicate Remover deletes the lines that appear more than once in a list or text and keeps the first copy of each, in the original order. It suits mailing lists, keyword lists and log extracts pasted one item per line. Three options change the comparison: ignore upper and lower case, ignore spaces around a line, and remove empty lines. Lines are compared after Unicode normalization, so é typed as one character or as e plus an accent match. It compares whole lines, not words, and runs in your browser."}
+        example={{
+          caption: "With \"Ignore case\" and \"Ignore surrounding spaces\" ticked; the page then shows 3 lines removed.",
+          inputLabel: "List",
+          input: "apple\nBanana\napple\nApple\n  banana\ncherry",
+          outputLabel: "Result",
+          output: "apple\nBanana\ncherry",
+        }}
+        howToTitle={"How to remove duplicate lines"}
         howTo={[
-          "Paste your list or text, one item per line.",
-          "Tick 'Ignore case', 'Ignore surrounding spaces' or 'Remove empty lines' if needed.",
-          "Click 'Remove Duplicates'.",
-          "Copy the result."
+          "Paste your list into the box, one item per line.",
+          "Tick \"Ignore case\" when Apple and apple are the same item, \"Ignore surrounding spaces\" for stray spaces, and \"Remove empty lines\" to drop blank lines.",
+          "Click \"Remove Duplicates\"; the number of lines removed appears above the button.",
+          "Copy the cleaned list with \"Copy\", or keep it as a file with \"Download\" (deduplicated.txt)."
         ]}
+        specs={[
+          { label: "Input", value: "Pasted text; Windows, old Mac and Unix line breaks are all read" },
+          { label: "Kept line", value: "The first occurrence, exactly as written, with its own spaces and case" },
+          { label: "Empty lines", value: "Compared like other lines, so only the first one stays; Remove empty lines drops them all" },
+          { label: "Output", value: "Kept lines in their original order with Unix line breaks, ready to copy or to save as deduplicated.txt" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"The comparison runs in JavaScript within this page, using a list of seen lines held in memory. Your lines never leave the browser and are forgotten when you close the tab. If copying the result fails, the page shows Copy failed and our error log receives the message \"Copy to the clipboard failed.\" with the tool name and browser version, but no line of your list."}
         faqs={[
-          { q: "Is Duplicate Remover free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Which occurrence is kept?", a: "The first one; the order of the remaining lines doesn't change." },
-          { q: "Are \"Apple\" and \"apple\" duplicates?", a: "Only if you tick 'Ignore case'. With 'Ignore surrounding spaces', \" apple \" and \"apple\" are duplicates too." },
-          { q: "Does it work with text copied from Excel or Windows?", a: "Yes — CRLF line endings are handled, so the last line is compared like the others." },
-          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
+          { q: "Are Apple and apple counted as duplicates?", a: "No, unless you tick \"Ignore case\". With \"Ignore surrounding spaces\" ticked, a line with spaces before or after it also matches the same line without them. In every case the line kept is the first one, as you typed it." },
+          { q: "Does it keep the blank lines between paragraphs?", a: "No. Empty lines are compared like any other line, so only the first one survives and later paragraph breaks are removed as duplicates. Tick \"Remove empty lines\" to drop them all; the removed count then includes them." },
+          { q: "Can it remove duplicate words inside a line?", a: "No. It compares whole lines only. Two lines holding the same words in another order, or with different punctuation, are both kept. To see how two versions differ word by word, use Text Comparator instead." },
+          { q: "Does it work with lists copied from Excel or Windows?", a: "Yes. Windows (CRLF), old Mac (CR) and Unix (LF) line endings are all recognized, so the last line of a pasted column matches its copy elsewhere. The result is written with Unix line breaks." }
         ]}
         tips={[
-          "Sort the result afterwards with the Text Sorter if you need it alphabetical.",
-          "The count of removed lines tells you at a glance how many duplicates there were."
+          "Sort the cleaned list afterwards with Text Sorter, whose A-Z order puts item 2 before item 10."
         ]}
       />
     </div>

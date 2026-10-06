@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "WebM to GIF — Convert a Video Clip to an Animated GIF" },
-  description: "Convert a clip of your WebM video into an animated GIF: choose start, length up to 60 s, width and frame rate. Proportions kept, any browser.",
+  title: { absolute: "WebM to GIF — VP8, VP9 and AV1 Clips to Animated GIF" },
+  description: "Make an animated GIF from a WebM video with VP8, VP9 or AV1, such as a browser screen recording. ffmpeg on our server converts it; sound is dropped.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/webm-to-gif" },
   openGraph: {
-    title: "WebM to GIF — Convert a Video Clip to an Animated GIF",
-    description: "Convert a clip of your WebM video into an animated GIF: choose start, length up to 60 s, width and frame rate. Proportions kept, any browser.",
+    title: "WebM to GIF — VP8, VP9 and AV1 Clips to Animated GIF",
+    description: "Make an animated GIF from a WebM video with VP8, VP9 or AV1, such as a browser screen recording. ffmpeg on our server converts it; sound is dropped.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/webm-to-gif",
   },
 };

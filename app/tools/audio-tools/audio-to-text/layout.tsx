@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Audio to Text — Offer Two Ways Online Free" },
-  description: "Audio to Text offers live microphone dictation or file upload, which sends your audio to a server-side AI transcription API.",
+  title: { absolute: "Audio to Text — Transcribe a File or Live Dictation" },
+  description: "Turn speech into text two ways: dictate live through your browser's speech recognition, or send a recording to OpenAI Whisper for TXT, SRT or VTT.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-to-text" },
   openGraph: {
-    title: "Audio to Text — Offer Two Ways Online Free",
-    description: "Audio to Text offers live microphone dictation or file upload, which sends your audio to a server-side AI transcription API.",
+    title: "Audio to Text — Transcribe a File or Live Dictation",
+    description: "Turn speech into text two ways: dictate live through your browser's speech recognition, or send a recording to OpenAI Whisper for TXT, SRT or VTT.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-to-text",
   },
 };

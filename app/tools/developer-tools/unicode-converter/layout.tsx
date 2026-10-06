@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Unicode Converter — Convert Text Online Free" },
-  description: "Unicode Converter converts text to and from JavaScript-style \\uXXXX escape sequences, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "Unicode Converter — Text to \\uXXXX Escapes and Back" },
+  description: "Turn text into JavaScript \\uXXXX escapes, or read \\uXXXX, \\u{1F600} and U+1F600 back as text. Emoji above U+FFFF become surrogate pairs.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/unicode-converter" },
   openGraph: {
-    title: "Unicode Converter — Convert Text Online Free",
-    description: "Unicode Converter converts text to and from JavaScript-style \\uXXXX escape sequences, entirely in your browser — nothing is uploaded to a server.",
+    title: "Unicode Converter — Text to \\uXXXX Escapes and Back",
+    description: "Turn text into JavaScript \\uXXXX escapes, or read \\uXXXX, \\u{1F600} and U+1F600 back as text. Emoji above U+FFFF become surrogate pairs.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/unicode-converter",
   },
 };

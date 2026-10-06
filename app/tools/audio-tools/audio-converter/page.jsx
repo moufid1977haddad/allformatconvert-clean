@@ -167,28 +167,34 @@ export default function AudioConverterPage() {
       </div>
       <SeoContent
         title="Audio Converter"
-        description="Audio Converter converts a single audio file between MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 using ffmpeg.wasm, running in your browser — your file is not uploaded, except for Opus output (below). The one exception is Opus: it is encoded on our own server with the reference libopus encoder (the in-browser one is not reliable), and the file is deleted as soon as you have downloaded the result."
+        description={`Audio Converter turns one audio file into another format. It writes 18 formats: MP3, WAV, AAC, FLAC, OGG Vorbis, M4A, Opus, WMA, AIFF, ALAC, AC3, M4R (iPhone ringtone), M4B (audiobook), MP2, WavPack, CAF, AU and MKA. For lossy targets except Opus, which is always made at 128 kbit/s, you pick the bitrate; for every target but Opus you can also change the sample rate or mix to mono or stereo. ffmpeg.wasm converts on this page; only an Opus target sends your original file to our media service. It handles one file at a time, and its picker lists audio files only: for the sound of a video, use Video to Audio.`}
+        howToTitle="How to convert an audio file to another format"
         howTo={[
-          "Click the upload area and select an audio file.",
-          "Choose your target format from the dropdown.",
-          "Click \"Convert Audio\": the file is converted in your browser (Opus by our own server, then deleted).",
-          "Preview and download the converted file."
+          `Pick or drop the one audio file you want in another format.`,
+          `Choose the "Target Format".`,
+          `For a lossy format, pick the "Quality"; if needed, set "Sample rate" and "Channels".`,
+          `Click "Convert Audio" and follow the progress bar.`,
+          `Play the result, then click "Download" to save it under your file name with the new extension.`,
         ]}
+        specs={[
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Output formats`, value: `MP3, WAV, AAC, FLAC, OGG (Vorbis), M4A, Opus, WMA, AIFF, ALAC, AC3, M4R, M4B, MP2, WV (WavPack), CAF, AU, MKA` },
+          { label: `Quality`, value: `128, 192 (default), 256 or 320 kbps for MP3, AAC, M4A, M4R, M4B, OGG, WMA, AC3 and MP2; AC3 and MP2 are never written below 192 kbps. Opus: 128 kbit/s.` },
+          { label: `Sample rate and channels`, value: `Keep the original, or 48 down to 8 kHz (OGG, AC3 and MP2: 48, 44.1 or 32 kHz only); mono or stereo. Not offered for Opus.` },
+          { label: `Files at once`, value: `One` },
+          { label: `Usage limits`, value: `Opus target: our media service counts conversions per connection per hour and per day, and refuses files over its maximum size or length.` },
+        ]}
+        privacy={`Every target except Opus is converted in your browser by ffmpeg.wasm, downloaded from unpkg.com. For Opus, your original file is uploaded in pieces to our media service, converted with libopus at 128 kbit/s and downloaded back by the page; the service removes your upload as soon as the conversion ends and the Opus file once it has been downloaded, or after a set time. A failed conversion sends us its cleaned message, the file extension, a size range and your browser's name and version.`}
         faqs={[
-          { q: "Is Audio Converter free to use?", a: "Yes, it's completely free with no signup. Conversions done in your browser have no limit; Opus files are made on our server, which allows a set number of conversions per connection each day." },
-          { q: "What formats are supported?", a: "MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3 as output targets, and any format ffmpeg can decode as input (which covers the vast majority of real-world audio files, including AMR)." },
-          { q: "Can it convert to AMR?", a: "No — this tool can read AMR files as input, but the AMR encoder isn't available in the ffmpeg build used here, so AMR isn't offered as an output target." },
-          { q: "What is ALAC output actually saved as?", a: "A .m4a file using the ALAC (Apple Lossless) codec instead of AAC — the same format iTunes/Apple Music uses for lossless downloads." },
-          { q: "Can I convert multiple files at once?", a: "No, this tool processes one file at a time — you'd need to repeat the process for each file." },
-          { q: "Is my file uploaded anywhere?", a: "For every format except Opus, no: conversion happens in your browser via ffmpeg.wasm. For Opus, the file is sent to our own server (not a third party), encoded with libopus, and deleted as soon as you have downloaded the result." }
+          { q: `Can I convert several files at once?`, a: `No. The converter takes one file per run, and the picker does not allow more. Pick the next file after the first download. To join several files into one instead, use Audio Merger.` },
+          { q: `Can I change the bitrate, sample rate or channels?`, a: `Yes. "Quality" offers 128 to 320 kbps for the lossy formats, "Sample rate" goes from 48 kHz down to 8 kHz, and "Channels" gives mono or stereo. A rate a format cannot store, such as 22.05 kHz for OGG, is refused with a sentence before encoding.` },
+          { q: `Can I make an iPhone ringtone?`, a: `Yes. Choose M4R as the target: the page reminds you that a ringtone lasts 40 seconds at most and how to install it with GarageBand, the Finder or iTunes. Shorten a longer song first with Audio Trimmer.` },
+          { q: `Can it convert to AMR?`, a: `No. AMR files can be read, but the ffmpeg build used here has no AMR encoder, so AMR is not in the list of targets. Convert to M4A or MP3 for a small speech file instead.` },
+          { q: `Which formats are made on your server?`, a: `Opus only: the whole original file goes to our media service, which counts conversions per connection per hour and per day and refuses files over its maximum size or length. Any other target is produced by ffmpeg.wasm without leaving the tab.` },
         ]}
         tips={[
-          "The first conversion after loading the page takes longer since your browser needs to download the ffmpeg.wasm engine (roughly 25–30MB).",
-          "FLAC, WAV, AIFF, and ALAC preserve full quality but produce larger files than MP3, AAC, WMA, or Opus.",
-          "For MP3, AAC, M4A, OGG and WMA, pick the quality: 192 kbps (the default) is transparent for most listening; 320 kbps is the most an MP3 can hold. A higher bitrate than your source cannot bring back detail it never had.",
-          "M4R is the iPhone ringtone format; iOS plays ringtones of up to 40 seconds, so trim a longer song first (Audio Trimmer).",
-          "Opus is a strong choice for small file size at good quality if your target player supports it.",
-          "This tool converts audio files only — it doesn't extract audio from video files."
+          `To take the sound out of a video, use Video to Audio: it offers the same 18 formats.`,
+          `ALAC writes Apple Lossless audio inside a .m4a file, the way Apple Lossless files are usually stored.`,
         ]}
       />
     </div>

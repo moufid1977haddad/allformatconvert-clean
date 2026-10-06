@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Audio Equalizer — Equalize Audio Online Free" },
-  description: "Audio Equalizer lets you shape an audio file's bass, mid, and treble in real time, then export the result as a downloadable WAV file.",
+  title: { absolute: "Audio Equalizer — Bass, Mid & Treble, Export as WAV" },
+  description: "Shape the bass, mids and treble of an audio file by up to 12 dB each while it plays, then export the result as a WAV file. Nothing is uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-equalizer" },
   openGraph: {
-    title: "Audio Equalizer — Equalize Audio Online Free",
-    description: "Audio Equalizer lets you shape an audio file's bass, mid, and treble in real time, then export the result as a downloadable WAV file.",
+    title: "Audio Equalizer — Bass, Mid & Treble, Export as WAV",
+    description: "Shape the bass, mids and treble of an audio file by up to 12 dB each while it plays, then export the result as a WAV file. Nothing is uploaded.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-equalizer",
   },
 };

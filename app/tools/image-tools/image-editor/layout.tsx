@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Editor — Free Photo Editor in Your Browser" },
-  description: "Image Editor is a free, full-featured photo editor that runs entirely in your browser — no upload, no signup, and no software to install.",
+  title: { absolute: "Image Editor — Adjust, Rotate, Flip, Effects and Text" },
+  description: "Edit a photo in one place: brightness, contrast, saturation, gray, invert, quarter turns, flips, pixelate, grain, vignette, corners, border, text.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-editor" },
   openGraph: {
-    title: "Image Editor — Free Photo Editor in Your Browser",
-    description: "Image Editor is a free, full-featured photo editor that runs entirely in your browser — no upload, no signup, and no software to install.",
+    title: "Image Editor — Adjust, Rotate, Flip, Effects and Text",
+    description: "Edit a photo in one place: brightness, contrast, saturation, gray, invert, quarter turns, flips, pixelate, grain, vignette, corners, border, text.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-editor",
   },
 };

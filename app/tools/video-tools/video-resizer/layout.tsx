@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Resizer — Resize a Video Online Free" },
-  description: "Video Resizer changes your video's width and height on our own server (fit with black bars, fill or stretch), in every browser including Safari and iPhone, and gives an MP4 with the original sound.",
+  title: { absolute: "Video Resizer — Resize or Crop a Video, MP4 Result" },
+  description: "Change a video's width and height (fit with black bars, fill or stretch) or crop it to a box you draw. Done by ffmpeg on our video service, as an MP4.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-resizer" },
   openGraph: {
-    title: "Video Resizer — Resize a Video Online Free",
-    description: "Video Resizer changes your video's width and height on our own server (fit with black bars, fill or stretch), in every browser including Safari and iPhone, and gives an MP4 with the original sound.",
+    title: "Video Resizer — Resize or Crop a Video, MP4 Result",
+    description: "Change a video's width and height (fit with black bars, fill or stretch) or crop it to a box you draw. Done by ffmpeg on our video service, as an MP4.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-resizer",
   },
 };

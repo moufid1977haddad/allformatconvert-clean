@@ -19,7 +19,7 @@ const MAX_MS = 8640000000000000n; // ECMAScript Date range: ±100 000 000 days
 export function parseTimestamp(input) {
   const s = input.trim();
   const m = /^(-?)(\d+)(?:\.(\d+))?$/.exec(s);
-  if (!m) throw new Error('Enter a whole number of seconds (or milliseconds, microseconds, nanoseconds) — digits only, optionally negative.');
+  if (!m) throw new Error('Enter a number of seconds (decimals allowed), milliseconds, microseconds or nanoseconds — digits only, optionally negative.');
   const [, sign, intPart, fracPart] = m;
   const digits = intPart.replace(/^0+(?=\d)/, '').length;
   const unit = UNITS.find((u) => digits <= u.max);
@@ -29,7 +29,7 @@ export function parseTimestamp(input) {
   // Fractional seconds (e.g. 1700000000.5 from Python's time.time()).
   if (fracPart && unit.name === 'seconds') ms += BigInt((fracPart + '000').slice(0, 3));
   if (sign) ms = -ms;
-  if (ms > MAX_MS || ms < -MAX_MS) throw new Error('This timestamp is outside the range a calendar date can represent (year ±275 760).');
+  if (ms > MAX_MS || ms < -MAX_MS) throw new Error('This timestamp is outside the range a calendar date can represent (from year -271821 to year 275760).');
   return { ms: Number(ms), unit: unit.name };
 }
 
@@ -85,7 +85,7 @@ export function parseInZone(value, timeZone) {
   const want = { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]), hour: Number(m[4]), minute: Number(m[5]), second: Number(m[6] || 0) };
   const wall = utcOf(want);
   let target;
-  try { target = toZoneValue(wall, 'UTC'); } catch { throw new Error('This date is outside the range a calendar date can represent (year ±275 760).'); }
+  try { target = toZoneValue(wall, 'UTC'); } catch { throw new Error('This date is outside the range a calendar date can represent (from year -271821 to year 275760).'); }
   // the instants this wall time could be: wall minus each offset the zone has around it
   // probes a day either side (within the Date range: 275760-09-13 would overflow it); review 03/10
   const probe = (t) => { try { return offsetMs(t, timeZone); } catch { return null; } };

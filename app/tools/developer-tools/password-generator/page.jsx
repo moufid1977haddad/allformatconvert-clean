@@ -114,26 +114,39 @@ export default function PasswordGeneratorPage() {
       </div>
       <SeoContent
         title="Password Generator"
-        description="Password Generator builds a random password from the character sets you select, or a passphrase of random words from the EFF Large Wordlist (7,776 words), using the browser's crypto.getRandomValues() — a cryptographically secure random number source, not the predictable Math.random() — entirely in your browser. Nothing is uploaded to a server, and no generated password is stored or logged."
+        description={"Password Generator makes random passwords from the character types you tick, or passphrases built from the EFF Large Wordlist (7,776 words), from 1 to 50 per click. Every character or word is drawn with crypto.getRandomValues, without the small bias of a plain modulo. Each ticked type appears at least once in a password, and an option removes look-alike characters (0 O 1 l I |). After each click the page estimates the strength in bits from the length and the size of the alphabet or word list. Nothing is saved: the results disappear when you reload."}
+        example={{
+          caption: "Two runs of the page’s generation code on 5 October 2026. Results are random each time, so never reuse these.",
+          inputLabel: "Settings",
+          input: "Password, Length: 16, all four types, Avoid look-alike characters\nPassphrase, Number of words: 6, Hyphen, Capitalize, Include a number",
+          outputLabel: "Generated",
+          output: "._]PrGBJ8M4ntD,m\nStrength: about 101 bits — excellent\n\nReliant0-Prowess-Commerce-Unseated-Decal-Diagnosis\nStrength: about 83 bits — very strong",
+        }}
+        howToTitle={"How to generate a strong password or passphrase"}
         howTo={[
-          "Set your desired password length with the slider (8-64 characters).",
-          "Choose Password or Passphrase. For a passphrase, pick the number of words (3-20), the separator, and whether to capitalize words or add a number.",
-          "Toggle which character types to include: uppercase, lowercase, numbers, and symbols; optionally avoid look-alike characters and set how many passwords to make.",
-          "Click 'Generate Password' to create a new password.",
-          "Click 'Copy' to copy it to your clipboard."
+          "Choose \"Password\" or \"Passphrase\" at the top.",
+          "For a password, set \"Length\" and tick \"Uppercase\", \"Lowercase\", \"Numbers\" and \"Symbols\"; for a passphrase, set \"Number of words\", \"Word separator\", \"Capitalize\" and \"Include a number\".",
+          "Optionally tick \"Avoid look-alike characters\" and enter a count in \"How many\".",
+          "Click \"Generate Password\" or \"Generate Passphrase\", then \"Copy\" for the first result; when you made several, select them in the list box.",
         ]}
+        specs={[
+          { label: "Password length", value: "8 to 64 characters" },
+          { label: "Passphrase", value: "3 to 20 words from the EFF Large Wordlist (7,776 words), five separators or none, optional capitals and digit" },
+          { label: "Symbols used", value: "!@#$%^&*()_+-=[]{}|;:,.<>?" },
+          { label: "Results per click", value: "1 to 50" },
+          { label: "Strength labels", value: "Excellent from 100 bits, very strong from 80, strong from 60, fair from 45, weak below" },
+        ]}
+        privacyTitle={"Where your passwords are created"}
+        privacy={"Passwords and passphrases are created in your browser with crypto.getRandomValues; they are never sent to our servers, logged or stored. The word list is part of the site’s code and loads the first time you generate a passphrase. Nothing is kept after a reload, so copy a password into your password manager before you leave."}
         faqs={[
-          { q: "Is Password Generator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "How secure are the generated passwords?", a: "Characters are chosen using crypto.getRandomValues(), the Web Crypto API's cryptographically secure random source — the right choice for security-sensitive randomness, unlike Math.random()." },
-          { q: "Can I customize length and character types?", a: "Yes — length ranges from 8 to 64 characters, and you can toggle uppercase, lowercase, numbers, and symbols independently." },
-          { q: "What is a passphrase and how strong is it?", a: "A passphrase is a series of random words, easier to remember and type than random characters. Each word is drawn uniformly from the EFF Large Wordlist's 7,776 words with the same cryptographically secure source, which gives about 12.9 bits per word: 6 words ≈ 77 bits, 8 words ≈ 103 bits. The strength shown assumes an attacker knows the word list, as it should." },
-          { q: "Are generated passwords stored or logged?", a: "No, generation happens entirely in your browser and the password is never sent to or stored on a server." }
+          { q: "How many bits does a 6-word passphrase have?", a: "77 bits: each word drawn from the 7,776-word list adds about 12.9 bits, and 8 words give 103. With \"Include a number\", one digit placed after one random word adds a few bits more, for example 83 in total for six words." },
+          { q: "Does every password contain each type I ticked?", a: "Yes. A password missing one of the ticked types is drawn again, so each selected type appears at least once, as sites with composition rules expect. Every password that qualifies stays equally likely." },
+          { q: "What does Avoid look-alike characters remove?", a: "6 characters: zero, capital O, one, lowercase l, capital I and the vertical bar, which are easy to confuse in many fonts. The alphabet gets smaller, so the strength shown drops slightly for the same length." },
+          { q: "Are generated passwords stored or logged?", a: "No. They exist only in the page while it is open: no request carries them to our servers, and a reload clears them. Copy a password before generating again, because a new click replaces the list." },
         ]}
         tips={[
-          "Use at least 16 characters with all four character types enabled for the strongest passwords on important accounts.",
-          "Generate a unique password for every account so a single leak doesn't compromise others.",
-          "Store generated passwords in a password manager rather than writing them down or reusing them from memory.",
-          "Copy the password immediately after generating it, since it isn't saved anywhere once you navigate away."
+          "For a master password you type by hand, a passphrase of six words gives 77 bits using only letters and the separator you pick.",
+          "Need an identifier rather than a secret? UUID Generator makes random version 4 IDs.",
         ]}
       />
     </div>

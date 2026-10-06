@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JavaScript Formatter — Add Line Breaks Online Free" },
-  description: "JavaScript Formatter adds line breaks and indentation around braces, brackets, and commas entirely in your browser, and can minify too.",
+  title: { absolute: "JavaScript Formatter & Minifier — Beautify or Shrink JS" },
+  description: "Beautify JavaScript with js-beautify and a 2-space indent, or minify it with Terser, which renames locals and drops dead code, on your device.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/javascript-formatter" },
   openGraph: {
-    title: "JavaScript Formatter — Add Line Breaks Online Free",
-    description: "JavaScript Formatter adds line breaks and indentation around braces, brackets, and commas entirely in your browser, and can minify too.",
+    title: "JavaScript Formatter & Minifier — Beautify or Shrink JS",
+    description: "Beautify JavaScript with js-beautify and a 2-space indent, or minify it with Terser, which renames locals and drops dead code, on your device.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/javascript-formatter",
   },
 };

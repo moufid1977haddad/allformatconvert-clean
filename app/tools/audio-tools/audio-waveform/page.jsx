@@ -198,25 +198,29 @@ export default function AudioWaveformPage() {
       </div>
       <SeoContent
         title="Audio Waveform"
-        description="Audio Waveform draws an interactive visual waveform of your audio file directly in your browser using the Web Audio API and canvas — nothing is uploaded to a server. Scroll to zoom in on the waveform and drag to pan across it, then export the current view as a PNG image."
+        description={`Audio Waveform draws the sound of one audio file as a waveform built from every channel, so a sound present on one side only is not missed. Scroll or use "Zoom in +" to look closer, up to ${MAX_ZOOM}x, and drag to move along the file with a mouse or a finger. "Download PNG" redraws the part on screen at the size you choose, from 800 to 3000 px wide and 150 to 800 px high, in your wave and background colours or on a transparent background. WMA and AMR files, which browsers cannot decode, are first turned into WAV by ffmpeg.wasm.`}
+        howToTitle="How to make a waveform image of an audio file"
         howTo={[
-          "Click the upload area and select an audio file.",
-          "The tool decodes the audio and renders its waveform on the canvas automatically.",
-          "Scroll over the waveform to zoom in or out, and click-and-drag to pan across it.",
-          "Click \"Download PNG\" to save the current waveform view as an image, or \"Reset Zoom\" to return to the full view."
+          `Pick or drop an audio file; the waveform appears above the player.`,
+          `Scroll over it, or click "Zoom in +" and "Zoom out −"; drag to pan.`,
+          `Choose the "Width", "Height", "Wave" and "Background" colours, or tick "Transparent".`,
+          `Click "Download PNG" to save the visible part; "Reset Zoom" brings back the whole file.`,
         ]}
+        specs={[
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Output format`, value: `PNG` },
+          { label: `Image size`, value: `Width 800, 1200, 1920 or 3000 px; height 150, 200, 300, 500 or 800 px` },
+          { label: `Zoom`, value: `${MIN_ZOOM}x to ${MAX_ZOOM}x; the scroll wheel zooms around the pointer, the buttons from the left edge of the view` },
+        ]}
+        privacy={`The audio is decoded in your browser with the Web Audio API, after ffmpeg.wasm has turned any format the browser cannot read into WAV; the waveform and the PNG are drawn on a canvas in the same tab. The audio and the PNG are not sent to any server. Should an error appear, the cleaned message goes to our error log along with the tool name and your browser's name and version.`}
         faqs={[
-          { q: "Can I choose the image size and colours?", a: "Yes: width from 800 to 3000 px, height from 150 to 800 px, the wave and background colours, or a transparent background. The PNG is drawn at that size — of the part shown, so zoom first to save a detail." },
-          { q: "Can I zoom or pan the waveform?", a: "Yes — scroll over the canvas to zoom in or out (centered on your cursor), and click-and-drag to pan across the waveform. Use \"Reset Zoom\" to return to the full view." },
-          { q: "Can I export or download the waveform image?", a: "Yes — click \"Download PNG\" to save the currently visible waveform (including your current zoom/pan) as a PNG image." },
-          { q: "What audio formats are supported?", a: "MP3, WAV, FLAC, OGG, M4A and the others your browser decodes directly; formats it cannot decode (WMA, AC3, AMR…) are decoded in your browser by ffmpeg.wasm first. Nothing is uploaded." },
-          { q: "Is my file uploaded anywhere?", a: "No. Decoding and rendering happen entirely in your browser — your file is never uploaded to a server." }
+          { q: `Can I choose the image size and colours?`, a: `Yes: four widths from 800 to 3000 px, five heights from 150 to 800 px, any wave and background colour, or a transparent background. The PNG is drawn at that size from the part on screen, not copied from the small preview.` },
+          { q: `Can I save a close-up of one moment?`, a: `Yes. Zoom on that moment, then click "Download PNG": only the visible part is drawn, at the full width you chose. "Reset Zoom" brings back the whole file.` },
+          { q: `Does it show sound that is on one channel only?`, a: `Yes. Each column of the picture spans the lowest and highest values of all channels together, so a sound on the right channel alone still shows. The two channels are not drawn as separate lanes.` },
+          { q: `Can I open WMA or AMR files?`, a: `Yes. Formats your browser cannot decode, such as WMA and AMR, are converted to WAV by ffmpeg.wasm on the page first; the first time takes longer while that engine loads.` },
         ]}
         tips={[
-          "Zoom in near a specific moment to inspect individual peaks, clipping, or silence in detail.",
-          "The PNG export captures exactly what's on screen, so zoom in first if you need a detailed close-up image.",
-          "Use \"Reset Zoom\" any time to quickly get back to the full-length overview.",
-          "Very large audio files may take a moment to decode before the waveform appears."
+          `Tick "Transparent" to lay the waveform over a video thumbnail or a cover picture.`,
         ]}
       />
     </div>

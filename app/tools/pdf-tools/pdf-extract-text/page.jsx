@@ -68,7 +68,7 @@ export default function PdfExtractTextPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Extract Text from PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Extract all text content from your PDF</p>
+        <p className="text-neutral-500 text-center mb-8">Extract the selectable text of your PDF, page by page</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PDF" />}</p>
@@ -95,25 +95,28 @@ export default function PdfExtractTextPage() {
       </div>
       <SeoContent
         title="PDF Extract Text"
-        description="PDF Extract Text pulls the text layer out of your PDF page by page, entirely in your browser using the PDF.js library — your file is never uploaded to a server. It only reads text that's actually embedded in the PDF; scanned or image-only pages have no text layer, and since no OCR is performed, those pages come out blank."
+        description={`PDF Extract Text reads the text layer of a PDF, the text you could select in a viewer, and gives it back as plain text, with line breaks and spaces rebuilt from the positions on the page. Take every page or only the pages you list, with or without a heading naming each page, then copy the text or save it as a .txt file. It does not read pictures: a scanned page has no text layer, and the tool then suggests PDF OCR. The file is read in your browser with PDF.js.`}
+        howToTitle="How to extract text from a PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Click 'Extract Text' to pull the text content from every page.",
-          "Read the result in the text box, grouped and labeled by page number.",
-          "Click 'Copy' to copy it, or 'Download' to save it as a .txt file."
+          `Choose the PDF.`,
+          `Optionally list pages in "Pages (empty: all)", and untick the page-heading checkbox for plain text.`,
+          `Click "Extract Text".`,
+          `Copy the result with "Copy", or click "Download" to save it as a .txt file named after your PDF.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF with a text layer` },
+          { label: 'Output', value: `Plain text on the page and a .txt file in UTF-8` },
+          { label: 'Pages', value: `All, or a list such as 1-3, 5, 8-` },
+          { label: 'Scanned pages', value: `No text to read; use PDF OCR` },
+        ]}
+        privacy={`PDF.js reads your file inside the browser, and neither the PDF nor the extracted text is uploaded. If extraction fails, a cleaned error message is reported to us with the tool's name, the file type, an approximate size and your browser's name and version, never the file name or any text. For files up to 25 MB, accents drawn as separate glyphs are repaired in the copy given to PDF.js, never in your file.`}
         faqs={[
-          { q: "Is PDF Extract Text completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does it support?", a: "PDF files only." },
-          { q: "Can I extract only some pages?", a: "Yes: type them in Pages (for example 1-3, 5, 8-); leave it empty for the whole document. Untick \"Start each page with Page N:\" for plain text without page headings." },
-          { q: "Is my uploaded PDF file secure and private?", a: "Yes — text extraction happens entirely in your browser using the PDF.js library, so your file is never uploaded to a server." },
-          { q: "Can I extract text from scanned or image-based PDFs?", a: "No. This tool doesn't perform OCR — it only reads a PDF's existing text layer, so scanned pages without embedded text come out blank." }
+          { q: "Can I extract text from a scanned PDF?", a: `No. A scan stores each page as a picture, so there is no text layer to read. When no page has text, the tool says so and suggests PDF OCR, which recognizes the letters in the pictures and can also give you a searchable PDF.` },
+          { q: "Will multi-column pages come out in the right order?", a: `No, not always. Line breaks and spaces are rebuilt from the positions of the text, but the order is the order in which the PDF stores its text. When a PDF stores its columns interleaved, lines of different columns alternate in the result.` },
+          { q: "Can I get the text without the page headings?", a: `Yes. Untick the page-heading checkbox above the button and the pages are separated by a blank line only. Leave it ticked when you need to know which page each passage came from.` },
         ]}
         tips={[
-          "Output is grouped by page (\"Page 1:\", \"Page 2:\", etc.) so you can tell where each chunk of text came from.",
-          "Works only on PDFs that already have a text layer — scanned or image-only pages won't produce any text.",
-          "Copy the text directly to your clipboard if you just need to paste it elsewhere, without downloading a file.",
-          "Line breaks and word spaces are rebuilt from the position of the text on the page; multi-column layouts are read line by line across the columns."
+          `For a file that mixes typed and scanned pages, PDF OCR reads both and leaves the pages that already have text without a second layer.`,
         ]}
       />
     </div>

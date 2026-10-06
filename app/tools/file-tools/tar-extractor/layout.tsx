@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "TAR Extractor — Extract TAR Online Free" },
-  description: "TAR Extractor is a free online tool that extracts files from TAR, TAR.GZ, and TGZ archives directly in your browser — no software or upload required.",
+  title: { absolute: "TAR Extractor — Open .tar, .tar.gz and .tgz Files Online" },
+  description: "Extract the files of a TAR, TAR.GZ or TGZ archive in your browser, with long and accented names kept. Download one file or all of them as a ZIP.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/tar-extractor" },
   openGraph: {
-    title: "TAR Extractor — Extract TAR Online Free",
-    description: "TAR Extractor is a free online tool that extracts files from TAR, TAR.GZ, and TGZ archives directly in your browser — no software or upload required.",
+    title: "TAR Extractor — Open .tar, .tar.gz and .tgz Files Online",
+    description: "Extract the files of a TAR, TAR.GZ or TGZ archive in your browser, with long and accented names kept. Download one file or all of them as a ZIP.",
     url: "https://www.onlineconvertools.com/tools/file-tools/tar-extractor",
   },
 };

@@ -1,31 +1,40 @@
 'use client';
-import GifFromVideoTool from '../../../components/GifFromVideoTool';
+import GifFromVideoTool, { GIF_MAX_SECONDS } from '../../../components/GifFromVideoTool';
+import { MAX_UPLOAD_MB } from '../../../components/MediaServiceTool';
 
 export default function AviToGifPage() {
   return (
     <GifFromVideoTool
       tool="avi-to-gif"
       title="AVI to GIF"
-      subtitle="Convert a AVI clip into an animated GIF — choose the start, length, width and frame rate"
+      subtitle="Turn part of an AVI file, which browsers cannot preview, into an animated GIF"
       seo={{
         title: 'AVI to GIF',
-        description: 'AVI to GIF converts a clip of your AVI video into an animated GIF. Pick where the clip starts, how long it lasts (up to 60 seconds), the width and the frame rate. AVI files are converted on our server with ffmpeg, so they work even though browsers cannot play AVI themselves. It runs on our server with ffmpeg, which builds an optimised 256-colour palette for your clip, so it works in every browser including Safari and iPhone. Your file is deleted from our server as soon as you have downloaded the GIF.',
+        description: `AVI to GIF turns part of an AVI video into an animated GIF. ffmpeg on our server reads the AVI, a format web browsers cannot play. You set the start time and the length (up to ${GIF_MAX_SECONDS} seconds), the width and the frame rate; the height keeps the proportions of the video. Because the preview cannot play an AVI, the page cannot read its duration in advance, and the server checks the start time instead. MP4, MOV, WebM, MKV and other video files are accepted too.`,
+        howToTitle: 'How to convert AVI to GIF',
         howTo: [
-          'Select a AVI file (up to 1 GB). Other video formats work too.',
-          'Set the start time and the length of the clip (up to 60 seconds).',
-          'Choose the width and frames per second — smaller values make a lighter GIF.',
-          'Click "Make GIF", preview it, then download.',
+          'Choose your .avi file; the preview box may stay black, because browsers do not play AVI.',
+          'Type the moment you want in "Start (seconds)", found beforehand in a desktop video player, and its duration in "Length (seconds)".',
+          'Pick "Width" and "Frames per second", and if you like "Plays" and "Compression".',
+          'Click "Make GIF", then "Download" to save the GIF under the name of your video.',
         ],
+        specs: [
+          { label: 'Input', value: 'AVI, plus MP4, MOV, WebM, MKV, WMV, FLV and the other types in the file picker' },
+          { label: 'Output', value: 'Animated GIF, file named after the AVI' },
+          { label: 'Preview', value: 'Browsers cannot play AVI here, so type the start time yourself' },
+          { label: 'GIF duration', value: `Up to ${GIF_MAX_SECONDS} seconds per GIF` },
+          { label: 'Largest file', value: `${MAX_UPLOAD_MB / 1024} GB per AVI` },
+          { label: 'Usage limits', value: 'Each connection has an hourly and a daily number of conversions' },
+        ],
+        privacy: 'This tool needs our server: the AVI is uploaded in pieces to our video service (ffmpeg on Railway), using a single-use ticket from this site. The service removes the AVI once the GIF is made or the job fails, and removes the GIF after this page has taken it; leftovers of abandoned jobs are swept by a timer. Only changes to "Plays" and "Compression" are done on this page, with gifsicle, on the GIF from our server.',
         faqs: [
-          { q: 'Is AVI to GIF free?', a: 'Yes, free with no signup and no watermark.' },
-          { q: 'Can I convert only part of my video?', a: 'Yes: set the start time and the length (up to 60 seconds).' },
-          { q: 'Why is my GIF large?', a: 'GIF has no real video compression. Lower the width (e.g. 320 px), the frame rate (e.g. 8–10) or the length to make it much lighter.' },
-          { q: 'Will a vertical video be squashed?', a: 'No. Only the width is set; the height follows the video, so it keeps its proportions.' },
-          { q: 'Is my video uploaded?', a: 'Yes, to our own server (not a third party), and deleted as soon as you have downloaded the result.' },
+          { q: 'Will my AVI play in the preview?', a: 'No, usually not: web browsers do not play AVI files, so the preview stays blank or shows an error. The conversion is not affected, because ffmpeg on our server reads the file. Type the start time as a number of seconds; a start beyond the end of the video is refused by the server with a message.' },
+          { q: 'Can I convert only part of an AVI?', a: `Yes. Set "Start (seconds)" and "Length (seconds)"; a GIF lasts from 0.2 to ${GIF_MAX_SECONDS} seconds. Since the page cannot read the duration of an AVI, a clip that runs past the end simply stops where the video ends.` },
+          { q: 'Is there a size limit for AVI files?', a: `Yes: ${MAX_UPLOAD_MB / 1024} GB per file, on a computer or a phone, and the service also refuses source videos above a maximum duration, which its message states. The GIF covers only the clip you pick, so its size depends on the length, the width and the frame rate.` },
+          { q: 'Is the AVI deleted after conversion?', a: 'Yes. Our video service deletes the AVI when processing ends, successful or not, and deletes the GIF once this page has downloaded it. Nothing about the name or the content of the file is written to the service logs.' },
         ],
         tips: [
-          '480 px and 10 fps is a good balance for sharing in chats and on social media.',
-          'Play the video above to find the exact second where your clip should start.',
+          'To pick the start visually, convert the AVI to MP4 first with Video Converter: an MP4 plays in the preview here.',
         ],
       }}
     />

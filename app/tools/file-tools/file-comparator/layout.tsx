@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "File Comparator — Compare Files Online Free" },
-  description: "File Comparator is a free online tool that instantly checks whether two files are byte-for-byte identical, entirely in your browser.",
+  title: { absolute: "File Comparator — Check Two Files Match, Byte by Byte" },
+  description: "Compare two files of any type byte by byte in your browser, and see the position of the first difference or confirm that both match exactly.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/file-comparator" },
   openGraph: {
-    title: "File Comparator — Compare Files Online Free",
-    description: "File Comparator is a free online tool that instantly checks whether two files are byte-for-byte identical, entirely in your browser.",
+    title: "File Comparator — Check Two Files Match, Byte by Byte",
+    description: "Compare two files of any type byte by byte in your browser, and see the position of the first difference or confirm that both match exactly.",
     url: "https://www.onlineconvertools.com/tools/file-tools/file-comparator",
   },
 };

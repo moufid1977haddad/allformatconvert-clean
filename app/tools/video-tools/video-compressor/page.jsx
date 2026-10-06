@@ -37,26 +37,33 @@ const HEIGHTS = [
 
 const seo = {
   title: 'Video Compressor',
-  description: 'Video Compressor shrinks video files with the encoders used by professional tools — H.264, or H.265 and AV1 (in our tests on camera video, 40 to 50 % smaller at the same quality) — on our server, so it works in any browser (including Safari and iPhone) and runs faster than the video plays. Choose a compression level and an optional resolution limit, watch real progress, and download an MP4. Your file is deleted from our server as soon as you have downloaded the result.',
+  description: `Video Compressor makes a video file lighter by encoding it again as an MP4. You choose one of three compression levels, the codec (H.264, which plays on almost every device, or H.265 and AV1, which give smaller files but need a recent phone, computer or browser) and, if you want, a maximum height from 1440p down to 240p. It takes MP4, MOV, MKV, WebM, AVI, WMV, FLV, MPG, TS, 3GP and other video files that have a picture track. ffmpeg does the encoding on our video service, so your browser only sends the file and receives the result. It does not cut or crop: use Video Trimmer or Video Resizer for that.`,
+  howToTitle: 'How to compress a video',
   howTo: [
-    'Select or drop a video file (MP4, MOV, MKV, WebM, AVI, WMV, FLV and more, up to 1 GB).',
-    'Pick a compression level and, if you want, a maximum resolution.',
-    'Click "Compress Video" and follow the real progress: upload, waiting line if the service is busy, then compression.',
-    'Compare the before and after size, preview the result, and download the MP4.',
+    `Choose or drop a video file; the settings appear once it is loaded.`,
+    `Pick a "Compression level" ("Balanced" is selected first) and, if you want, a "Resolution" limit.`,
+    `Keep "Codec" on H.264 for a file that plays everywhere, or choose H.265 or AV1 for a smaller one; a number in "Exact quality (CRF), optional" replaces the level.`,
+    `Click "Compress Video" and follow the upload, the waiting line when the service is busy, and the encoding percentage.`,
+    `Compare the "Before" and "After" sizes, play the result and click "Download" to save the MP4.`,
   ],
+  specs: [
+    { label: 'Input formats', value: `MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS (a picture track is required)` },
+    { label: 'Output', value: `MP4 with H.264, H.265 (HEVC) or AV1 video and AAC sound at 96 kbps` },
+    { label: 'Maximum file size', value: `1 GB per video, on a computer as on a phone` },
+    { label: 'Length', value: `Our video service sets a maximum duration and a time limit per encoding; a video over either is refused or stopped with a message` },
+    { label: 'Usage limits', value: `A set number of videos per hour and per day for each internet connection, shared by every tool that uses our video service; no account` },
+  ],
+  privacy: `Your video goes in pieces straight from this page to our video service (ffmpeg on Railway). The service deletes the original when the compression ends and the MP4 once this page has downloaded it; an unfinished job is removed after a set time. Its logs keep the operation, a size range, the job's status and timings, never the file name or content. A shown error sends us its cleaned text, the error type, the tool name, your browser and its version, the file extension and a size range.`,
   faqs: [
-    { q: 'How large a video can I compress?', a: 'Up to 1 GB per file. The file goes straight to our video service in pieces, so a dropped connection resumes instead of starting over.' },
-    { q: 'What do I get?', a: 'An MP4 with AAC sound and, by default, H.264 video, the format that plays on every phone, computer and browser. You can choose H.265 (HEVC) or AV1. In our tests on 1080p camera footage, at the same visual quality (VMAF) as H.264, H.265 files were about 40 % smaller and AV1 files about 50 % smaller; most phones and recent computers play H.265, while AV1 plays in current Chrome, Firefox and Edge and on recent devices.' },
-    { q: 'Can I set the exact quality?', a: 'Yes: type a CRF value (lower = better and bigger; 0-51 for H.264 and H.265, 0-63 for AV1). The video is then encoded once at exactly that value — even if the result comes out larger than the original, since that was your choice.' },
-    { q: 'Is my video kept?', a: 'No. The original is deleted the moment compression ends, and the result is deleted right after your download (or after 15 minutes if you never download it). Nothing about your file is logged.' },
-    { q: 'Why is this not done in the browser?', a: 'Compressing on a server is several times faster than real time and works on iPhone and Safari, where in-browser video recording is not available.' },
-    { q: 'Can the result be larger than the original?', a: 'No. The compressor is given a size ceiling taken from your own file. If a result still is not smaller, it automatically tries one stronger setting, and if that is not smaller either it tells you your video is already well compressed instead of handing you a bigger file. To go smaller in that case, lower the resolution.' },
+    { q: 'Does H.265 or AV1 really give a smaller file?', a: `Yes. On a 1080p camera clip measured on 3 October, H.265 and AV1 files were about 40 to 50 % lighter than H.264 at the same visual quality (VMAF): about 40 % for H.265, about 50 % for AV1. On animation H.265 was still lighter, while AV1 was heavier but much sharper. H.264 stays the safest choice for old phones and TVs.` },
+    { q: 'Can the compressed video be larger than the original?', a: `No, unless you type an exact CRF. With a level, a result that is not at least 2 % smaller is encoded once more at the next, stronger level; if that still fails, you get no file and the page says the video is already well compressed. "Strong" has no stronger level. An exact CRF is encoded once and delivered as it comes out.` },
+    { q: 'Is the sound kept?', a: `Yes. The first audio track is encoded again as AAC at 96 kbps. Other audio tracks, subtitles and the file's metadata, such as its recording date or location, are not copied into the compressed MP4.` },
+    { q: 'Can I compress a video on my iPhone?', a: `Yes. The encoding happens on our video service, so Safari on iPhone and iPad works like a computer browser. A video picked from the Photos library reaches the page already shrunk by iOS; save it to the Files app first and pick it there to compress the original.` },
+    { q: 'How many videos can I compress?', a: `One at a time, up to 1 GB each, within a set number per hour and per day for your internet connection. The count is shared with the other tools that use our video service. When it is reached, the page says so and you can try again later; no account is needed.` },
   ],
   tips: [
-    'Balanced is right for most videos; use Strong for messaging apps and email limits.',
-    'Limiting the resolution to 720p usually shrinks a phone video far more than a higher compression level.',
-    'Keep the tab open while it works; you can cancel at any time.',
-    'iPhone videos (.mov) are accepted directly.',
+    `If the page says the video is already well compressed, choose a lower "Resolution" instead of a stronger level.`,
+    `Cut the part you need with Video Trimmer first: a shorter video uploads sooner and ends up lighter.`,
   ],
 };
 
@@ -66,7 +73,7 @@ export default function VideoCompressorPage() {
     <MediaServiceTool
       op="compress"
       title="Video Compressor"
-      subtitle="Compress video files — any browser, up to 1 GB"
+      subtitle="Make a video file lighter as an MP4 — encoded on our video service, up to 1 GB"
       buttonLabel="Compress Video"
       initialParams={{ level: 'balanced', maxHeight: '', codec: 'h264', crf: '' }}
       buildParams={(p) => ({ level: p.level, ...(p.maxHeight ? { maxHeight: Number(p.maxHeight) } : {}), ...(p.codec && p.codec !== 'h264' ? { codec: p.codec } : {}), ...(p.crf !== '' && p.crf != null ? { crf: Math.round(Number(p.crf)) } : {}) })}

@@ -103,29 +103,37 @@ export default function VideoToGifPage() {
     <GifFromVideoTool
       tool="video-to-gif"
       title="Video to GIF"
-      subtitle="Turn a clip of any video into an animated GIF — or extract its frames as PNG images"
+      subtitle="Make an animated GIF from part of a video, or save its frames as PNG images"
       extra={({ file, busy }) => <FrameExtractor file={file} busy={busy} />}
       seo={{
         title: 'Video to GIF',
-        description: 'Video to GIF turns a clip of any video (MP4, MOV from an iPhone, WebM, MKV, AVI and more) into one animated GIF file. Pick where the clip starts, how long it lasts (up to 60 seconds), the width and the frame rate. It runs on our server with ffmpeg, building an optimised 256-colour palette for your clip, so it works in every browser including Safari and iPhone; vertical and square videos keep their shape. Need still images instead? Open "Or extract frames as PNG images" to capture up to 150 frames in your browser and download them one by one or as a ZIP.',
+        description: 'This page gets two things out of one video. "Make GIF" turns a clip into an animated GIF on our video service: you set the start, a length of up to 60 seconds, a width from 160 to 1080 pixels and 5 to 30 frames per second, and the height follows the video. Two extra settings, how many times it plays and an optional compression, are then applied by gifsicle on this page. Under the GIF settings, "Or extract frames as PNG images" saves still frames instead, as separate PNG files or one ZIP.',
+        howToTitle: 'How to make a GIF or PNG frames from a video',
         howTo: [
-          'Select a video file (up to 1 GB).',
-          'Set the start time and the length of the clip (up to 60 seconds), the width and the frames per second.',
-          'Click "Make GIF", preview the animation, then click "Download".',
-          'For still images, open "Or extract frames as PNG images", choose the start, frame rate and duration, then download the frames or all of them as a ZIP.',
+          'Choose or drop a video file; it plays in the preview so you can find your moment.',
+          'Fill in "Start (seconds)" and "Length (seconds)", then choose "Width" and "Frames per second".',
+          'If you want, set "Plays" (forever, once, 3 or 5 times) and "Compression".',
+          'Click "Make GIF", follow the upload and processing percentage, then click "Download".',
+          'For still images, open "Or extract frames as PNG images", set the start, frame rate and duration, extract, then save the frames one by one or with "Download all".',
         ],
+        specs: [
+          { label: 'Input formats', value: 'MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS' },
+          { label: 'GIF output', value: 'Animated GIF, 160 to 1080 pixels wide but never wider than the video, 5 to 30 frames per second' },
+          { label: 'Clip length', value: '0.2 to 60 seconds; a clip that runs past the end stops there, with a note when your browser can read the video length' },
+          { label: 'PNG frames', value: 'Frame extraction: 1 to 15 per second over 1 to 10 seconds, up to 150 PNG files, made in your browser' },
+          { label: 'Maximum file size', value: '1 GB per source video for a GIF, on a computer or a phone' },
+          { label: 'Usage limits', value: 'Each GIF counts toward the hourly and daily limit of your internet connection on our video service; frame extraction is not counted' },
+        ],
+        privacy: 'For a GIF, the video is sent in pieces to our video service on Railway, which cuts the clip and builds the GIF with ffmpeg; the original is deleted when the GIF is ready, and the GIF once this page has downloaded it. The loop and compression settings are applied afterwards on this page. Frame extraction sends nothing: the frames are drawn from the video player in this tab. Errors shown on the page reach us as cleaned text, with the error type, the tool name, the browser and its version, the extension and a size range.',
         faqs: [
-          { q: 'Does this produce a single animated GIF file?', a: 'Yes — "Make GIF" returns one animated .gif file of your clip.' },
-          { q: 'Which video formats can I use?', a: 'MP4, MOV (including iPhone videos), WebM, MKV, AVI, WMV, FLV and most others ffmpeg can read.' },
-          { q: 'How long can the GIF be?', a: 'Up to 60 seconds, starting wherever you want in the video.' },
-          { q: 'Can I get the individual frames instead?', a: 'Yes: "Or extract frames as PNG images" captures up to 15 frames per second for up to 10 seconds, in your browser (nothing is uploaded for that), each as a PNG, or all in one ZIP.' },
-          { q: 'Is my video uploaded?', a: 'For the GIF, yes, to our own server (not a third party), and deleted as soon as you have downloaded the result. Frame extraction runs entirely in your browser.' },
+          { q: 'Can I get still images instead of a GIF?', a: 'Yes. Open "Or extract frames as PNG images", choose 1 to 15 frames per second over 1 to 10 seconds from your start, and the page saves up to 150 PNG images, one by one or all in a ZIP. Frames of a very large video are scaled down to fit the browser\'s canvas limit.' },
+          { q: 'How can I make the GIF file smaller?', a: 'Lower the "Width" or the "Frames per second", or shorten the clip. You can also set "Compression" to "Light (smaller file)" or "Strong (smallest, some noise)", which gifsicle applies after the GIF is made.' },
+          { q: 'Can the GIF play only once?', a: 'Yes. Set "Plays" to "Once", "3 times" or "5 times" before you click "Make GIF"; "Forever (loop)" is the default. The count is written into the GIF file itself.' },
+          { q: 'What if my start plus length goes beyond the video?', a: 'The GIF stops where the video ends. When your browser can read the video length, the page shortens the clip itself and shows a note with the real length above the result. A start time after the end of the video is refused with a message.' },
+          { q: 'Is there a limit on GIFs?', a: 'Yes: 1 GB per video, 60 seconds per GIF, and a set number of GIFs per hour and per day for each internet connection on our video service. Frame extraction is not limited this way.' },
         ],
         tips: [
-          '480 px and 10 fps is a good balance for sharing in chats and on social media.',
-          'For a reaction GIF, keep it short: 2 to 4 seconds.',
-          'Lower the width or the frame rate to make the GIF much lighter.',
-          'Play the video above to find the exact second where your clip should start.',
+          'Play the video in the preview and note the second where your moment starts before you fill in "Start (seconds)".',
         ],
       }}
     />

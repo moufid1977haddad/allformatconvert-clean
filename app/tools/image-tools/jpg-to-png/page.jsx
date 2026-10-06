@@ -7,6 +7,8 @@ import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { RASTER_MAX_PIXELS } from '../../../lib/imageOutput';
+import { PHONE_MAX_MP } from '../../../lib/reduceImage';
 export default function JPGtoPNGPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -43,24 +45,27 @@ export default function JPGtoPNGPage() {
       </div>
       <SeoContent
         title="JPG to PNG"
-        description="JPG to PNG converts a JPG image to PNG format entirely in your browser using the HTML canvas — your file is never uploaded to a server. Note that since a JPG has no transparency to begin with, the PNG output is fully opaque, just like the source."
+        description={`JPG to PNG saves a JPG or JPEG photo as a PNG. From then on the pixels are kept without further loss, which helps when a picture will be edited and saved several times, or when a program asks for PNG. Converting cannot undo the compression already in the JPG, and it adds no transparency: the PNG is as opaque as the photo. A photo taken sideways with an orientation tag is stored the right way up, and camera details such as GPS location are not copied. One photo per conversion, decoded and saved by the browser.`}
+        howToTitle="How to convert JPG to PNG"
         howTo={[
-          "Click the upload area and select a JPG file from your device.",
-          "Click 'Convert' to render it to PNG.",
-          "Preview the converted image.",
-          "Click the download button to save your PNG file."
+          `Pick a .jpg or .jpeg photo in the upload area to see it there.`,
+          `Click "Convert" and look at the PNG preview.`,
+          `Click "Download" to save the PNG, named after your photo.`
         ]}
+        specs={[
+          { label: 'Input format', value: `JPG, JPEG (.jpg, .jpeg)` },
+          { label: 'Output format', value: `PNG, opaque, same width and height` },
+          { label: 'Largest photo', value: `${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels on a computer` },
+          { label: 'On iPhone and iPad', value: `No smaller cap is set, but a phone gives a page much less memory; ${PHONE_MAX_MP}-megapixel photos are the largest confirmed on a real iPhone` }
+        ]}
+        privacy={`Your photo is decoded and saved as PNG by the browser on this device; no copy is sent to our servers or to a third party. On an iPhone or iPad, very large photos are processed in strips, still locally. If an error message appears, it is logged for us in cleaned form with the tool's name and your browser's name and version, never with the photo.`}
         faqs={[
-          { q: "Is JPG to PNG completely free to use?", a: "Yes, it's 100% free with no registration required." },
-          { q: "Will the image quality be affected during conversion?", a: "No, the pixels are copied as-is. Note that JPG compression artifacts already present in the source image aren't removed by converting to PNG." },
-          { q: "Can I convert multiple images at once?", a: "No, only one file can be converted at a time — there's no batch upload." },
-          { q: "Is my uploaded image data secure?", a: "Yes. Conversion happens entirely in your browser — your file is never uploaded to a server." }
+          { q: "Does converting JPG to PNG improve the quality?", a: `No. The PNG keeps the photo exactly as decoded, including any blocks or blur the JPG compression already caused. What you gain is that later edits saved as PNG lose nothing more.` },
+          { q: "Can the PNG have a transparent background?", a: `No, not by converting: a JPG has no transparency, so the PNG is fully opaque. To cut out the subject and get a transparent PNG, use Background Remover.` },
+          { q: "Does the PNG keep the camera's EXIF data?", a: `No. The PNG is written from the pixels only; the EXIF data of the JPG, such as GPS position, date and camera model, is left out.` }
         ]}
         tips={[
-          "PNG is a good target format when you need lossless output for further editing.",
-          "Since JPGs have no transparency, converting to PNG won't add an alpha channel — the image stays fully opaque.",
-          "PNG files are generally larger than JPGs, so expect a bigger file size after conversion.",
-          "Convert one file at a time and download each result before starting the next."
+          `For a lossless copy in WebP format instead, use JPG to WebP with its lossless mode and compare the two file sizes.`
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "HTML Entity Decoder — Decode HTML Entities Online Free" },
-  description: "HTML Entity Decoder decodes HTML entities — named and numeric — back into plain text using the browser's own DOMParser.",
+  title: { absolute: "HTML Entity Decoder — &amp;, &nbsp;, &#8364; to Characters" },
+  description: "Turn &amp;, &nbsp;, &eacute; or &#x1F600; into real characters without stripping tags. Useful for feed, CMS or e-mail source text.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/html-entity-decoder" },
   openGraph: {
-    title: "HTML Entity Decoder — Decode HTML Entities Online Free",
-    description: "HTML Entity Decoder decodes HTML entities — named and numeric — back into plain text using the browser's own DOMParser.",
+    title: "HTML Entity Decoder — &amp;, &nbsp;, &#8364; to Characters",
+    description: "Turn &amp;, &nbsp;, &eacute; or &#x1F600; into real characters without stripping tags. Useful for feed, CMS or e-mail source text.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/html-entity-decoder",
   },
 };

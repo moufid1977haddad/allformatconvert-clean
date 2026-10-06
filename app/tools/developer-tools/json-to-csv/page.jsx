@@ -37,24 +37,29 @@ export default function JsonToCsvPage() {
       </div>
       <SeoContent
         title="JSON to CSV"
-        description="JSON to CSV converts a JSON array of objects (or a single object) into CSV text, entirely in your browser — nothing is uploaded to a server. Every key found in any object becomes a column, in the order first seen, so no field is dropped when rows differ. Nested objects are flattened into dotted column names (address.city) and arrays into indexed ones (tags.0, tags.1), the way ConvertCSV and json-csv.com do. Numbers are written exactly as in your JSON (a 20-digit id is never rounded), and a value containing a comma, double quote, or line break is wrapped in double quotes with internal quotes doubled, so it stays in a single column when reopened."
+        description={"JSON to CSV turns pasted JSON into comma-separated text with a header row. It takes an array of objects, a single object (one row) or an array of plain values (one value column). Every key seen in any object becomes a column, in first-seen order (keys that are whole numbers, such as 10, come first); nested objects are flattened to dotted names and arrays to numbered ones. Numbers are copied exactly as written, so a 20-digit ID is not rounded. Values with a comma, a quote, a line break or spaces at either end are quoted. The JSON is read and the CSV written inside your browser tab."}
+        example={{"caption":"Two objects with different keys, a nested address and a tags array, and the CSV the tool returns:","inputLabel":"JSON","input":"[\n  {\"id\": 12345678901234567890, \"name\": \"Ann\", \"address\": {\"city\": \"Paris\"}, \"tags\": [\"a\", \"b\"]},\n  {\"id\": 2, \"name\": \"Lee, Bo\", \"email\": null}\n]","outputLabel":"CSV","output":"id,name,address.city,tags.0,tags.1,email\n12345678901234567890,Ann,Paris,a,b,\n2,\"Lee, Bo\",,,,"}}
+        howToTitle="How to convert JSON to CSV"
         howTo={[
-          'Paste a JSON array of objects into the input box, e.g. [{"name":"John","age":30}].',
-          "Click 'Convert' to generate CSV text.",
-          "Review the result in the output box.",
-          "Click 'Copy' to copy it to your clipboard."
+          "Paste your JSON into \"JSON Input\".",
+          "Click \"Convert\".",
+          "Check the header row and the columns in \"CSV Output\".",
+          "Take the result with \"Copy\", or keep it as data.csv with \"Download\".",
         ]}
+        specs={[
+          { label: "Input", value: "JSON text: an array of objects, one object, or an array of values" },
+          { label: "Output", value: "comma-separated text with a header row, saved as data.csv" },
+          { label: "Missing keys and null", value: "empty cell" },
+        ]}
+        privacy={"The JSON is parsed and the CSV built in your browser when you click \"Convert\"; the text you paste is not uploaded. If an error occurs, such as invalid JSON, we receive its message with quoted text masked, plus the tool name and your browser and version."}
         faqs={[
-          { q: "Is JSON to CSV free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it flatten nested JSON into columns?", a: "Yes — a nested object becomes dotted columns (address.city, address.zip) and an array becomes indexed columns (tags.0, tags.1). An empty object or array is written as {} or []." },
-          { q: "What if my objects have different keys?", a: "Every key that appears in any object becomes a column; a row that lacks a key gets an empty cell there. Nothing is dropped." },
-          { q: "Does it handle values that contain commas?", a: "Yes — a value containing a comma, quote, or newline is automatically wrapped in double quotes in the output, so it's read back as a single column." }
+          { q: "Can it flatten nested JSON?", a: "Yes. An address object with a city key becomes the column address.city, and a tags array becomes tags.0, tags.1 and so on, at any depth. An empty object or array is written as {} or [] so its column is not lost." },
+          { q: "Is it a problem if objects have different keys?", a: "No. The columns are the union of all keys, in the order they first appear (whole-number keys first), and a row without a key gets an empty cell there. A null value also gives an empty cell, and true and false are written as words." },
+          { q: "Can I convert a single JSON string or number?", a: "No. The top level must be an array or an object; otherwise the tool answers that the JSON must be an array of objects, or a single object. An empty array is refused too, since it has no row to write." },
+          { q: "Can I choose another separator than the comma?", a: "No. The output always uses commas, with the header first and one row per line; a value holding a line break stays quoted over several lines. If you need tabs instead, copy the result and paste it into CSV to TSV, which detects the comma and writes tab-separated text." },
         ]}
         tips={[
-          "Paste an array of objects, a single object (one row), or an array of plain values (one \"value\" column).",
-          "Objects with different keys are fine: the columns are the union of all keys, in first-seen order.",
-          "Values containing a comma, quote, or newline are quoted automatically in the output — no manual cleanup needed for those.",
-          "Nested JSON is flattened automatically; rename the dotted headers afterwards if you prefer other column names."
+          "To build JSON from a CSV file, use CSV to JSON, which can also type numeric columns.",
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JSON to CSV — Convert a JSON Array Online Free" },
-  description: "JSON to CSV converts a JSON array of objects into CSV text, using the browser's built-in JSON.parse, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "JSON to CSV Converter — Nested Objects to Dotted Columns" },
+  description: "Paste a JSON array or object and get CSV: nested objects become columns like address.city, arrays like tags.0. Large numbers keep every digit.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-csv" },
   openGraph: {
-    title: "JSON to CSV — Convert a JSON Array Online Free",
-    description: "JSON to CSV converts a JSON array of objects into CSV text, using the browser's built-in JSON.parse, entirely in your browser — nothing is uploaded to a server.",
+    title: "JSON to CSV Converter — Nested Objects to Dotted Columns",
+    description: "Paste a JSON array or object and get CSV: nested objects become columns like address.city, arrays like tags.0. Large numbers keep every digit.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-csv",
   },
 };

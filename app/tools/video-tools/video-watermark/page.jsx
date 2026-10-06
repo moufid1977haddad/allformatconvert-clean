@@ -177,7 +177,7 @@ export default function VideoWatermarkPage() {
       setVideoWidth(video.videoWidth);
       setVideoHeight(video.videoHeight);
       if (d > MAX_DURATION) {
-        setDurationError(`This video is ${Math.round(d)}s -- over the 2-minute limit. Watermarking runs in your browser and takes roughly one second per second of video, so longer files would take too long or risk freezing the tab. Trim it first, or use a shorter clip.`);
+        setDurationError(`This video is ${Math.round(d)}s -- over the 2-minute limit. Watermarking runs in your browser and can take several times the length of an HD video, so longer files would take too long or risk freezing the tab. Trim it first, or use a shorter clip.`);
       } else {
         setDurationError('');
       }
@@ -233,7 +233,7 @@ export default function VideoWatermarkPage() {
       if (video.src !== src) return; // another video was chosen meanwhile
       if (damaged) setDurationError(damaged);
       else if (code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || code === MediaError.MEDIA_ERR_DECODE) {
-        setDurationError("This browser can't play this video's format or codec, so it can't be watermarked here -- the file itself may be fine. MP4 (H.264) and WebM play in every browser; .avi, many .mov and .mkv files and less common codecs often don't. Convert it to MP4 first with our Video Converter, then try again.");
+        setDurationError("This browser can't play this video's format or codec, so it can't be watermarked here -- the file itself may be fine. MP4 (H.264) is the safest choice; .avi, many .mov and .mkv files and less common codecs often don't play here. Convert it to MP4 first with our Video Converter, then try again.");
       } else {
         setDurationError("This video failed to load, so its length can't be confirmed. Try a different file.");
       }
@@ -475,7 +475,7 @@ export default function VideoWatermarkPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Video Watermark</h1>
         <p className="text-neutral-500 text-center mb-2">Burn a text or image watermark into your video and export a real watermarked video file</p>
-        <p className="text-neutral-500 text-sm text-center mb-2">Works on videos up to <strong>2 minutes</strong> long. Watermarking runs entirely in your browser and takes roughly as long as the video itself (about 1 second of processing per second of video).</p>
+        <p className="text-neutral-500 text-sm text-center mb-2">Works on videos up to <strong>2 minutes</strong> long. Watermarking runs entirely in your browser; for 1080p footage it can take several times the length of the video.</p>
         <p className="text-neutral-500 text-xs text-center mb-8">Best supported formats: <strong>MP4 (H.264)</strong> and <strong>WebM</strong>. Formats like .avi, many .mov/.mkv files, or uncommon codecs often can&apos;t be decoded in-browser at all -- convert to MP4 first if your file is rejected.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
@@ -538,7 +538,7 @@ export default function VideoWatermarkPage() {
 
           {loading ? (
             <div className="space-y-3">
-              <ProgressBar pct={progress} label={eta !== null ? `Encoding... (about ${eta}s remaining)` : 'Encoding...'} />
+              <ProgressBar pct={progress} label={eta !== null ? `Encoding... (${eta}s of video left to encode)` : 'Encoding...'} />
               <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
             </div>
           ) : (
@@ -559,27 +559,28 @@ export default function VideoWatermarkPage() {
       </div>
       <SeoContent
         title="Video Watermark"
-        description="Video Watermark burns a text or image watermark into your video and exports a real watermarked .mp4 file, entirely in your browser using ffmpeg.wasm -- your file is never uploaded to a server. Choose a text watermark (typed, with adjustable opacity) or an image/logo watermark, pick one of five corner/center positions, and export. Videos are limited to 2 minutes: browser-side encoding runs at roughly real-time speed, so a 90-second clip takes about 90 seconds, and longer files would risk an unresponsive tab."
+        description={`Video Watermark draws a text or a logo onto every frame of a video and saves the result as an MP4. You set the size as a share of the video width, the opacity, the text color and one of 9 positions: the corners, the middle of each edge or the center. Text gets a thin dark outline so it stays readable on bright footage. The work runs with ffmpeg.wasm in your browser; the video must last ${MAX_DURATION / 60} minutes or less, play in your browser, and use H.264, HEVC, VP8, VP9, Theora or ProRes. One fixed mark is added, not a moving or repeated one.`}
+        howToTitle="How to add a watermark to a video"
         howTo={[
-          "Click the upload area and select a video file (2 minutes or shorter).",
-          "Choose Text or Image as your watermark type, and enter your text or upload a logo/image.",
-          "Adjust the size, the opacity slider and (for text) the colour, and pick one of the 9 positions.",
-          "Click \"Add Watermark\" and watch the progress bar and time estimate while it encodes.",
-          "Preview and download the resulting watermarked .mp4 file."
+          `Choose or drop a video file of ${MAX_DURATION / 60} minutes or less; the page checks its length first.`,
+          "Under \"Watermark Type\", choose text and type it in \"Watermark Text\", or choose image and pick a logo under \"Watermark Image\".",
+          "Set \"Size\", \"Opacity\" and, for text, \"Text colour\", then click one of the 9 buttons under \"Position\".",
+          "Click \"Add Watermark\" and follow the progress bar while the video is encoded.",
+          "Play the result and click \"Download\" to save the MP4, named after your video with -watermarked."
         ]}
+        specs={[
+          { label: 'Input', value: `Videos of up to ${MAX_DURATION / 60} minutes that your browser can play, encoded in H.264, HEVC, VP8, VP9, Theora or ProRes (MP4 and WebM are the safest)` },
+          { label: 'Watermark', value: "Text in any color, or an image your browser can open (PNG, JPG, WebP and others); 5 to 60 % of the video width; opacity from 10 % to fully opaque" },
+          { label: 'Output', value: "MP4 with H.264 video (x264, veryfast preset) and AAC sound" },
+          { label: 'File size', value: "Limited by length (2 minutes), not by size; the video is held in the tab's memory" }
+        ]}
+        privacy="The video and the watermark image are read and encoded by ffmpeg.wasm in this tab and are not uploaded; the engine itself, about 10 MB, comes from unpkg.com, a public code host. A failed run sends us a report: the cleaned message, the error type, the tool, your browser and version, the file type and a size range; never the video."
         faqs={[
-          { q: "Does this produce a full watermarked video now?", a: "Yes -- it exports a real .mp4 file with the watermark burned into every frame and the original audio preserved, not a single still image." },
-          { q: "Can I use an image or logo as the watermark?", a: "Yes. Switch the Watermark Type toggle to Image and upload a PNG or JPG; it's scaled to the size you choose (5 to 60% of the video width, 15% by default) with the opacity you choose. A text watermark can take any colour; it keeps a thin dark outline so it stays readable on bright footage." },
-          { q: "Why is there a 2-minute limit?", a: "Watermarking runs entirely in your browser via ffmpeg.wasm, which encodes at roughly real-time speed (about 1 second of processing per second of video). Longer clips would take too long or risk freezing the tab." },
-          { q: "Is audio preserved?", a: "Yes, if your video has an audio track it's kept and re-encoded to AAC alongside the watermarked video. Silent or audio-free videos (screen recordings, muted exports) work fine too -- the output is just video-only." },
-          { q: "Why was my video rejected before I even clicked Convert?", a: "Two different reasons produce two different messages. If your browser can't decode the file at all (common for .avi, some .mov/.mkv, or uncommon codecs), you'll see a message saying so -- that's a browser support gap, not proof your file is broken. If the browser can play the file but can't determine its length, you'll see a different message asking for a re-export. MP4 (H.264) and WebM are the safest formats to use here." },
-          { q: "Is my file uploaded anywhere?", a: "No, everything happens locally in your browser via ffmpeg.wasm -- there's no server involved." }
-        ]}
-        tips={[
-          "If your clip is longer than 2 minutes, trim it first with a video trimmer, then watermark the shorter result.",
-          "Choose a position over a less busy part of the frame so your watermark stays readable without overwhelming the video.",
-          "Lower opacity (30-50%) reads as a subtler watermark; higher opacity is more visible but more intrusive.",
-          "The first run after loading the page also downloads the ffmpeg.wasm engine (roughly 25-30MB), so it takes a little longer than later runs."
+          { q: "Why is there a 2-minute limit?", a: `The whole video is held in the browser tab's memory and encoded by ffmpeg.wasm on your device, which takes time. Videos over ${MAX_DURATION / 60} minutes are refused before any encoding starts; cut them first with Video Trimmer.` },
+          { q: "How long does watermarking take?", a: "Several times the length of the video for 1080p footage: when we measured this browser engine on 28 September, re-encoding 1080p took about 3.7 seconds per second of video in Chrome and about 29 seconds in Firefox. Smaller videos go faster. The seconds shown next to the progress bar count the video still to encode, not the waiting time." },
+          { q: "Which videos are refused?", a: "Videos over the length limit, files your browser cannot play (often AVI and some MOV or MKV files), and videos in another codec than H.264, HEVC, VP8, VP9, Theora or ProRes, AV1 included. Convert them to MP4 with Video Converter first." },
+          { q: "Is the sound kept?", a: "Yes. Every audio track is encoded again as AAC next to the watermarked picture. A video without sound gives a silent MP4 rather than an error." },
+          { q: "Can I use a transparent PNG logo?", a: "Yes. The image is drawn with its transparency, then scaled to the size you choose and given the opacity you set. A very large image is first reduced to 2048 pixels on its longer side." }
         ]}
       />
     </div>

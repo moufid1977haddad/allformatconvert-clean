@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Text Encryptor — Encrypt Text Online Free" },
-  description: "Text Encryptor obfuscates text with a password-based XOR cipher and Base64 encoding, entirely in your browser.",
+  title: { absolute: "Text Encryptor — Password-Based AES-256-GCM Encryption" },
+  description: "Encrypt a message with a password using AES-256-GCM and PBKDF2, then share the Base64 result. Decrypt it here with the same password.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/text-encryptor" },
   openGraph: {
-    title: "Text Encryptor — Encrypt Text Online Free",
-    description: "Text Encryptor obfuscates text with a password-based XOR cipher and Base64 encoding, entirely in your browser.",
+    title: "Text Encryptor — Password-Based AES-256-GCM Encryption",
+    description: "Encrypt a message with a password using AES-256-GCM and PBKDF2, then share the Base64 result. Decrypt it here with the same password.",
     url: "https://www.onlineconvertools.com/tools/text-tools/text-encryptor",
   },
 };

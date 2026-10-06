@@ -105,24 +105,32 @@ export default function ImageComparisonPage() {
       </div>
       <SeoContent
         title="Image Comparison"
-        description="Image Comparison shows two images stacked with a draggable vertical divider, letting you slide between a 'before' and 'after' view, and a Differences view that marks in red every pixel that changed (more than 16/255 on any channel) with the share of pixels that differ, as Diffchecker's image compare does. Whole images are shown, never cropped. Both images stay in your browser — nothing is uploaded to a server."
+        description={"Image Comparison puts two pictures on top of each other so you can see what changed between a before and an after version: a retouch, an export setting, a new screenshot. In the Slider view, a vertical line splits the frame and the Slider control below moves it. In the Differences view, every pixel whose red, green, blue or alpha value differs by more than 16 out of 255 is painted red over a faded copy of the first image, with the count and percentage of changed pixels; that picture can be downloaded as a PNG. Both images stay in your browser."}
+        howToTitle={"How to compare two images"}
         howTo={[
-          "Click the first box and upload your 'before' image.",
-          "Click the second box and upload your 'after' image.",
-          "Drag the slider left and right to reveal more or less of each image.",
-          "Switch to Differences to see exactly which pixels changed, and download that difference image if needed."
+          "Click \"Image 1 (Before)\" and choose the original picture.",
+          "Click \"Image 2 (After)\" and choose the edited one.",
+          "In the \"Slider\" view, move the \"Slider\" control to sweep the dividing line across both pictures.",
+          "Click \"Differences\" to paint the changed pixels red, then click \"Download\" to save differences.png if you need it.",
         ]}
+        specs={[
+          { label: "Input formats", value: "Two pictures the browser can open, such as JPG, PNG, WebP or GIF" },
+          { label: "Size limit", value: "100 megapixels per image; a larger one is refused with a message" },
+          { label: "Changed pixel", value: "A difference above 16/255 on red, green, blue or alpha" },
+          { label: "Different sizes", value: "Image 2 is scaled to the size of image 1 before comparing, and the summary says so" },
+          { label: "Download", value: "differences.png, at the size of image 1" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"Both pictures are read and compared by this page inside your browser, and neither is uploaded. The difference image is built in the tab and is gone once you close it, unless you saved it. The cleaned text of an error message, if any is shown, goes to us with the name of this tool and of your browser, plus its version, but never the images."}
         faqs={[
-          { q: "What image formats does Image Comparison support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP." },
-          { q: "Is my image data stored or shared?", a: "No, both images stay in your browser and are never uploaded to a server." },
-          { q: "Can I compare more than two images at once?", a: "No, the tool only supports comparing two images at a time." },
-          { q: "Does it highlight what changed?", a: "Yes — the Differences view paints every changed pixel red over a faded copy of the first image, gives the percentage of changed pixels, and can be downloaded as a PNG. Images of different sizes are compared after scaling the second to the first." }
+          { q: "Can I compare images of different sizes?", a: "Yes. Image 2 is scaled to the width and height of image 1 before the pixels are compared, and the summary under the Differences view gives both sizes so you know it happened." },
+          { q: "Can I drag the line on the image?", a: "No. The dividing line follows the \"Slider\" control under the pictures, from 0 to 100 percent of the width; the line itself cannot be grabbed. On a touch screen, slide that control with your finger." },
+          { q: "What counts as a changed pixel?", a: "16 out of 255 is the threshold: a pixel counts as changed when its red, green, blue or transparency value differs by more than that. Smaller shifts are drawn in faded gray, not red, and are not counted." },
+          { q: "Can I compare more than two images?", a: "No. The page holds one before and one after picture. To check a whole folder for copies, use Duplicate Image Finder, which compares every pair in a batch." },
         ]}
         tips={[
-          "Use images with the same dimensions and framing for the most useful comparison.",
-          "Drag the slider slowly across areas you want to inspect closely.",
-          "If you want to share the comparison, take a manual screenshot of your browser window.",
-          "Tiny differences from JPEG re-compression stay below the 16/255 threshold, so only real changes are painted."
+          "Load the same file in both boxes to see the identical-images message, then swap in the edited version.",
+          "After compressing a photo with Image Compressor, use Differences to see where the picture changed.",
         ]}
       />
     </div>

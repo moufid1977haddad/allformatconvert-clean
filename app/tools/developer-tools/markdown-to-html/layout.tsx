@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Markdown to HTML — Convert a Small Subset of Markdown Online" },
-  description: "Markdown to HTML converts a small subset of Markdown into a complete HTML document, entirely in your browser.",
+  title: { absolute: "Markdown to HTML Converter — Full HTML5 Page, GFM Rules" },
+  description: "Convert Markdown to a complete HTML5 document that declares UTF-8 encoding, using CommonMark and GitHub Flavored Markdown; copy it or save document.html.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/markdown-to-html" },
   openGraph: {
-    title: "Markdown to HTML — Convert a Small Subset of Markdown Online",
-    description: "Markdown to HTML converts a small subset of Markdown into a complete HTML document, entirely in your browser.",
+    title: "Markdown to HTML Converter — Full HTML5 Page, GFM Rules",
+    description: "Convert Markdown to a complete HTML5 document that declares UTF-8 encoding, using CommonMark and GitHub Flavored Markdown; copy it or save document.html.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/markdown-to-html",
   },
 };

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Audio Booster — Amplify an Audio File's Volume Online Free" },
-  description: "Audio Booster amplifies an audio file's volume using a gain multiplier (1x-5x), processed in your browser — nothing is uploaded, except for Opus output, which our own server encodes and then deletes.",
+  title: { absolute: "Audio Booster — Make Audio Louder or Normalize to -16 LUFS" },
+  description: "Raise or lower an audio file's volume from 0.25x to 5x, or even out its loudness, with a limiter that stops clipping. Save in 18 audio formats.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-booster" },
   openGraph: {
-    title: "Audio Booster — Amplify an Audio File's Volume Online Free",
-    description: "Audio Booster amplifies an audio file's volume using a gain multiplier (1x-5x), processed in your browser — nothing is uploaded, except for Opus output, which our own server encodes and then deletes.",
+    title: "Audio Booster — Make Audio Louder or Normalize to -16 LUFS",
+    description: "Raise or lower an audio file's volume from 0.25x to 5x, or even out its loudness, with a limiter that stops clipping. Save in 18 audio formats.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-booster",
   },
 };

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Split — Create a Separate PDF File Online Free" },
-  description: "Split a PDF by custom ranges, every N pages, every page or chosen pages, and download the parts one by one or as a ZIP — in your browser, nothing uploaded.",
+  title: { absolute: "Split PDF — Ranges, Every N Pages, Bookmarks, ZIP" },
+  description: "Cut a PDF into separate files by page ranges, every N pages, single pages, odd and even pages or bookmarks, and download each part or one ZIP.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-split" },
   openGraph: {
-    title: "PDF Split — Create a Separate PDF File Online Free",
-    description: "Split a PDF by custom ranges, every N pages, every page or chosen pages, and download the parts one by one or as a ZIP — in your browser, nothing uploaded.",
+    title: "Split PDF — Ranges, Every N Pages, Bookmarks, ZIP",
+    description: "Cut a PDF into separate files by page ranges, every N pages, single pages, odd and even pages or bookmarks, and download each part or one ZIP.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-split",
   },
 };

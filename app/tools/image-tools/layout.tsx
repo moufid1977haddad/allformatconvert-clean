@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Tools — Convert, Compress, and Edit Images Online Free" },
-  description: "Image Tools is a free online suite of utilities designed to help you edit, convert, and optimize images without downloading any software.",
+  title: { absolute: "Image Tools: Convert HEIC, Resize, Compress and Edit Photos" },
+  description: "37 image tools to convert HEIC, WebP, PNG, JPG and TIFF, resize, crop, compress, add effects and strip EXIF data, with the work done in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools" },
   openGraph: {
-    title: "Image Tools — Convert, Compress, and Edit Images Online Free",
-    description: "Image Tools is a free online suite of utilities designed to help you edit, convert, and optimize images without downloading any software.",
+    title: "Image Tools: Convert HEIC, Resize, Compress and Edit Photos",
+    description: "37 image tools to convert HEIC, WebP, PNG, JPG and TIFF, resize, crop, compress, add effects and strip EXIF data, with the work done in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools",
   },
 };

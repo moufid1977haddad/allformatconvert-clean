@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
-import { MAX_PDF_TO_WORD_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_PDF_TO_WORD_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
@@ -68,7 +68,7 @@ export default function PdfToWordPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">PDF to Word</h1>
         <p className="text-neutral-500 text-center mb-2">Convert PDF files to an editable Word document: .docx, .doc (Word 97-2003) or .rtf</p>
-        <p className="text-neutral-500 text-xs text-center mb-8">In our tests on PDFs exported from Word, headings, tables, columns and lists were kept. Scanned PDFs are not supported.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">In our tests on PDFs exported from Word, headings, tables, columns and lists were kept. Scanned PDFs were not tested.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PDF" />}</p>
@@ -102,26 +102,30 @@ export default function PdfToWordPage() {
       </div>
       <SeoContent
         title="PDF to Word"
-        description="PDF to Word converts your PDF into a real, editable .docx Word document using our conversion provider, ConvertAPI. Your file is sent securely over HTTPS through our server to ConvertAPI, with file storage turned off, and deleted after conversion — we don't store or log it. For Word 97-2003 (.doc), which ConvertAPI does not write, that .docx is then converted to .doc by LibreOffice on our own conversion server and deleted right after. We tested two PDFs exported from Word (one with a table with merged cells, a two-column section, a numbered list, headers and footers, an image with text wrapping; one with footnotes and a watermark). We converted each back to PDF and compared it with the original: headings, table, columns, lists, header and footer, image, footnotes and watermark were all present and in place. We did not test PDFs from other sources (layout software, scans, forms), where results can differ."
+        description={`PDF to Word turns a PDF into a Word document you can edit: .docx, Word 97-2003 .doc, or Rich Text .rtf. The conversion is done by ConvertAPI, our provider; for .doc, our own LibreOffice service then rewrites the .docx in the older format. In our test of 19 September 2026 on two PDFs exported from Word, headings, a table with a merged cell, columns, numbered lists, header and footer, an image, footnotes and a watermark came back in place. PDFs from other software, forms and scans were not tested.`}
+        howToTitle="How to convert PDF to Word"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Choose Word (.docx), Word 97-2003 (.doc) or Rich Text (.rtf), then click Convert. Your file is uploaded securely for conversion; once the document is ready, click 'Download'.",
-          "Open the resulting .docx, .doc or .rtf file in Word or a compatible editor."
+          `Click or drop the PDF you want to edit in Word.`,
+          `Choose "Word (.docx)", "Word 97-2003 (.doc)" or "Rich Text (.rtf)".`,
+          `Click the convert button, whose label follows the format you chose.`,
+          `When "Word document ready" appears, "Download" saves the editable document in the format you chose.`,
         ]}
+        specs={[
+          { label: 'Input format', value: `PDF` },
+          { label: 'Output formats', value: `DOCX, DOC (Word 97-2003) or RTF` },
+          { label: 'Maximum file size', value: `${officeMaxLabel(MAX_PDF_TO_WORD_STAGED_BYTES)} per file` },
+          { label: 'Usage limits', value: `A limit per network per hour and per day, shared with the site's other paid tools, and a monthly budget for the whole site` },
+        ]}
+        privacy={`Your PDF goes over HTTPS through our server to ConvertAPI, which converts it with its file storage turned off. For .doc, the .docx that comes back is sent on to our own LibreOffice service to make the older format. A PDF over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB is first uploaded in parts to our media service, which deletes it when the conversion ends and deletes the Word file as soon as this page has received it, or after a time limit.`}
         faqs={[
-          { q: "Is PDF to Word completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does PDF to Word support?", a: "Input must be a PDF. Output is a Word document (.docx), the older Word 97-2003 format (.doc), or Rich Text Format (.rtf) — which Word, LibreOffice, Pages and WordPad all open — for every PDF size this tool accepts." },
-          { q: "How is the .doc made, and is it as good as the .docx?", a: "The PDF is first converted to .docx, then LibreOffice converts that .docx to .doc on our own server. In our tests — including documents produced by our conversion provider — the .doc reopened in Microsoft Word and in LibreOffice with the same text, pages, tables and pictures as the .docx. One limit of the older format: text placed in fixed-size text boxes can be cut; the page tells you when your document has text boxes. Choose .docx whenever your software can open it." },
-          { q: "Will my documents be uploaded to a server?", a: "Yes. Your file is sent securely over HTTPS through our server to our conversion provider, ConvertAPI, with file storage turned off, and deleted after conversion — we don't keep it. For .doc, the converted .docx also goes to our own conversion server, where LibreOffice makes the .doc, and is deleted right after." },
-          { q: "Will the converted document keep my PDF's formatting?", a: "In our tests on two PDFs exported from Word, yes: headings, a table with merged cells, columns, numbered lists, header and footer, an image and footnotes carried over. We did not test PDFs from other sources, so check the result on yours." },
-          { q: "Can I convert scanned or image-based PDFs?", a: "No — conversion relies on the PDF already containing a text layer. A scanned page with no underlying text (i.e. no OCR has been run on it) won't produce editable text in the output." },
-          { q: "Do I need to install any software to use PDF to Word?", a: "No, it works directly in your web browser." }
+          { q: `Will the Word file keep my formatting?`, a: `Yes for the two Word-exported PDFs we tested on 19 September 2026: after a round trip, headings, a table with a merged cell, two columns, numbered lists, header and footer, a wrapped image, footnotes and a watermark were in place. PDFs made by other software were not tested, so check the result on yours.` },
+          { q: `Is the .doc as good as the .docx?`, a: `Yes for ordinary text, tables and pictures: in our tests the .doc reopened in Word and LibreOffice with the same text, pages, tables and pictures. Text inside fixed-size text boxes can be cut in the older format, and the page counts such boxes for you. Choose .docx whenever your software opens it.` },
+          { q: `Is there a usage limit?`, a: `Yes. Each conversion is a paid call to ConvertAPI, so every network has an hourly and a daily allowance shared with the site's other paid tools, and the whole site has a monthly budget. The limit message says how long to wait, or, for the monthly budget, the date it resets.` },
+          { q: `Do I still get a file if the .doc step fails?`, a: `Yes: you receive the .docx that ConvertAPI already made, and a note explains that the .doc could not be produced. Word 2007 and later, LibreOffice, Pages and Google Docs open a .docx.` },
         ]}
         tips={[
-          "In our tests on PDFs exported from Word, the .docx kept headings, tables, columns and lists rather than only the plain text.",
-          "Works best on PDFs that already contain a text layer (most PDFs exported from Word, Google Docs, or similar tools).",
-          "Scanned or image-only PDFs need OCR performed elsewhere first — this tool doesn't perform OCR.",
-          "Very large or complex files may take a little longer to convert — keep the tab open until the Download button appears."
+          `For a scanned PDF, run PDF OCR first to give it a text layer, then convert the result here.`,
+          `Pick Rich Text (.rtf) for WordPad or an older word processor that reads neither .docx nor .doc.`,
         ]}
       />
     </div>

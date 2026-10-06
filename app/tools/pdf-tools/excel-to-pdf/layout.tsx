@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Excel to PDF — Convert Your .xlsx, .xls, .csv, or .ods File Online" },
-  description: "Excel to PDF converts your .xlsx, .xls, .csv, or .ods file to PDF using LibreOffice. In our tests numbers, formulas and color scales carried over.",
+  title: { absolute: "Excel to PDF — XLSX, XLS, CSV & ODS, One Page per Sheet" },
+  description: "Convert an Excel, CSV or OpenDocument spreadsheet to PDF with LibreOffice on our server. One checkbox fits each wide sheet onto a single page.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/excel-to-pdf" },
   openGraph: {
-    title: "Excel to PDF — Convert Your .xlsx, .xls, .csv, or .ods File Online",
-    description: "Excel to PDF converts your .xlsx, .xls, .csv, or .ods file to PDF using LibreOffice. In our tests numbers, formulas and color scales carried over.",
+    title: "Excel to PDF — XLSX, XLS, CSV & ODS, One Page per Sheet",
+    description: "Convert an Excel, CSV or OpenDocument spreadsheet to PDF with LibreOffice on our server. One checkbox fits each wide sheet onto a single page.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/excel-to-pdf",
   },
 };

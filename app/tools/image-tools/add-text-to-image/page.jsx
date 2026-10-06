@@ -124,24 +124,32 @@ export default function AddTextToImagePage() {
       </div>
       <SeoContent
         title="Add Text to Image"
-        description="Add Text to Image overlays text — one or several lines — onto your photo, entirely in your browser. Type your message; choose the font (Arial, Impact for memes, Georgia, Courier, Verdana, Comic Sans), bold or italic, size, colour, opacity, rotation, an outline and a shadow; and position it with the X/Y sliders — no design skills or software installation needed, and nothing is uploaded to a server."
+        description={"Add Text to Image writes your words on a picture: a caption, a meme line, a date or a simple watermark. The text can run over several lines (press Enter) and is centered on a point you place with the X and Y sliders. You choose one of six fonts, bold or italic, a size measured in pixels of the full photo, a color, the opacity, a rotation, an outline with its own color, and a soft drop shadow. There is one block of text per image: clicking again replaces it instead of adding a second one. The text is drawn in your browser with the fonts on your device."}
+        howToTitle={"How to add text to a photo"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Type your text (Enter for a new line), then set the font, size, color, opacity, rotation, outline or shadow.",
-          "Use the X and Y position sliders to place the text where you want it.",
-          "Click 'Apply Text' and then the download button to save your image."
+          "Click the upload box and choose the photo you want to caption.",
+          "Type in \"Text (Enter for a new line)\", then pick a \"Font\", a \"Color\" and a \"Font Size\" (10 to 800 px, measured on the full-size photo).",
+          "Place the text with \"X Position\" and \"Y Position\", and set \"Opacity\", \"Rotation\", \"Outline\" or \"Shadow\" if you want them.",
+          "Click \"Apply Text\", check the preview, then click \"Download\"; JPG, PNG and WebP keep their format, any other photo comes back as PNG.",
         ]}
+        specs={[
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF and other pictures the browser can display" },
+          { label: "Output format", value: "The format of the photo for JPG, PNG and WebP; PNG for other formats" },
+          { label: "Fonts", value: "Arial / Helvetica, Impact, Georgia / Times, Courier, Verdana, Comic Sans; a font your device lacks is replaced by a similar one" },
+          { label: "Text settings", value: "Size 10 to 800 px, opacity 10 to 100 percent, rotation from −180° to 180°, outline 0 to 30 px, optional shadow" },
+          { label: "Photo size", value: "Photos of up to 268 megapixels" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"Your words are drawn onto the photo by this page, with fonts already installed on your device, and neither the photo nor the text is uploaded. The captioned image stays in the tab until you download it. If an error appears, we receive the error message cleaned of any quoted text, the tool's name and the browser's name and version, to track down the problem."}
         faqs={[
-          { q: "What image formats are supported?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
-          { q: "Can I add multiple text boxes to a single image?", a: "No, only one text overlay is supported at a time — clicking Apply again re-applies your current text to the original image rather than stacking a second layer." },
-          { q: "Can I choose a different font or add a shadow?", a: "Yes: six fonts (a font your device lacks is replaced by a similar one), bold and italic, a shadow, an outline of any colour and width, the opacity and a rotation." },
-          { q: "Do I need to create an account to use this tool?", a: "No, it's completely free with no account or login required." }
+          { q: "Can I write several lines?", a: "Yes. Press Enter in the text box to start a new line. The lines are centered on the X/Y point, one under the other, spaced at 1.2 times the font size, and the outline and shadow apply to every line." },
+          { q: "Can I add two separate text boxes?", a: "No. There is one block of text per image. Clicking \"Apply Text\" again redraws your current text on the original photo; it does not stack a second layer. For a second caption, download the result, load it again and add the next text." },
+          { q: "Is the font size measured on the preview?", a: "No. It is counted in pixels of the full photo, so on a large phone photo the default size looks small. Raise \"Font Size\" (up to 800 px) and click \"Apply Text\" again to check." },
+          { q: "Can I make a classic meme caption?", a: "Yes. Choose \"Impact (memes)\", keep a white \"Color\", raise \"Outline\" a few pixels with a black \"Outline colour\", and move \"Y Position\" near the top or the bottom. Bold is already on by default." },
         ]}
         tips={[
-          "Use a color that contrasts clearly with your image so the text stays readable.",
-          "Preview a few font sizes to find one that fits your image without running off the edges.",
-          "For a meme, choose Impact, white text with a black outline of 4 to 8 px.",
-          "Since nothing is uploaded, download your result promptly — it isn't saved anywhere after you leave the page."
+          "The settings stay in place when you load another photo, so you can put the same caption on several pictures one after the other.",
+          "Lower \"Opacity\" for a discreet watermark that does not hide the picture.",
         ]}
       />
     </div>

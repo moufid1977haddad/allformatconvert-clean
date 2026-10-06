@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "MP4 to GIF — Convert a Video Clip to an Animated GIF" },
-  description: "Convert a clip of your MP4 into an animated GIF: choose start, length up to 60 s, width and frame rate. Vertical videos keep their shape.",
+  title: { absolute: "MP4 to GIF — Cut a Clip, Choose Width and Frame Rate" },
+  description: "Make an animated GIF from part of an MP4: set the start, the length, the width and the frame rate. ffmpeg on our server builds the GIF, without sound.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/mp4-to-gif" },
   openGraph: {
-    title: "MP4 to GIF — Convert a Video Clip to an Animated GIF",
-    description: "Convert a clip of your MP4 into an animated GIF: choose start, length up to 60 s, width and frame rate. Vertical videos keep their shape.",
+    title: "MP4 to GIF — Cut a Clip, Choose Width and Frame Rate",
+    description: "Make an animated GIF from part of an MP4: set the start, the length, the width and the frame rate. ffmpeg on our server builds the GIF, without sound.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/mp4-to-gif",
   },
 };

@@ -3,7 +3,7 @@ import { textFileProblem, decodedText } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
-import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_HTML_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import PageSetup, { PAGE_SETUP_DEFAULT, withPageSetup } from '../../../components/PageSetup';
 import { useToolError } from '../../../lib/useToolError';
@@ -128,24 +128,28 @@ export default function MarkdownToPdfPage() {
       </div>
       <SeoContent
         title="Markdown to PDF"
-        description="Markdown to PDF turns a .md file or pasted Markdown into a real PDF file you download. Your Markdown is converted to HTML in your browser (CommonMark with GitHub tables, task lists and fenced code), any script or event handler is removed, and the page is then printed to PDF by a real browser engine (Chromium) on our conversion service — the same way the reference converters do it: the text stays selectable and searchable, and links stay clickable."
+        description={`Markdown to PDF renders Markdown as a clean document and saves it as a PDF file. It reads CommonMark plus GitHub Flavored Markdown: headings, emphasis, strikethrough, lists and task lists, links, images, fenced code blocks, tables and blockquotes. Upload a .md, .markdown or .txt file, or paste the text. The Markdown becomes HTML with scripts removed, and our Chromium service prints that HTML with selectable text. Images must be published on the web, since a file on your computer cannot be reached.`}
+        howToTitle="How to convert Markdown to PDF"
         howTo={[
-          "Choose 'Upload File' to select a .md file, or 'Paste Text' to type or paste Markdown directly.",
-          "Click 'Convert to PDF'. The Markdown is rendered and printed to a PDF (A4 unless you choose another page size, orientation or margins) by our conversion service.",
-          "When 'PDF ready' appears, click 'Download' (on an iPhone or iPad, 'Save / Share' also sends it to Files, Mail or AirDrop).",
-          "Open the PDF to check it: headings, tables, code blocks and links are kept."
+          `Choose "Upload File" to pick a .md file, or "Paste Text" to type or paste Markdown.`,
+          `Keep "Page size" on "As in the document" for A4, or pick another size, an "Orientation" and "Margins".`,
+          `Click "Convert to PDF"; once "PDF ready" is shown, "Download" saves the rendered Markdown.`,
         ]}
+        specs={[
+          { label: 'Input formats', value: `.md, .markdown or .txt file, or pasted text` },
+          { label: 'Output', value: `PDF, A4 unless you choose Letter, Legal, A3 or A5` },
+          { label: 'Size limit', value: `${officeMaxLabel(MAX_HTML_STAGED_BYTES)} of HTML` },
+          { label: 'Usage limits', value: `Documents over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB of HTML count toward a limit per network per hour and per day.` },
+        ]}
+        privacy={`Your Markdown becomes HTML on your device, with scripts and event handlers removed, before it is sent to our Chromium service to be printed. Only the HTML is sent, not the original file. HTML over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB goes in parts through our media service, which drops it after printing and erases the PDF when this page has fetched it, or after a time limit.`}
         faqs={[
-          { q: "Is Markdown to PDF really free to use?", a: "Yes, it's completely free with no signup." },
-          { q: "What markdown syntax is supported?", a: "CommonMark plus GitHub Flavored Markdown: headings, bold, italics, strikethrough, lists and task lists, links, images, fenced code blocks, tables and blockquotes." },
-          { q: "Is my markdown content uploaded?", a: "Yes, once: the HTML made from your Markdown is sent to our conversion service to be printed to PDF by a real browser engine, then discarded. Scripts are removed before it leaves your browser." },
-          { q: "Do I get a real PDF file?", a: "Yes — a downloadable A4 PDF with selectable text and clickable links, not a print dialog." }
+          { q: `Are GitHub tables and task lists supported?`, a: `Yes. GitHub Flavored Markdown is switched on, so tables, task lists with their checkboxes, strikethrough and fenced code blocks render, along with the usual CommonMark headings, lists, links, images and blockquotes. Raw HTML in the Markdown is cleaned and any script is removed.` },
+          { q: `Can I use a page size other than A4?`, a: `Yes. A4 is the default. Choose Letter, Legal, A3 or A5 in "Page size", portrait or landscape in "Orientation", and None, Small (10 mm), Normal (20 mm) or Big (30 mm) in "Margins".` },
+          { q: `Will images from my computer appear in the PDF?`, a: `No. Only the HTML is sent, so a path to a file on your computer cannot be reached by our service. Use pictures published on the web with a full https:// address; they are fetched when the page is printed.` },
+          { q: `Do code blocks and tables break across pages?`, a: `No for a code block that fits on one page: it is kept whole. A long table can run over several pages, but each of its rows stays in one piece.` },
         ]}
         tips={[
-          "Use proper heading hierarchy (# H1, ## H2, ### H3) since it maps directly to styled headings in the output.",
-          "Images must use full web addresses (https://…): a path to a file on your computer cannot be reached by the conversion service.",
-          "Very long tables break across pages with their rows kept whole.",
-          "Keep your original .md file as your source of truth — the PDF is a rendered export, not something you can edit back."
+          `Start the document with a single # heading: it is set in the largest size, with a rule underneath.`,
         ]}
       />
     </div>

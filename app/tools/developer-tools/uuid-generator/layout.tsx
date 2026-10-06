@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "UUID Generator — Create Version 4 (random) UUIDs Online Free" },
-  description: "UUID Generator creates version 4 (random) UUIDs using the Web Crypto API for cryptographically strong randomness, in your browser.",
+  title: { absolute: "UUID Generator — v4 Random or v7 Time-Ordered, in Bulk" },
+  description: "Generate 1 to 1000 version 4 or version 7 UUIDs, or the nil UUID, in upper or lower case, with or without hyphens or braces, and save them as uuids.txt.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/uuid-generator" },
   openGraph: {
-    title: "UUID Generator — Create Version 4 (random) UUIDs Online Free",
-    description: "UUID Generator creates version 4 (random) UUIDs using the Web Crypto API for cryptographically strong randomness, in your browser.",
+    title: "UUID Generator — v4 Random or v7 Time-Ordered, in Bulk",
+    description: "Generate 1 to 1000 version 4 or version 7 UUIDs, or the nil UUID, in upper or lower case, with or without hyphens or braces, and save them as uuids.txt.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/uuid-generator",
   },
 };

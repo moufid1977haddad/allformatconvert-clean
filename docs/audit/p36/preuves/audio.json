@@ -1,0 +1,238 @@
+{
+  "/tools/audio-tools/audio-booster": [
+    {
+      "claim": "0.25x",
+      "file": "app/tools/audio-tools/audio-booster/page.jsx",
+      "pattern": "type=\"range\" min=\\{0\\.25\\} max=\\{5\\} step=\\{0\\.25\\}"
+    },
+    {
+      "claim": "5x",
+      "file": "app/tools/audio-tools/audio-booster/page.jsx",
+      "pattern": "min=\\{0\\.25\\} max=\\{5\\}"
+    },
+    {
+      "claim": "1x",
+      "file": "app/tools/audio-tools/audio-booster/page.jsx",
+      "pattern": "limiter && volume > 1 \\?"
+    },
+    {
+      "claim": "16 bits",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "aiff -> pcm_s16be .native, aiff muxer."
+    }
+  ],
+  "/tools/audio-tools/audio-compressor": [
+    {
+      "claim": "64 to 320 kbps",
+      "file": "app/tools/audio-tools/audio-compressor/page.jsx",
+      "pattern": "\\['64', '96', '128', '192', '256', '320'\\]"
+    },
+    {
+      "claim": "320 kbps",
+      "file": "app/tools/audio-tools/audio-compressor/page.jsx",
+      "pattern": "\\['64', '96', '128', '192', '256', '320'\\]"
+    },
+    {
+      "claim": "8 kbps",
+      "file": "app/tools/audio-tools/audio-compressor/page.jsx",
+      "pattern": "Math\\.max\\(8, Math\\.floor\\(srcKbps\\)\\)"
+    },
+    {
+      "claim": "8 kHz",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "\\[8000, '8 kHz \\(telephone\\)'\\]"
+    },
+    {
+      "claim": "32 kHz",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "ac3: \\[48000, 44100, 32000\\], mp2: \\[48000, 44100, 32000\\], ogg: \\[48000, 44100, 32000\\]"
+    }
+  ],
+  "/tools/audio-tools/audio-converter": [
+    {
+      "claim": "128 to 320 kbps",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "AUDIO_BITRATES = \\[\\[128, [^\\]]*\\], \\[192, [^\\]]*\\], \\[256, [^\\]]*\\], \\[320, "
+    },
+    {
+      "claim": "320 kbps",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "\\[320, '[A-Za-z]+ — 320 kbps'\\]"
+    },
+    {
+      "claim": "192 kbps",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "fmt\\.value === 'ac3' \\|\\| fmt\\.value === 'mp2' \\? Math\\.max\\(kbps, 192\\)"
+    },
+    {
+      "claim": "48 kHz",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "\\[48000, '48 kHz \\(video\\)'\\]"
+    },
+    {
+      "claim": "8 kHz",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "\\[8000, '8 kHz \\(telephone\\)'\\]"
+    },
+    {
+      "claim": "22.05 kHz",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "ogg: \\[48000, 44100, 32000\\]"
+    },
+    {
+      "claim": "40 seconds",
+      "file": "app/tools/audio-tools/audio-converter/page.jsx",
+      "pattern": "An iPhone ringtone lasts 40 seconds at most"
+    },
+    {
+      "claim": "32 kHz",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "mp2: .48000, 44100, 32000., ogg: .48000, 44100, 32000."
+    }
+  ],
+  "/tools/audio-tools/audio-equalizer": [
+    {
+      "claim": "200 Hz",
+      "file": "app/tools/audio-tools/audio-equalizer/page.jsx",
+      "pattern": "bass\\.frequency\\.value = 200;"
+    },
+    {
+      "claim": "1 kHz",
+      "file": "app/tools/audio-tools/audio-equalizer/page.jsx",
+      "pattern": "mid\\.frequency\\.value = 1000;"
+    },
+    {
+      "claim": "3 kHz",
+      "file": "app/tools/audio-tools/audio-equalizer/page.jsx",
+      "pattern": "treble\\.frequency\\.value = 3000;"
+    },
+    {
+      "claim": "16-bit",
+      "file": "app/tools/audio-tools/audio-equalizer/page.jsx",
+      "pattern": "view\\.setUint16\\(34, 16, true\\)"
+    }
+  ],
+  "/tools/audio-tools/audio-merger": [
+    {
+      "claim": "64 to 320 kbps",
+      "file": "app/lib/audioMerge.js",
+      "pattern": "LOSSY_KBPS = \\[320, 256, 192, 160, 128, 96, 64\\]"
+    },
+    {
+      "claim": "24 bits",
+      "file": "app/tools/audio-tools/audio-merger/page.jsx",
+      "pattern": "stores up to 24 bits"
+    },
+    {
+      "claim": "32-bit",
+      "file": "app/lib/audioMerge.js",
+      "pattern": "return fits\\('flac'\\) \\? 'flac' : 'wav'"
+    }
+  ],
+  "/tools/audio-tools/audio-metadata": [
+    {
+      "claim": "10 MB",
+      "file": "app/components/MediaInfo.jsx",
+      "pattern": "the first time loads the ~10 MB engine"
+    },
+    {
+      "claim": "2 GB",
+      "file": "app/components/MetadataStripper.jsx",
+      "pattern": "MAX_BYTES = 2 \\* 1024 \\* 1024 \\* 1024"
+    }
+  ],
+  "/tools/audio-tools/audio-to-text": [
+    {
+      "claim": "4 MB",
+      "file": "lib/quota/limits.js",
+      "pattern": "OFFICE_STAGED_THRESHOLD_BYTES = 4 \\* 1024 \\* 1024"
+    }
+  ],
+  "/tools/audio-tools/audio-trimmer": [
+    {
+      "claim": "16-bit",
+      "file": "app/tools/audio-tools/audio-trimmer/page.jsx",
+      "pattern": "flac16 = /Audio: flac"
+    },
+    {
+      "claim": "40 seconds",
+      "file": "app/tools/audio-tools/audio-converter/page.jsx",
+      "pattern": "An iPhone ringtone lasts 40 seconds at most"
+    }
+  ],
+  "/tools/audio-tools/audio-waveform": [
+    {
+      "claim": "200x",
+      "file": "app/tools/audio-tools/audio-waveform/page.jsx",
+      "pattern": "const MAX_ZOOM = 200;"
+    },
+    {
+      "claim": "3000 px",
+      "file": "app/tools/audio-tools/audio-waveform/page.jsx",
+      "pattern": "\\[800, 1200, 1920, 3000\\]"
+    },
+    {
+      "claim": "800 px",
+      "file": "app/tools/audio-tools/audio-waveform/page.jsx",
+      "pattern": "\\[150, 200, 300, 500, 800\\]"
+    }
+  ],
+  "/tools/audio-tools/voice-recorder": [
+    {
+      "claim": "192 kbps",
+      "file": "app/tools/audio-tools/voice-recorder/page.jsx",
+      "pattern": "'libmp3lame', '-b:a', '192k'"
+    },
+    {
+      "claim": "16-bit",
+      "file": "app/tools/audio-tools/voice-recorder/page.jsx",
+      "pattern": "view\\.setUint16\\(34, 16, true\\)"
+    }
+  ],
+  "/tools/video-tools/media-player": [
+    {
+      "claim": "0.5x to 2x",
+      "file": "app/tools/video-tools/media-player/page.jsx",
+      "pattern": "\\[0\\.5, 0\\.75, 1, 1\\.25, 1\\.5, 2\\]"
+    },
+    {
+      "claim": "0.5×",
+      "file": "app/tools/video-tools/media-player/page.jsx",
+      "pattern": "\\[0\\.5, 0\\.75, 1, 1\\.25, 1\\.5, 2\\]"
+    },
+    {
+      "claim": "2×",
+      "file": "app/tools/video-tools/media-player/page.jsx",
+      "pattern": "\\[0\\.5, 0\\.75, 1, 1\\.25, 1\\.5, 2\\]"
+    },
+    {
+      "claim": "0.75×",
+      "file": "app/tools/video-tools/media-player/page.jsx",
+      "pattern": "\\[0\\.5, 0\\.75, 1, 1\\.25, 1\\.5, 2\\]"
+    },
+    {
+      "claim": "16.7 megapixels",
+      "file": "app/lib/canvasLimit.js",
+      "pattern": "IOS_CANVAS_MAX_PIXELS = 16_777_216"
+    }
+  ],
+  "/tools/video-tools/video-metadata": [
+    {
+      "claim": "10 MB",
+      "file": "app/components/MediaInfo.jsx",
+      "pattern": "the first time loads the ~10 MB engine"
+    },
+    {
+      "claim": "2 GB",
+      "file": "app/components/MetadataStripper.jsx",
+      "pattern": "MAX_BYTES = 2 \\* 1024 \\* 1024 \\* 1024"
+    }
+  ],
+  "/tools/audio-tools/audio-splitter": [
+    {
+      "claim": "16 bits",
+      "file": "app/lib/audioFormats.js",
+      "pattern": "aiff -> pcm_s16be .native, aiff muxer."
+    }
+  ]
+}

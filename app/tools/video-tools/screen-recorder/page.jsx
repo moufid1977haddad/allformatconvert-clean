@@ -67,7 +67,7 @@ export default function ScreenRecorderPage() {
       } else if (sources.length === 1 && sources[0] === mic) {
         stream = new MediaStream([...display.getVideoTracks(), ...mic.getAudioTracks()]);
       }
-      if (!stream.getAudioTracks().length) setAudioNote('This recording has no sound: the screen was shared without audio (tick "Share audio" in the browser\'s sharing dialog — only a tab or the whole screen on Chrome and Edge can share sound), and the microphone is off.');
+      if (!stream.getAudioTracks().length) setAudioNote('This recording has no sound: the screen was shared without audio (tick the box that shares the tab or system audio in the browser\'s sharing dialog — only a tab or the whole screen on Chrome and Edge can share sound), and the microphone is off.');
       streamRef.current = stream;
       if (preview.current) preview.current.srcObject = stream;
       const type = recorderType();
@@ -163,7 +163,7 @@ export default function ScreenRecorderPage() {
             <div className="space-y-3">
               <video controls playsInline src={videoUrl} className="w-full rounded-xl" />
               <FileDownload href={videoUrl} name={`screen-recording-${new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')}.${ext}`} />
-              {ext !== 'mp4' && !converting && <button type="button" onClick={toMp4} className="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl py-2 font-semibold transition">Make an MP4 (plays on iPhone and everywhere)</button>}
+              {ext !== 'mp4' && !converting && <button type="button" onClick={toMp4} className="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl py-2 font-semibold transition">Make an MP4 (plays on iPhone)</button>}
               {converting && <ProgressBar pct={converting.pct} label={converting.label} />}
             </div>
           )}
@@ -171,25 +171,31 @@ export default function ScreenRecorderPage() {
       </div>
       <SeoContent
         title="Screen Recorder"
-        description="Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs, in your browser, with no software installation (only Firefox's optional MP4 copy is made on our video service). Recordings are saved as MP4 (H.264 + AAC) in Chrome, Edge and Safari; Firefox can only record WebM, which one click turns into an MP4 on our video service."
+        description={`Screen Recorder captures a screen, a window or a browser tab through the screen sharing of the browser. On Chrome and Edge, a shared tab or whole screen can bring its sound; tick "Add my microphone (mixed with the screen's sound)" to add your voice in the same track, and the page warns when a recording has no sound at all. "Pause" and "Resume" continue the same file. Where MediaRecorder can write MP4 (H.264 and AAC), as in Safari and in Chrome or Edge 126 and later, you get an MP4; Firefox records WebM, and "Make an MP4" converts it on our media service. iPhone and iPad do not allow screen recording from a web page.`}
+        howToTitle="How to record your screen"
         howTo={[
-          "Click \"Start Recording\" and choose which screen, window, or tab to share when your browser prompts you.",
-          "Perform the actions you want to record while the live preview plays.",
-          "Click \"Stop Recording\" when you're finished.",
-          "Preview the result, then click \"Download\" to save it (MP4; in Firefox, WebM, with a button to make an MP4)."
+          `Tick "Add my microphone (mixed with the screen's sound)" if you want your voice, then click "Start Recording".`,
+          `Choose the screen, window or tab in the browser's dialog; on Chrome or Edge, tick the box that shares the tab or system audio.`,
+          `Use "Pause" and "Resume", then click "Stop Recording" or stop sharing from the browser's bar.`,
+          `Click "Download" to save the MP4, or the WebM with a "Make an MP4" button below it.`,
         ]}
+        specs={[
+          { label: `Sources`, value: `A screen, window or tab; its sound on Chrome and Edge (tab or whole screen only); optional microphone in any browser that records` },
+          { label: `Output format`, value: `MP4 (H.264 + AAC) where the browser can record it; otherwise WebM, which can be converted to MP4` },
+          { label: `Length`, value: `No maximum in the page; the recording is held in memory while the page is open` },
+          { label: `iPhone and iPad`, value: `Not available: Apple does not let web pages record the screen` },
+          { label: `Usage limits`, value: `"Make an MP4" only: conversions per connection are counted per hour and per day, and the media service refuses a video over its maximum size or length.` },
+        ]}
+        privacy={`Recording happens in your browser, and the video is not sent anywhere unless you click "Make an MP4". That button uploads the WebM in pieces to our media service, which converts it to MP4; the WebM is wiped there when the conversion ends and the MP4 once the page has downloaded it, or after a set time. A failed start or conversion sends its cleaned message, with your browser's name and version, to our error log.`}
+        privacyTitle="Where your recording is processed"
         faqs={[
-          { q: "What video format do recordings download as?", a: "MP4 (H.264 video, AAC sound) in Chrome, Edge and Safari, the format every phone and computer plays. Firefox can only record WebM: the page then offers to make an MP4 from it on our video service. The file extension always matches the real content." },
-          { q: "Is Screen Recorder free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it record audio?", a: "Yes: the sound of the screen or tab you share (tick 'Share audio' in the browser's dialog; Chrome and Edge can share a tab's or the whole screen's sound), and your microphone if you tick 'Add my microphone' — both are mixed into one track. If the recording has no sound at all, the page says so." },
-          { q: "Is my recording uploaded anywhere?", a: "No: recording happens entirely in your browser, and only if you click \"Make an MP4\" (Firefox) is the recording sent to our video service, which deletes it once the MP4 is made and downloaded." },
-          { q: "Can I record my screen on an iPhone or iPad?", a: "Not from a web page: Apple does not let browsers record the screen on iPhone and iPad. Use Screen Recording in Control Center instead." }
+          { q: `Does it record sound?`, a: `Yes, on Chrome and Edge: the sound of a shared tab or whole screen, if you tick the audio box in the sharing dialog; a window, Firefox and Safari share no sound. "Add my microphone (mixed with the screen's sound)" adds your voice in one track. With no sound at all, the page tells you.` },
+          { q: `Will my recording play on an iPhone?`, a: `Yes, when it is an MP4. Safari and Chrome or Edge 126 and later record MP4 directly. Firefox records WebM, which the iPhone Photos app cannot open, so click "Make an MP4" to convert it on our media service.` },
+          { q: `Can I record my screen on an iPhone or iPad?`, a: `No. Apple does not let browsers capture the screen there, so the page shows a notice and the start button stays off. Use Screen Recording in Control Center instead.` },
+          { q: `Is my recording uploaded?`, a: `No, unless you click "Make an MP4". That conversion runs on our media service, which counts conversions per connection per hour and per day, refuses videos over its maximum size or length, and deletes the file once the MP4 is downloaded.` },
         ]}
         tips={[
-          "Choose \"Chrome Tab\" instead of your whole screen when recording to also capture that tab's audio, if your browser supports it.",
-          "Close unnecessary tabs and apps before recording for smoother performance.",
-          "If you need a different format than your browser's native one, convert the downloaded file afterward with a dedicated video converter.",
-          "Recording also stops if you stop sharing from the browser's own sharing indicator, not just the \"Stop Recording\" button."
+          `Cut the first and last seconds with Video Trimmer, where you usually reach for the stop button.`,
         ]}
       />
     </div>

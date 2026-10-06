@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { useToolError } from '../../../lib/useToolError';
+import { OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import UploadPrompt from '@/app/components/UploadPrompt';
 
 export default function WordToPdfPage() {
@@ -105,27 +106,29 @@ export default function WordToPdfPage() {
       </div>
       <SeoContent
         title="Word to PDF"
-        description="Word to PDF converts your .docx or .doc file into a PDF. A .docx file is sent securely over HTTPS through our server to our conversion provider, ConvertAPI, with file storage turned off; an older .doc file is converted by our own LibreOffice server. Either way the file is deleted after conversion — we don't store or log it. We tested .docx files with Calibri, Cambria, Arial and Arial Narrow text, two-level numbered lists, a table with merged cells, an image with text wrapping, a two-column section, headers and footers with page numbers, footnotes and a watermark: every page matched the output of two other online converters, and the text stays fully selectable. Two disclosed limits: a Word-generated table of contents is not recalculated during conversion — it shows whatever was last cached in the .docx, not a freshly rebuilt table — and the older .doc format takes a different conversion path that we have not measured."
+        description={`Word to PDF turns a word-processor document into a PDF whose text you can select and search. It accepts .docx, .doc, macro-enabled .docm, the templates .dotx, .dotm and .dot, OpenDocument .odt and .ott, .rtf and WordPerfect .wpd; Microsoft Works .wps is refused because our converter reads it as a blank page. A .docx is converted by ConvertAPI, our provider, and every other format by our own LibreOffice service. With a .docx, fields are not recalculated: a table of contents shows what was last saved in the file; our LibreOffice service, used for the other formats, can update it.`}
+        howToTitle="How to convert a Word document to PDF"
         howTo={[
-          "Click the upload area and select a Word file (.docx, .doc, .docm, .dotx, .dot), an OpenDocument text (.odt, .ott), an RTF, or a WordPerfect file (.wpd).",
-          "Click 'Convert to PDF'. Your file is uploaded securely for conversion; once the PDF is ready, click 'Download'.",
-          "Save the resulting PDF file to your device."
+          `Click or drop your document on the upload area; a file over ${officeMaxLabel()} is refused before anything is sent.`,
+          `Click "Convert to PDF": the button shows "Converting...", preceded by the upload percentage for a file over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB.`,
+          `When "PDF ready" appears, click "Download" to save the PDF; a note under it tells you when our backup converter made it.`,
         ]}
+        specs={[
+          { label: 'Input formats', value: `.docx, .doc, .docm, .dotx, .dotm, .dot, .odt, .ott, .rtf, .wpd` },
+          { label: 'Output', value: `One PDF file with selectable text` },
+          { label: 'Maximum file size', value: `${officeMaxLabel()} per file` },
+          { label: 'Files at once', value: `One` },
+          { label: 'Usage limits', value: `A .docx counts toward a limit per network per hour and per day, shared with the site's other paid tools, and toward a monthly budget for the whole site. Any file over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB counts toward a separate hourly and daily limit for your connection.` },
+        ]}
+        privacy={`Your document goes over HTTPS to our server. A .docx is passed on to ConvertAPI with its file storage turned off; if ConvertAPI is unavailable, our own LibreOffice service makes the PDF instead and the page says so. Other formats go straight to that LibreOffice service. A file over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB is first uploaded in parts to our media service, which deletes the original when the conversion ends and the PDF as soon as this page has fetched it, or after a time limit if the page never does.`}
         faqs={[
-          { q: "Is Word to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does Word to PDF support?", a: ".docx (converted by ConvertAPI) and, converted by our own LibreOffice server: .doc, macro-enabled .docm, templates .dotx / .dotm / .dot, OpenDocument .odt / .ott, .rtf and WordPerfect .wpd (Microsoft Works .wps is not accepted: our converter cannot read it). We checked that each of these formats converts; the page-by-page fidelity measurement quoted on this page was made on .docx files." },
-          { q: "Will my documents be uploaded to a server?", a: "Yes. A .docx file goes securely over HTTPS through our server to our conversion provider, ConvertAPI (file storage turned off); a .doc file goes to our own LibreOffice server. The file is deleted after conversion — we don't keep it." },
-          { q: "What happens if the .docx converter is down?", a: "If ConvertAPI is unavailable, your .docx is converted by our own LibreOffice server instead, and the page tells you so next to the download. That PDF has all your text, but fonts, line and page breaks and equation spacing can differ from Word, and an image stored in a non-standard way can be missing; try again later for the usual conversion." },
-          { q: "Do I need to install any software to use Word to PDF?", a: "No, it works directly in your web browser." },
-          { q: "Will the text in my PDF be selectable?", a: "Yes. Because conversion is done server-side rather than by rasterizing a screenshot, the resulting PDF has fully selectable, searchable text." },
-          { q: "Why does this look different from the previous in-browser converter?", a: "This tool now converts documents server-side instead of approximating the layout in your browser. The trade-off is that your file is uploaded; in return, fonts, spacing and page layout follow the original Word document, and the text is selectable." },
-          { q: "Will my table of contents update automatically?", a: "No. A table of contents (or any other calculated field) is converted using whatever was last cached in the .docx file, not recalculated during conversion. In Word, click into the table of contents and choose \"Update Field\" before converting if you want it to reflect your current headings and page numbers." }
+          { q: `Are DOC and DOCX both supported?`, a: `Yes. A .docx is converted by ConvertAPI, whose output matched two other online converters page by page in our tests of 18 and 19 September 2026. A .doc, like the OpenDocument, RTF, template and WordPerfect files, goes to our LibreOffice service; we checked that each of these converts, but measured fidelity on .docx only.` },
+          { q: `Will the fonts and layout stay the same?`, a: `Yes for the .docx files we tested: Calibri, Cambria, Arial and Arial Narrow text, two-level numbered lists, a table with merged cells, a wrapped image, a two-column section, headers and footers with page numbers, footnotes and a watermark matched the original. When our LibreOffice service makes the PDF, Wingdings and Webdings symbols are not reproduced.` },
+          { q: `Is the table of contents updated during conversion?`, a: `No for a .docx converted by ConvertAPI: a table of contents, a page reference or a date shows the value last saved in the document, so update it in Word and save before converting. Our LibreOffice service, which handles the other formats and the backup, recalculated the table of contents in our test of 4 October 2026.` },
+          { q: `Can I still convert a .docx when ConvertAPI is down?`, a: `Yes. Our own LibreOffice service makes the PDF and a note next to the download says so. All your text is there, but fonts, line and page breaks and equation spacing can differ from Word, and an image stored in an unusual way can be missing. Try again later for the usual conversion.` },
         ]}
         tips={[
-          "In our tests on .docx files, fonts, spacing and page layout matched two other online converters.",
-          "The resulting PDF has selectable, searchable text rather than a flattened image.",
-          "Update any table of contents or calculated fields in Word before converting — they carry over as last saved, not recalculated.",
-          "Very large or complex files may take a little longer to convert — keep the tab open until the Download button appears."
+          `Converting a spreadsheet or a slide deck? Use Excel to PDF or PowerPoint to PDF: this page only takes word-processor files.`,
         ]}
       />
     </div>

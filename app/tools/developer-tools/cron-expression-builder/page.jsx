@@ -23,7 +23,7 @@ export default function CronExpressionBuilderPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Cron Expression Builder</h1>
-        <p className="text-neutral-500 text-center mb-8">Build and validate cron expressions</p>
+        <p className="text-neutral-500 text-center mb-8">Build a cron schedule from presets, field by field</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <CronPaste onFields={(f) => apply(f.join(' '))} />
           <div className="grid grid-cols-5 gap-2">
@@ -47,24 +47,37 @@ export default function CronExpressionBuilderPage() {
       </div>
       <SeoContent
         title="Cron Expression Builder"
-        description="Cron Expression Builder assembles a 5-field cron string (minute, hour, day, month, weekday) live as you fill in five text boxes, with eight presets that go beyond the basics to include a weekday-only schedule and a 15-minute interval. It runs entirely client-side with no syntax checking, next-run preview, or calendar/time pickers — the value in each field is joined directly into the final expression, so double-check it against your scheduler's syntax."
+        description={"Cron Expression Builder helps you write a new five-field cron schedule. Start from one of eight presets (every minute, hour, day, week, month or year, every weekday at 09:00, every 15 min) and adjust the Minute, Hour, Day, Month and Weekday boxes. Each keystroke is checked: the schedule is described in plain English and its next five run times are listed in your time zone, or the wrong value is reported with its allowed range. Ranges (1-5), lists (1,15), steps (*/15) and names such as MON or JAN are understood. An expression you already have can be pasted as a starting point. The page Cron Expression offers the same checker with six presets."}
+        example={{
+          caption: "The Every weekday preset, with the next runs computed as if it were clicked on Tuesday 6 October 2026 at 12:00 UTC; run times listed for a visitor in UTC whose browser is set to US English (the page uses your zone and language).",
+          inputLabel: "Preset clicked",
+          input: "Every weekday",
+          outputLabel: "Expression and check",
+          output: "0 9 * * 1-5\nAt 09:00, Monday through Friday\nNext runs (your time zone):\nWed, Oct 7, 2026, 09:00 AM\nThu, Oct 8, 2026, 09:00 AM\nFri, Oct 9, 2026, 09:00 AM\nMon, Oct 12, 2026, 09:00 AM\nTue, Oct 13, 2026, 09:00 AM",
+        }}
+        howToTitle={"How to build a cron expression"}
         howTo={[
-          "Type values into the Minute, Hour, Day, Month, and Weekday fields, or click a preset below to fill them in automatically.",
-          "Watch the generated cron expression update live as you type.",
-          "Click 'Copy' to copy the expression to your clipboard.",
-          "Paste it into your application, server, or scheduling system."
+          "Under \"Presets\", click the schedule closest to yours, for example \"Every weekday\" or \"Every 15 min\".",
+          "Edit the boxes that differ: \"Minute\" 0-59, \"Hour\" 0-23, \"Day\" 1-31, \"Month\" 1-12, \"Weekday\" 0-6 with 0 for Sunday.",
+          "Watch the line under the expression: the description and the next runs change with every edit.",
+          "When the runs match what you want, click \"Copy\" and paste the expression into your crontab or scheduler.",
         ]}
+        specs={[
+          { label: "Presets", value: "Every minute, Every hour, Every day, Every week, Every month, Every year, Every weekday (0 9 * * 1-5), Every 15 min (*/15 * * * *)" },
+          { label: "Field syntax", value: "Numbers, ranges (1-5), lists (1,15), steps (*/15) and names such as MON or JAN" },
+          { label: "Check", value: "After every edit; an out-of-range value is reported with the allowed range" },
+          { label: "Next runs listed", value: "Five, in your browser’s time zone" },
+          { label: "Output", value: "One line in the order minute hour day month weekday, copied with the Copy button" },
+        ]}
+        privacyTitle={"Where your schedule is built"}
+        privacy={"Building and checking happen in your browser: the cron-parser and cronstrue libraries load into the page after it opens, and the expression you build is never sent to our servers. Next runs are computed from your device’s clock. The boxes are not saved, so a reload brings back five asterisks."}
         faqs={[
-          { q: "What is a cron expression?", a: "A string of five space-separated fields — minute, hour, day of month, month, and day of week — that defines when a scheduled task should run." },
-          { q: "Is Cron Expression Builder free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I paste an existing cron expression to validate it?", a: "Yes. Paste it in 'Paste a whole expression': it is split into the five boxes, checked, described in plain English, and its next runs are listed. Macros such as @daily are expanded and a crontab line's command is left out." },
-          { q: "What operating systems support cron expressions?", a: "Cron expressions are used by Linux, macOS, Unix, and many scheduling libraries across languages like Python, Java, Node.js, and PHP." }
+          { q: "Is there a preset for every 15 minutes?", a: "Yes. \"Every 15 min\" fills in */15 * * * *, which runs at minutes 0, 15, 30 and 45 of every hour. Change 15 to 5 or 10 in the \"Minute\" box for other intervals; the next runs list shows the effect at once." },
+          { q: "Can I run a job only on weekdays?", a: "Yes. Put 1-5 in the \"Weekday\" box (1 is Monday, 5 is Friday), or click the \"Every weekday\" preset, which also sets the time to 09:00. Use 0,6 instead to run on Saturday and Sunday only." },
+          { q: "Will 0 0 31 * * run every month?", a: "No. It runs only in months that have a 31st day, so February, April, June, September and November are skipped; from October 2026, for example, the five runs listed go from 31 October to 31 December. The \"Every month\" preset, 0 0 1 * *, runs on the first day of every month instead." },
         ]}
         tips={[
-          "The eight presets (including 'Every weekday' and 'Every 15 min') fill in all five fields at once — a fast starting point you can then tweak.",
-          "Cron fields are minute (0-59), hour (0-23), day of month (1-31), month (1-12), and day of week (0-6, Sunday=0).",
-          "Since there's no validation, test your expression in your actual scheduler or a dedicated cron-syntax checker before relying on it in production.",
-          "Use ranges like 1-5 (e.g. in the weekday field for Monday-Friday) or intervals like */15 for recurring schedules."
+          "Already have an expression to adapt? Paste it into \"Paste a whole expression\" and edit the boxes from there.",
         ]}
       />
     </div>

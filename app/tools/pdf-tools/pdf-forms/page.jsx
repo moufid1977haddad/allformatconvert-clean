@@ -157,26 +157,30 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Forms"
-        description="PDF Forms reads the existing fillable fields from a PDF you upload — text fields, checkboxes, radio buttons, dropdowns and lists — shows each one with its current value, and writes back only what you change, entirely in your browser using the pdf-lib library; your file is never uploaded to a server. The form stays fillable, or can be flattened if you tick that option. It only fills in an existing form; it doesn't let you create a new form or add fields to a PDF that doesn't already have them."
+        description={`PDF Forms opens a PDF that already contains fillable fields (an AcroForm) and shows every field with its current value: text boxes, checkboxes, radio groups, drop-down and multiple-choice lists. Only the fields you change are written back, so values already in the form stay as they were. Read-only fields, signatures and push buttons are left alone unless you flatten the form, which turns every field into page content. You can keep the form fillable or flatten it so the values become part of the page. It does not create new fields, and XFA forms made with Adobe LiveCycle cannot be filled here. pdf-lib reads and fills the fields inside your browser.`}
+        howToTitle="How to fill a PDF form online"
         howTo={[
-          "Click the upload area and select a PDF that already contains fillable form fields.",
-          "Change the fields you need: type text, tick checkboxes, pick radio and dropdown options. Values already in the form are shown and kept.",
-          "Tick 'Flatten the form' if the values must no longer be editable, then click 'Fill and Download PDF'.",
-          "Click 'Download' next to filled_form.pdf to save the result."
+          `Choose a PDF that has fillable fields; each field appears with its name and current value.`,
+          `Type in text fields, tick checkboxes and pick radio or list options; fields you do not touch keep their values.`,
+          `Tick "Flatten the form" if the values must no longer be editable.`,
+          `Click "Fill and Download PDF" to build the file, then "Download" to save filled_form.pdf.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF with AcroForm fields` },
+          { label: 'Field types', value: `Text, checkbox, radio group, drop-down list, multiple-choice list` },
+          { label: 'Left unchanged', value: `Signature fields, push buttons and read-only fields, unless you flatten the form` },
+          { label: 'Characters', value: `Western European letters with the form's standard font` },
+          { label: 'Result', value: `filled_form.pdf, still fillable or flattened` },
+        ]}
+        privacy={`The form is read and filled in your browser with pdf-lib; the PDF and the values you type are not sent to our servers. A form that opens without a password but restricts editing, as many official forms do, is decrypted in the browser before filling.`}
         faqs={[
-          { q: "Is PDF Forms free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I create a new PDF form or add fields?", a: "No — this tool only fills in fields that already exist in the PDF you upload. It doesn't let you add text boxes, checkboxes, or other fields." },
-          { q: "What happens to checkboxes, radio buttons, or dropdowns in the form?", a: "Each is shown with its own control (a checkbox, or a list of the options the form allows) and filled like a text field. Signature and push-button fields are kept as they are." },
-          { q: "Will fields I leave alone be erased?", a: "No — every field shows its current value, and only the fields you change are written." },
-          { q: "Can I type accents or other alphabets?", a: "Western European letters work with the standard form font. If a form uses that font and you type, for example, Cyrillic or Chinese, the tool says so instead of producing a broken file." },
-          { q: "Does it work with a PDF that has no form fields?", a: "No — if the PDF has no fillable fields, you'll see \"No form fields found in this PDF.\"" }
+          { q: "Can it fill a scan or a PDF whose boxes are only drawn?", a: `No. Those have no AcroForm fields, so the page says no form fields were found. If the file is an XFA form made with Adobe LiveCycle or Designer, the page says so instead, since only Adobe Acrobat or Reader can fill those.` },
+          { q: "Will the values already in the form be kept?", a: `Yes. Each field opens with its current value, and only the fields you change are written when you save. A field marked read-only by the form's author is shown but cannot be changed here.` },
+          { q: "Can I type Cyrillic, Greek or Chinese into a field?", a: `No, not with the standard PDF form font, which writes Western European letters only. In that case saving stops with a message explaining which character could not be written, instead of producing a broken file.` },
+          { q: "Should I flatten the form?", a: `Yes, but only when the values must stay as they are. Flattening turns every field into part of the page, so nobody can edit it in a PDF reader, and it cannot be undone. Leave it unticked to send a form the next person can still change.` },
         ]}
         tips={[
-          "Leave 'Flatten the form' unticked to keep the form fillable; tick it when the values must become part of the page.",
-          "Only PDFs with an existing fillable form (an AcroForm) will show anything to fill in.",
-          "A field marked read-only is locked by the form's author and is left unchanged.",
-          "Keep the original PDF if you flatten it, since flattening can't be undone."
+          `To sign the completed form, open filled_form.pdf in PDF Sign after filling it.`,
         ]}
       />
     </div>

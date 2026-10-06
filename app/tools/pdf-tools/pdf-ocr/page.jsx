@@ -14,7 +14,7 @@ import TextArea from '@/app/components/TextArea';
 import { fitScale, withTimeout, StepTimeout } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
 import { LANGUAGES, matchLanguages, optionLabel } from '../../../lib/ocrLanguages';
 import LanguageCombobox, { languageFromBrowser } from '@/app/components/LanguageCombobox';
-import { serverRenderAvailable, listPages } from '../../../lib/serverPageRender';
+import { serverRenderAvailable, listPages, STAGED_MAX_BYTES } from '../../../lib/serverPageRender';
 import { ServerPageOcr, LOCAL_OCR_LIMIT_MS, LOCAL_OCR_LIMIT_LABEL } from '../../../lib/serverPageOcr';
 
 // P33 (05/10): the device's own recognition is watched. Real iPhone pass of 04/10 (iOS 26): the page stayed on "Page 1
@@ -337,28 +337,31 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF OCR"
-        description="PDF OCR renders each page of your PDF onto a canvas and runs real optical character recognition on it with Tesseract -- this is what lets it read scanned documents and photographed pages that have no underlying text layer at all, unlike our PDF Extract Text tool, which only reads a text layer that's already embedded in the file. Choose the document's language -- up to three for a mixed document -- from Tesseract's 100+ supported languages, in one list you can search by English or native name; your browser's language is chosen first when it is available. You get the recognized text to copy, and a searchable PDF: your original pages, unchanged, with the recognized text added as an invisible layer so the file can be searched and its text selected. It works best on a straight, clean, high-contrast scan; a skewed, angled, or low-quality photo gives more mistakes. OCR mistakes are not always visible garbage: a digit or letter can be read as another plausible one (8 and 3, rn and m), so proofread numbers and names. On a computer, everything runs in your browser (Tesseract.js; the engine and language data are downloaded once, then cached) and your file is not uploaded. On an iPhone or iPad, a page the device cannot recognize within 20 seconds is recognized by our own OCR service (Tesseract on our server, not a third party), in the same languages: the PDF is sent there, then deleted, and the page tells you."
+        description={`PDF OCR reads the text in pictures: each page of your PDF is drawn on a canvas and recognized by Tesseract, so scanned documents and photographed pages inside a PDF become text. Choose the language among ${LANGUAGES.length}, or up to three for a mixed document; your browser's language is picked first when it is in the list. You get the recognized text to copy and a searchable copy of your PDF: the original pages with an invisible text layer added. Pages that already had their own text do not get a second layer. The input must be a PDF; turn photos into one with Image to PDF first.`}
+        howToTitle="How to OCR a scanned PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Tap the language field and type to search, then choose the document's language (up to three for a mixed document); your browser's language is chosen first when it is available.",
-          "Click 'Run OCR'. The first run downloads the OCR engine and language data, then recognizes text page by page.",
-          "Watch the progress bars for the download and for each page (\"Page X of Y\").",
-          "Read the result, grouped by page number, click 'Copy Text' to copy it, or 'Download' next to the -searchable.pdf file to get your PDF with the text layer added."
+          `Choose the PDF to read.`,
+          `Type in "Language of the document" to search by English name, native name or code, and choose one to three languages.`,
+          `Click "Run OCR"; the first run downloads the engine and the language data, then the pages are read one by one.`,
+          `Copy the result with "Copy Text", or click "Download" for the -searchable.pdf file.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF only: scans or photos placed in a PDF` },
+          { label: 'Languages', value: `${LANGUAGES.length}, up to three at once` },
+          { label: 'Output', value: `Recognized text, and a searchable PDF when text was found` },
+          { label: 'On iPhone and iPad', value: `A page that fails or is not recognized within ${LOCAL_OCR_LIMIT_LABEL} goes to our OCR service, for PDFs up to ${Math.floor(STAGED_MAX_BYTES / 1048576)} MB` },
+          { label: 'Usage limits', value: `Our OCR service (iPhone and iPad only): 300 pages per hour and 1,000 pages per day per network` },
+        ]}
+        privacy={`On a computer or an Android device, recognition runs in your browser with Tesseract.js and your PDF is not uploaded; the engine and language data are downloaded from cdn.jsdelivr.net the first time. On an iPhone or iPad, a page that fails, or makes no progress for ${LOCAL_OCR_LIMIT_LABEL}, and the pages after it, are recognized by our own OCR service (Tesseract on our pdf-tools server): the PDF is sent there, then deleted, and the page tells you before and after.`}
         faqs={[
-          { q: "Does this actually perform OCR now?", a: "Yes. Every page is rendered to a canvas and recognized as an image using Tesseract -- it no longer just reads an existing text layer, so scanned and photographed pages work." },
-          { q: "Which languages are supported?", a: "All 100+ languages that Tesseract itself supports, from Afrikaans to Yiddish, in one searchable list (English or native name, or the code). A document mixing languages can use up to three at once; only the selected languages' data is downloaded. Our OCR service on iPhone and iPad has every language of the list." },
-          { q: "How accurate is the text recognition?", a: "It's real OCR, not a flawless one -- expect a meaningful error rate (roughly 4-16% of characters, depending on scan quality), especially on skewed, angled, or low-contrast images. Some errors are visibly garbled, others are plausible (a 3 read instead of an 8), so proofread numbers, names and amounts before relying on them." },
-          { q: "Can I get a searchable PDF?", a: "Yes — after recognition, the file ending in -searchable.pdf gives your original PDF with the recognized text added as an invisible layer on each page, placed as the page is displayed (crop and rotation included). The pages themselves are not re-compressed or changed. A page that already had selectable text does not get the layer (its text would be doubled when copied); its recognized text is still shown." },
-          { q: "Why is the first run slower than later ones?", a: "The first OCR run on a given language downloads the Tesseract engine and that language's training data. Your browser caches both, so later runs are faster." },
-          { q: "Is there a file size limit?", a: "There's no fixed limit on a computer -- it's bound by your browser's available memory, and multi-page PDFs will simply take longer since each page is recognized in turn. When our OCR service takes over on an iPhone or iPad, it accepts PDFs up to 44 MB." },
-          { q: "Is my PDF uploaded?", a: "Not on a computer: everything happens locally in your browser. On an iPhone or iPad, if the device cannot recognize a page within 20 seconds (or fails), that page and the next ones are recognized by our own OCR service: your PDF is sent there, then deleted, nothing is kept, and the page tells you before and after." }
+          { q: "How accurate is the recognition?", a: `0.8% of characters were wrong in our one measured test (29 September 2026, text printed at 7 pt). Skewed, blurred or low-contrast pages give more errors, and a wrong character can look plausible, such as an 8 read as a 3, so check names and figures.` },
+          { q: "Can I OCR a JPG or PNG photo directly?", a: `No. The tool opens PDF files only. Put the photos into a PDF with Image to PDF or JPG to PDF first, then run OCR on that PDF; each photo becomes one page that is recognized like a scan.` },
+          { q: "Will the searchable PDF look different?", a: `No. The pages are not redrawn or recompressed: the recognized text is added as an invisible layer placed on each page as it is displayed, crop and rotation included. A page that already had at least half as much selectable text is left without a second layer.` },
+          { q: "Is the first run slower?", a: `Yes. The OCR engine and the data of each chosen language are downloaded the first time, with their own progress bar. Your browser keeps them, so later runs only download a language you have not used before.` },
+          { q: "Is there a limit on iPhone or iPad?", a: `Yes, when our service takes over: it accepts PDFs up to ${Math.floor(STAGED_MAX_BYTES / 1048576)} MB and recognizes at most 300 pages per hour and 1,000 pages per day per network. On a computer there is no fixed limit, but a step stuck for 90 seconds stops with a message.` },
         ]}
         tips={[
-          "A straight, clean, high-contrast scan gives noticeably better results than a photo taken at an angle or in poor lighting.",
-          "If a page comes out garbled, try re-scanning it straighter or with better lighting; check figures one by one even when the text looks right.",
-          "Multi-page PDFs show a \"Page X of Y\" counter and a per-page progress bar so you can see how much is left.",
-          "Always proofread OCR output before using it for anything important -- no OCR engine, including this one, is error-free."
+          `If letters come out wrong, check the language first: a page written in two languages reads better with both selected.`,
         ]}
       />
     </div>

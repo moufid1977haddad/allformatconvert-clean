@@ -7,6 +7,8 @@ import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { RASTER_MAX_PIXELS } from '../../../lib/imageOutput';
+import { PHONE_MAX_MP } from '../../../lib/reduceImage';
 export default function BMPtoPNGPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -43,24 +45,27 @@ export default function BMPtoPNGPage() {
       </div>
       <SeoContent
         title="BMP to PNG"
-        description="BMP to PNG converts a BMP image to PNG format entirely in your browser using the HTML canvas — your file is never uploaded to a server. Upload a BMP, click Convert, and download the resulting PNG."
+        description={`BMP to PNG turns a Windows bitmap (.bmp) into a PNG file. A bitmap usually stores its pixels as raw rows; PNG stores them with lossless compression. The width and height stay the same, the colours stay as your browser shows them, and the new file keeps the bitmap's name with a .png ending. This page converts one bitmap per click; for a batch, or for JPG or WebP output, use Image Converter. A bitmap your browser cannot open is refused with a message instead of giving a wrong picture. The bitmap is decoded and re-saved on this page.`}
+        howToTitle="How to convert BMP to PNG"
         howTo={[
-          "Click the upload area and select a BMP file from your device.",
-          "Click 'Convert' to render it to PNG.",
-          "Preview the converted image.",
-          "Click the download button to save your PNG file."
+          `Pick your .bmp file in the upload area; the bitmap appears there as a preview.`,
+          `Click "Convert".`,
+          `Click "Download" under the result to save the PNG, named after your bitmap.`
         ]}
+        specs={[
+          { label: 'Input format', value: `BMP (.bmp), one file at a time` },
+          { label: 'Output format', value: `PNG, lossless, same width and height` },
+          { label: 'Largest image', value: `${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels on a computer; a bigger bitmap is refused with its size in the message` },
+          { label: 'On iPhone and iPad', value: `No lower cap is set, but Safari gives a page far less memory than a computer; the largest photo this site has confirmed on a real iPhone is ${PHONE_MAX_MP} megapixels` }
+        ]}
+        privacy={`The bitmap is decoded by your own browser and written out as a PNG on this page. It is not uploaded to us or to anyone else. If the conversion fails, a cleaned report goes to our error log: the message shown, the tool's name and your browser's name and version, without the file or its name.`}
         faqs={[
-          { q: "Is BMP to PNG completely free to use?", a: "Yes, it's 100% free with no registration required." },
-          { q: "Does the tool support batch conversion?", a: "No, only one file can be converted at a time — there's no multi-file upload." },
-          { q: "Will my images be uploaded to a server?", a: "No. Conversion happens entirely in your browser using the canvas element — your file never leaves your device." },
-          { q: "What file size limits does BMP to PNG have?", a: "There's no fixed size limit — processing happens locally, so it's limited only by your device's available memory." }
+          { q: "Does converting BMP to PNG change the picture?", a: `No. PNG is lossless, so the PNG has the same size and the colours your browser displays for the bitmap. One exception: in a 32-bit bitmap with partly transparent pixels, those pixels can shift slightly on the way through the browser's canvas.` },
+          { q: "Why is my BMP file refused?", a: `Either it is too large or it cannot be read. Above ${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels the message gives the bitmap's size; otherwise it says the file may be damaged or in a form your browser cannot open.` },
+          { q: "Does Image Converter take a whole set of bitmaps?", a: `Yes. This page takes one bitmap at a time, but Image Converter accepts a batch of BMP files, converts them one after another, and offers all results together as a ZIP.` }
         ]}
         tips={[
-          "For best results, make sure your BMP file isn't corrupted before uploading.",
-          "PNG supports transparency, so it's a good target format if your source has an alpha channel.",
-          "Run your PNG through an image compressor afterward if you need a smaller file size for the web.",
-          "Keep a backup of your original BMP file in case you need it again later."
+          `Need a JPG or WebP rather than a PNG? Image Converter reads BMP files too and lets you pick the output format.`
         ]}
       />
     </div>

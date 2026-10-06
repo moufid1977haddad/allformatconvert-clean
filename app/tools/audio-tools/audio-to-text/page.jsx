@@ -143,7 +143,7 @@ export default function AudioToTextPage() {
                   <TextDownload text={micTranscript} name="transcript.txt" />
                 </div>
               )}
-              <p className="text-neutral-500 text-xs text-center">Works best in Google Chrome with microphone permission</p>
+              <p className="text-neutral-500 text-xs text-center">Needs a browser with speech recognition, such as Chrome, and microphone permission</p>
             </>
           )}
 
@@ -194,25 +194,29 @@ export default function AudioToTextPage() {
       </div>
       <SeoContent
         title="Audio to Text"
-        description="Audio to Text offers two ways to get a transcript: live microphone dictation using your browser's built-in speech recognition (works best in Chrome; your browser sends the recording to its maker's speech service — Google in Chrome, Microsoft in Edge, Apple in Safari — not to us), or file upload, which sends your audio through our server to OpenAI's transcription API and returns the text."
+        description={`Audio to Text has two modes. "Use Microphone" types what you say as you speak, with the speech recognition built into your browser; Firefox does not have it. "Upload Audio File" sends one recording to OpenAI's Whisper model through our server and returns the transcript, plus timed SRT and VTT subtitles when Whisper sends segments. The recording is passed on exactly as picked, and any format Whisper turns down is reported back on the page. The text can be copied or downloaded. It does not translate and does not keep your transcripts.`}
+        howToTitle="How to transcribe speech to text"
         howTo={[
-          "Choose \"Use Microphone\" for live dictation, or \"Upload Audio File\" to transcribe an existing recording.",
-          "For mic mode, click \"Start Transcription\" and speak — text appears as you talk.",
-          "For file mode, upload your audio and click \"Transcribe Audio\" to send it for AI transcription.",
-          "Copy the transcript or download it as a .txt file."
+          `Choose "Use Microphone" for live dictation or "Upload Audio File" for a recording.`,
+          `Microphone: click "Start Transcription", allow the microphone, speak, then click "Stop".`,
+          `File: pick or drop an audio file of up to ${audioMaxLabel()} and click "Transcribe Audio".`,
+          `Click "Copy", or "Download" the .txt file; a transcribed file also offers .srt and .vtt subtitles.`,
         ]}
+        specs={[
+          { label: `Input`, value: `Your microphone, or one audio file in a type Whisper reads; it is not converted first` },
+          { label: `Maximum file size`, value: `Up to ${audioMaxLabel()}, the ceiling of OpenAI's Whisper API` },
+          { label: `Output`, value: `Text to copy; TXT; SRT and VTT for uploaded files when timings come back` },
+          { label: `Usage limits`, value: `File mode: one hourly and daily allowance per connection, shared with the site's other AI tools, under a monthly budget for the site's paid services; a file over 4 MB also uses the upload service's own hourly and daily allowance. Microphone mode is not counted.` },
+          { label: `Microphone browsers`, value: `Needs the speech recognition of the browser; without it the page shows "Speech recognition not supported. Try Chrome."` },
+        ]}
+        privacy={`Microphone mode: your browser's own speech service does the recognition (Chrome, for example, sends the sound to Google), and the page only receives the words. File mode: your file goes to our server, which sends it to OpenAI's transcription API (model whisper-1). Files over 4 MB first travel to our media service, which deletes them once read. We keep no copy; OpenAI's own data rules apply on its side. Error messages shown on the page, cleaned, are sent to our error log with your browser's name and version.`}
+        privacyTitle="Where your audio is processed"
         faqs={[
-          { q: "Is my audio uploaded to a server?", a: "Yes, in both modes, but not to the same place. Microphone dictation uses your browser's built-in speech recognition (Web Speech API): the browser itself sends the recording to its maker's speech service (Google in Chrome, Microsoft in Edge, Apple in Safari), and we never receive it. Uploaded audio files are sent through our server to OpenAI's transcription API to generate the text, then deleted." },
-          { q: "Which browsers support microphone dictation?", a: "It relies on the Web Speech API, which works best in Google Chrome; other browsers may not support it." },
-          { q: "What audio formats can I upload?", a: "Common formats like MP3, WAV, and M4A." },
-          { q: "How large can an uploaded audio file be?", a: `File-upload transcription accepts up to ${audioMaxLabel()} per file — the maximum the transcription engine (OpenAI Whisper) itself accepts. Split a longer recording into smaller pieces and transcribe each separately if you hit the limit. Microphone dictation has no such limit since it doesn't call a paid API.` },
-          { q: "Is Audio to Text free to use?", a: "Yes, both the microphone and file-upload modes are free to use. The file mode sends your audio to OpenAI, so it has an hourly and daily limit per connection; microphone dictation has none." }
-        ]}
-        tips={[
-          "For live dictation, speak clearly at a steady pace and keep background noise low for the best accuracy.",
-          "If microphone mode shows \"not supported,\" switch to Chrome or use file upload instead.",
-          "Always proofread AI-generated transcripts before using them somewhere important — accuracy varies with audio quality.",
-          "Download your transcript right after generating it, since it isn't saved automatically if you navigate away."
+          { q: `Does microphone dictation work in every browser?`, a: `No. It needs the speech recognition built into the browser: Chrome has it, Firefox does not and shows "Speech recognition not supported. Try Chrome." File upload works in any browser, since the transcription itself runs at OpenAI.` },
+          { q: `How large a recording can I upload?`, a: `Up to ${audioMaxLabel()}; a bigger file is refused the moment you pick it, before anything is sent, and the button stays off. Cut a long recording with Audio Splitter, or save it as MP3 with Audio Compressor, then transcribe the result.` },
+          { q: `Can I get subtitles with timestamps?`, a: `Yes, for uploaded files: each timed segment Whisper sends back becomes one subtitle cue, saved as .srt or .vtt, and "Download all" zips them with the .txt. Microphone mode gives plain text only.` },
+          { q: `How many files can I transcribe per day?`, a: `A set number per connection, per hour and per day, shared with the site's other AI tools, and only while the monthly budget for paid services lasts; the page says when a limit is reached. The numbers are server settings, not shown here. Live dictation does not count.` },
+          { q: `Is my recording stored?`, a: `No, not by us. An uploaded file is passed to OpenAI and the text comes back; a file over 4 MB is deleted from our media service once read. Live dictation never reaches our server: it goes to the speech service of your browser.` },
         ]}
       />
     </div>

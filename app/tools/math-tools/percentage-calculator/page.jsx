@@ -23,7 +23,7 @@ export default function PercentageCalculatorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Percentage Calculator</h1>
-        <p className="text-neutral-500 text-center mb-8">Calculate percentages easily</p>
+        <p className="text-neutral-500 text-center mb-8">Six percentage calculations that update as you type</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-6">
           <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-4 space-y-3">
             <h2 className="font-semibold text-indigo-400">What is X% of Y?</h2>
@@ -90,21 +90,40 @@ export default function PercentageCalculatorPage() {
       </div>
       <SeoContent
         title="Percentage Calculator"
-        description="Percentage Calculator offers six independent instant calculations — what X% of Y is, what percent X is of Y, the percentage change from X to Y, X is Y% of what, increasing or decreasing X by Y%, and the percentage difference between X and Y — all computed live as you type, entirely in your browser. Each panel has its own pair of number fields, so entering values in one doesn't affect the others."
+        description={`Percentage Calculator has six panels, each answering one question: what X% of Y is, what percent X is of Y, the percentage change from X to Y, the number that X is Y% of, X increased or decreased by Y%, and the percentage difference between X and Y. Results appear as you type, with up to 10 significant digits and no rounding of small values to zero, and each panel keeps its own numbers. A division by zero is reported instead of a made-up value.`}
+        example={{
+          caption: 'Each panel with sample numbers and the result it shows (the page\'s own formulas, run in Node on October 6, 2026).',
+          inputLabel: 'You enter',
+          input: 'What is 15% of 80?\n12 is what % of 80?\nChange from 60 to 72\nChange from 72 to 60\n12 is 15% of what?\nIncrease 80 by 15%\nDecrease 80 by 15%\nDifference between 60 and 72',
+          outputLabel: 'Result',
+          output: '12\n15%\n20%\n-16.66666667%\n80\n92\n68\n18.18181818%',
+        }}
+        howToTitle="How to calculate a percentage"
         howTo={[
-          "Scroll to the panel for the calculation you need: \"What is X% of Y?\", \"X is what % of Y?\", \"Percentage change from X to Y\", \"X is Y% of what?\", \"Increase or decrease X by Y%\" or \"Percentage difference between X and Y\".",
-          "Enter your two numbers in that panel's input fields.",
-          "The result appears instantly below the inputs — no calculate button needed.",
-          "Each panel keeps its own values, so you can fill in more than one calculation at a time."
+          `Find the panel for your question, from "What is X% of Y?" down to "Percentage difference between X and Y".`,
+          `Type the two numbers in that panel; in "Increase or decrease X by Y%", also choose "Increase" or "Decrease".`,
+          'Read the result under the fields: it changes as you type, and there is no button to press.',
         ]}
-        faqs={SEO.faqs}
-        example={SEO.example}
+        specs={[
+          { label: 'Calculations', value: 'X% of Y; X as a percent of Y; change from X to Y; X is Y% of what; X increased or decreased by Y%; difference between X and Y' },
+          { label: 'Change formula', value: '(Y − X) ÷ |X| × 100, so the sign follows the direction even when X is negative' },
+          { label: 'Difference formula', value: '|X − Y| ÷ (|X + Y| ÷ 2) × 100, the same whichever number comes first' },
+          { label: 'Precision', value: 'Up to 10 significant digits; very small results are written out, not rounded to zero' },
+          { label: 'Zero', value: 'Cannot divide by zero when the base is 0; Undefined when X + Y = 0 in the difference panel' },
+        ]}
+        privacyTitle="Where your numbers are processed"
+        privacy="The six panels apply their formulas in your browser, and your numbers are neither sent nor stored: the fields are empty again when you reload. A crash of the calculator is reported by our error watch as a cleaned error message with the tool's name and your browser's name and major version, never the numbers in the six panels."
+        faqs={[
+          { q: 'Is percentage change the same as percentage difference?', a: 'No. Change measures a move from a starting value, so the order matters: 60 to 72 is a rise of 20 percent, 72 to 60 a fall of about 16.67 percent. Difference compares two values with no start, dividing the gap by their average. The third and sixth panels give each.' },
+          { q: 'Does a 20 percent rise followed by a 20 percent fall bring me back to the start?', a: 'No. The fall applies to the larger amount: 100 rises to 120, and taking 20 percent off 120 leaves 96. Undoing a 20 percent rise takes a fall of 20 ÷ 120, about 16.67 percent, which the "Increase or decrease X by Y%" panel lets you check.' },
+          { q: 'Can a percentage change go below minus 100 percent?', a: 'Yes, when the new value is negative. The page divides by the absolute value of the starting number, so 10 to −5 is a change of −150 percent, and −10 to −5 counts as a rise of 50 percent, since the value went up.' },
+          { q: 'What if the starting value is 0?', a: 'No percentage can be given, because it would mean dividing by zero: a change from 0, X as a percent of 0, and X is 0 percent of what all show Cannot divide by zero. The difference panel shows Undefined when the two numbers add up to 0.' },
+          { q: 'How many decimals does it show?', a: '10 significant digits at most, without rounding small results to zero: 0.001 percent of 5 shows 0.00005, where a two-decimal display would show 0.00. Round money amounts to cents yourself before using them.' },
+        ]}
         related={SEO.related}
         tips={[
-          "Since each panel is independent, you can keep values filled in across all three at once for quick comparisons.",
-          "For percentage change, a negative result means a decrease and a positive result means an increase.",
-          "Use \"X is what % of Y?\" to quickly figure out grades, discounts, or completion rates.",
-          "Round results manually for money calculations to avoid odd fractional cents."
+          `To find a price before a discount, use "X is Y% of what?" with the sale price and the share of the full price you paid.`,
+          `To add a tip or a tax to a bill, "Increase or decrease X by Y%" gives the total in one step.`,
         ]}
       />
     </div>

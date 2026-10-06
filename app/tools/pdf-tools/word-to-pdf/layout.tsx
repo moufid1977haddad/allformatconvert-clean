@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Word to PDF — Convert Your .docx or .doc File Online Free" },
-  description: "Word to PDF converts your .docx or .doc file to PDF. In our tests .docx output matched two other online converters; a table of contents is not recalculated.",
+  title: { absolute: "Word to PDF Converter — DOCX, DOC, ODT, RTF & WPD Free" },
+  description: "Convert Word, OpenDocument, RTF or WordPerfect files to PDF. A .docx is converted by ConvertAPI, other formats by our own LibreOffice service.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/word-to-pdf" },
   openGraph: {
-    title: "Word to PDF — Convert Your .docx or .doc File Online Free",
-    description: "Word to PDF converts your .docx or .doc file to PDF. In our tests .docx output matched two other online converters; a table of contents is not recalculated.",
+    title: "Word to PDF Converter — DOCX, DOC, ODT, RTF & WPD Free",
+    description: "Convert Word, OpenDocument, RTF or WordPerfect files to PDF. A .docx is converted by ConvertAPI, other formats by our own LibreOffice service.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/word-to-pdf",
   },
 };

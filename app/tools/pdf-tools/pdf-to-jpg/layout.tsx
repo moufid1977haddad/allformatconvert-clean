@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF to JPG — Pages or Embedded Images, Online Free" },
-  description: "PDF to JPG: each page as a JPG at 72, 150 or 300 dpi, or the pictures inside the PDF extracted. Choose pages; in your browser on a computer (on iPhone or iPad, a page the device cannot draw is drawn by our PDF service, then deleted).",
+  title: { absolute: "PDF to JPG — Every Page as a JPG, or Its Embedded Images" },
+  description: "Save each PDF page as a JPG at Normal, High or Screen resolution, or extract the photos inside as JPG files, with High or Medium quality.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-jpg" },
   openGraph: {
-    title: "PDF to JPG — Pages or Embedded Images, Online Free",
-    description: "PDF to JPG: each page as a JPG at 72, 150 or 300 dpi, or the pictures inside the PDF extracted. Choose pages; in your browser on a computer (on iPhone or iPad, a page the device cannot draw is drawn by our PDF service, then deleted).",
+    title: "PDF to JPG — Every Page as a JPG, or Its Embedded Images",
+    description: "Save each PDF page as a JPG at Normal, High or Screen resolution, or extract the photos inside as JPG files, with High or Medium quality.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-jpg",
   },
 };

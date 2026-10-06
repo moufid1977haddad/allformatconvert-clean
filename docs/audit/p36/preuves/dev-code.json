@@ -1,0 +1,13 @@
+{
+  "/tools/developer-tools/json-formatter": [
+    { "claim": "1,000,000 characters", "file": "app/components/TextArea.jsx", "pattern": "const LIMIT = 1_000_000;" },
+    { "claim": "20,000 characters", "file": "app/components/TextArea.jsx", "pattern": "const PREVIEW = 20_000;" }
+  ],
+  "/tools/developer-tools/code-formatter": [
+    { "claim": "13 Languages", "file": "app/lib/codeFormat.js", "pattern": "export const LANGUAGES = \\[\\s*(\\{ id: '\\w+', label: '[^']+', ext: '\\w+' \\},\\s*){13}\\];" },
+    { "claim": "4,000 characters", "file": "app/lib/codeFormat.js", "pattern": "const head = text\\.slice\\(0, 4000\\);" }
+  ],
+  "/tools/developer-tools/sql-formatter": [
+    { "claim": "12 Dialects", "file": "app/tools/developer-tools/sql-formatter/page.jsx", "pattern": "\\[\\['sql','Standard SQL'\\](,\\['\\w+','[^']+'\\]){11}\\]\\.map" }
+  ]
+}

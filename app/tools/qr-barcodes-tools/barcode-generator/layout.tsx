@@ -6,10 +6,10 @@ import ToolSeo from '@/app/components/ToolSeo';
 const url = 'https://www.onlineconvertools.com' + SEO.path;
 
 export const metadata: Metadata = {
-  title: { absolute: SEO.title },
-  description: SEO.description,
+  title: { absolute: "Barcode Generator — 37 Types: EAN-13, UPC, Code 128, SVG/PDF" },
+  description: "Make 37 barcode types, from EAN-13 and Code 128 to Data Matrix, as PNG or as SVG, PDF and EPS at the exact print size, singly or by the thousand.",
   alternates: { canonical: url },
-  openGraph: { title: SEO.title, description: SEO.description, url },
+  openGraph: { title: "Barcode Generator — 37 Types: EAN-13, UPC, Code 128, SVG/PDF", description: "Make 37 barcode types, from EAN-13 and Code 128 to Data Matrix, as PNG or as SVG, PDF and EPS at the exact print size, singly or by the thousand.", url },
 };
 
 // The page is a 'use client' component and can't export metadata itself; this layout hosts it. Its structured data is

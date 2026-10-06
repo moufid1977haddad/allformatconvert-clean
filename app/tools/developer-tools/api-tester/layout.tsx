@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "API Tester — Send HTTP Requests Directly Online Free" },
-  description: "API Tester sends HTTP requests directly from your browser to the endpoint you specify, and shows the response status and body.",
+  title: { absolute: "API Tester — Send GET, POST, PUT, PATCH, DELETE Requests" },
+  description: "Send GET, POST, PUT, DELETE or PATCH requests from your browser to the URL you enter, with JSON headers and a body, then read the status and body.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/api-tester" },
   openGraph: {
-    title: "API Tester — Send HTTP Requests Directly Online Free",
-    description: "API Tester sends HTTP requests directly from your browser to the endpoint you specify, and shows the response status and body.",
+    title: "API Tester — Send GET, POST, PUT, PATCH, DELETE Requests",
+    description: "Send GET, POST, PUT, DELETE or PATCH requests from your browser to the URL you enter, with JSON headers and a body, then read the status and body.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/api-tester",
   },
 };

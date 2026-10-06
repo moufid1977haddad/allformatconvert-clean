@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "XML Formatter — Re-indent XML Online Free" },
-  description: "XML Formatter re-indents XML using line-based text processing, not a real XML parser, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "XML Formatter — Well-Formedness Check, 2-Space Indent" },
+  description: "Check that XML is well-formed and re-indent it by 2 spaces per level, in your browser. Errors give line and column; CDATA is never split.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/xml-formatter" },
   openGraph: {
-    title: "XML Formatter — Re-indent XML Online Free",
-    description: "XML Formatter re-indents XML using line-based text processing, not a real XML parser, entirely in your browser — nothing is uploaded to a server.",
+    title: "XML Formatter — Well-Formedness Check, 2-Space Indent",
+    description: "Check that XML is well-formed and re-indent it by 2 spaces per level, in your browser. Errors give line and column; CDATA is never split.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/xml-formatter",
   },
 };

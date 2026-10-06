@@ -8,7 +8,7 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { addImagePage } from '../../../lib/pdfImages';
 import { convertOffice, checkOfficeSize, officeMaxLabel } from '../../../lib/officeUpload';
-import { MAX_OFFICE_STAGED_BYTES, MAX_SPREADSHEET_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_OFFICE_STAGED_BYTES, MAX_SPREADSHEET_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { useToolError } from '../../../lib/useToolError';
 
 // P21 (02/10), format coverage: Smallpdf's Merge PDF "combine[s] PDF documents with other PDFs, Word, Excel, and
@@ -191,8 +191,8 @@ export default function PdfMergePage() {
     <div className="min-h-screen bg-neutral-100 dark:bg-black p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">Merge PDF</h1>
-        <p className="text-neutral-500 text-center mb-2">Combine PDFs — and images or Word, Excel, PowerPoint files — into one PDF. Free, no signup</p>
-        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports up to {maxPages.toLocaleString()} pages combined{isMobile ? ' on this device' : ''} (files up to {maxSizeLabel} total). Merging runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 text-center mb-2">Combine PDFs — and images or Word, Excel, PowerPoint files — into one PDF</p>
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports up to {maxPages.toLocaleString()} pages combined{isMobile ? ' on this device' : ''} (files up to {maxSizeLabel} total). PDFs and images are merged by a background worker in this tab.</p>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">Click to add PDFs, images or Office files</p>
@@ -251,25 +251,31 @@ export default function PdfMergePage() {
       </div>
       <SeoContent
         title="Merge PDF"
-        description="Merge PDF is a free online tool that lets you combine multiple PDF files into a single document instantly. No software installation required and no signup; PDFs and images are merged in your browser, in a background Web Worker so the page stays responsive, and only a Word, Excel or PowerPoint file you add is sent to our server, to be converted to PDF first. Perfect for combining reports, contracts, invoices, scans and photos into one PDF."
+        description={`Merge PDF joins files into one PDF in the order of the list. PDF files are combined page by page and keep their own bookmarks and form fields; an image (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF) becomes one page at its own size, turned upright, and a multi-page TIFF one page per image; a Word, Excel or PowerPoint file is first converted to PDF on our server. By default each file gets a bookmark named after it, and two form fields with the same name in different files are renamed so each keeps its value. Except for those Office files, everything is merged by a background worker in your browser.`}
+        howToTitle="How to merge PDF files"
         howTo={[
-          "Click the upload area and select two or more files: PDFs, images (JPG, PNG, HEIC, WebP…) or Word, Excel and PowerPoint documents.",
-          "Put the files in order: drag a file to its new place in the list, or use the ↑ and ↓ arrows next to it.",
-          "Click the Merge PDFs button to combine all files into one.",
-          "Download your merged PDF file once it's ready."
+          `Click the upload area and add two or more files: PDFs, images, or Word, Excel and PowerPoint documents.`,
+          `Drag a row to reorder it with a mouse, or use the ↑ and ↓ arrows next to it.`,
+          `Untick "Add a bookmark for each file" if you do not want them, then click "Merge PDFs".`,
+          `Take the combined file, merged.pdf, with the "Download" button.`,
         ]}
+        specs={[
+          { label: 'Input formats', value: `PDF; JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF; DOC, DOCX, ODT, RTF; XLS, XLSX, CSV, ODS; PPT, PPTX, ODP` },
+          { label: 'Files at once', value: `Two or more, in the order of the list` },
+          { label: 'Office files', value: `Up to ${officeMaxLabel(MAX_OFFICE_STAGED_BYTES)} per document and ${officeMaxLabel(MAX_SPREADSHEET_STAGED_BYTES)} per spreadsheet` },
+          { label: 'Total size', value: `The combined cap of all listed files is printed above the upload area; smaller on phones, iPhone and iPad` },
+          { label: 'Usage limits', value: `.docx conversions are limited per network per hour and per day within a monthly budget for the whole site; any Office file over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB also counts against a per-network hourly and daily upload limit` },
+          { label: 'Result', value: `merged.pdf, with one bookmark per file if you keep the option` },
+        ]}
+        privacy={`Only the Office files you add are sent to our server; PDFs and images are merged in your browser and are not uploaded. Each Word, Excel or PowerPoint file you add is sent to our server to be converted to PDF: a .docx goes to ConvertAPI with file storage turned off, or to our own LibreOffice service when ConvertAPI is unavailable (the page tells you), and other Office formats go to our LibreOffice service (Gotenberg). An Office file over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB first travels through our media service.`}
         faqs={[
-          { q: "Is Merge PDF free to use?", a: "Yes, completely free with no signup required." },
-          { q: "Are my files safe?", a: "PDFs and images are merged directly in your browser, in a background Web Worker, and are never uploaded; only a Word, Excel or PowerPoint file you add is sent to our server first, to be converted to PDF (a .docx through our provider ConvertAPI, with file storage turned off), and deleted after conversion — the page says so when you add one." },
-          { q: "Can I merge images or Word files with PDFs?", a: "Yes. Each image (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF) becomes a page at its own size, upright; each Word, Excel or PowerPoint document is converted to PDF first, then everything is merged in the order of the list." },
-          { q: "How many PDF files can I merge at once?", a: `Up to ${MAX_TOTAL_PAGES.toLocaleString()} pages combined and ${MAX_TOTAL_SIZE_LABEL} total on desktop (${MOBILE_MAX_TOTAL_PAGES.toLocaleString()} pages / ${MOBILE_MAX_TOTAL_SIZE_LABEL} on phones and tablets) -- measured limits to keep merging reliable in the browser tab, rather than risking a crash on a very large combined document. Split larger jobs into batches and merge the results together. A Word, Excel or PowerPoint file you add is converted on our server first, up to ${officeMaxLabel(MAX_OFFICE_STAGED_BYTES)} per document and ${officeMaxLabel(MAX_SPREADSHEET_STAGED_BYTES)} per spreadsheet; a larger one is refused before it is sent.` },
-          { q: "Does merging PDFs reduce quality?", a: "No. The merged PDF retains the full quality of all original files including images, fonts, and formatting." }
+          { q: "Can I merge PDF and JPG files together?", a: `Yes. Each image becomes one page sized to the picture and turned upright from its orientation tag, placed between your PDFs in list order, and a multi-page TIFF gives one page per image. Besides JPG, the tool reads PNG, HEIC, WebP, GIF, BMP, TIFF and AVIF.` },
+          { q: "Can I merge Word or Excel files with PDFs?", a: `Yes. Each Office document is converted to PDF on our server first, up to ${officeMaxLabel(MAX_OFFICE_STAGED_BYTES)} per document and ${officeMaxLabel(MAX_SPREADSHEET_STAGED_BYTES)} per spreadsheet; a file over its limit is refused before anything is sent. Conversions of .docx files, and uploads of any Office file over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB, are limited per network per hour and per day.` },
+          { q: "Does merging lower the quality?", a: `No for PDF files: their pages are copied as they are. JPEG and PNG pictures go in without re-encoding; a TIFF, or a HEIC your browser cannot open itself, becomes a lossless PNG; WebP, GIF, BMP, AVIF, mirrored JPEGs and HEIC photos your browser opens are re-encoded as JPEG, or PNG when transparent. A .docx made by our backup LibreOffice service can differ from Word.` },
+          { q: "Are bookmarks and form fields kept?", a: `Yes. With the bookmark option on, each file gets a bookmark named after it, with its own bookmarks underneath. Form fields from every file still work; when two files use the same field name, one is renamed and the result message lists the change.` },
         ]}
         tips={[
-          "On a phone or tablet, use the ↑ and ↓ arrows to reorder the files; dragging a file works with a mouse.",
-          "You can merge scanned PDFs, form PDFs, and regular text PDFs together.",
-          "For large files, the merge may take a few seconds — the progress bar tracks each file as it's added.",
-          "After merging, use our PDF Compress tool to reduce the file size if needed."
+          `After merging several scans, PDF Compress can make the combined file smaller.`,
         ]}
       />
     </div>

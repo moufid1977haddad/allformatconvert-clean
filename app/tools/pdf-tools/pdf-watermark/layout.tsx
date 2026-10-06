@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Watermark — Stamp a Diagonal, Semi-transparent Text" },
-  description: "PDF Watermark stamps a diagonal, semi-transparent text watermark across every page, entirely in your browser.",
+  title: { absolute: "Watermark PDF — Text or Logo, Mosaic, Opacity" },
+  description: "Stamp a text or PNG/JPG logo watermark on PDF pages: nine positions or a repeated mosaic, rotation, opacity, and over or under the content.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-watermark" },
   openGraph: {
-    title: "PDF Watermark — Stamp a Diagonal, Semi-transparent Text",
-    description: "PDF Watermark stamps a diagonal, semi-transparent text watermark across every page, entirely in your browser.",
+    title: "Watermark PDF — Text or Logo, Mosaic, Opacity",
+    description: "Stamp a text or PNG/JPG logo watermark on PDF pages: nine positions or a repeated mosaic, rotation, opacity, and over or under the content.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-watermark",
   },
 };

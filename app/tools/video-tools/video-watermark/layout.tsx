@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Watermark — Add a Text or Image Watermark to Video" },
-  description: "Burns a text or image watermark into your video and exports a real watermarked .mp4 file, entirely in your browser via ffmpeg.wasm — no upload. Videos up to 2 minutes; original audio is preserved.",
+  title: { absolute: "Video Watermark — Add Text or a Logo to a Video" },
+  description: "Burn a text or image watermark into a video of up to 2 minutes, with size, opacity, color and 9 positions. Encoded to MP4 in your browser, no upload.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-watermark" },
   openGraph: {
-    title: "Video Watermark — Add a Text or Image Watermark to Video",
-    description: "Burns a text or image watermark into your video and exports a real watermarked .mp4 file, entirely in your browser via ffmpeg.wasm — no upload. Videos up to 2 minutes; original audio is preserved.",
+    title: "Video Watermark — Add Text or a Logo to a Video",
+    description: "Burn a text or image watermark into a video of up to 2 minutes, with size, opacity, color and 9 positions. Encoded to MP4 in your browser, no upload.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-watermark",
   },
 };

@@ -7,6 +7,8 @@ import { loadRaster, encodeRaster } from '../../../lib/imageOutput';
 import { FileDownload } from '../../../components/FileDownload';
 import UploadPrompt from '@/app/components/UploadPrompt';
 
+import { RASTER_MAX_PIXELS } from '../../../lib/imageOutput';
+import { PHONE_MAX_MP } from '../../../lib/reduceImage';
 export default function HeicToPngPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -68,24 +70,27 @@ export default function HeicToPngPage() {
       </div>
       <SeoContent
         title="HEIC to PNG"
-        description="HEIC to PNG converts an iPhone HEIC photo to PNG format entirely in your browser, using the open-source heic2any library — your photo is never uploaded to a server."
+        description={`HEIC to PNG makes a PNG from a HEIC or HEIF photo, the format iPhones and iPads save pictures in. PNG stores pixels without lossy compression, so there is no quality slider here: the photo is written exactly as it was decoded. Choose it when the picture will be edited further or when a program asks for PNG; choose HEIC to JPG when a small file matters more. Safari and the other browsers on iPhone and iPad decode HEIC themselves; a browser that cannot, like Chrome or Firefox on a computer, loads the heic2any library for it.`}
+        howToTitle="How to convert HEIC to PNG"
         howTo={[
-          "Click the upload area and select a HEIC or HEIF file from your device.",
-          "Click 'Convert to PNG' and wait a few seconds for the conversion to finish.",
-          "Preview the converted image.",
-          "Click the download button to save your PNG file."
+          `Select the .heic or .heif photo in the upload area.`,
+          `Click "Convert to PNG" and wait for the preview of the result.`,
+          `Click "Download" to save the PNG under the photo's name.`
         ]}
+        specs={[
+          { label: 'Input formats', value: `HEIC or HEIF (.heic, .heif)` },
+          { label: 'Output format', value: `PNG, lossless, 8 bits per channel` },
+          { label: 'Largest photo', value: `${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels in Safari on a Mac; with heic2any no cap is set by the page` },
+          { label: 'On iPhone and iPad', value: `${PHONE_MAX_MP}-megapixel photos are the largest confirmed on a real iPhone` }
+        ]}
+        privacy={`The photo is not sent anywhere: the HEIC is read on your phone or computer, by the browser's own decoder or by the heic2any library, fetched from our site only when needed, and the PNG is produced right there. A failed conversion sends a short report to our error log (cleaned message, extension, size range, tool name, browser name and version); the photo itself and its name are never part of it.`}
         faqs={[
-          { q: "Is HEIC to PNG completely free to use?", a: "Yes, it's 100% free with no account creation required." },
-          { q: "What file size limit does HEIC to PNG support?", a: "There's no fixed size limit — conversion happens locally in your browser, so it's limited only by your device's available memory." },
-          { q: "Do I need to create an account to convert images?", a: "No account is necessary — you can start converting immediately." },
-          { q: "Will my uploaded images be kept private?", a: "Yes. Conversion happens entirely in your browser using the heic2any library — your photo is never uploaded to a server." }
+          { q: "Is the PNG an exact copy of the HEIC photo?", a: `Yes, of the pixels your browser decodes. Nothing is compressed away, but the browser works with 8 bits per colour channel, so a photo stored with more than 8 bits per channel comes out at 8 bits.` },
+          { q: "Is the iPhone's location removed from the PNG?", a: `Yes. The PNG is built from the pixels alone; the location, date and camera details stored in the HEIC are not copied.` },
+          { q: "Is a photo bigger than Safari's canvas limit converted whole?", a: `Yes. iOS decodes the HEIC itself, at full size, and a photo larger than one Safari canvas allows is decoded in strips, so big photos from recent iPhones are converted whole.` }
         ]}
         tips={[
-          "Convert one HEIC file at a time — there's no batch upload option.",
-          "Check the converted PNG right after downloading to confirm it looks the way you expect.",
-          "Use HEIC to PNG when sharing photos on platforms that don't support Apple's HEIC format natively.",
-          "PNG files are larger than HEIC, so expect the output to take up more storage space."
+          `Several HEIC photos to convert? Image Converter takes them in one batch and can write PNG, JPG or WebP.`
         ]}
       />
     </div>

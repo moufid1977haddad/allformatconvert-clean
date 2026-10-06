@@ -69,24 +69,35 @@ export default function TimestampConverterPage() {
       </div>
       <SeoContent
         title={"Timestamp Converter"}
-        description={"Timestamp Converter converts a Unix timestamp to a date and back, entirely in your browser — nothing is uploaded to a server. Like epochconverter.com, it recognises the unit from the number of digits — seconds (10 digits today), milliseconds (13, as from JavaScript's Date.now()), microseconds or nanoseconds — and always tells you which one it used. Each result is shown in UTC (ISO 8601) and in your own time zone, with the equivalent seconds and milliseconds. Negative timestamps (before 1970) and fractional seconds are supported; anything that isn't a number is reported instead of being partially read."}
+        description={"Timestamp Converter turns a Unix timestamp into a date and a date back into a timestamp. The unit is read from the number of digits (up to 11 for seconds, 12 to 14 for milliseconds, 15 to 17 for microseconds, 18 to 20 for nanoseconds), and the result always names the unit it used. Each result gives the ISO 8601 date in UTC, the date in the time zone you pick (your own by default), how long ago or ahead it is, and the value as seconds and as milliseconds. Negative values (before 1970) work, and decimals are read for seconds only. A time skipped by daylight saving time is refused and a repeated one is flagged."}
+        example={{
+          caption: "Output of the page’s own conversion code for a 13-digit value with America/New_York picked; the Relative line is left out because it depends on today’s date.",
+          inputLabel: "Unix Timestamp",
+          input: "1700000000000",
+          outputLabel: "Result box",
+          output: "Read as milliseconds\nUTC: 2023-11-14T22:13:20.000Z\nAmerica/New York: Tuesday, 14 November 2023 at 17:13:20 (UTC−05:00)\nSeconds: 1700000000  Milliseconds: 1700000000000",
+        }}
+        howToTitle={"How to convert a Unix timestamp to a date and back"}
         howTo={[
-          "Click 'Use Current Time' to fill in the current Unix timestamp and date, or enter your own.",
-          "To convert a timestamp to a date, type it into the Unix Timestamp field and click its 'Convert' button — seconds, milliseconds, microseconds and nanoseconds are all recognised.",
-          "To convert a date to a timestamp, pick the time zone (yours by default), set the Date and Time field and click its 'Convert' button.",
-          "Read the UTC and local results in the summary box below."
+          "Pick a zone in \"Time zone (for the date field and the result)\"; your own zone comes first.",
+          "Type a timestamp in \"Unix Timestamp\" and click the \"Convert\" button next to it, or click \"Use Current Time\".",
+          "To go the other way, set \"Date and Time\" and click its \"Convert\" button.",
+          "Read the box below: \"Read as\" names the unit, followed by UTC, your chosen zone, the relative time and the value as seconds and as milliseconds.",
         ]}
+        specs={[
+          { label: "Units read", value: "Seconds (up to 11 digits), milliseconds (12 to 14), microseconds (15 to 17), nanoseconds (18 to 20)" },
+          { label: "Date range", value: "The JavaScript date range, from year -271821 to year 275760" },
+          { label: "Precision", value: "Milliseconds; microseconds and nanoseconds are truncated, and a decimal part counts for seconds only" },
+          { label: "Time zones", value: "Your browser’s list of IANA zones, shown under their current names such as Asia/Kolkata" },
+          { label: "Date to timestamp", value: "Whole seconds, read in the zone you picked" },
+        ]}
+        privacyTitle={"Where your dates are converted"}
+        privacy={"Every conversion is computed by the page with your browser’s own time-zone data; the timestamps and dates you enter are not sent to our servers. If an error message is shown, that message is sent to our error log with the tool’s name and your browser’s name and version, long numbers replaced by a placeholder, so that we can fix recurring problems."}
         faqs={[
-          { q: "Is Timestamp Converter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What is a Unix timestamp?", a: "The number of seconds elapsed since January 1, 1970, 00:00:00 UTC — a common way computers represent a point in time." },
-          { q: "Does it support millisecond timestamps?", a: "Yes — a 13-digit value such as 1700000000000 is read as milliseconds, and the result says so. Microseconds (16 digits) and nanoseconds (19 digits) are recognised too." },
-          { q: "Which time zone are the dates in?", a: "Every result is shown in UTC (ISO 8601) and in the time zone you pick — yours by default, or any of the IANA zones (Europe/Paris, America/New_York, Asia/Kolkata…). The Date and Time field is read in that zone too; an hour skipped when daylight saving time starts is refused, and one that happens twice when it ends is flagged." },
-          { q: "Does it handle dates before 1970?", a: "Yes — enter a negative timestamp, such as -86400 for December 31, 1969." }
-        ]}
-        tips={[
-          "The detected unit is always displayed, so an unexpected year points to a unit mismatch immediately.",
-          "Fractional seconds such as 1700000000.5 (Python's time.time()) are accepted.",
-          "Use 'Use Current Time' as a quick way to get the current Unix timestamp for testing."
+          { q: "Can it tell seconds from milliseconds?", a: "Yes, by counting digits: 1700000000 has 10 digits and is read as seconds, 1700000000000 has 13 and is read as milliseconds. The result starts with Read as and the unit, so a date in 1970 or far in the future points to a wrong unit." },
+          { q: "Is the date field read in UTC?", a: "No. It is read in the zone selected in the list, which is your own by default. A time skipped when daylight saving time starts is refused with a message, and a time that occurs twice is read as the first one, with a note giving the second." },
+          { q: "Can I convert dates before 1970?", a: "Yes. Enter a negative timestamp: -86400 gives 1969-12-31T00:00:00.000Z in UTC. Dates before year 1 are shown in the results, but the date field stays empty because it cannot hold them." },
+          { q: "Does it accept decimal timestamps like 1700000000.5?", a: "Yes, for seconds: 1700000000.5, as returned by Python’s time.time(), is read to the millisecond. A decimal part after a millisecond, microsecond or nanosecond value is ignored." },
         ]}
       />
     </div>

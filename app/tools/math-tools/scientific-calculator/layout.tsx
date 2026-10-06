@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Scientific Calculator — Evaluate Expressions With" },
-  description: "Scientific Calculator evaluates expressions with trigonometric functions, logarithms, square roots, exponents, and parentheses, in your browser.",
+  title: { absolute: "Scientific Calculator — Degrees or Radians, log, ln, n!, Ans" },
+  description: "Evaluate expressions with sin, cos, tan and their inverses in degrees or radians, log, ln, roots, powers and factorials, to 12 significant digits.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/math-tools/scientific-calculator" },
   openGraph: {
-    title: "Scientific Calculator — Evaluate Expressions With",
-    description: "Scientific Calculator evaluates expressions with trigonometric functions, logarithms, square roots, exponents, and parentheses, in your browser.",
+    title: "Scientific Calculator — Degrees or Radians, log, ln, n!, Ans",
+    description: "Evaluate expressions with sin, cos, tan and their inverses in degrees or radians, log, ln, roots, powers and factorials, to 12 significant digits.",
     url: "https://www.onlineconvertools.com/tools/math-tools/scientific-calculator",
   },
 };

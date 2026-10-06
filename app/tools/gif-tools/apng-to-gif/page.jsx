@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { writeRgbaFrame, hasTransparency, headerSize, sizeProblem } from '../../../lib/gifEncode';
+import { writeRgbaFrame, hasTransparency, headerSize, sizeProblem, MAX_ANIMATION_PIXELS } from '../../../lib/gifEncode';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
@@ -68,25 +68,31 @@ export default function ApngToGifPage() {
       </div>
       <SeoContent
         title="APNG to GIF"
-        description="APNG to GIF decodes every frame of your animated PNG (using the upng-js library) and re-encodes them into a real, downloadable animated GIF (using gifenc), entirely in your browser — nothing is uploaded to a server. Each frame is quantized to its own 256-color palette, and frame delays, transparency (fully transparent pixels stay transparent) and the number of plays are carried over from the original APNG."
+        description="APNG to GIF converts an animated PNG (APNG) into an animated GIF, for apps and sites that do not show APNG. It decodes every frame with upng-js and encodes them with gifenc, on this page. Each frame gets its own palette of up to 256 colors. Mostly transparent pixels become fully transparent and the others fully opaque, because GIF has no partial transparency. Frame delays and the number of plays are copied from the APNG. A plain, non-animated PNG works too and gives a one-frame GIF."
+        howToTitle="How to convert APNG to GIF"
         howTo={[
-          "Click the upload area and select a PNG or APNG file from your device.",
-          "Click \"Convert to GIF\" to decode every frame and re-encode them as an animated GIF.",
-          "Preview the resulting GIF and check the frame count.",
-          "Click \"Download\" next to the GIF to save the result."
+          "Choose an .apng or .png file; a preview appears in the box.",
+          "Click \"Convert to GIF\".",
+          "Watch the GIF play; the frame count appears in green under it.",
+          "Click \"Download\" to save converted.gif."
         ]}
+        specs={[
+          { label: "Input", value: "APNG or PNG (image/apng, image/png)" },
+          { label: "Output", value: "Animated GIF, saved as converted.gif" },
+          { label: "Frame size", value: `Up to ${(MAX_ANIMATION_PIXELS / 1e6).toFixed(1)} megapixels per frame (width × height), on every device` },
+          { label: "Transparency", value: "1-bit: each pixel is either fully transparent or fully opaque" },
+          { label: "Colors", value: "A palette of up to 256 per frame, without dithering" }
+        ]}
+        privacy="The APNG is read and the GIF is built by JavaScript in your browser; the file is not uploaded anywhere. An error shown on the page is logged for us with its cleaned text, the tool name and your browser and its version, without the file or its name."
         faqs={[
-          { q: "Does this tool produce a real animated GIF?", a: "Yes — every frame of the source APNG is decoded and re-encoded into the GIF, not just a single snapshot." },
-          { q: "Will a regular (non-animated) PNG work too?", a: "Yes — it's treated as a single-frame \"animation\" and converts to a static single-frame GIF." },
-          { q: "Will the colors look exactly the same?", a: "APNG supports full 24-bit color with alpha, while GIF is limited to a 256-color palette per frame with no partial transparency (only fully opaque or fully transparent). Fully transparent areas stay transparent; semi-transparent pixels become either opaque or transparent (cut at 50 %), and smooth gradients or more than 256 colors per frame may show visible color banding." },
-          { q: "Is APNG to GIF free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
-          { q: "Is my file uploaded anywhere?", a: "No. Everything runs locally in your browser — your file is never uploaded to a server." }
+          { q: "Will transparency survive the conversion?", a: "Yes, but only on or off: GIF lets a pixel be fully transparent or fully opaque, nothing in between. Pixels with an alpha under 50 % become transparent and the others opaque, so soft shadows and smoothed edges turn into hard edges." },
+          { q: "Does the GIF play as many times as the APNG?", a: "Yes. An APNG set to loop forever gives a GIF that loops forever, one set to play once plays once, and a fixed count such as three plays is kept. A frame without a delay is given 100 ms." },
+          { q: "Will the colors stay exactly the same?", a: "No, not always. An APNG can hold millions of colors per frame and a GIF at most 256; each frame is reduced to its own palette without dithering, so gradients and photos may show bands, while flat graphics and icons usually look the same." },
+          { q: "Is there a size limit?", a: `Yes: a frame may have at most ${(MAX_ANIMATION_PIXELS / 1e6).toFixed(1)} megapixels, read from the file header before any decoding. Neither the file size nor the number of frames has a fixed limit; a long animation simply takes longer to convert.` }
         ]}
         tips={[
-          "Simple, flat-color animations convert most cleanly since the GIF format's 256-color-per-frame palette and lack of partial transparency are the main sources of quality loss.",
-          "Frame delays from the original APNG are preserved, so playback speed should closely match the source animation.",
-          "Large or many-frame APNGs take longer to process since every frame is individually quantized.",
-          "Keep your original APNG file if you need full color fidelity or partial (alpha) transparency later, since GIF can't represent either."
+          "To go the other way and keep full transparency, use GIF to APNG.",
+          "GIF Compressor can make the converted GIF lighter afterwards."
         ]}
       />
     </div>

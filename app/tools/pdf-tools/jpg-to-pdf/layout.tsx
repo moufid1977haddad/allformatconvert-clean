@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JPG to PDF — Combine Images Into One PDF Online Free" },
-  description: "JPG to PDF is a one-shot batch converter: select your JPG, PNG, HEIC or other images, and pdf-lib stitches them into a single PDF in your browser.",
+  title: { absolute: "JPG to PDF Converter — Photos to One PDF, A4 or Letter" },
+  description: "Turn JPG photos, including iPhone HEIC shots, into one PDF without recompressing the JPEGs. Choose A4, Letter or one page per photo; no upload.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/jpg-to-pdf" },
   openGraph: {
-    title: "JPG to PDF — Combine Images Into One PDF Online Free",
-    description: "JPG to PDF is a one-shot batch converter: select your JPG, PNG, HEIC or other images, and pdf-lib stitches them into a single PDF in your browser.",
+    title: "JPG to PDF Converter — Photos to One PDF, A4 or Letter",
+    description: "Turn JPG photos, including iPhone HEIC shots, into one PDF without recompressing the JPEGs. Choose A4, Letter or one page per photo; no upload.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/jpg-to-pdf",
   },
 };

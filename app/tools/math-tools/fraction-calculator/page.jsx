@@ -112,23 +112,37 @@ export default function FractionCalculatorPage() {
       </div>
       <SeoContent
         title={"Fraction Calculator"}
-        description={"Fraction Calculator adds, subtracts, multiplies and divides two fractions and simplifies the result, entirely in your browser. Arithmetic is exact at any size (no rounding, even with 20-digit numerators), signs are normalised (1/-2 is shown as -1/2), and the result is given as a simplified fraction, a mixed number (1 1/8) and a decimal — exact when the decimal terminates, otherwise written exactly with its repeating digits in brackets (1/6 = 0.1(6)). Each box also accepts a decimal such as 1.5; anything that isn't a number is reported, never read as a different value."}
+        description={`Fraction Calculator does one operation on two fractions: add, subtract, multiply or divide. Each box takes a whole number, a decimal such as 0.75 or a fraction, and the small box on the left turns an entry into a mixed number. The arithmetic uses exact whole numbers of any length, so a 20-digit numerator is not rounded. You get the result reduced to lowest terms, as a mixed number when it differs, and as a decimal written exactly, with repeating digits in brackets, followed by the steps of the calculation, worked out by the page with whole-number arithmetic.`}
+        example={{
+          caption: 'Three calculations and what the page shows (the page\'s own fraction code, run in Node on October 6, 2026).',
+          inputLabel: 'You enter',
+          input: '1 (whole) and 1/2  +  3/4\n1/6  /  2/3\n22/7  *  1/1',
+          outputLabel: 'Result and steps',
+          output: '9/4 = 2 1/4 (mixed number) = 2.25\n  1 and the fraction = 3/2 as an improper fraction\n  Least common denominator of 2 and 4: 4\n  3/2 = 6/4 and 3/4 = 3/4\n  6/4 + 3/4 = 9/4\n1/4 = 0.25\n  Dividing by 2/3 is multiplying by its reciprocal 3/2\n  (1 × 3) / (6 × 2) = 3/12\n  Simplify by 3: 1/4\n22/7 = 3 1/7 (mixed number) = 3.(142857)\n  Multiply across: (22 × 1) / (7 × 1) = 22/7',
+        }}
+        howToTitle="How to add, subtract, multiply or divide fractions"
         howTo={[
-          "Enter the numerator and denominator of each fraction (decimals such as 0.5 are accepted); for a mixed number such as 1 1/2, type the whole number in the small box on the left.",
-          "Choose +, -, × or ÷.",
-          "Click 'Calculate'.",
-          "Read the simplified fraction, the mixed number, the decimal and the steps of the calculation."
+          'Type each numerator above the line and each denominator below it; a box may also hold a decimal such as 0.5.',
+          'For a mixed number such as 1 1/2, put the 1 in the small box on the left, with any minus sign there.',
+          `Pick "+", "-", "*" or "/" between the two fractions.`,
+          `Click "Calculate" to get the reduced fraction, the mixed number, the decimal and the numbered steps.`,
         ]}
+        specs={[
+          { label: 'Entries', value: 'Whole numbers, decimals and fractions such as 3/-4 in any box; a whole part in the small box for a mixed number' },
+          { label: 'Number size', value: 'Any length: exact integer arithmetic, never rounded' },
+          { label: 'Decimal', value: 'Exact; the repeating part is shown in brackets, and a period longer than 100 digits is cut with a note' },
+          { label: 'Reported instead of a result', value: 'A zero denominator, division by zero, and text that is not a number' },
+        ]}
+        privacyTitle="Where your fractions are processed"
+        privacy="All the arithmetic is done by this page in your browser, and your numbers are not sent anywhere. When an error message is shown, its text goes to our error log with the tool's name and your browser's name and major version, and whatever it quotes from your entries is replaced by a placeholder."
         faqs={[
-          { q: "Is Fraction Calculator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it simplify the result?", a: "Yes — the result is always reduced to lowest terms using the greatest common divisor." },
-          { q: "Can I use negative numbers or decimals?", a: "Yes — -3/4, 3/-4 and 0.75 are all accepted; the sign is moved to the numerator in the result." },
-          { q: "Is the decimal exact?", a: "Yes. A terminating decimal is written in full (9/8 = 1.125); a repeating one shows its repeating digits in brackets (1/6 = 0.1(6), 22/7 = 3.(142857)). When the repeating part is longer than 100 digits, the first 100 digits are shown followed by '…', never rounded." },
-          { q: "Can I enter mixed numbers and see the steps?", a: "Yes. Type the whole number in the small box before a fraction (-1 and 1/2 means -1 1/2). Under the result, the steps are listed: the least common denominator for + and −, the reciprocal for ÷, and the simplification." }
+          { q: 'Is the answer always in lowest terms?', a: 'Yes. Every result is divided by the greatest common divisor of its numerator and denominator, and the minus sign moves to the numerator, so 1/-2 is shown as -1/2. When that division changes something, a step names the number it divided by.' },
+          { q: 'Can I enter mixed numbers?', a: 'Yes. Type the whole part in the small box before the fraction: 1 there, then 1 over 2, means 1 1/2. For a negative mixed number, put the minus on the whole part only, as in -1 and 1/2; a minus inside the fraction as well is refused with a message.' },
+          { q: 'Is the decimal exact?', a: 'Yes. 9/8 is written 1.125, and a repeating decimal shows its period in brackets: 1/6 is 0.1(6) and 22/7 is 3.(142857). When the period runs past 100 digits, the digits are cut, never rounded, and a note says the repeating part is longer.' },
+          { q: 'What happens if I divide by zero?', a: 'No result is given. Dividing by a fraction equal to zero shows Cannot divide by zero, and so does a 0 typed in a denominator box; a fraction typed in one box, such as 1/0, is reported as an error that quotes it.' },
         ]}
         tips={[
-          "To enter a mixed number like 1 1/2, type 1 in the whole-number box, then 1 over 2; for a negative one, put the minus sign on the whole number.",
-          "Dividing by a fraction equal to zero is reported instead of giving an infinite result."
+          'To compare two fractions, subtract one from the other: a negative result means the first one is smaller.',
         ]}
       />
     </div>

@@ -8,6 +8,9 @@ import { FileDownload } from '../../../components/FileDownload';
 import AnimatedImageNote from '../../../components/AnimatedImageNote';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { RASTER_MAX_PIXELS } from '../../../lib/imageOutput';
+import { WEBP_MAX_SIDE } from '../../../lib/bigImage';
+import { PHONE_MAX_MP } from '../../../lib/reduceImage';
 export default function PNGtoWebPPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -55,24 +58,28 @@ export default function PNGtoWebPPage() {
       </div>
       <SeoContent
         title="PNG to WebP"
-        description="PNG to WebP converts a PNG image to WebP format entirely in your browser — your file is never uploaded to a server (in Safari, which has no WebP encoder of its own, by libwebp compiled to WebAssembly, the encoder Squoosh uses). Transparency is preserved, since WebP supports an alpha channel just like PNG. Choose the quality (80 by default) or lossless mode — pixel-exact for an opaque image (with transparency, half-transparent edges can be rounded by one step), the right choice for screenshots, logos and graphics."
+        description={`PNG to WebP converts a PNG image to WebP and keeps its transparency, since WebP has an alpha channel like PNG. Two modes are offered. Lossy WebP, with a quality from 1 to 100 (80 to start), suits photos and large pictures. "Lossless" keeps an opaque image as your browser displays it and suits screenshots, logos and flat graphics; partly transparent pixels can shift slightly, more so the more transparent they are. The page shows both sizes in KB after converting. An animated PNG gives its first frame only, and a note says so. Safari and the other browsers on iPhone and iPad have no WebP encoder, so libwebp in WebAssembly is used there.`}
+        howToTitle="How to convert PNG to WebP"
         howTo={[
-          "Click the upload area and select a PNG file from your device.",
-          "Click 'Convert' to render it to WebP.",
-          "Preview the converted image.",
-          "Click the download button to save your WebP file."
+          `Select the PNG, for example a screenshot or a logo, in the upload area.`,
+          `Tick "Lossless" for graphics, or leave it off and set "Quality".`,
+          `Click "Convert" and check the KB figures for the PNG and the WebP.`,
+          `Click "Download"; the WebP keeps the name of your PNG.`
         ]}
+        specs={[
+          { label: 'Input format', value: `PNG (.png), one file` },
+          { label: 'Output format', value: `WebP with transparency, lossy or lossless` },
+          { label: 'Largest image', value: `${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels on a computer, at most ${WEBP_MAX_SIDE.toLocaleString('en-US')} px per side` },
+          { label: 'On iPhone and iPad', value: `libwebp encodes the whole image in memory; ${PHONE_MAX_MP} megapixels is the largest image size confirmed on a real iPhone` }
+        ]}
+        privacy={`The PNG is read and the WebP written inside your browser. Lossless files, and every WebP made on Safari, iPhone or iPad, come from libwebp, which your browser fetches from our site once. The image itself is never sent. A failed WebP encode sends us its cleaned error wording along with the tool's name and your browser's name and version.`}
         faqs={[
-          { q: "Is PNG to WebP completely free to use?", a: "Yes, it's 100% free with no registration required." },
-          { q: "What file size limits does the tool have?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
-          { q: "Will conversion affect image quality or transparency?", a: "Transparency is preserved. Choose 'Lossless' for a pixel-exact copy of an opaque image (half-transparent edges may be rounded by one step), or a quality from 1 to 100 (80 by default) for a smaller file with slight changes." },
-          { q: "Do I need to download or install software?", a: "No, it's entirely web-based and works in any modern browser." }
+          { q: "Does the WebP keep the transparent background?", a: `Yes. Transparent and half-transparent pixels of the PNG stay transparent in the WebP, in both lossy and lossless mode, so a logo on a transparent background can be placed on any colour.` },
+          { q: "Is lossless mode an exact copy of the PNG?", a: `Yes for an opaque image: every pixel is identical to the PNG as your browser displays it. Partly transparent pixels pass through the browser's canvas and can change slightly; the nearer to fully transparent, the larger the change.` },
+          { q: "Why does my PNG fail to convert?", a: `It is too wide, too tall or too large. ${WEBP_MAX_SIDE.toLocaleString('en-US')} pixels is the longest side WebP allows, so a longer PNG is refused with a message; on a computer, an image above ${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels is too large for a browser to process.` }
         ]}
         tips={[
-          "WebP images are typically smaller than PNG at similar visual quality, which helps page load speed.",
-          "Convert files one at a time — there's no batch upload option.",
-          "WebP is supported by all current major browsers, so it's safe to use for most web projects.",
-          "Use WebP for product photos and thumbnails to reduce bandwidth and improve mobile load times."
+          `Lossless mode keeps the text of a screenshot exactly as it is; compare its KB figure with a lossy try before choosing.`
         ]}
       />
     </div>

@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { buildChapterHtml, firstPageShowsCover } from '../../../lib/ebookHtml';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
-import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_HTML_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { formatBytes } from '../../../lib/formatBytes';
 import { useToolError } from '../../../lib/useToolError';
@@ -243,7 +243,7 @@ export default function MobiToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">MOBI to PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert MOBI ebooks to PDF</p>
+        <p className="text-neutral-500 text-center mb-8">Turn a Kindle MOBI, AZW or AZW3 book into a PDF</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a MOBI file" />}</p>
@@ -270,25 +270,27 @@ export default function MobiToPdfPage() {
       </div>
       <SeoContent
         title="MOBI to PDF"
-        description="MOBI to PDF properly decodes your Kindle ebook's internal PalmDOC or Huffman/CDIC text compression and the newer KF8 structure used by .azw3 files, right in your browser, using the same parsing engine as MOBI to EPUB; only the extracted text and images are then sent to our conversion service. The extracted chapters, images, and cover are assembled into a single clean HTML document, which is then uploaded to our conversion service for high-fidelity PDF rendering with a real browser engine — producing a properly paginated PDF with selectable text, rather than a rough print-dialog approximation."
+        description={`MOBI to PDF converts Kindle ebooks to PDF: the older MOBI format (.mobi, .azw) and the newer KF8 format (.azw3). Your browser decodes it with the same parser as our MOBI to EPUB tool, unpacking the compressed text, the images and the cover. Our Chromium service then prints the decoded chapters, each starting a new page, as a PDF whose text you can select. Books sold with DRM cannot be decoded.`}
+        howToTitle="How to convert a Kindle MOBI or AZW3 book to PDF"
         howTo={[
-          "Click the upload area and select a .mobi, .azw, or .azw3 file.",
-          "Click \"Convert to PDF\". The file is parsed locally, then the extracted content is uploaded for PDF rendering.",
-          "Once the PDF is ready, click 'Download'.",
-          "Open the downloaded PDF to confirm it looks right."
+          `Click or drop the Kindle book (.mobi, .azw or .azw3) to turn into pages.`,
+          `Click "Convert to PDF"; the button reads "Parsing MOBI file..." while your browser decodes the book.`,
+          `When "PDF ready" is shown, "Download" saves the Kindle book as a PDF.`,
         ]}
+        specs={[
+          { label: 'Input formats', value: `MOBI (.mobi, .azw) and KF8 (.azw3), without DRM` },
+          { label: 'Output', value: `One PDF with the cover on its first page when the book has one` },
+          { label: 'Size limit', value: `${officeMaxLabel(MAX_HTML_STAGED_BYTES)} of HTML once the book is decoded, images included` },
+          { label: 'Usage limits', value: `Decoded books over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB count toward an hourly and a daily limit per network.` },
+        ]}
+        privacy={`Decoding is done by your browser, and the original MOBI file never leaves it. Our server receives just the HTML made from the book and passes it to our Chromium service for printing. Above ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB, that HTML travels in parts through our media service, which deletes it after printing and discards the PDF once this page has retrieved it, or after a time limit.`}
         faqs={[
-          { q: "Will this reliably convert my MOBI ebook to PDF?", a: "Yes, for unencrypted .mobi, .azw, and .azw3 files. The tool properly decompresses MOBI's PalmDOC or Huffman/CDIC-compressed text and parses the KF8 structure used by most .azw3 files, so chapters, images, and the cover come through correctly, rather than the garbled text a naive byte-to-text approach would produce. DRM-protected ebooks purchased from stores like Amazon can't be converted." },
-          { q: "Is MOBI to PDF free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is my file uploaded anywhere?", a: "Partially. Your original MOBI file is parsed entirely in your browser and never uploaded. Only the extracted, cleaned-up HTML (text, images, and cover) is uploaded to our conversion service, purely to render the final PDF with a real browser engine, and it's discarded immediately afterward." },
-          { q: "What file types can I upload?", a: ".mobi, .azw, and .azw3 files. The parser automatically detects whether a file uses the older MOBI6 structure or the newer KF8 structure used by most .azw3 files." },
-          { q: "Will the text in my PDF be selectable?", a: "Yes. The PDF is rendered from real HTML by a browser engine, not a screenshot, so text stays selectable and searchable." }
+          { q: `Can a Kindle book bought from Amazon become a PDF?`, a: `No, not when the book carries DRM, as most purchases do: its text is encrypted and cannot be decoded here. Books without DRM, such as many free titles, convert normally. A file that is not a Kindle book at all is refused with a message.` },
+          { q: `Which Kindle formats are accepted?`, a: `Three: .mobi and .azw in the MOBI structure, and .azw3 in the KF8 structure. The tool tries the structure that matches the extension first, then the other one, so a misnamed file can still open. Other Kindle files, such as .prc or .kfx, are not accepted.` },
+          { q: `Is the cover included?`, a: `Yes, when the book has one. It is read from the book's data or, failing that, from the cover record in the file header, and becomes the first page unless the first chapter already shows it.` },
         ]}
         tips={[
-          "For DRM-protected Kindle purchases, remove the DRM first with a tool you're authorized to use — this converter only handles unencrypted files.",
-          "Both .mobi/.azw (MOBI6) and .azw3 (KF8) files are supported, with the internal format detected automatically.",
-          "Chapters are separated by page breaks in the resulting PDF for easier navigation.",
-          "Very large books may take a little longer to render — keep the tab open until the Download button appears."
+          `To keep the book reflowable on an e-reader, choose MOBI to EPUB rather than a PDF.`,
         ]}
       />
     </div>

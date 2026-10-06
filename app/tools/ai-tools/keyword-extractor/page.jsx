@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPromptLength } from '@/lib/quota/limits';
+import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 import { readAiJson } from '../../../lib/aiClient';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -59,24 +59,30 @@ export default function KeywordExtractorPage() {
       </div>
       <SeoContent
         title="Keyword Extractor"
-        description="Keyword Extractor is a free online tool that uses OpenAI's GPT-4o mini model to identify the most important keywords and key phrases in a piece of text, along with a brief explanation of why each one matters. Paste in an article or piece of content and get a numbered list of keywords back — useful for SEO research and content planning."
+        description={`Keyword Extractor reads a text you paste, such as an article, a product page or a transcript, and returns a numbered list of its most important keywords and key phrases, each with a short note on why it matters. The list is written by OpenAI's GPT-4o mini; your text goes through our server to reach it. It shows what the text is about, not search data: there are no search volumes, rankings or competition scores. For exact word frequencies that never go through our server, use the keyword density in Word Counter. Up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters per request.`}
+        howToTitle="How to extract keywords from a text"
         howTo={[
-          "Paste your text, article, or webpage content into the input field.",
-          "Click the 'Extract Keywords' button to send it to the AI.",
-          "Wait a moment while the AI identifies relevant keywords.",
-          "Copy the numbered list of keywords to use in your SEO strategy or content planning."
+          "Paste the text into the \"Paste text to extract keywords...\" box.",
+          "Click \"Extract Keywords\".",
+          "Read the numbered list under \"Result\", with a reason for each keyword.",
+          "Click \"Copy\" or \"Download\" (keywords.txt) to keep the list."
         ]}
+        specs={[
+          { label: "Input", value: `An article, page or transcript, up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters` },
+          { label: "Output", value: "A numbered list of keywords and key phrases with brief explanations, as plain text" },
+          { label: "Number of keywords", value: "Not fixed; the model decides from the text" },
+          { label: "Usage limits", value: "A connection can make a limited number of requests per hour and per day, together with the site's other paid tools, within the site's monthly budget" }
+        ]}
+        privacyTitle="Where your text is processed"
+        privacy="The text is sent to our server, then to OpenAI's GPT-4o mini, which returns the keyword list. We store neither the text nor the list. To keep a text off our server, use Word Counter's keyword density instead, which is computed in the browser."
         faqs={[
-          { q: "Is Keyword Extractor really free to use?", a: "Yes, Keyword Extractor is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "How does the keyword extraction work?", a: "It sends your text to an AI language model, which analyzes the content and returns a numbered list of what it judges to be the most important keywords and phrases, with a short explanation for each." },
-          { q: "Can I extract keywords from PDFs or only text?", a: "Keyword Extractor only accepts pasted plain text — there's no file picker; the text you paste is sent to OpenAI through our server. You can copy text from a PDF or Word document and paste it into the tool." },
-          { q: "How many keywords will be extracted from my content?", a: "The number varies based on content length and what the AI judges to be relevant; there's no fixed count." }
+          { q: "Does it show search volume or keyword difficulty?", a: "No. The keywords come from your text only, chosen by a language model for their weight in it. Check volume and competition in a search-data tool before you plan content around a keyword." },
+          { q: "Is the number of keywords fixed?", a: "No. The model decides from the length and content of the text, and each keyword comes with a brief reason. Each click is a new request, so asking again can give a different selection." },
+          { q: "Is this the same as keyword density?", a: "No. Keyword density, in Word Counter, counts exactly how often each word appears, without sending the text to our server. This tool asks an AI model which words and phrases matter most, so it can list an important phrase that appears only once." },
+          { q: "How much text can I analyze?", a: `${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters of article text per request. A longer paste is stopped on the page; analyze a long article section by section, or paste its main body only.` }
         ]}
         tips={[
-          "Use the extracted keywords to inform your meta descriptions, title tags, and header tags.",
-          "Look for long-tail phrases in the results, as they often have less competition.",
-          "Compare keyword lists from multiple articles in your niche to spot content gaps.",
-          "Run competitor content through the tool to see what topics and phrasing they emphasize."
+          "Paste the article body without menus, footers or comments, which would add words that are not about your topic."
         ]}
       />
     </div>

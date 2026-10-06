@@ -68,25 +68,30 @@ export default function XmlToJsonPage() {
       </div>
       <SeoContent
         title="XML to JSON"
-        description="XML to JSON converts XML into JSON using the fast-xml-parser library, entirely in your browser — nothing is uploaded to a server. Malformed XML is correctly detected and reported as invalid. Repeated sibling elements become a JSON array automatically, element text content is stored under a '#text' key when it shares a node with attributes or other children, and — unlike a plain DOM-based conversion — XML attributes are preserved, each appearing as a JSON key prefixed with '@_' (e.g. id='5' becomes '@_id': '5')."
+        description={"XML to JSON checks pasted XML and converts it with the fast-xml-parser library. Each element becomes a key; repeated sibling elements become an array; attributes become keys prefixed with @_; text that shares an element with attributes or children goes under #text. Every value stays a string exactly as written, so leading zeros and trailing decimals survive. The XML declaration is dropped. Malformed XML is reported with the parser's message, which gives the position for a mismatched closing tag, instead of a partial result. fast-xml-parser does the parsing inside your browser tab."}
+        example={{"caption":"Two person elements with an id attribute and phone numbers starting with 0, and the JSON the tool returns:","inputLabel":"XML","input":"<?xml version=\"1.0\"?>\n<contacts>\n  <person id=\"1\"><name>Ann</name><phone>0612345678</phone></person>\n  <person id=\"2\"><name>Bo</name><phone>0698765432</phone></person>\n</contacts>","outputLabel":"JSON","output":"{\n  \"contacts\": {\n    \"person\": [\n      {\n        \"name\": \"Ann\",\n        \"phone\": \"0612345678\",\n        \"@_id\": \"1\"\n      },\n      {\n        \"name\": \"Bo\",\n        \"phone\": \"0698765432\",\n        \"@_id\": \"2\"\n      }\n    ]\n  }\n}"}}
+        howToTitle="How to convert XML to JSON"
         howTo={[
-          "Paste your XML into the input box.",
-          "Click 'Convert' to parse it into JSON.",
-          "Review the output — attributes appear as '@_'-prefixed keys alongside each element's other content.",
-          "Click 'Copy' to copy the JSON result."
+          "Paste XML into \"XML Input\".",
+          "Click \"Convert\"; the button reads \"Converting…\" while the parser loads.",
+          "Read the JSON in \"JSON Output\", with a note if some elements mix text and tags.",
+          "Click \"Copy\", or \"Download\" to keep the JSON as data.json.",
         ]}
+        specs={[
+          { label: "Input", value: "XML text" },
+          { label: "Output", value: "indented JSON in data.json" },
+          { label: "Attributes", value: "keys prefixed with @_" },
+          { label: "Values", value: "always strings, never turned into numbers" },
+        ]}
+        privacy={"fast-xml-parser is downloaded into the page when you first click \"Convert\" and does all the work in your browser; your XML is not uploaded. A validation error or any other failure is reported to us as text, quoted names and values masked, with the tool name and your browser name and version."}
         faqs={[
-          { q: "Is XML to JSON free to use?", a: "Yes, completely free with no registration required." },
-          { q: "Will invalid XML be detected?", a: "Yes — malformed XML is validated and reported as 'Invalid XML', with the underlying parser error when available." },
-          { q: "Are numbers converted?", a: "No — every value is kept as text, exactly as it is written in the XML, so a phone number like 0612345678 or a ZIP code like 01234 keeps its leading zero and a version like 1.10 stays 1.10." },
-          { q: "Are XML attributes included in the JSON output?", a: "Yes — every attribute is preserved as a JSON key prefixed with '@_', for example id=\"5\" becomes \"@_id\": \"5\" on that same element's object." },
-          { q: "Is my data uploaded to a server?", a: "No, conversion happens entirely in your browser using the fast-xml-parser library, loaded on demand when you click Convert." }
+          { q: "Are XML attributes kept?", a: "Yes. Each attribute becomes a key prefixed with @_ on the element's object, next to its children, so a person element with id 1 gets @_id holding the string 1." },
+          { q: "Are numbers converted to JSON numbers?", a: "No. Every value stays text exactly as written, so the phone number 0612345678 keeps its zero and a version 1.10 is not shortened. Convert the values you need in your own code." },
+          { q: "Is text mixed with tags kept in place?", a: "No. In <p>Hello <b>world</b> again</p>, the text parts are joined under #text without their position among the tags, and the page shows a note naming such elements. The tool suits data files better than documents." },
+          { q: "Will invalid XML be detected?", a: "Yes. The XML is validated first; a mismatched tag gives a message such as Expected closing tag 'b' (opened in line 1, col 4) instead of closing tag 'a'." },
         ]}
         tips={[
-          "Attributes show up as '@_'-prefixed keys (e.g. '@_id') on the same object as that element's children or text.",
-          "Repeated sibling elements with the same tag name are automatically grouped into a JSON array.",
-          "Element text content appears under a '#text' key when the element also has attributes or child elements.",
-          "Copy the result or download it as a file; nothing is saved on a server, and leaving the page before either asks first."
+          "To write JSON as XML, with @_ keys turned into attributes, use JSON to XML.",
         ]}
       />
     </div>

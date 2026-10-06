@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF to PowerPoint — Convert PDF to Editable Slides" },
-  description: "Convert each page of a PDF into an editable PowerPoint slide (.pptx). Free, no signup, files up to 99 MB.",
+  title: { absolute: "PDF to PowerPoint — Each Page as an Editable PPTX Slide" },
+  description: "Convert every page of a PDF into a slide of an editable .pptx presentation. ConvertAPI does the work, and text stays editable where the PDF has real text.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-ppt" },
   openGraph: {
-    title: "PDF to PowerPoint — Convert PDF to Editable Slides",
-    description: "Convert each page of a PDF into an editable PowerPoint slide (.pptx). Free, no signup, files up to 99 MB.",
+    title: "PDF to PowerPoint — Each Page as an Editable PPTX Slide",
+    description: "Convert every page of a PDF into a slide of an editable .pptx presentation. ConvertAPI does the work, and text stays editable where the PDF has real text.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-ppt",
   },
 };

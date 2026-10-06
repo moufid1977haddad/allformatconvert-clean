@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Organize — Let You Reorder Online Free" },
-  description: "PDF Organize lets you reorder and remove pages within a single PDF using Up, Down, and Remove buttons, entirely in your browser.",
+  title: { absolute: "Organize PDF Pages — Reorder, Rotate, Duplicate" },
+  description: "Rearrange the pages of one PDF from a list: move up or down, rotate, duplicate, add blank pages or remove pages, then save the new document.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-organize" },
   openGraph: {
-    title: "PDF Organize — Let You Reorder Online Free",
-    description: "PDF Organize lets you reorder and remove pages within a single PDF using Up, Down, and Remove buttons, entirely in your browser.",
+    title: "Organize PDF Pages — Reorder, Rotate, Duplicate",
+    description: "Rearrange the pages of one PDF from a list: move up or down, rotate, duplicate, add blank pages or remove pages, then save the new document.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-organize",
   },
 };

@@ -1,0 +1,74 @@
+{
+  "/tools/converter-tools/mobi-to-epub": [
+    {
+      "claim": "EPUB 3 file",
+      "file": "app/tools/converter-tools/mobi-to-epub/page.jsx",
+      "pattern": "opf\" version=\"3\\.0\""
+    }
+  ],
+  "/tools/converter-tools/unit-converter": [
+    {
+      "claim": "1024 bytes",
+      "file": "app/tools/converter-tools/unit-converter/page.jsx",
+      "pattern": "KiB: 1 \\/ 1024,"
+    },
+    {
+      "claim": "1073.741824 MB",
+      "file": "app/tools/converter-tools/unit-converter/page.jsx",
+      "pattern": "MB: 1e-6, .*GiB: 1 \\/ 1024 \\*\\* 3"
+    },
+    {
+      "claim": "365.2425 days",
+      "file": "app/tools/converter-tools/unit-converter/page.jsx",
+      "pattern": "'year \\(365\\.2425 days\\)': 1 \\/ 31556952"
+    }
+  ],
+  "/tools/qr-barcodes-tools/barcode-generator": [
+    {
+      "claim": "72 to 2400 dpi",
+      "file": "app/tools/qr-barcodes-tools/barcode-generator/render.js",
+      "pattern": "clamp\\(Number\\(ui\\.dpi\\) \\|\\| 300, 72, 2400\\)"
+    },
+    {
+      "claim": "10 characters",
+      "file": "app/tools/qr-barcodes-tools/barcode-generator/symbologies.js",
+      "pattern": "and K over 10 characters"
+    },
+    {
+      "claim": "5 MB",
+      "file": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx",
+      "pattern": "file\\.size > 5e6"
+    }
+  ],
+  "/tools/qr-barcodes-tools/qr-generator": [
+    {
+      "claim": "22 %",
+      "file": "app/lib/qrRender.js",
+      "pattern": "const side = Math\\.floor\\(n \\* 0\\.22\\)"
+    },
+    {
+      "claim": "512 px",
+      "file": "app/tools/qr-barcodes-tools/qr-generator/page.jsx",
+      "pattern": "Math\\.min\\(1, 512 \\/ Math\\.max\\(w, h\\)\\)"
+    }
+  ],
+  "/tools/qr-barcodes-tools/qr-scanner": [
+    {
+      "claim": "12 megapixels",
+      "file": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx",
+      "pattern": "Math\\.sqrt\\(12e6 \\/ \\(iw \\* ih\\)\\)"
+    },
+    {
+      "claim": "20 seconds",
+      "file": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx",
+      "pattern": "resolve\\(null\\); \\}, 20000\\)"
+    }
+  ],
+  "/tools/math-tools/statistics-calculator": [
+    {
+      "claim": "1.5 ×",
+      "file": "app/lib/mathTools.js",
+      "pattern": "x < q1 - 1\\.5 \\* iqr \\|\\| x > q3 \\+ 1\\.5 \\* iqr"
+    }
+  ]
+}

@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "Converter Tools — Convert Units, Colors, and Currencies" },
-  description: "Converter Tools instantly converts between multiple file formats, units of measurement, and data types without any installation.",
+  title: { absolute: "Converters: Currency, Units, Color Codes and MOBI to EPUB" },
+  description: "Convert amounts at the day's exchange rate, units in 12 categories, colors between HEX, RGB, HSL, HSV and CMYK, and DRM-free MOBI ebooks to EPUB.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/converter-tools" },
   openGraph: {
-    title: "Converter Tools — Convert Units, Colors, and Currencies",
-    description: "Converter Tools instantly converts between multiple file formats, units of measurement, and data types without any installation.",
+    title: "Converters: Currency, Units, Color Codes and MOBI to EPUB",
+    description: "Convert amounts at the day's exchange rate, units in 12 categories, colors between HEX, RGB, HSL, HSV and CMYK, and DRM-free MOBI ebooks to EPUB.",
     url: "https://www.onlineconvertools.com/tools/converter-tools",
   },
 };

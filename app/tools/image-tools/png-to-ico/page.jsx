@@ -153,24 +153,29 @@ export default function PngToIcoPage() {
       </div>
       <SeoContent
         title="PNG to ICO"
-        description="PNG to ICO builds a real, multi-resolution Windows ICO file from your PNG — with a proper ICONDIR/ICONDIRENTRY container around PNG-encoded frames at each selected size (16, 32, 48, and 256px by default) — entirely in your browser, with your file never uploaded to a server. The result is a genuine .ico binary, not a PNG simply renamed, so it works both as a browser favicon and in software (like Windows Explorer or app icon tooling) that expects the native ICO format."
+        description={`PNG to ICO builds a Windows icon file from a PNG. You choose which sizes go inside, from ${ALL_SIZES[0]} to ${ALL_SIZES[ALL_SIZES.length - 1]} pixels square, and each size is drawn from your image and stored as a PNG entry in one ICO container: a real icon file, not a renamed PNG. A picture that is not square is either fitted on a transparent square or cropped to fill it, never stretched. The download is always named favicon.ico. PNG entries in an icon are read by Windows Vista and later. The icon is assembled in your browser.`}
+        howToTitle="How to make an ICO file from a PNG"
         howTo={[
-          "Click the upload area and select a PNG file from your device.",
-          "Choose which sizes to bundle into the ICO: 16x16, 24x24, 32x32, 48x48, 64x64, 128x128 and/or 256x256 (16, 32, 48 and 256 are selected by default).",
-          "Click 'Convert to ICO' to build the multi-resolution icon file.",
-          "Click the download button to save your favicon.ico file."
+          `Pick the PNG for your icon, ideally square, in the upload area.`,
+          `Under "Sizes to include", click the size buttons to add or remove sizes.`,
+          `Under "Image that is not square", choose "Fit" or "Fill".`,
+          `Click "Convert to ICO", then "Download" to save favicon.ico.`
         ]}
+        specs={[
+          { label: 'Input format', value: `PNG (.png), one file` },
+          { label: 'Output format', value: `ICO named favicon.ico, with PNG-compressed entries` },
+          { label: 'Icon sizes', value: `${ALL_SIZES.join(', ')} px square; ${DEFAULT_SIZES.join(', ')} selected at first` },
+          { label: 'Non-square images', value: `Fit (whole image, transparent margins) or Fill (cropped to the square, centred)` }
+        ]}
+        privacy={`Each icon size is drawn on a canvas in your browser and packed into the .ico by the page's own code. The PNG you choose is not uploaded anywhere. A displayed error message is logged for us in cleaned form, with the tool's name and your browser's name and version, without the image or its name.`}
         faqs={[
-          { q: "What is an ICO file?", a: "An ICO file is an image format traditionally used for website favicons and application icons. A proper ICO container can bundle several resolutions of the same icon in one file, letting the OS or browser pick the best size for each context — this tool produces exactly that, not a single image renamed to .ico." },
-          { q: "Do I need to install any software to use this tool?", a: "No, it's completely web-based and works directly in your browser." },
-          { q: "Is there a file size limit for PNG uploads?", a: "There's no fixed limit — processing happens locally, and favicon source images are typically small anyway." },
-          { q: "Can I convert multiple PNG files at once?", a: "No, only one file can be converted at a time." }
+          { q: "Can I include more sizes than the default ones?", a: `Yes. ${ALL_SIZES.length} sizes are offered: ${ALL_SIZES.join(', ')} pixels. ${DEFAULT_SIZES.join(', ')} are selected at first; click any size button to add or remove it, and the icon holds exactly the sizes that are highlighted.` },
+          { q: "Is a rectangular image stretched to a square?", a: `No. "Fit" keeps the whole picture centred on a transparent square; "Fill" crops it to the square from the centre. Choose one under "Image that is not square"; in both cases the proportions are kept.` },
+          { q: "Will a small PNG look sharp at the largest size?", a: `No. Every size is drawn from your PNG, so an image smaller than a selected size is enlarged and looks soft. Start from a PNG at least as big as the largest size you select.` },
+          { q: "Does the icon work on Windows XP?", a: `No. The sizes are stored as PNG inside the icon, which Windows reads from Vista onward. Older systems expect bitmap entries, which this tool does not write.` }
         ]}
         tips={[
-          "For best results, start with a PNG at least as large as your biggest selected size (256px if included); a non-square image is either fitted on a transparent square or cropped to fill it (your choice), never stretched.",
-          "Use a PNG with a transparent background if you want the icon to have transparency.",
-          "Keep all four sizes selected for maximum compatibility — Windows uses different sizes for the taskbar, desktop, and Explorer views.",
-          "Test the downloaded file in your browser's favicon slot, or by setting it as a desktop shortcut icon, to confirm it displays correctly."
+          `To check an existing icon, open it with ICO to PNG, which can list every size the icon holds.`
         ]}
       />
     </div>

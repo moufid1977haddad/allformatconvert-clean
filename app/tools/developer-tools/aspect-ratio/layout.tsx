@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Aspect Ratio Calculator — Compute the Simplified Ratio" },
-  description: "Aspect Ratio Calculator computes the simplified ratio and decimal value for any width and height you enter, live in your browser as you type.",
+  title: { absolute: "Aspect Ratio Calculator — Simplify W:H, Find a Missing Side" },
+  description: "Enter a width and a height to get the simplified ratio and its decimal, or type a new width to get the height that keeps the same proportions.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/aspect-ratio" },
   openGraph: {
-    title: "Aspect Ratio Calculator — Compute the Simplified Ratio",
-    description: "Aspect Ratio Calculator computes the simplified ratio and decimal value for any width and height you enter, live in your browser as you type.",
+    title: "Aspect Ratio Calculator — Simplify W:H, Find a Missing Side",
+    description: "Enter a width and a height to get the simplified ratio and its decimal, or type a new width to get the height that keeps the same proportions.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/aspect-ratio",
   },
 };

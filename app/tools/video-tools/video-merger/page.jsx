@@ -146,7 +146,7 @@ export default function VideoMergerPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Video Merger</h1>
-        <p className="text-neutral-500 text-center mb-8">Join several videos into one MP4 — in seconds when they come from the same camera</p>
+        <p className="text-neutral-500 text-center mb-8">Join several videos into one MP4 — without re-encoding when they share the same encoding</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !stage && inputRef.current.click()}>
@@ -184,26 +184,31 @@ export default function VideoMergerPage() {
       </div>
       <SeoContent
         title="Video Merger"
-        description="Video Merger joins two or more videos into one MP4, in the order you choose. Videos that are alike — typically several clips from the same phone or camera — are joined in seconds without re-encoding, right in your browser, so nothing is uploaded and no quality is lost. Videos of different sizes, frame rates or formats are first matched to the first one on our video service (black bars instead of stretching, silence added to a silent clip), then joined the same way. The MP4 plays on iPhone, Android, Mac and Windows."
+        description={`Video Merger joins two or more videos, one after the other, into a single MP4 in the order you set. The clips are joined by copy in your browser, with no upload and no re-encoding, only when they all share the same encoding: H.264 or HEVC video with AAC sound or none, the same size, frame rate and encoder settings, as clips filmed one after another with the same phone settings can be. Otherwise each clip is first sent to our video service and matched to the first one (its size, with black bars rather than stretching, its frame rate, stereo sound), then joined the same way.`}
+        howToTitle="How to merge videos into one MP4"
         howTo={[
-          "Click the upload area and add two or more videos.",
-          "Put them in order with the ↑ and ↓ buttons, and remove any you don't want.",
-          "Click \"Merge Videos\": alike videos are joined in seconds; different ones are matched on our video service first.",
-          "Play the merged video and download the MP4."
+          `Choose or drop two or more videos; you can add more afterwards.`,
+          `Set the order with the ↑ and ↓ buttons next to each video, and remove one with ✕.`,
+          `Click "Merge Videos"; the number on the button is the count of clips.`,
+          `Wait while the page reads the clips and, when they differ, uploads and matches each one on our video service.`,
+          `Play the merged video and click "Download" to save the MP4, named after the first clip with -merged.`,
         ]}
+        specs={[
+          { label: 'Input formats', value: `MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS; at least two files` },
+          { label: 'Output', value: `One MP4: H.264 or HEVC copied as is when the clips are alike, H.264 with AAC sound when they had to be matched` },
+          { label: 'Maximum total size', value: `2 GB on a computer, 700 MB on phones, iPhone and iPad; clips sent for matching also face our video service's own size limit` },
+          { label: 'Frame rate', value: `The first clip's when clips are matched, at most 60 frames per second` },
+          { label: 'Usage limits', value: `None when the clips are alike; otherwise each clip counts as one job in the hourly and daily limit of your internet connection on our video service` },
+        ]}
+        privacy={`Only when all the clips are alike is nothing uploaded: ffmpeg.wasm, a copy of ffmpeg loaded from unpkg.com, joins them inside this tab. Otherwise every clip is sent to our video service on Railway, matched, and downloaded back; the service erases each original when its matching ends and the matched copy once this page has fetched it. The final join always happens in this tab. An error shown on the page is reported to us as cleaned text with its error type, the tool name and your browser and version, without the videos.`}
         faqs={[
-          { q: "Can I reorder videos before merging?", a: "Yes — use the ↑ and ↓ buttons next to each video." },
-          { q: "Does the merged video have audio?", a: "Yes: each clip keeps its sound. A clip without sound gets silence, so the sound stays in step with the pictures." },
-          { q: "What if my videos have different resolutions?", a: "The result has the first video's size and frame rate; a clip of another shape keeps its proportions, with black bars, never stretched." },
-          { q: "Does merging reduce quality?", a: "Not when the videos are alike (same camera settings): they are joined without re-encoding. Different videos are re-encoded once, in high quality, to match the first." },
-          { q: "Is my file uploaded anywhere?", a: "Not when the videos are alike: they are joined in your browser. Otherwise each video is sent to our video service to be matched, and deleted as soon as that is done (the matched copy right after it is downloaded back)." },
-          { q: "What do I get?", a: "One MP4 (H.264 or HEVC video, AAC sound), the format the iPhone Photos app, Android, Mac and Windows all play." }
+          { q: "Can I merge videos from different phones or cameras?", a: `Yes. Clips that differ in size, frame rate or format are matched to the first clip on our video service: same size with black bars where the shape differs, same frame rate, stereo sound, and silence added to a silent clip. They are then joined without a second re-encoding.` },
+          { q: "Does merging lose quality?", a: `No, when the clips are alike: they are copied, not re-encoded, and nothing is uploaded. Yes, slightly, when they differ: each clip is encoded once in H.264 before the join, at the service's high-quality setting or, if that would make it larger than the original, with stronger compression; its sound becomes stereo AAC.` },
+          { q: "Which video sets the size of the result?", a: `The first one in the list. Its width, height and frame rate are applied to the others; a clip of another shape gets black bars and is never stretched. Move the clip you want as the reference to the top with the ↑ button.` },
+          { q: "How large can the videos be?", a: `2 GB in total on a computer and 700 MB on phones, iPhone and iPad, because the merged file is built in the browser tab's memory before you save it. Clips that must be matched also go through the size limit of our video service.` },
         ]}
         tips={[
-          "Clips filmed with the same phone and settings merge in seconds and keep their exact quality.",
-          "Put the video whose size you want to keep first: the others are matched to it.",
-          "On iPhone, pick the videos with \"Choose Files\" from the Files app to keep their original quality (see the note above).",
-          "Trim each clip first if you only need part of it: the merge is faster and the file smaller."
+          `On iPhone, pick the clips in the Files app rather than the Photos library: iOS shrinks videos picked from Photos before the page receives them.`,
         ]}
       />
     </div>

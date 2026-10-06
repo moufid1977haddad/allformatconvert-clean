@@ -3,7 +3,7 @@ import { textFileProblem, decodedText } from '../../../lib/fileChecks';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
-import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_HTML_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import PageSetup, { PAGE_SETUP_DEFAULT, withPageSetup } from '../../../components/PageSetup';
 import { useToolError } from '../../../lib/useToolError';
@@ -168,26 +168,29 @@ export default function HtmlToPdfPage() {
       </div>
       <SeoContent
         title="HTML to PDF"
-        description="HTML to PDF converts a web page from its address (URL), an HTML file or pasted HTML code. For an address, our server fetches the page with its style sheets, images and fonts — public http and https pages only, never a private network address — and prints it at the screen width you choose (desktop, laptop, tablet or phone), on A4, Letter, Legal, A3 or A5, with your margins, or as one long page; the page's scripts are not run, for safety, so a page that builds its content with JavaScript can come out incomplete (the tool says so). For a file or code, it uploads your HTML — including its CSS — to our conversion service, which renders it with a real browser engine (Chromium via Gotenberg) and returns a PDF for you to download; there too its scripts are not run, for safety, and the tool tells you when your HTML contains any. We tested a page with CSS grid, flexbox, a gradient with a shadow, a table with a merged cell, two-column text, an inline SVG, print-only CSS and French accents: it matched what Chrome prints for the same page. The one difference: a font that isn't installed on our servers (Georgia in our test) is replaced by a similar one (Liberation Serif), so line breaks can shift slightly."
+        description={`HTML to PDF prints HTML to a PDF with Chromium, the engine behind Chrome, on our own conversion service. It takes three kinds of input: the address of a public web page, an .html or .htm file, or HTML code you paste. Scripts never run, for safety, so anything JavaScript would build is missing; the page warns you when your HTML has scripts or when a web page seems to depend on them. A font our servers do not have is replaced by a similar one, which can move line breaks. Headers and footers are not offered.`}
+        howToTitle="How to convert HTML or a web page to PDF"
         howTo={[
-          "Choose 'From URL' and type the address of a public web page, or 'Upload File' to select an .html file, or 'Paste Code' to type or paste HTML directly.",
-          "For a URL, choose the screen size the page is laid out at, the paper, orientation and margins, and optionally 'One long page'.",
-          "Click 'Convert to PDF'. Your HTML is uploaded and rendered by a real browser engine into a PDF.",
-          "Once the PDF is ready, click 'Download'.",
-          "Open the downloaded PDF to confirm it looks right."
+          `Choose "From URL" and type a page address, "Upload File" to pick an .html file, or "Paste Code".`,
+          `Set "Page size", "Orientation" and "Margins"; for an address, also pick a "Screen size" and, if you like, "One long page".`,
+          `Click "Convert to PDF"; when "PDF ready" appears, "Download" saves the printed page.`,
         ]}
+        specs={[
+          { label: 'Input', value: `A public http:// or https:// address, an .html or .htm file, or pasted HTML` },
+          { label: 'Output', value: `PDF on A4, Letter, Legal, A3 or A5, portrait or landscape, or the page size set in the document` },
+          { label: 'File or code size', value: `${officeMaxLabel(MAX_HTML_STAGED_BYTES)} of HTML` },
+          { label: 'From an address', value: `Page HTML up to 5 MB, at most 150 resources of up to 3 MB each and 25 MB in all; ports 80 and 443 only; up to 5 redirects` },
+          { label: 'Usage limits', value: `From an address: 20 conversions an hour and 60 a day per visitor, and 300 an hour for all visitors together. File or code over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB: a limit per network per hour and per day.` },
+        ]}
+        privacy={`For an address, our server downloads the public page with its style sheets, images and fonts, refuses private-network addresses and checks every redirect, then our Chromium service prints it. A file or pasted code is sent over HTTPS to that same Chromium service, which runs no script. HTML larger than ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB passes first through our media service, which deletes it once the PDF exists and removes the PDF as soon as this page has downloaded it, or after a time limit.`}
         faqs={[
-          { q: "Is HTML to PDF completely free to use?", a: "Yes, it's completely free with no signup. It runs on our server, which allows a set number of conversions per connection each hour and day." },
-          { q: "Can I customize page size, margins, or headers/footers?", a: "Page size (A4, Letter, Legal, A3, A5), orientation and margins: yes, with the three choices above the button — or leave them on 'As in the document' to keep the page's own CSS. Headers and footers: not offered." },
-          { q: "Can I convert a web page from its URL?", a: "Yes: choose 'From URL' and type the address. Our server fetches the page and everything it needs to display (style sheets, images, fonts), then prints it with Chromium. Only public http:// and https:// addresses on the standard ports are accepted: addresses of private or local networks are refused, and every redirect is checked the same way. The page's scripts are not run, for safety — most pages print fully, but one that builds its content with JavaScript can come out incomplete, and the tool tells you when a page looks like one. Pages behind a login cannot be converted: only what anyone can see without signing in." },
-          { q: "Will my HTML documents be uploaded to a server?", a: "Yes. Your HTML code or file is uploaded to our conversion service, purely to render the final PDF with a real browser engine, and it's discarded immediately afterward." },
-          { q: "What HTML features are supported?", a: "Whatever a modern Chromium browser can render: CSS styling, images, tables, and most modern HTML5 elements. In our test the PDF matched Chrome's print output, except that fonts missing from our servers are replaced by similar ones. Scripts (JavaScript) are not run, for safety: content a script would build, such as a chart, is missing from the PDF, and the tool says so when your HTML has scripts." }
+          { q: `Can I convert a web page from its URL?`, a: `Yes. Choose "From URL" and type the address. Only public http and https pages on ports 80 and 443 work, and private-network addresses are refused. Pages behind a login show only what a visitor without an account sees, and a page built by JavaScript can come out incomplete because scripts are not run.` },
+          { q: `Does the PDF look like what Chrome prints?`, a: `Yes, in our test of 19 September 2026: a page with CSS grid, flexbox, a gradient with a shadow, a merged table cell, two columns, an inline SVG, print-only CSS and French accents had the same layout as Chrome's print. The differences were the fonts: Georgia became Liberation Serif and Arial became Liberation Sans.` },
+          { q: `How many pages can I convert from addresses?`, a: `20 an hour and 60 a day per visitor, plus a ceiling of 300 an hour for all visitors together. Uploaded files and pasted code have no such count up to ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB; above that size, a separate hourly and daily limit per connection applies.` },
+          { q: `Do images with relative paths work in an uploaded file?`, a: `No. Only the HTML itself is sent, without the files stored next to it, so a relative path cannot be found. Use full https:// addresses for images and style sheets, or embed them in the HTML as data URLs.` },
         ]}
         tips={[
-          "Use absolute image URLs (starting with https://) rather than relative paths, since a relative path won't resolve on the conversion service.",
-          "Check your HTML with your browser's Print preview first — in our test the PDF matched Chrome's print output, and print-only CSS (@media print) applies.",
-          "For pasted code, make sure to include a full HTML document (with <html> and <body> tags) for the most reliable rendering.",
-          "Very large or complex HTML files may take a little longer to convert — keep the tab open until the Download button appears."
+          `For a site that has a print layout without menus and ads, tick the print-style box before converting its address.`,
         ]}
       />
     </div>

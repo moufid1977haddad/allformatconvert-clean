@@ -70,24 +70,32 @@ export default function AddBorderToImagePage() {
       </div>
       <SeoContent
         title="Add Border to Image"
-        description="Add Border to Image lets you add a solid-color border of any width around a photo, entirely in your browser using the HTML canvas — your image is never uploaded to a server. Choose a border width and color; the border goes around the image and its transparent areas stay transparent, and the result keeps your image's format (JPG, PNG or WebP)."
+        description={"Add Border to Image draws a frame of one solid color around a picture: a screenshot that needs an edge on a white page, a product photo, a logo. The width is counted in pixels of the real image, from 1 to 100 px, and the frame is added outside the picture, so nothing is covered or cropped. Transparent areas of a PNG or WebP logo stay transparent; only the frame is painted. A JPG comes back as a JPG, a WebP as a WebP, a PNG as a PNG, and any other format as PNG. There is one style, a plain solid band: no dashes, shadow or rounded frame. Your browser does all the work."}
+        howToTitle={"How to add a border to an image"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Adjust the border width slider and pick a border color.",
-          "Click 'Add Border' to apply it.",
-          "Click the download button to save your bordered PNG image."
+          "Click the upload box and pick the picture to frame.",
+          "Move the \"Border Width\" slider (1 to 100 px) and choose a color with \"Border Color\".",
+          "Click \"Add Border\"; the framed picture appears under the button.",
+          "Click \"Download\": the framed copy keeps the format of a JPG, PNG or WebP, and any other picture becomes a PNG (on iPhone and iPad, \"Save / Share\" opens the share sheet).",
         ]}
+        specs={[
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF, or any other picture your browser can open" },
+          { label: "Output format", value: "JPG in, JPG out (quality 92); PNG and WebP keep their format; anything else is written as PNG" },
+          { label: "Border width", value: "1 to 100 px of the full-size image, added on the left, right, top and bottom" },
+          { label: "Largest picture", value: "Pictures above 268 megapixels are refused with a message" },
+          { label: "Animated files", value: "A GIF, APNG or WebP animation keeps its first frame; a note says so before you start" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The frame is painted by this page on a canvas in your own browser, and the picture is not sent anywhere. The framed copy lives only in this tab until you download it; closing the tab discards it. When the tool shows an error, we receive the cleaned wording of that message with the tool's name and your browser's name and version, never the image or its file name."}
         faqs={[
-          { q: "What image formats does Add Border to Image support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
-          { q: "Is there a limit to the image size I can upload?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
-          { q: "Can I adjust the border thickness?", a: "Yes, use the border width slider (1–100px) to set the thickness before applying." },
-          { q: "Can I choose different border styles, like dashed or double?", a: "No, only a solid-color border is available — there's no dashed, dotted, or multi-layer style option." }
+          { q: "Does the border make the image bigger?", a: "Yes. The border is added outside the picture, so the result grows by the border width on the left, the right, the top and the bottom. No part of the original picture is covered, scaled or cropped." },
+          { q: "Can I make a dashed, double or rounded border?", a: "No. The only style is a plain band of one color. For rounded edges, add the border here first, then open the result in Round Corners, which can make the corners transparent or fill them with a color." },
+          { q: "Does a transparent logo stay transparent?", a: "Yes. Only the band around the picture is painted, so a PNG or WebP logo keeps its see-through background inside the frame and stays in its own format." },
+          { q: "Will a JPG lose quality?", a: "Yes, a little: a JPG is written again as a JPG at quality 92, a lossy step, while a PNG stays lossless. The picture keeps its full size in pixels and is never scaled down." },
         ]}
         tips={[
-          "Pick a border color that complements your image's dominant colors for a cleaner look.",
-          "Use thicker borders for smaller images and thinner borders for larger images to keep the proportions balanced.",
-          "Run your bordered image through the Round Corners tool afterward if you want rounded edges too.",
-          "Since nothing is uploaded, download your result right away — it isn't saved anywhere after you leave the page."
+          "Each click on \"Add Border\" starts again from your original file: change the width or the color and click again, no need to reload the picture.",
+          "For a frame with rounded corners, run the bordered picture through Round Corners afterwards.",
         ]}
       />
     </div>

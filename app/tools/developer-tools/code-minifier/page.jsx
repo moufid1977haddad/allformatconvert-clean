@@ -42,22 +42,37 @@ export default function CodeMinifierPage() {
       </div>
       <SeoContent
         title={"Code Minifier"}
-        description={"Code Minifier compresses JavaScript, TypeScript, CSS and HTML entirely in your browser. JavaScript is minified by Terser (the engine behind webpack and Vite), so code without semicolons, return statements and regular expressions keep exactly their behaviour; TypeScript has its types removed first and is then minified the same way; CSS is minified by CSSO, which keeps strings and data: URLs intact; HTML loses comments and the whitespace between tags, while <pre>, <textarea>, <script> and <style> contents are left untouched. Code that doesn't parse is reported instead of producing a broken file."}
+        description={"Code Minifier shrinks four kinds of code in your browser, chosen with the JS, TS, CSS and HTML buttons. JavaScript goes through Terser, which renames local variables and drops dead code; TypeScript is first stripped of its types by Sucrase, then minified the same way, so the result is JavaScript. CSS goes through CSSO, which merges identical rules and shortens values. HTML loses its comments, each run of whitespace becomes one space, and the contents of <pre>, <textarea>, <script> and <style> stay as written. Only JavaScript and TypeScript are parsed strictly: broken CSS or HTML is not reported."}
+        example={{
+          caption: "HTML mode: the comment goes, spaces shrink to one, <pre> keeps its spacing.",
+          inputLabel: "Input",
+          input: "<ul>\n  <!-- main menu -->\n  <li><a href=\"/\">Home</a></li>\n  <li>   About   us </li>\n</ul>\n<pre>  keep   this</pre>",
+          outputLabel: "Output",
+          output: "<ul> <li><a href=\"/\">Home</a></li> <li> About us </li> </ul> <pre>  keep   this</pre>",
+        }}
+        howToTitle={"How to minify JavaScript, CSS or HTML"}
         howTo={[
-          "Choose the language: JS, TS, CSS or HTML.",
-          "Paste your code into the input box.",
-          "Click 'Minify'.",
-          "Click 'Copy' to copy the result."
+          "Click \"JS\", \"TS\", \"CSS\" or \"HTML\" to choose the language.",
+          "Paste the code into \"Input\".",
+          "Click \"Minify\"; the result fills \"Output\" and the line below it gives the characters saved.",
+          "Click \"Copy\", or \"Download\" to save minified.js, minified.ts, minified.css or minified.html, depending on the mode.",
         ]}
+        specs={[
+          { label: "Input languages", value: "JavaScript, TypeScript without JSX, CSS, HTML" },
+          { label: "Engines", value: "Terser (JavaScript and TypeScript), Sucrase (TypeScript types), CSSO (CSS), the site's own minifier (HTML)" },
+          { label: "Errors", value: "JavaScript and TypeScript syntax errors are shown as Error: plus the engine's message; CSS and HTML are never rejected" },
+          { label: "File name", value: "minified plus the mode: .js, .css or .html; in TS mode the file is named .ts although it holds JavaScript" },
+        ]}
+        privacyTitle={"Where your code is processed"}
+        privacy={"All four minifiers run on your device; Terser, Sucrase or CSSO is downloaded the first time its mode is used, and the code you paste is not uploaded. If a JavaScript or TypeScript error is displayed, its message, cleaned of quoted text, long numbers and addresses, is reported to our error log together with the tool name and your browser's name and version."}
         faqs={[
-          { q: "Is Code Minifier free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Will minified JavaScript behave the same?", a: "Yes — Terser parses the code before compressing it, so automatic semicolon insertion and every operator keep their meaning." },
-          { q: "What does TypeScript minification produce?", a: "JavaScript: the type annotations are removed (as the TypeScript compiler does), then the code is minified." },
-          { q: "Is my code uploaded?", a: "No — everything runs in your browser; each engine is downloaded once when you first use it." }
+          { q: "Will minified JavaScript behave the same?", a: "Yes. Terser parses the code before compressing it, so code without semicolons, a return followed by a line break and expressions like a - -b keep their meaning. Code that does not parse gets an error instead of a broken file." },
+          { q: "Does TS mode handle TSX or namespaces?", a: "No. TS mode strips types without JSX support, so TSX fails with a syntax error, and a namespace is removed with everything inside it. Move namespace code out first, and minify TSX in your own build." },
+          { q: "Does HTML mode delete all spaces between tags?", a: "No. A space between inline elements can be visible: two bold words separated only by a line break would run together without it. So each run of spaces and line breaks becomes one space instead of disappearing." },
+          { q: "Does CSS mode check my CSS?", a: "No. CSSO repairs or skips what it cannot read without a message: a missing closing brace is added, and text that is not CSS can disappear from the output. Check the result of a stylesheet you are unsure about." },
         ]}
         tips={[
-          "Keep your original source: minified code is meant for production, not for editing.",
-          "In HTML mode, inline scripts and styles are kept as they are; minify them separately in JS or CSS mode if needed."
+          "The characters-saved line also appears after an error, so trust it only when the output is real code.",
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Timestamp Converter — Convert a Unix Timestamp (in Seconds)" },
-  description: "Timestamp Converter converts a Unix timestamp (in seconds) to a date and back, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "Unix Timestamp Converter — Seconds, ms, µs, ns to Date" },
+  description: "Convert a Unix timestamp given as seconds, milliseconds, microseconds or nanoseconds to UTC and any IANA time zone, or a date and time back to a timestamp.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/timestamp-converter" },
   openGraph: {
-    title: "Timestamp Converter — Convert a Unix Timestamp (in Seconds)",
-    description: "Timestamp Converter converts a Unix timestamp (in seconds) to a date and back, entirely in your browser — nothing is uploaded to a server.",
+    title: "Unix Timestamp Converter — Seconds, ms, µs, ns to Date",
+    description: "Convert a Unix timestamp given as seconds, milliseconds, microseconds or nanoseconds to UTC and any IANA time zone, or a date and time back to a timestamp.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/timestamp-converter",
   },
 };

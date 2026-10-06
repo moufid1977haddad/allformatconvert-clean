@@ -42,7 +42,7 @@ export default function FileComparatorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">File Comparator</h1>
-        <p className="text-neutral-500 text-center mb-8">Compare two files side by side</p>
+        <p className="text-neutral-500 text-center mb-8">Check whether two files are identical, byte for byte</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => ref1.current.click()}>
@@ -70,25 +70,30 @@ export default function FileComparatorPage() {
       </div>
       <SeoContent
         title="File Comparator"
-        description="File Comparator is a free online tool that instantly checks whether two files are byte-for-byte identical, entirely in your browser. It's a fast way to verify that a downloaded file matches the original, confirm a backup is intact, or spot accidental duplicates — no upload, no software installation."
+        description="File Comparator tells you whether two files are exactly the same, byte for byte, and if not, where the first difference is: its byte number, counted from 1 as the cmp command counts it, and its hexadecimal offset. If one file is the other with extra bytes at the end, it says so. Both files are read in pieces of 8 MiB with a progress percentage, so large files are never loaded whole. It does not show a line-by-line diff or list every difference. Typical uses: checking a download, a copy or a backup against its original."
+        howToTitle="How to compare two files"
         howTo={[
-          "Click the first box and select the first file to compare.",
-          "Click the second box and select the second file.",
-          "Click \"Compare Files\" to check them byte-by-byte.",
-          "View the result — \"Files are identical\" or \"Files are different\", with the position of the first differing byte — along with each file's name and size."
+          "Click \"File 1\" and choose the first file.",
+          "Click \"File 2\" and choose the second one.",
+          "Click \"Compare Files\" and follow the percentage on the button.",
+          "Read the verdict, \"Files are identical\" or \"Files are different\", with the first differing byte and the name and size of each file."
         ]}
+        specs={[
+          { label: "Files", value: "Two, of any type" },
+          { label: "Comparison", value: "Exact, byte by byte, stopping at the first difference" },
+          { label: "Reading", value: "8 MiB of each file at a time, with a progress percentage" },
+          { label: "Size limit", value: "None set in the tool; the files are never loaded whole" },
+          { label: "Result", value: "Verdict, first differing byte (decimal position and hex offset), both names and sizes" }
+        ]}
+        privacy="Both files are read from your device by this page and compared there; neither file is uploaded and no copy of either is made. Large files are read in pieces, so they are never held whole in memory. If the comparison fails, our error log receives the cleaned message, the tool name and your browser, never the files or their names."
         faqs={[
-          { q: "What does File Comparator actually compare?", a: "It performs an exact byte-for-byte binary comparison — it tells you whether two files match, not a line-by-line text diff." },
-          { q: "What file types are supported?", a: "Any file type and any size: the files are read piece by piece, so even multi-gigabyte files can be compared without loading them whole." },
-          { q: "Does it show where the files differ?", a: "It gives the position of the first differing byte (as the cmp command does), or says that one file is the other with extra bytes at the end." },
-          { q: "Is File Comparator free to use?", a: "Yes, it's completely free with no signup and no limit on how many comparisons you can run." },
-          { q: "Is my data private?", a: "Yes. Both files are compared entirely in your browser — neither one is uploaded to a server." }
+          { q: "Does it show what changed between two text files?", a: "No. It only answers whether the bytes are identical and where the first difference is. To see the lines that changed between two texts, use Diff Viewer in Developer Tools." },
+          { q: "Can it compare very large files?", a: "Yes, the tool sets no size limit: it reads both files 8 MiB at a time and stops at the first difference, so it never holds a whole file in memory. The time it takes grows with the size of the identical part." },
+          { q: "Does it tell me where the files differ?", a: "Yes, the first place only: \"First difference at byte\" gives its position counted from 1, followed by the offset in hexadecimal counted from 0. When one file simply continues past the other, it says they are identical up to that byte." },
+          { q: "Do different names or dates matter?", a: "No. Only the contents are compared; names and modification dates are ignored, so a renamed copy of a file shows as identical to the original." }
         ]}
         tips={[
-          "Use this to confirm a downloaded file matches the original before deleting your source copy.",
-          "If the two files show different sizes, they're guaranteed to be different — no need to dig further.",
-          "For text or code files where you need to see exactly which lines changed, use a dedicated text-diff tool instead — this tool only reports whether files match.",
-          "Handy for spotting accidental duplicate files saved under different names before cleaning up storage."
+          "Two files of different sizes are always different; the tool still shows where they first diverge."
         ]}
       />
     </div>

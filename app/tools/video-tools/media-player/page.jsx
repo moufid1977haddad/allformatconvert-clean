@@ -62,7 +62,7 @@ export default function MediaPlayerPage() {
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a media file" />}</p>
-            <p className="text-neutral-500 text-sm mt-1">Supports MP4, MP3, WAV, OGG, WebM</p>
+            <p className="text-neutral-500 text-sm mt-1">Plays what your browser can decode, such as MP4, MP3, WAV, OGG and WebM</p>
             <input ref={inputRef} type="file" accept={`${AUDIO_ACCEPT},${VIDEO_ACCEPT}`} className="hidden" onChange={handleFile} />
           </div>
           {file && encryptedMusicMessage(file.name) ? (
@@ -102,25 +102,29 @@ export default function MediaPlayerPage() {
       </div>
       <SeoContent
         title="Media Player"
-        description="Media Player plays a single audio or video file directly in your browser using native HTML5 playback — the file loads locally as a blob URL and is never uploaded anywhere."
+        description={`Media Player opens one audio or video file from your device in the player built into your browser. Below it you can set the speed from 0.5× to 2× and turn on "Loop". For a video you can also open a picture-in-picture window where the browser offers it, save the current frame as a PNG, and add subtitles from an .srt or .vtt file; a subtitle file that is not UTF-8 is read in the usual Windows code page of your browser's language. It plays what your browser can decode; for a file it cannot decode, it says so and links to Video Converter or Audio Converter. It does not make playlists.`}
+        howToTitle="How to play an audio or video file"
         howTo={[
-          "Click the upload area and select an audio or video file.",
-          "The file loads instantly using your browser's native player controls.",
-          "Use the built-in play, pause, volume, and seek controls to control playback.",
-          "Upload a different file at any time to switch what's playing."
+          `Pick or drop an audio or video file.`,
+          `Use the player's controls, and choose a "Speed" or tick "Loop".`,
+          `For a video, click "Subtitles (.srt, .vtt)" to add a subtitle file, or "Picture in picture" to keep it on top.`,
+          `Click "Save this frame", then "Download" to save the picture as a PNG.`,
         ]}
+        specs={[
+          { label: `Input formats`, value: `Audio: MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF. Video: MP4, M4V, MOV, QT, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS. Playback depends on your browser.` },
+          { label: `Subtitles`, value: `SRT or WebVTT, for videos` },
+          { label: `Saved frame`, value: `PNG at the video's size; on iPhone and iPad, scaled down to fit 16.7 megapixels` },
+        ]}
+        privacy={`The file is opened from your device through a local blob: address and played by your browser; it is not uploaded or streamed from a server. Subtitles are converted and frames are drawn in the same tab, and the speed, loop and picture-in-picture buttons only act on the player.`}
         faqs={[
-          { q: "What file formats are supported?", a: "Any audio or video format your browser can play natively — commonly MP4, WebM, MP3, WAV, and OGG." },
-          { q: "Is Media Player free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I create a playlist of multiple files?", a: "Not currently — one file is loaded and played at a time." },
-          { q: "Can I change the speed, loop or add subtitles?", a: "Yes: speed from 0.5× to 2×, Loop, picture-in-picture where the browser offers it, Save this frame (a PNG of the picture shown), and subtitles from an .srt or .vtt file, shown over the video." },
-          { q: "Is my file uploaded to a server?", a: "No, the file is read locally and played via a browser blob URL — it's never uploaded or streamed from a server." }
+          { q: `Can it play AVI, WMV or MKV files?`, a: `Yes, if your browser can decode them. When it cannot, the page says "This browser cannot play" this file and links to Video Converter or Audio Converter, so you can make an MP4 or MP3 first.` },
+          { q: `Can I add subtitles to a video?`, a: `Yes: click "Subtitles (.srt, .vtt)" and pick the file. SRT timings are rewritten as WebVTT, one-digit hours included. A file that is not UTF-8 is read in the Windows code page of your browser's language, such as Windows-1252 for Western languages.` },
+          { q: `Can I save a still image from a video?`, a: `Yes. Pause where you want, click "Save this frame" and download the PNG. It has the video's own size, except on iPhone and iPad, where a picture over 16.7 megapixels is scaled down to fit the browser's canvas limit.` },
+          { q: `Can I play several files in a row?`, a: `No. The player holds one file at a time; choosing another file replaces it and clears the subtitles and the saved frame of the previous one. To hear several tracks back to back, join them first with Audio Merger.` },
         ]}
         tips={[
-          "Right-click the video player for extra native browser options like Picture-in-Picture, depending on your browser.",
-          "Use the spacebar to play/pause and arrow keys to seek once the player is focused.",
-          "For video files, click the player's fullscreen icon for a larger viewing experience.",
-          "If a file doesn't play, your browser likely doesn't support its codec — try converting it with a dedicated converter tool first."
+          `Tick "Loop" and choose 0.75× to practise a passage of music or a dance step.`,
+          `Load the .srt you made in Subtitle Generator here to check its timings against the video.`,
         ]}
       />
     </div>

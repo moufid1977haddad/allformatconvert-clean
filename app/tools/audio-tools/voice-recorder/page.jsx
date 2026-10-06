@@ -193,25 +193,30 @@ export default function VoiceRecorderPage() {
       </div>
       <SeoContent
         title="Voice Recorder"
-        description="Voice Recorder captures audio from your microphone directly in your browser using the MediaRecorder API — nothing is uploaded to a server. Recordings are saved in the format your browser records natively — WebM in Chrome, Edge and Firefox, MP4 in Safari — and can also be converted and downloaded as a standard WAV file using the Web Audio API entirely on your device."
+        description={`Voice Recorder records your microphone with the MediaRecorder built into the browser. "Pause" and "Resume" continue the same recording; "Stop Recording" ends it. The file comes in the format your browser records: M4A (AAC) where it can record MP4 audio, as Safari and Chrome or Edge 126 and later do, and WebM (Opus) elsewhere, such as Firefox. "Export as MP3" makes a 192 kbps MP3 with ffmpeg.wasm, and "Export as WAV" a 16-bit WAV. Nothing is recorded until you allow the microphone.`}
+        howToTitle="How to record your voice"
         howTo={[
-          "Click \"Start Recording\" and allow microphone access if prompted.",
-          "Speak into your microphone — the indicator pulses red while recording.",
-          "Click \"Stop Recording\" when you're finished.",
-          "Download the recording directly (WebM, or MP4 in Safari), or click \"Export as WAV\" to convert it and download a WAV file instead."
+          `Click "Start Recording" and allow the microphone.`,
+          `Use "Pause" and "Resume" as needed, then click "Stop Recording".`,
+          `Listen to the recording in the player.`,
+          `Click "Download" for the file as recorded, or first "Export as MP3" or "Export as WAV"; "Download all" puts every version in one ZIP.`,
         ]}
+        specs={[
+          { label: `Input`, value: `Your microphone, after the browser asks for permission` },
+          { label: `Output formats`, value: `M4A (AAC) or WebM (Opus) as recorded; MP3 at 192 kbps; WAV, 16-bit` },
+          { label: `Length`, value: `No maximum in the page; the recording is kept in memory until you leave` },
+        ]}
+        privacy={`The microphone sound is recorded by your browser and stays on this page. The MP3 export uses ffmpeg.wasm, downloaded from unpkg.com, and the WAV export the Web Audio API, both on your device. No recording is sent to a server. If the microphone cannot start or an export fails, that message, cleaned, reaches our error log with your browser's name and version.`}
+        privacyTitle="Where your recording is processed"
         faqs={[
-          { q: "What audio format do recordings download as?", a: "Recordings are captured in your browser's native format: WebM in Chrome, Edge and Firefox, MP4 in Safari, and the file extension always matches. Click \"Export as MP3\" for an MP3 (192 kbit/s, plays everywhere) or \"Export as WAV\" for an uncompressed WAV, both made on your device." },
-          { q: "Can I pause a recording?", a: "Yes: Pause stops the recording without ending it, Resume continues the same recording, and Stop Recording finishes it." },
-          { q: "Is Voice Recorder free to use?", a: "Yes, it's completely free with no signup and no limit on how many recordings you can make." },
-          { q: "Do I need to install anything?", a: "No, it works directly in your browser as long as you grant microphone access." },
-          { q: "Is my recording private?", a: "Yes. Recording and the WAV and MP3 exports all happen entirely on your device via the browser's MediaRecorder and Web Audio APIs — audio is never uploaded to a server unless you choose to share the downloaded file yourself." }
+          { q: `Is the recording an MP3?`, a: `No, not directly: it is saved in the format your browser records, M4A (AAC) or WebM (Opus), and the extension always matches the content. Click "Export as MP3" for a 192 kbps MP3, or "Export as WAV" for an uncompressed WAV.` },
+          { q: `Can I pause and continue the same recording?`, a: `Yes. "Pause" holds the recording and "Resume" carries on in the same file; only "Stop Recording" finishes it. Starting a new recording replaces the previous one, so download it first.` },
+          { q: `Can I record if I blocked the microphone?`, a: `No. The page shows "Microphone access was refused" until you allow the microphone for this site in your browser settings. A device without a microphone gets "No microphone was found on this device."` },
+          { q: `Is there a time limit?`, a: `No. The page sets no maximum length; the recording grows in the memory of your browser until you click "Stop Recording", so very long sessions depend on your device.` },
         ]}
         tips={[
-          "Record in a quiet space and keep the microphone 6–12 inches from your mouth for clearer audio.",
-          "Use \"Export as WAV\" if you need an uncompressed, universally compatible format instead of the browser's native format.",
-          "Download your recording promptly after stopping — refreshing the page will lose it since nothing is saved automatically.",
-          "If you accidentally deny microphone permission, you'll need to reset the site's microphone permission in your browser settings to try again."
+          `For a transcript of what you said, upload the M4A or WebM to Audio to Text.`,
+          `Cut silence at the start or end with Audio Trimmer before sharing.`,
         ]}
       />
     </div>

@@ -2,8 +2,8 @@
 import { textFileProblem, decodedText } from '../../../lib/fileChecks';
 import { useMemo, useState, useRef } from 'react';
 import { textToPdf, needsRenderer, textToHtmlDocument } from '../../../lib/textPdf';
-import { MAX_HTML_STAGED_BYTES } from '@/lib/quota/limits';
-import { convertOffice, checkOfficeSize, officeStageLabel } from '../../../lib/officeUpload';
+import { MAX_HTML_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
+import { convertOffice, checkOfficeSize, officeStageLabel, officeMaxLabel } from '../../../lib/officeUpload';
 import SeoContent from '../../../components/SeoContent';
 import { FileDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
@@ -116,26 +116,28 @@ export default function TextToPdfPage() {
       </div>
       <SeoContent
         title="Text to PDF"
-        description="Text to PDF converts plain text — pasted directly or from an uploaded .txt file — into a real PDF with automatic word-wrapping and page breaks, in every common writing system and with emoji: Latin alphabets, Greek, Cyrillic, Vietnamese, Arabic and Hebrew (right to left), Hindi, Bengali, Punjabi, Gujarati, Tamil, Telugu, Kannada, Malayalam, Sinhala, Thai, Lao, Myanmar, Khmer, Amharic, Georgian, Armenian, Chinese, Japanese and Korean, with the free Noto fonts (SIL Open Font License). Text in Latin, Greek, Cyrillic, Arabic, Hebrew, Devanagari, Tamil, Thai or CJK is made entirely in your browser; emoji (in colour, skin tones and flags included) and the other scripts are printed by our own PDF service with a real browser engine, and the page says so before you convert. The text stays selectable and searchable in the PDF. You choose the page size (A4, Letter, Legal, A5), the orientation, the text size and the margins."
+        description={`Text to PDF puts plain text into a PDF, wrapping long lines and starting new pages as needed, with the free Noto fonts so the letters stay selectable text. Paste text or upload a .txt file; Windows and Unicode text files are read in their own encoding. Latin, Greek, Cyrillic, Arabic and Hebrew, Devanagari, Tamil, Thai, Chinese, Japanese and Korean are drawn in your browser, not on our server. Emoji, Bengali and other scripts are printed by our Chromium service instead. There is no styling: no bold, headings or title field.`}
+        howToTitle="How to convert text to PDF"
         howTo={[
-          "Choose 'Paste Text' to type or paste content, or 'Upload File' to select a .txt file.",
-          "Review the text — uploading a file auto-fills the text area with its content (Windows and Unicode text files are read in their own encoding).",
-          "Optionally choose the page size (A4, Letter, Legal, A5), the orientation, the text size and the margins.",
-          "Click 'Convert to PDF' to generate the document with automatic word wrap and page breaks.",
-          "Click 'Download' to save the file (on an iPhone or iPad, 'Save / Share' also sends it to Files, Mail or AirDrop)."
+          `Choose "Paste Text" and type, or "Upload File" to pick a .txt file.`,
+          `Pick the "Page size", "Orientation", "Text size" and "Margins".`,
+          `Click "Convert to PDF"; when "Done!" appears, "Download" saves your text as a PDF.`,
         ]}
+        specs={[
+          { label: 'Input formats', value: `Pasted text or a .txt file` },
+          { label: 'Output', value: `PDF with selectable text` },
+          { label: 'Page and type', value: `A4, Letter, Legal or A5; portrait or landscape; text from 9 to 24 pt; narrow, normal or wide margins` },
+          { label: 'Text length', value: `Not capped when the PDF is made in your browser; ${officeMaxLabel(MAX_HTML_STAGED_BYTES)} of HTML when our service prints it` },
+        ]}
+        privacy={`Unless the page says otherwise, the PDF is made on your device, with fonts loaded from this site, or from cdn.jsdelivr.net for Chinese, Japanese and Korean, without your text. When the text holds emoji, Bengali, another script or a symbol outside those fonts, such as an arrow, a note above the options says so, and the text is sent to our Chromium service, which returns the PDF. Above ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB of HTML, it first goes in parts through our media service, which deletes it after printing.`}
         faqs={[
-          { q: "Is Text to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Which languages and alphabets work?", a: "All the common ones: Latin alphabets (every accent, Polish, Turkish, Vietnamese…), Greek, Cyrillic, Arabic and Hebrew (right to left), Hindi, Bengali, Punjabi, Gujarati, Odia, Tamil, Telugu, Kannada, Malayalam, Sinhala, Thai, Lao, Myanmar, Khmer, Amharic, Georgian, Armenian, Chinese, Japanese and Korean — and emoji, in colour. Each character is drawn with a matching Noto font and only the letters used are embedded, so the PDF stays small." },
-          { q: "Can I adjust font size, margins, or the document title?", a: "Yes for the layout: page size A4, Letter, Legal or A5, portrait or landscape, text from 9 to 24 pt, narrow, normal or wide margins. There's no title field." },
-          { q: "What file types can I upload?", a: "Only plain .txt files — the content is read as text and filled into the paste box." },
-          { q: "Is my text uploaded to a server?", a: "Not for Latin, Greek, Cyrillic, Arabic, Hebrew, Devanagari, Tamil, Thai, Chinese, Japanese or Korean text: that PDF is made in your browser. Text with emoji or another script is printed by our own PDF service (not a third party) and deleted right after; the page tells you before you convert." }
+          { q: `Does it work with Arabic, Hindi or Chinese text?`, a: `Yes. Arabic and Hebrew are laid out right to left, Hindi is shaped with its Devanagari conjuncts, and Chinese, Japanese and Korean use Noto Sans SC, JP or KR. Printed by our service, we also checked Bengali, Gurmukhi, Gujarati, Telugu, Kannada, Malayalam, Odia, Sinhala, Myanmar, Khmer, Lao, Ethiopic, Georgian and Armenian.` },
+          { q: `Can I put emoji in the PDF?`, a: `Yes, in color, with skin tones, flags and family sequences. Emoji are printed by our Chromium service with Noto Color Emoji, so the page tells you before converting that your text will be sent there.` },
+          { q: `Is my text uploaded?`, a: `No, unless the text holds emoji, Bengali, another script or a symbol outside the fonts loaded on your device, such as an arrow or a check mark. In that case a note above the options says so before you convert, and the text goes to our Chromium service.` },
+          { q: `Can I change the font or add a title?`, a: `No. The font is Noto, chosen for each script, and there is no title field. You can change the page size, the orientation, the text size from 9 to 24 pt and the margins.` },
         ]}
         tips={[
-          "Line breaks in your original text are preserved as paragraph breaks; long lines wrap automatically to fit the page width.",
-          "Very long text automatically flows onto additional pages, so there's no need to split content yourself.",
-          "For non-.txt files (like .docx), copy the text out and paste it directly instead of trying to upload the file.",
-          "Since font and layout are fixed, this tool suits quick, simple documents rather than styled or branded output."
+          `Need bold text, headings or tables? Write the text in Markdown and use Markdown to PDF.`,
         ]}
       />
     </div>

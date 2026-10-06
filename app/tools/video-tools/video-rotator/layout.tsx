@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Rotator — Rotate Your Video Online Free" },
-  description: "Rotate a video 90°, 180° or 270°: turned picture that plays upright in every player, or instant lossless rotation for MP4 and MOV. Free, full resolution.",
+  title: { absolute: "Video Rotator — Rotate 90°, 180°, 270° or Mirror a Video" },
+  description: "Turn a video 90°, 180° or 270° or mirror it. MP4 and MOV can be rotated losslessly in your browser; other cases are re-encoded on our video service.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-rotator" },
   openGraph: {
-    title: "Video Rotator — Rotate Your Video Online Free",
-    description: "Rotate a video 90°, 180° or 270°: turned picture that plays upright in every player, or instant lossless rotation for MP4 and MOV. Free, full resolution.",
+    title: "Video Rotator — Rotate 90°, 180°, 270° or Mirror a Video",
+    description: "Turn a video 90°, 180° or 270° or mirror it. MP4 and MOV can be rotated losslessly in your browser; other cases are re-encoded on our video service.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-rotator",
   },
 };

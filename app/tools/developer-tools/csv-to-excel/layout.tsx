@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "CSV to Excel — Build an .xlsx or .xls Workbook Online Free" },
-  description: "CSV to Excel builds an .xlsx or legacy .xls workbook from a CSV file or pasted CSV text, entirely in your browser, with automatic delimiter detection — your data is never uploaded to a server.",
+  title: { absolute: "CSV to Excel Converter — XLSX or XLS with Real Number Cells" },
+  description: "Turn a CSV file or pasted CSV into an Excel .xlsx or .xls workbook. Semicolons, decimal commas and Excel CSV encodings are read in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/csv-to-excel" },
   openGraph: {
-    title: "CSV to Excel — Build an .xlsx or .xls Workbook Online Free",
-    description: "CSV to Excel builds an .xlsx or legacy .xls workbook from a CSV file or pasted CSV text, entirely in your browser, with automatic delimiter detection — your data is never uploaded to a server.",
+    title: "CSV to Excel Converter — XLSX or XLS with Real Number Cells",
+    description: "Turn a CSV file or pasted CSV into an Excel .xlsx or .xls workbook. Semicolons, decimal commas and Excel CSV encodings are read in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/csv-to-excel",
   },
 };

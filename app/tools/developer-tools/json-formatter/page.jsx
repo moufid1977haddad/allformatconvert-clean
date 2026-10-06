@@ -54,26 +54,39 @@ export default function JsonFormatterPage() {
       </div>
       <SeoContent
         title="JSON Formatter"
-        description="JSON Formatter checks your JSON with the browser's built-in JSON.parse, then re-indents your original text without re-serializing it — so large numbers like 64-bit IDs, trailing zeros (1.10) and escapes stay exactly as you wrote them — entirely in your browser — nothing is uploaded to a server. Format adds 2-space indentation; Minify strips it back to a single line. Since it uses a real parser, invalid JSON is reliably caught and reported rather than guessed at."
+        description={"JSON Formatter checks your JSON with the browser's JSON.parse, then re-indents the text you pasted instead of rebuilding it from parsed values. That is why 20-digit ids and 1.10 stay exactly as written, and so do escapes unless you sort the keys. Choose 2 spaces, 4 spaces or a tab, tick Sort keys A-Z to order the keys of every object at every depth, or use Minify for a single line. Invalid JSON is reported with its line and column, and the faulty line is shown with a caret under the problem. There is no tree view and no syntax coloring. Validation and re-indenting run in your browser."}
+        example={{
+          caption: "Format with 2 spaces: the 20-digit id and 1.10 are copied, not recalculated.",
+          inputLabel: "Input",
+          input: "{\"id\":12345678901234567890,\"price\":1.10,\"tags\":[\"a\",\"b\"],\"meta\":{}}",
+          outputLabel: "Output",
+          output: "{\n  \"id\": 12345678901234567890,\n  \"price\": 1.10,\n  \"tags\": [\n    \"a\",\n    \"b\"\n  ],\n  \"meta\": {}\n}",
+        }}
+        howToTitle={"How to format and validate JSON"}
         howTo={[
-          "Paste your JSON into the input box.",
-          "Choose the indent (2 spaces, 4 spaces or a tab) and whether to sort the keys A-Z, then click 'Format' for readable JSON, or 'Minify' for a compact single-line version.",
-          "If the JSON is invalid, the error names its line and column and shows that line with a caret under the problem.",
-          "If the JSON is invalid, an 'Invalid JSON' error appears instead of output.",
-          "Click 'Copy' to copy the result to your clipboard."
+          "Paste JSON into \"Input\".",
+          "Choose \"2 spaces\", \"4 spaces\" or \"Tab\" under Indent, and tick \"Sort keys A-Z\" if you want ordered keys.",
+          "Click \"Format\", or \"Minify\" for a single line.",
+          "If the JSON is invalid, read the red line under the boxes: it gives the line and column, and the block below marks the spot with ^.",
+          "Click \"Copy\", or \"Download\" to save \"formatted.json\".",
         ]}
+        specs={[
+          { label: "Input", value: "JSON text, pasted" },
+          { label: "Output", value: "Indented or one-line JSON, saved as formatted.json" },
+          { label: "Indent", value: "2 spaces, 4 spaces or a tab" },
+          { label: "Sort keys A-Z", value: "Every object at every depth, by character code (capitals first); numbers kept, strings re-escaped" },
+          { label: "Length", value: "The code sets no maximum; above 1,000,000 characters the boxes show only the first 20,000 characters" },
+        ]}
+        privacyTitle={"Where your JSON is processed"}
+        privacy={"JSON.parse and the re-indenter are part of the page, so formatting and validation take place in your browser and your JSON is not uploaded. If an Invalid JSON message is displayed, that message, with the quoted part of your JSON, long numbers and addresses removed, is reported to our error log, together with the tool name and your browser's name and version."}
         faqs={[
-          { q: "Is JSON Formatter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it validate my JSON?", a: "Yes — since it uses the browser's real JSON parser, any syntax error causes a clear 'Invalid JSON' message rather than a best-effort guess." },
-          { q: "Can it sort keys or use tabs?", a: "Yes — tick 'Sort keys A-Z' (every object, at every depth; numbers are still written exactly as in your JSON) and choose 2 spaces, 4 spaces or a tab." },
-          { q: "Does it support a tree view or syntax highlighting?", a: "No, output is plain indented or minified text in a textarea — there's no collapsible tree view or colored syntax highlighting." },
-          { q: "Is my data uploaded to a server?", a: "No, formatting and minifying both happen entirely in your browser." }
+          { q: "Does it show where my JSON is invalid?", a: "Yes. Click \"Format\" and the message gives the line and column of the first error, while the box below shows that line with a caret under the problem. Trailing commas, single quotes and unquoted keys are the usual causes." },
+          { q: "Will formatting change my numbers?", a: "No. The output is built from your original text, so 12345678901234567890 and 1.10 are copied as typed, whereas re-serializing would print 12345678901234567000 and 1.1. With Sort keys A-Z, numbers stay exact but escapes such as \\u00e9 are rewritten as the character." },
+          { q: "Does Sort keys A-Z ignore case?", a: "No. Keys are ordered by character code at every depth, so capitals come first: B sorts before a. If a key appears twice in one object, only its last value is kept. Arrays keep their original order." },
+          { q: "Is there a tree view?", a: "No. The output is plain text in a box, with no collapsible tree and no colors. The indentation, and the caret shown for an error, are the only guides." },
         ]}
         tips={[
-          "If you get 'Invalid JSON', check for common issues like trailing commas, single quotes instead of double quotes, or unquoted keys — none of which are valid JSON.",
-          "Format and Minify are reversible: format minified JSON to read it, or minify formatted JSON to compact it back down.",
-          "There's no file upload or download — paste JSON in and copy the result out.",
-          "For very large JSON, formatting and minifying both run synchronously in your browser, so extremely large input may briefly freeze the page."
+          "A JSON file that starts with a byte order mark is rejected here as invalid; JSON Minifier and Code Formatter remove that mark first.",
         ]}
       />
     </div>

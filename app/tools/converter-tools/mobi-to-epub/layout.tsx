@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "MOBI to EPUB — Convert Your Kindle Ebook Online Free" },
-  description: "MOBI to EPUB converts your Kindle ebook into a real, standards-compliant EPUB file entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "MOBI to EPUB Converter — Also AZW3, AZW and PRC, No Upload" },
+  description: "Turn a DRM-free MOBI, AZW, AZW3 or PRC ebook into an EPUB 3 file with its chapters, images, cover and table of contents, rebuilt in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/converter-tools/mobi-to-epub" },
   openGraph: {
-    title: "MOBI to EPUB — Convert Your Kindle Ebook Online Free",
-    description: "MOBI to EPUB converts your Kindle ebook into a real, standards-compliant EPUB file entirely in your browser — nothing is uploaded to a server.",
+    title: "MOBI to EPUB Converter — Also AZW3, AZW and PRC, No Upload",
+    description: "Turn a DRM-free MOBI, AZW, AZW3 or PRC ebook into an EPUB 3 file with its chapters, images, cover and table of contents, rebuilt in your browser.",
     url: "https://www.onlineconvertools.com/tools/converter-tools/mobi-to-epub",
   },
 };

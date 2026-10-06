@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Unlock — Decrypt a Password-protected PDF Online Free" },
-  description: "PDF Unlock decrypts a password-protected PDF using the password you provide, entirely in your browser — no upload needed.",
+  title: { absolute: "Unlock PDF — Remove a Password You Know" },
+  description: "Remove the open password or the print and copy restrictions from a PDF when you know the password, keeping its bookmarks and form fields.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-unlock" },
   openGraph: {
-    title: "PDF Unlock — Decrypt a Password-protected PDF Online Free",
-    description: "PDF Unlock decrypts a password-protected PDF using the password you provide, entirely in your browser — no upload needed.",
+    title: "Unlock PDF — Remove a Password You Know",
+    description: "Remove the open password or the print and copy restrictions from a PDF when you know the password, keeping its bookmarks and form fields.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-unlock",
   },
 };

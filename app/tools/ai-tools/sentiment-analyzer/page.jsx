@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPromptLength } from '@/lib/quota/limits';
+import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 import { readAiJson } from '../../../lib/aiClient';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -59,24 +59,30 @@ export default function SentimentAnalyzerPage() {
       </div>
       <SeoContent
         title="Sentiment Analyzer"
-        description="Sentiment Analyzer is a free online tool that uses OpenAI's GPT-4o mini model to judge whether a piece of text is Positive, Negative, or Neutral, along with a confidence estimate and an explanation of the key sentiment indicators it found. It's useful for businesses, researchers, and content creators reviewing customer feedback, reviews, or social posts."
+        description={`Sentiment Analyzer reads a piece of text, such as a customer review, a comment or a support message, and says whether its overall tone is Positive, Negative or Neutral. The answer, written by OpenAI's GPT-4o mini, also gives a confidence percentage and the phrases that point to that sentiment. The percentage is the model's own estimate, not a measured accuracy. Your text goes through our server to OpenAI. One text per request, up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters; there is no batch mode and no spreadsheet import.`}
+        howToTitle="How to analyze the sentiment of a text"
         howTo={[
-          "Paste or type the text you want to analyze into the text area.",
-          "Click the 'Analyze Sentiment' button to send it to the AI.",
-          "Wait a moment while the AI processes your text.",
-          "Read the result, which includes the sentiment classification, a confidence estimate, and the reasoning behind it."
+          "Paste one review or message into the \"Paste text to analyze sentiment...\" box.",
+          "Click \"Analyze Sentiment\".",
+          "Read the verdict, the confidence percentage and the explanation under \"Result\".",
+          "Click \"Copy\" or \"Download\" (sentiment.txt) to keep the analysis."
         ]}
+        specs={[
+          { label: "Input", value: `One review or message, up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters` },
+          { label: "Output", value: "Positive, Negative or Neutral, a confidence percentage and the key indicators, in plain text" },
+          { label: "Batch", value: "No; one text per request" },
+          { label: "Usage limits", value: "Hourly and daily request limits per connection, shared with the site's other paid tools, and a monthly site budget" }
+        ]}
+        privacyTitle="Where your text is processed"
+        privacy="Your text goes to our server and from there to OpenAI's GPT-4o mini, which returns the analysis. Each review is a separate request, and nothing from one analysis is kept for the next: we store neither the text nor the result. When you analyze customer messages, remove names and contact details first."
         faqs={[
-          { q: "Is Sentiment Analyzer really free to use?", a: "Yes, Sentiment Analyzer is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "What languages does Sentiment Analyzer support?", a: "It works best with English, but the underlying AI model can generally handle many other languages as well, with results that may vary in accuracy." },
-          { q: "How accurate is the sentiment analysis?", a: "There's no fixed accuracy figure — results depend on the AI model's interpretation of context, and it can misjudge sarcasm or ambiguous phrasing like any sentiment analysis tool." },
-          { q: "Can I analyze multiple texts at once?", a: "No, the tool processes one text submission at a time — there's no bulk or batch processing option." }
+          { q: "Is the confidence percentage a measured accuracy?", a: "No. It is the model's own estimate of how sure it is, written into its answer. The tool does not compute it, so two runs on the same text can give different figures." },
+          { q: "Can I analyze many reviews at once?", a: "No. The page sends one text per request. If you paste several reviews together, you get one overall verdict for all of them; paste them one at a time to classify each review." },
+          { q: "Does it understand sarcasm?", a: "No, not reliably. Irony, sarcasm and mixed reviews, such as praise for a product with complaints about delivery, can be misread. Read the explanation in the result to see which words led to the verdict." },
+          { q: "Which languages can I analyze?", a: "Any language you paste: the page neither sets nor blocks one, and the text goes to the model as it is. The site has not measured accuracy by language, so read results in languages other than English with extra care." }
         ]}
         tips={[
-          "For more accurate results, provide complete sentences rather than single words or fragments.",
-          "The tool works best with clear, straightforward language; heavily sarcastic or ironic text may be misclassified.",
-          "Read the AI's explanation alongside the classification to understand which words influenced the result.",
-          "Analyze feedback one piece at a time and keep your own log if you want to track sentiment trends over time."
+          "Split a review that praises one thing and criticizes another into two parts to see each sentiment separately."
         ]}
       />
     </div>

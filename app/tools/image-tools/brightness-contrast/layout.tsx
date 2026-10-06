@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Brightness and Contrast — Let You Adjust an Image's" },
-  description: "Brightness and Contrast lets you adjust an image's brightness and contrast with two sliders, applied via the browser's canvas filter, entirely on your device.",
+  title: { absolute: "Brightness, Contrast & Saturation — Adjust a Photo Free" },
+  description: "Lighten, darken, add contrast or saturation to a photo with three sliders from 0 to 200%. The math of the CSS filters, run in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/brightness-contrast" },
   openGraph: {
-    title: "Brightness and Contrast — Let You Adjust an Image's",
-    description: "Brightness and Contrast lets you adjust an image's brightness and contrast with two sliders, applied via the browser's canvas filter, entirely on your device.",
+    title: "Brightness, Contrast & Saturation — Adjust a Photo Free",
+    description: "Lighten, darken, add contrast or saturation to a photo with three sliders from 0 to 200%. The math of the CSS filters, run in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/brightness-contrast",
   },
 };

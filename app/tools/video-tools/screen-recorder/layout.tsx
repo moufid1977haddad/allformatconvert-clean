@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Screen Recorder — Record Screens Online Free" },
-  description: "Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs.",
+  title: { absolute: "Screen Recorder — Record Screen, Tab and Mic to MP4" },
+  description: "Record a screen, window or tab, with tab or system sound on Chrome and Edge and your mic. Saves MP4 where the browser can; Firefox WebM converts to MP4.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/screen-recorder" },
   openGraph: {
-    title: "Screen Recorder — Record Screens Online Free",
-    description: "Screen Recorder captures your screen, window, or browser tab using the browser's built-in screen-sharing and MediaRecorder APIs.",
+    title: "Screen Recorder — Record Screen, Tab and Mic to MP4",
+    description: "Record a screen, window or tab, with tab or system sound on Chrome and Edge and your mic. Saves MP4 where the browser can; Firefox WebM converts to MP4.",
     url: "https://www.onlineconvertools.com/tools/video-tools/screen-recorder",
   },
 };

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Forms — Read the Existing Fillable Fields Online Free" },
-  description: "PDF Forms reads the existing fillable fields from a PDF you upload and lets you type a value into each one, entirely in your browser.",
+  title: { absolute: "Fill PDF Forms — Text, Checkboxes, Lists, Flatten" },
+  description: "Fill the existing fields of a PDF form, from text boxes to radio buttons and lists, keep it fillable or flatten it, then save the completed copy.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-forms" },
   openGraph: {
-    title: "PDF Forms — Read the Existing Fillable Fields Online Free",
-    description: "PDF Forms reads the existing fillable fields from a PDF you upload and lets you type a value into each one, entirely in your browser.",
+    title: "Fill PDF Forms — Text, Checkboxes, Lists, Flatten",
+    description: "Fill the existing fields of a PDF form, from text boxes to radio buttons and lists, keep it fillable or flatten it, then save the completed copy.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-forms",
   },
 };

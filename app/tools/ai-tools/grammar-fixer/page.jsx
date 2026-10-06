@@ -1,7 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPromptLength } from '@/lib/quota/limits';
+import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 import { changes, applyChoices } from './diff';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -115,25 +115,33 @@ export default function GrammarFixerPage() {
       </div>
       <SeoContent
         title="Grammar Fixer"
-        description="Grammar Fixer is a free online tool that uses OpenAI's GPT-4o mini model to correct spelling, punctuation, and grammatical errors in your writing. Paste your text and see every correction in place — removed words struck through, added words underlined — then keep or undo each one before copying the result."
+        description={`Grammar Fixer corrects spelling, grammar, agreement and clearly wrong punctuation with minimal edits, using OpenAI's GPT-4o mini. The model is told not to rewrite, rephrase or translate, and to leave correct sentences exactly as written. The result is shown word by word in your text, removed words struck through in red and added words underlined in green, and each change can be undone. The text you copy or download as corrected.txt contains only the changes you kept. Your text goes through our server to OpenAI, up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters per request.`}
+        howToTitle="How to fix grammar and spelling"
         howTo={[
-          "Paste or type your text directly into the input field.",
-          "Click the 'Fix Grammar' button to send it to the AI.",
-          "Review the changes: removed words are struck through in red, added words underlined in green.",
-          "Click any change to undo it (click again to restore it), or use Keep all / Undo all, then copy the result."
+          "Paste your text into the \"Paste text to fix grammar...\" box.",
+          "Click \"Fix Grammar\".",
+          "Review each change in place, and click one to undo it (click again to restore it).",
+          "Use \"Keep all\" or \"Undo all\" to decide in one step.",
+          "Click \"Copy\" or \"Download\" to get corrected.txt with the changes you kept."
         ]}
+        specs={[
+          { label: "Input", value: `Text to proofread, up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters` },
+          { label: "Corrections", value: "Spelling, grammar, agreement, verb forms, wrong or missing words and clearly wrong punctuation; no style or word-choice changes" },
+          { label: "Output", value: "Your text with the changes you kept, to copy or download as a .txt file" },
+          { label: "Languages", value: "Tested on English and ten other languages; a notice appears for Japanese, Chinese, Russian, Hindi and Turkish, where corrections were less reliable" },
+          { label: "Usage limits", value: "Per-connection hourly and daily limits, shared with the site's other paid tools, and a monthly budget for the whole site" }
+        ]}
+        privacyTitle="Where your text is processed"
+        privacy="Your text is sent to our server and then to OpenAI's GPT-4o mini, which returns a corrected copy. Only the correction request goes to our server: the comparison that marks each change runs in your browser, and undoing or restoring a change sends nothing more. We do not store your text."
         faqs={[
-          { q: "Is Grammar Fixer really free to use?", a: "Yes, Grammar Fixer is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "What types of errors does Grammar Fixer detect?", a: "It can catch spelling mistakes, punctuation errors, subject-verb agreement issues, and other common grammatical mistakes as part of rewriting your text." },
-          { q: "Can I see what was changed?", a: "Yes. Every change is shown word by word in your text, and each one can be undone on its own; the text you copy includes only the changes you kept. Undoing them all gives back your original text exactly." },
-          { q: "Is my text private when using Grammar Fixer?", a: "Your text is sent to OpenAI's API to generate the correction. It is not stored on our servers or shared for any purpose beyond producing your result." },
-          { q: "Which languages does Grammar Fixer handle well?", a: "English best: in our tests it fixed 25 of 25 typical errors and left correct text untouched. We also measured Portuguese, German, Italian, Spanish and Arabic on published learner texts, where it corrects most errors while changing few correct sentences. In Russian, Chinese, Japanese, Hindi and Turkish, corrections are less reliable — some correct sentences get changed — and the page says so when your text is in one of these languages. Every change is shown and can be undone." }
+          { q: "Will it rewrite my sentences?", a: "No. The model is told to make minimal edits, not to paraphrase, reorder or change style, and to leave correct sentences as written. If it still changes something you wanted to keep, click that change to undo it." },
+          { q: "Can I see what was changed?", a: "Yes. Every change appears in place, removed words struck through and added words underlined, with a count of changes kept and undone. Undoing all of them gives back your original text exactly." },
+          { q: "How well does it work in English?", a: "25 of 25 typical errors were corrected in our English test of 28/09/2026, and a text without errors came back unchanged. It is a small test, so keep reviewing each change before you copy the result." },
+          { q: "How reliable is it in other languages?", a: "29 of 40 learner sentences were corrected exactly in Portuguese and 16 to 17 in German, but 11 in Spanish, 9 in Italian and 6 in Arabic. Japanese, Chinese, Russian, Hindi and Turkish texts get a notice on the page that corrections are less reliable." }
         ]}
         tips={[
-          "For best results, paste complete sentences or paragraphs rather than single words, so the AI has context.",
-          "Check each highlighted change: AI edits can occasionally change meaning, and you can undo just that one.",
-          "Use Grammar Fixer before submitting important documents like resumes, cover letters, or professional emails.",
-          "Combine Grammar Fixer with your own proofreading to catch style issues the AI might miss."
+          "Undo any change the tool made to a name, a brand or a technical term it did not recognise.",
+          "If you want new wording rather than corrections, use AI Paraphraser instead."
         ]}
       />
     </div>

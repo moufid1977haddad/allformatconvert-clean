@@ -17,7 +17,7 @@ export default function ScssToCssPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">SCSS to CSS</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert SCSS to CSS format</p>
+        <p className="text-neutral-500 text-center mb-8">Compile SCSS to CSS with Dart Sass</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm text-neutral-500 mb-1">SCSS Input</label><TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste SCSS here..." value={input} onChange={e => setInput(e.target.value)} /></div>
@@ -33,22 +33,37 @@ export default function ScssToCssPage() {
       </div>
       <SeoContent
         title={"SCSS to CSS"}
-        description={"SCSS to CSS compiles SCSS with Dart Sass, the official Sass compiler, entirely in your browser. Everything Sass supports works: variables, nesting and the & parent selector, mixins with arguments, @extend, functions, control flow (@if, @each, @for), maps and built-in modules (sass:math, sass:color…). Output is expanded or compressed CSS; an undefined variable or a syntax error is reported with its line, as Sass reports it, instead of producing broken CSS."}
+        description={"SCSS to CSS compiles SCSS with Dart Sass, the reference Sass compiler, inside your browser. Variables, nesting with &, mixins, functions, @extend, @if, @each and @for, maps and the built-in modules loaded with @use, such as sass:math or sass:color, all work. Choose expanded CSS to read or compressed CSS to ship. A Sass error, such as an undefined variable, replaces the output with Sass's own message, which shows the line and column. Only the pasted code is compiled: imports of other files fail, and the indented .sass syntax is not accepted."}
+        example={{
+          caption: "Expanded output; math.div comes from the sass:math module.",
+          inputLabel: "SCSS Input",
+          input: "@use \"sass:math\";\n$gap: 12px;\n.card {\n  padding: math.div($gap, 2);\n  .title { font-weight: 600; }\n  &:hover { padding: $gap; }\n}",
+          outputLabel: "CSS Output",
+          output: ".card {\n  padding: 6px;\n}\n.card .title {\n  font-weight: 600;\n}\n.card:hover {\n  padding: 12px;\n}",
+        }}
+        howToTitle={"How to compile SCSS to CSS"}
         howTo={[
-          "Paste your SCSS into the input box.",
-          "Choose expanded (readable) or compressed (minified) output.",
-          "Click 'Convert'.",
-          "Click 'Copy' to copy the CSS."
+          "Paste your SCSS into \"SCSS Input\".",
+          "Pick \"Expanded\" for readable CSS or \"Compressed\" for a single line.",
+          "Click \"Convert\"; the CSS, or Sass's error message, appears in \"CSS Output\".",
+          "Click \"Copy\", or \"Download\" to save \"styles.css\".",
         ]}
+        specs={[
+          { label: "Input", value: "SCSS syntax as text (not the indented SASS syntax)" },
+          { label: "Output", value: "CSS, expanded or compressed, saved as styles.css" },
+          { label: "Compiler", value: "Dart Sass, sass package 1.105.0" },
+          { label: "Modules", value: "Built-in ones only (sass:math, sass:color…); @import or @use of your own files stops with Can't find stylesheet to import" },
+        ]}
+        privacyTitle={"Where your code is processed"}
+        privacy={"Dart Sass, compiled to JavaScript, runs in your browser once you click \"Convert\", so the stylesheet you paste stays on your device. Error reports are the exception: when compilation fails, Sass's error message is sent, trimmed, to our error log with the tool name and your browser's name and version, and that message can quote the line of SCSS where the error is. An unexpected failure of the page is also reported, with the same details."}
         faqs={[
-          { q: "Is SCSS to CSS free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is it a real Sass compiler?", a: "Yes — it runs Dart Sass, the reference implementation maintained by the Sass team, compiled to JavaScript." },
-          { q: "Does it support @use and @import of other files?", a: "Built-in modules (@use \"sass:math\") work; importing your own files isn't possible because only the pasted code is available." },
-          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; the engine is downloaded once when you first click." }
+          { q: "Is it a real Sass compiler?", a: "Yes. It runs Dart Sass, the implementation maintained by the Sass team, compiled to JavaScript, so variables, mixins, @extend, control flow and built-in modules behave as in the sass command-line tool." },
+          { q: "Can I use @import or @use with my own partials?", a: "No. Only the pasted code exists here, so importing a partial stops with Can't find stylesheet to import. Built-in modules such as sass:math do load. Paste the content of your partials above your code instead." },
+          { q: "Does it accept the indented .sass syntax?", a: "No. The compiler is called with SCSS syntax only, so code written without braces and semicolons is reported as an error. Convert indented Sass to SCSS before pasting it." },
         ]}
         tips={[
-          "Use compressed output for production and expanded output to read the result.",
-          "Errors show the line and column Sass reports — fix the SCSS and convert again."
+          "Errors point to line:column in your input: fix the SCSS there and click \"Convert\" again.",
+          "Use Compressed for files you deploy and Expanded when you want to review the generated selectors.",
         ]}
       />
     </div>

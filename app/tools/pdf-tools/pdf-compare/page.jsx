@@ -119,23 +119,30 @@ export default function Page() {
       </div>
       <SeoContent
         title="Compare PDF"
-        description={"Compare PDF extracts the text of two PDF files entirely in your browser with PDF.js, keeping each line of the page, then highlights the differences line by line with the Myers diff algorithm — lines only in the first PDF in red, lines only in the second in green, spacing ignored — and shows both full texts side by side. It compares text, not layout or images; scanned PDFs without a text layer have no text to compare."}
+        description={`Compare PDF reads the text of two PDF files and lists the lines that differ: lines found only in the first file are shown in red, lines only in the second in green, and inside a changed line the words that differ are highlighted. Each line carries the number of the page it comes from, and spacing differences are ignored. Both full texts are then shown side by side. It compares text only, not layout, images or fonts, and a scanned PDF has no text to compare. PDF.js reads both files inside your browser tab.`}
+        howToTitle="How to compare two PDF files"
         howTo={[
-          "Click the left box and upload your first PDF file.",
-          "Click the right box and upload your second PDF file.",
-          "Click 'Compare PDFs' to extract the text from both files.",
-          "Read the highlighted differences, then the full texts side by side if needed."
+          `Click the left box and choose the first PDF, for example the older version.`,
+          `Click the right box and choose the second PDF.`,
+          `Click "Compare PDFs".`,
+          `Read the count of changed lines and the red and green lines with their page numbers, then the two full texts below for context; nothing is downloaded.`,
         ]}
+        specs={[
+          { label: 'Input', value: `Two PDF files, one in each box` },
+          { label: 'Result', value: `On-screen list of differences and both texts; no file to download` },
+          { label: 'Compared', value: `Text lines, with spacing ignored; layout, pictures and fonts are not compared` },
+          { label: 'Scanned PDFs', value: `No text to compare: the page says which file has none, or that neither has, and suggests PDF OCR` },
+        ]}
+        privacy={`Both PDFs are read in your browser by PDF.js; the files and their text are not uploaded to our servers. If the page shows an error, a cleaned copy of that message, the tool's name and your browser's name and version are reported to us so it can be fixed; your files and their text are never part of that report.`}
         faqs={[
-          { q: "Is PDF Compare free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it highlight the differences between the two documents?", a: "Yes — after the comparison, lines found only in the first PDF are shown in red and lines found only in the second in green, using the Myers diff algorithm (as Diffchecker and git); inside a changed line the words that differ are highlighted, and each line shows its page number. Spacing differences are ignored. The full text of both PDFs is also shown side by side." },
-          { q: "Are my files uploaded to a server?", a: "No, text extraction happens entirely in your browser using the PDF.js library." },
-          { q: "Can it compare scanned PDFs?", a: "Not usefully — extraction only pulls text that's actually embedded in the file. Scanned or image-only pages have no text layer, so those panels will come out empty." }
+          { q: "Does it also show which words changed inside a line?", a: `Yes. A line found only in one file is colored red or green, and when a removed line pairs with an added one, the words that differ inside them are highlighted. Each line also shows the page it comes from, so you can find it in the original document.` },
+          { q: "Can I compare two scanned PDFs?", a: `No. A scan stores pictures of pages, not text, so there is nothing to compare. With two scans, the page says that neither PDF has text; run both through PDF OCR to get searchable PDFs, then compare those copies instead.` },
+          { q: "Are changes in spacing reported as differences?", a: `No. Before the comparison, each line is trimmed and runs of spaces are reduced to one, so spacing alone never counts. Text that moved to another line can still appear as one line removed and one line added.` },
+          { q: "Does it compare formatting, pictures or layout?", a: `No. Only the text that PDF.js reads from each page is compared. A new font, a moved picture or a different color with the same words gives no difference, and lines follow the order in which each file stores its text.` },
         ]}
         tips={[
-          "Works best on text-based PDFs; scanned documents without a text layer won't produce readable output.",
-          "Only raw text is extracted — page layout, images, and formatting are not compared.",
-          "For long documents, use your browser's find (Ctrl/Cmd+F) inside each panel to jump to a specific term."
+          `Put the older version in the left box: lines that were removed then show in red, new lines in green.`,
+          `For two scanned versions of a contract, run PDF OCR on both first, then compare the searchable copies.`,
         ]}
       />
     </div>

@@ -332,29 +332,32 @@ export default function ImageCompressorPage() {
       </div>
       <SeoContent
         title="Image Compressor"
-        description="Image Compressor shrinks JPG, PNG and WebP images entirely in your browser — your images are never uploaded. JPGs are re-encoded with MozJPEG, the encoder behind the best online compressors; PNGs stay PNG with their transparency, reduced to the smallest colour palette that keeps the quality you chose; WebPs stay WebP; SVGs stay vector, minified with SVGO, and are only offered once the tool has checked they draw exactly like the original. In our tests on a real photo, the default setting produced a file the same size and quality as the leading online compressor's."
+        description={`Image Compressor makes JPG, PNG, WebP, AVIF and SVG files smaller without changing their format, and without changing their dimensions unless you choose to reduce an oversized image. JPGs are re-encoded with MozJPEG; a PNG keeps its transparency and gets the smallest colour palette that still meets the quality you set; WebP and AVIF stay WebP and AVIF; an SVG stays vector, is minified with SVGO and is only offered if it draws the same as the original. Other images your browser can open, such as BMP, become JPG. If a result would not be smaller, you get no file, just a message. A background worker does the encoding.`}
+        example={{ caption: 'Measured on 23 September 2026 at the default setting (78), against iLoveIMG on the same files (docs/audit/RAPPORT-ecarts-marche.md, §3b).', inputLabel: 'Original files', input: 'Photo, JPEG, 491 KB\nAlready compressed JPEG, 149 KB\nTransparent PNG, 987 KB', outputLabel: 'Our result (iLoveIMG)', output: '209,692 bytes (209,154)\n145,480 bytes (144,293)\n135,368 bytes (170,281)' }}
+        howToTitle="How to compress images"
         howTo={[
-          `Click the upload area and choose one or more images (up to ${MAX_FILES}).`,
-          `Set the quality slider — ${DEFAULT_QUALITY}% is the recommended balance; 100% makes PNGs lossless.`,
-          "Click 'Compress' and watch each image's before/after size.",
-          "Download each image, or all of them at once as a ZIP."
+          `Click the upload area and choose up to ${MAX_FILES} images.`,
+          `Keep "By quality" and set the slider (${DEFAULT_QUALITY} is the recommended balance), or choose "To a size of" and type a size in KB.`,
+          `Click "Compress image" (or "Compress" followed by the number of images) and watch each size before and after.`,
+          `Click "Download" for each image, or "Download all" for compressed-images.zip.`
         ]}
+        specs={[
+          { label: 'Input formats', value: `JPG, PNG, WebP, AVIF, SVG; other browser-readable images become JPG` },
+          { label: 'Images at once', value: `Up to ${MAX_FILES}` },
+          { label: 'Largest image', value: `${MAX_MP} megapixels on a computer, ${PHONE_MAX_MP} on phones, iPhone and iPad; a larger one can be reduced first in the same step` },
+          { label: 'Refused', value: `Animated GIF, animated PNG and animated WebP, with a message pointing to GIF Compressor` }
+        ]}
+        privacy={`Compression runs in a background worker of your browser, with encoders (MozJPEG, OxiPNG, libwebp, libavif) downloaded from our site the first time they are needed. Your images are not uploaded. The messages shown next to each image are not reported; a page-level error (too many files, the engine stopping) or a crash sends a cleaned report with the tool's name and your browser's name and version.`}
         faqs={[
-          { q: "Is Image Compressor free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "Which formats does it compress?", a: "JPG, PNG, WebP, AVIF and SVG, each kept in its own format. Other images your browser can open (BMP, a still GIF…) are converted to JPG, on a white background, and the result says so. An animated GIF is not turned into a still picture: the page sends you to our GIF Compressor, which keeps the animation." },
-          { q: "Will compression affect image quality?", a: "Below 100%, yes, a little: that is how the file gets smaller. At the default setting the difference is hard to see on a photo. For PNGs, 100% is fully lossless; if no palette can keep the quality you chose, the PNG is repacked losslessly instead." },
-          { q: "Does it keep transparency?", a: "Yes for PNG and WebP. Transparent areas of other formats become white, since they are saved as JPG." },
-          { q: "Can I compress an image to a given size, like 100 KB?", a: "Yes, for JPG, WebP and AVIF: choose 'To a size of' and type the size. The highest quality that fits is found automatically. The picture keeps its dimensions: if even the lowest quality is too big, the page says so and you can make it smaller first with Image Resizer. A PNG is compressed at the quality you set." },
-          { q: "How are SVG files compressed?", a: "They stay vector: SVGO, the standard SVG optimiser, removes editor metadata, shortens numbers and ids and merges what can be merged — the same method the leading online compressor uses (in our test on the Tux SVG: 48.8 KB → 35.1 KB, identical to theirs within 4 bytes). Before offering the file, the tool draws both versions and compares them pixel by pixel; if they differ, it tries a more cautious setting, and if that still differs it keeps your original. The quality slider does not apply to SVG." },
-          { q: "Is there a size limit?", a: `Each image can be up to ${MAX_MP} megapixels on a computer and ${PHONE_MAX_MP} on a phone (48 MP phone photos fit). A phone browser reloads a page that needs more memory than it gives, so a larger image (a panorama, a 108 MP photo) is named as soon as you choose it, and one button reduces it to ${PHONE_REDUCE_MP} MP (${MAX_MP} MP on a computer) and compresses it in the same step.` },
-          { q: "Can I compress multiple images at once?", a: `Yes, up to ${MAX_FILES} at a time, then download them one by one or together as a ZIP.` },
-          { q: "Are my images uploaded?", a: "No. Everything runs in your browser, in a background worker; your images never leave your device." }
+          { q: "Can I compress an image to a size like 100 KB?", a: `Yes. Choose "To a size of", type 100 in the KB box and compress. For JPG, WebP and AVIF the highest quality between 10 and 95 that fits is found automatically, without shrinking the picture; if even quality 10 is too big, the result says so and suggests Image Resizer. A PNG uses the slider instead.` },
+          { q: "Does compression lower the image quality?", a: `Yes for JPG, WebP and AVIF, at every setting: they are always re-encoded with loss, slightly at high values. A PNG at quality 100 is repacked without any loss, and so is a PNG for which no palette reaches the chosen quality.` },
+          { q: "Does an SVG stay a vector file?", a: `Yes. SVGO removes editor metadata, shortens numbers and ids and merges what it can. Both versions are then drawn and compared, with small anti-aliasing differences tolerated; if the drawing changed, a more cautious setting is tried, and if that changes it too, your original is kept.` },
+          { q: "Is there a limit on image size?", a: `Yes. Up to ${MAX_MP} megapixels on a computer and ${PHONE_MAX_MP} on a phone, iPhone or iPad, where a page that needs more memory gets reloaded. A larger image is named as soon as you choose it, and a button reduces it and compresses it in one step.` },
+          { q: "Does it keep transparency and photo orientation?", a: `Yes. PNG, WebP, AVIF and SVG keep their transparency; images converted to JPG get a white background. Photos stay the right way up, while their EXIF details, such as GPS location and camera model, are removed.` }
         ]}
         tips={[
-          "If an image is already heavily compressed, the tool tells you instead of handing back a larger file.",
-          "Photos shrink the most as JPG; logos, screenshots and graphics with few colours shrink the most as PNG.",
-          "Phone photos keep their orientation, and their location and camera details (EXIF) are removed.",
-          "Keep your original file as a backup in case you need the full-quality version later."
+          `If an image is reported as already well compressed, lower the slider and compress it again.`,
+          `On an iPhone, pick the photo through Files rather than the photo library to compress the original file; the page explains how.`
         ]}
       />
     </div>

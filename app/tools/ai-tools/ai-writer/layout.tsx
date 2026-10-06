@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "AI Writer — Use Openai's Gpt-4o Mini Model Online Free" },
-  description: "AI Writer is a free online tool that uses OpenAI's GPT-4o mini model to generate written content from a simple description.",
+  title: { absolute: "AI Writer — Draft Text from a Short Description" },
+  description: "Describe what you need, from a blog intro to product copy, and get a first draft from GPT-4o mini, ready to copy or save as a .txt file.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/ai-writer" },
   openGraph: {
-    title: "AI Writer — Use Openai's Gpt-4o Mini Model Online Free",
-    description: "AI Writer is a free online tool that uses OpenAI's GPT-4o mini model to generate written content from a simple description.",
+    title: "AI Writer — Draft Text from a Short Description",
+    description: "Describe what you need, from a blog intro to product copy, and get a first draft from GPT-4o mini, ready to copy or save as a .txt file.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/ai-writer",
   },
 };

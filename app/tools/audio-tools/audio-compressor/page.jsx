@@ -142,25 +142,32 @@ export default function AudioCompressorPage() {
       </div>
       <SeoContent
         title="Audio Compressor"
-        description="Audio Compressor reduces an audio file's size by re-encoding it at a lower bitrate (64–320 kbps) using ffmpeg.wasm in your browser (Opus is encoded at the chosen bitrate by our own server with libopus, then deleted). Note: this is bitrate-based file-size compression — it does not apply dynamic-range compression (threshold/ratio/attack/release) despite the tool's name. Output format is your choice among the bitrate-controllable codecs (MP3, AAC, M4A, OGG, Opus, WMA, AC3) — lossless formats like WAV and FLAC aren't offered here since a bitrate target doesn't apply to them."
+        description={`Audio Compressor shrinks one audio file by re-encoding it at a lower bitrate. Pick 64, 96, 128, 192, 256 or 320 kbps; when ffmpeg can read your file's own bitrate, the tool never encodes above it, which keeps most small voice memos from growing, and the page says when the result is still larger. Mono and a lower sample rate make speech files smaller still. It writes nine lossy formats where a bitrate counts: MP3, AAC, M4A, OGG, Opus, WMA, AC3, M4B and MP2. It does not touch loudness or dynamic range. Every format but Opus is encoded by ffmpeg.wasm in the page; Opus is handed to our media service.`}
+        howToTitle="How to compress an audio file"
         howTo={[
-          "Click the upload area and select an audio file.",
-          "Choose a target bitrate from the presets (64k–320k).",
-          "Pick an output format — MP3 is the most universally compatible.",
-          "Click \"Compress Audio\": the file is re-encoded in your browser (Opus by our own server, then deleted).",
-          "Compare the before/after size and download the result."
+          `Pick or drop the audio file you want to make smaller.`,
+          `Choose a value under "Bitrate", from 64 to 320 kbps.`,
+          `For speech, tick "Mono (half the data for speech)" or choose a lower "Sample rate".`,
+          `Pick the "Output Format" and click "Compress Audio".`,
+          `Compare the "Original" and "Compressed" sizes, then click "Download".`,
         ]}
+        specs={[
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Output formats`, value: `MP3, AAC, OGG (Vorbis), M4A, Opus, WMA, AC3, M4B, MP2` },
+          { label: `Bitrate`, value: `64, 96, 128, 192, 256 or 320 kbps, lowered to the source's own bitrate when ffmpeg can read it and it is lower (never under 8 kbps)` },
+          { label: `Sample rate`, value: `Keep the original, or 48, 44.1, 32, 22.05, 16 or 8 kHz; OGG, AC3 and MP2 take only 48, 44.1 or 32 kHz. Mono and sample rate are not offered for Opus.` },
+          { label: `Usage limits`, value: `Opus only: jobs per connection are limited per hour and per day, and the decoded audio sent to our media service has a maximum size and length.` },
+        ]}
+        privacy={`Compression runs in your browser with ffmpeg.wasm, fetched from unpkg.com, except when you choose Opus. Then the audio is decoded here to FLAC and sent to our media service, which encodes it with libopus at your bitrate; the decoded copy is deleted there when encoding ends, and the compressed file after your browser has downloaded it or a set time. If compression fails, the cleaned error message, the tool name, the file extension, a size range and your browser's name and version are reported to us.`}
         faqs={[
-          { q: "Does this apply dynamic-range compression?", a: "No — despite the name, this tool re-encodes your audio at a lower bitrate to shrink file size. It doesn't touch the audio's dynamic range (loud vs. quiet parts)." },
-          { q: "What output format do I get?", a: "Your choice among MP3, AAC, M4A, OGG, Opus, WMA, and AC3 — all bitrate-controllable, lossy codecs where a lower bitrate actually shrinks the file. Lossless formats (WAV, FLAC) aren't offered since bitrate compression doesn't apply to them." },
-          { q: "Is there a file size limit?", a: "No hard limit is enforced by the tool — very large files are limited only by your browser's available memory." },
-          { q: "Is my file uploaded anywhere?", a: "For every format except Opus, no: processing happens in your browser via ffmpeg.wasm. For Opus, the processed audio is sent to our own server (not a third party), encoded with the reference libopus encoder (the in-browser one is not as good), and deleted as soon as you have downloaded the result." }
+          { q: `Does this compress the dynamic range (loud versus quiet)?`, a: `No. Despite the name, it only lowers the bitrate to make the file smaller. Loud and quiet passages keep their levels. To even out loudness instead, use the normalization option of Audio Booster.` },
+          { q: `Can the result be larger than my file?`, a: `Yes, when your file is already well compressed. The page then shows "Larger by" and advises keeping your original. To avoid most such cases, the tool never encodes above the bitrate your file already has, when ffmpeg can read it, and says so when it lowered your choice.` },
+          { q: `Can I compress to WAV or FLAC?`, a: `No, on purpose: a bitrate target does not shrink these lossless formats. The list holds nine lossy formats where a lower bitrate gives a smaller file. For lossless audio, Audio Converter can write FLAC, WavPack or ALAC instead.` },
+          { q: `Which output goes through a server?`, a: `Opus alone: the decoded audio is sent to our media service for libopus encoding at the bitrate you chose. That service limits jobs per connection per hour and per day and refuses audio over its maximum size or length. The eight other formats are encoded by ffmpeg.wasm on this page.` },
         ]}
         tips={[
-          "128 kbps is a reasonable default for most music; drop to 64–96 kbps for voice-only content where size matters most.",
-          "Lower bitrates noticeably reduce quality for complex music — compare the audio preview before committing.",
-          "The first compression after loading the page takes longer since the ffmpeg.wasm engine needs to download.",
-          "If you need real dynamic-range compression (leveling loud and quiet parts), you'll need a dedicated audio-editing tool — this one only changes bitrate."
+          `Cut silences or unwanted parts with Audio Trimmer first: a shorter file is a smaller file.`,
+          `Check your file's current bitrate with Audio Metadata before choosing a lower one.`,
         ]}
       />
     </div>

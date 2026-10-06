@@ -53,23 +53,38 @@ export default function DiffViewerPage() {
       </div>
       <SeoContent
         title={"Diff Viewer"}
-        description={"Diff Viewer compares two texts line by line with the Myers diff algorithm — the one used by git and diffchecker — entirely in your browser. It finds the smallest set of added and removed lines, so inserting or deleting a line marks only that line, not everything after it. Each line shows its number in the original and in the modified text; Windows (CRLF) and Unix line endings compare as equal, and an option ignores differences in spaces."}
+        description={"Diff Viewer lists the differences between two texts in a single column, like a patch: each line is marked unchanged, removed (-) or added (+), with its number in the original and in the modified text. It uses the Myers algorithm (jsdiff library), so one inserted line is shown as one addition instead of shifting everything below it. When a line is replaced, the words that changed are highlighted inside both versions. Options ignore letter case, or spaces at line ends and the amount of space between words. Windows and Unix line endings compare as equal. Text Comparator shows the same comparison in two columns."}
+        example={{
+          caption: "Output of the page’s own comparison code; [-…-] and {+…+} stand for the words highlighted in red and green.",
+          inputLabel: "Original, then Modified",
+          input: "Original:\nred\nThe cat sat on the mat\nblue\n\nModified:\nred\nThe dog sat on the mat\nblue\ngreen",
+          outputLabel: "Result (original line no., modified line no., line)",
+          output: " 1  1   red\n 2    - The [-cat-] sat on the mat\n    2 + The {+dog+} sat on the mat\n 3  3   blue\n    4 + green",
+        }}
+        howToTitle={"How to compare two texts line by line"}
         howTo={[
-          "Paste the original text on the left and the modified text on the right.",
-          "Optionally tick 'Ignore whitespace'.",
-          "Click 'Compare'.",
-          "Read the result: red lines were removed, green lines were added, grey lines are unchanged."
+          "Paste the first version in \"Original\" and the new version in \"Modified\".",
+          "Tick \"Ignore whitespace\" so that re-indented lines are not listed as removed and added, and \"Ignore case\" for changes of capitals only.",
+          "Click \"Compare\"; the button stays grey until both boxes contain text.",
+          "Read the list: a red line was removed, a green line was added, and the two numbers on the left give its line in each text.",
         ]}
+        specs={[
+          { label: "Input", value: "Two pasted texts; there is no file upload" },
+          { label: "Options", value: "Ignore case; Ignore whitespace (trims line ends and treats a run of spaces as one space)" },
+          { label: "Line endings", value: "Windows, Unix and old Mac line breaks are treated as the same" },
+          { label: "Result", value: "One column with original and modified line numbers and word highlights; no download" },
+          { label: "Text size", value: "The tool sets no size cap; above 1,000,000 characters a box shows only its first 20,000 characters, and the comparison still uses all of it" },
+        ]}
+        privacyTitle={"Where your texts are compared"}
+        privacy={"Both texts are compared by code running in this page and are never sent to our servers or stored. The comparison library is downloaded with the page code the first time you click Compare. The result disappears when you reload, so copy what you need from it first."}
         faqs={[
-          { q: "Is Diff Viewer free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "How does it decide what changed?", a: "It uses the Myers algorithm (as git does) to find the longest common sequence of lines, so a single inserted line shows as one addition." },
-          { q: "Do line endings matter?", a: "No — CRLF and LF line endings are treated as the same." },
-          { q: "Does it show which words changed inside a line?", a: "Yes: when a line was changed, the words that differ are highlighted inside the removed and the added line. Ignore case and Ignore whitespace leave out differences of capital letters or spacing." },
-          { q: "Is my text uploaded?", a: "No — the comparison runs entirely in your browser." }
+          { q: "Can it ignore indentation changes?", a: "Yes. With \"Ignore whitespace\" ticked, a line whose indentation went from 2 to 4 spaces is listed once as unchanged, with its old and new line numbers, and a tab compares equal to a space. A space inserted inside a word still counts as a change." },
+          { q: "Does it show which words changed inside a line?", a: "Yes. When removed lines are followed by added ones, they are paired in order and the words that differ are highlighted inside each pair: red in the old line, green in the new one. Lines added or removed without a partner are shown whole." },
+          { q: "Can I see the two texts side by side?", a: "No. Diff Viewer shows one list with both line numbers, the way a patch reads. Text Comparator, in the text tools, uses the same comparison engine and options and shows the two texts in two columns." },
+          { q: "Do Windows line endings show up as differences?", a: "No. CRLF, CR and LF line breaks are all turned into the same break before comparing, so a file saved on Windows and the same file saved on Linux compare as identical." },
         ]}
         tips={[
-          "Line numbers on each row refer to the original (left) and modified (right) text.",
-          "Tick 'Ignore whitespace' to compare code where only indentation changed."
+          "Comparing two versions of a JSON file? Format both with JSON Formatter first so that each value sits on its own line.",
         ]}
       />
     </div>

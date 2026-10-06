@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Text Comparator — Compare Two Texts Line Online Free" },
-  description: "Text Comparator compares two texts line by line, highlighting which lines match exactly and which don't, entirely in your browser.",
+  title: { absolute: "Text Comparator — Side-by-Side Diff With Changed Words" },
+  description: "Paste two texts and see them side by side: matching lines aligned, changed words in red and green, added lines alone. Case and spacing can be ignored.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/text-comparator" },
   openGraph: {
-    title: "Text Comparator — Compare Two Texts Line Online Free",
-    description: "Text Comparator compares two texts line by line, highlighting which lines match exactly and which don't, entirely in your browser.",
+    title: "Text Comparator — Side-by-Side Diff With Changed Words",
+    description: "Paste two texts and see them side by side: matching lines aligned, changed words in red and green, added lines alone. Case and spacing can be ignored.",
     url: "https://www.onlineconvertools.com/tools/text-tools/text-comparator",
   },
 };

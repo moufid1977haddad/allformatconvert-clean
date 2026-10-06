@@ -142,7 +142,7 @@ export default function ImageUpscalerPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">AI Image Upscaler</h1>
-        <p className="text-neutral-500 text-center mb-8">Enlarge small images 2× or 4× with an AI model that rebuilds real detail</p>
+        <p className="text-neutral-500 text-center mb-8">Enlarge small images 2× or 4× with a super-resolution AI model</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition" onClick={() => !loading && inputRef.current.click()}>
             {preview && file ? <img src={preview} alt="" className="max-h-48 mx-auto rounded" /> : <div><p className="text-neutral-500 text-sm"><UploadPrompt what="an image" /></p><p className="text-neutral-500 text-xs mt-1">JPG, PNG, WebP · up to 6 megapixels (e.g. 3000×2000)</p></div>}
@@ -192,26 +192,33 @@ export default function ImageUpscalerPage() {
       </div>
       <SeoContent
         title="AI Image Upscaler"
-        description="AI Image Upscaler enlarges small images 2× or 4× with a super-resolution neural network (MoSR) that rebuilds fine detail — skin, fabric, foliage — instead of just stretching and blurring the pixels. In our tests on a real photo reduced to a quarter of its size, its result was measurably closer to the original than the leading online upscaler's (LPIPS perceptual distance 0.107 against 0.164, lower is better). Images up to 6 megapixels. When your browser supports WebGPU, the image has no transparency and the result fits in the browser, the model usually runs on your own device and the image is not uploaded; otherwise — or if your graphics chip fails or you choose the faster server — it runs on our own server (never a third party) and the image is deleted after you download the result. The page always shows which one ran."
+        description={`AI Image Upscaler enlarges a JPG, PNG or WebP image 2× or 4× with 4xNomos2_hq_mosr, a super-resolution neural network that predicts fine detail instead of only stretching pixels. Images up to ${MAX_INPUT_PIXELS / 1e6} megapixels and ${MAX_FILE_BYTES / 1048576} MB are accepted. If your browser offers WebGPU, the image has no transparency and the result fits in the browser, the model runs on your device; otherwise the image goes to our own server. Either way you get a PNG and a before/after slider to compare. The page always says where the work was done.`}
+        howToTitle="How to upscale an image with AI"
         howTo={[
-          "Click the upload area and select an image (up to 6 megapixels, e.g. 3000×2000).",
-          "Choose 2× or 4× enlargement.",
-          "Click 'Upscale Image': the page shows where it runs (your device or our server) and how long is left.",
-          "Drag the comparison slider to see the difference, then download your PNG."
+          "Click the upload area and choose a JPG, PNG or WebP image.",
+          "Under \"Enlarge\", pick 2× or 4×; each button shows the size of the result.",
+          "Click \"Upscale Image\"; the page says whether it runs on your device or on our server and how long is left, and \"Cancel\" stops it.",
+          "Drag the \"Compare\" slider to see before and after, then click \"Download\" to save the PNG."
         ]}
+        specs={[
+          { label: "Input formats", value: "JPG, PNG, WebP" },
+          { label: "Maximum input", value: `${MAX_INPUT_PIXELS / 1e6} megapixels and ${MAX_FILE_BYTES / 1048576} MB` },
+          { label: "Output", value: "PNG, transparency kept, named after your image with -upscaled-2x or -upscaled-4x" },
+          { label: "Where it runs", value: "On your device with WebGPU; on our server otherwise, for images with transparency, or when you choose it" },
+          { label: "Usage limits", value: "None when it runs on your device; on our server, a number of jobs per connection per hour and per day, and the upscaler's own monthly budget" }
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy="When your browser has WebGPU, the AI model is downloaded once and the image is enlarged in your browser; it is not uploaded. Otherwise the image is uploaded to our media service on Railway and enlarged by our own AI service, never a third party; large images are sent in parts. The image and the result are deleted from the service after your download completes, or when the job expires."
         faqs={[
-          { q: "Is AI Image Upscaler free to use?", a: "Yes, it's free with no signup and no watermark." },
-          { q: "Does it really use AI?", a: "Yes. A super-resolution neural network (the MoSR architecture, model 4xNomos2_hq_mosr) predicts the missing detail, rather than smoothing an enlarged copy like a classic resize." },
-          { q: "How large can the image be?", a: "Up to 6 megapixels (for example 3000×2000), like the leading free upscalers: at 4× it becomes 96 megapixels. Larger images are usually already large enough; shrink them first with Image Resizer if you really need to." },
-          { q: "What formats are supported?", a: "JPG, PNG and WebP in; PNG out, so the enlarged image isn't re-compressed. Transparency is kept." },
-          { q: "Is my image uploaded to a server?", a: "Usually not when your browser supports WebGPU (current Chrome, Edge and Safari, and Firefox on Windows): the AI model is downloaded once and runs on your own device, and the page says so. Otherwise — for images with transparency, results too large for the browser, a graphics chip that fails, or if you pick the faster server — it runs on our own server (not a third-party service), and your image is deleted after you download the result." },
-          { q: "Who made the AI model?", a: "4xNomos2_hq_mosr was trained by Philip Hofmann and published under the Creative Commons Attribution 4.0 licence. We chose it after comparing nine open models on the same photo." }
+          { q: "Is my image uploaded?", a: "No, not when it runs on your device: with WebGPU, no transparency and a result your browser can hold, the image stays in the browser and the page says so. Otherwise yes: it goes to our own server, never a third party, and the page says that too." },
+          { q: "How large can the image be?", a: `${MAX_INPUT_PIXELS / 1e6} megapixels, for example 3000×2000, and ${MAX_FILE_BYTES / 1048576} MB. At 4× such an image becomes ${(MAX_INPUT_PIXELS * 16) / 1e6} megapixels. Larger photos are refused before any work starts; shrink them first with Image Resizer.` },
+          { q: "Does 2× take less time than 4×?", a: "No. The model always enlarges 4×, and the 2× result is the 4× result reduced by half, so both take about the same time. Choose 2× when you do not need the larger file." },
+          { q: "Is transparency kept?", a: "Yes. An image with transparent areas is always processed on our server, which enlarges the colors with the AI model and resizes the transparency layer with a standard filter, then joins both in the PNG." },
+          { q: "Is the AI model openly licensed?", a: "Yes. Philip Hofmann trained 4xNomos2_hq_mosr and published it under the Creative Commons Attribution 4.0 licence; the page credits it under the tool. We chose it after comparing nine open models on the same photo." }
         ]}
         tips={[
-          "Start from the best version of the image you have: the AI rebuilds detail, but it can't recover what heavy compression destroyed.",
-          "4× is the model's native factor; 2× is the 4× result reduced, so both take about the same time.",
-          "Use the comparison slider on a face or a texture to see what the AI added.",
-          "The first run on your device downloads the AI model (about 25 MB); after that it's cached. On a slow graphics chip, the page offers our server when it would be clearly faster."
+          "The first run on your device downloads the AI model; later runs during the same visit start sooner.",
+          "On a slow graphics chip, accept the page's offer to switch to our server when it appears."
         ]}
       />
     </div>

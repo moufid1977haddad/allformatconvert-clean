@@ -30,7 +30,7 @@ let sessionPromise = null;
 async function getSession(onPhase) {
   if (!sessionPromise) {
     sessionPromise = (async () => {
-      onPhase?.('Loading the AI model (first time only, about 25 MB)');
+      onPhase?.('Loading the AI model (about 17 MB from this site, plus the AI engine from cdn.jsdelivr.net; once per visit)');
       const ort = await import('onnxruntime-web/webgpu');
       ort.env.wasm.wasmPaths = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
       ort.env.logLevel = 'error';

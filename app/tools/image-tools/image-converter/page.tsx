@@ -30,6 +30,7 @@ interface ConvertedFile {
   convertedSize: number;
 }
 
+import { WEBP_MAX_SIDE } from '../../../lib/bigImage';
 export default function ImageConverterPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [format, setFormat] = useState('webp');
@@ -243,8 +244,8 @@ export default function ImageConverterPage() {
       <div className="max-w-3xl mx-auto">
 
         <h1 className="text-3xl font-bold text-center mb-2">Image Converter</h1>
-        <p className="text-neutral-500 text-center mb-2">Convert images to PNG, JPG, WebP or AVIF — 100% local, nothing uploaded to any server.</p>
-        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Each image up to {maxMegapixels} megapixels{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 text-center mb-2">Convert images to WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO or PDF in your browser — nothing is uploaded to any server.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Each image up to {maxMegapixels} megapixels{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Images are encoded in a background worker, one after another.</p>
 
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
 
@@ -322,12 +323,12 @@ export default function ImageConverterPage() {
                     </select>
                     {format === 'webp' && !nativeWebp && (
                       <p className="text-xs text-neutral-500 mt-1 max-w-xs">
-                        This browser has no WebP encoder of its own, so WebP is made here with libwebp in WebAssembly (the encoder Squoosh uses): a few seconds per photo, and the first use downloads about 0.3 MB.
+                        This browser has no WebP encoder of its own, so WebP is made here with libwebp in WebAssembly (the encoder Squoosh uses), fetched from our site when you convert to WebP.
                       </p>
                     )}
                     {format === 'avif' && (
                       <p className="text-xs text-neutral-500 mt-1 max-w-xs">
-                        AVIF is encoded with a WebAssembly encoder, so it is slower than the other formats (a few seconds per photo) and the first use downloads about 1 MB.
+                        AVIF is encoded with a WebAssembly encoder, which is slower than the browser’s own encoders; the first use downloads about 1 MB.
                       </p>
                     )}
                   </div>
@@ -351,7 +352,7 @@ export default function ImageConverterPage() {
                   </div>
                   ) : (
                   <p className="flex-1 min-w-[160px] text-xs text-neutral-500 self-center" data-no-quality>
-                    {format.toUpperCase()} has no quality setting here: {format === 'gif' ? 'it is written with 256 colours (the GIF limit).' : 'it is written without loss.'}
+                    {format.toUpperCase()} has no quality setting here: {format === 'gif' ? 'it is written with 256 colours (the GIF limit).' : 'it is written without lossy compression.'}
                   </p>
                   )}
                 </div>
@@ -402,8 +403,8 @@ export default function ImageConverterPage() {
         {/* Info */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
           {[
-            { icon: Lock, title: '100% Private', desc: 'Files never leave your device' },
-            { icon: Zap, title: 'Instant', desc: 'Conversion happens in your browser' },
+            { icon: Lock, title: 'Private', desc: 'Files never leave your device' },
+            { icon: Zap, title: 'Local', desc: 'Conversion happens in your browser' },
             { icon: Package, title: 'Batch', desc: 'Convert multiple files at once' },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="bg-white border border-neutral-200 rounded-xl p-4">
@@ -417,28 +418,33 @@ export default function ImageConverterPage() {
       </div>
       <SeoContent
         title="Image Converter"
-        description="Image Converter is a free online tool that converts images — including TIFF, iPhone HEIC/HEIF photos, Photoshop PSD, SVG and camera RAW files (Canon, Nikon, Sony, Fujifilm, Olympus, Panasonic, Pentax, iPhone ProRAW DNG…) — to PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, ICO (a multi-size favicon) or PDF entirely in your browser (AVIF is encoded with a WebAssembly encoder because no browser can encode it natively, and WebP too on Safari, which has no WebP encoder of its own) — nothing is ever uploaded to a server. Drop in one or many images, pick your target format and quality, and download the results instantly, with a live before/after size comparison for every file. Conversion runs in a background Web Worker so the page stays responsive even on large batches."
+        description={`Image Converter changes the format of one image or a whole batch. It opens PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, iPhone HEIC/HEIF, Photoshop PSD/PSB, SVG and camera RAW files (Canon, Nikon, Sony, Fujifilm, Olympus, Panasonic, Pentax and more), and writes WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO or PDF. RAW files are developed with LibRaw, using the white balance the camera recorded. Every result shows its new size next to the old one. An animated GIF or WebP becomes a still image of its first frame, and each image gives its own file: PDF output is one page per image, not a combined document. Files are converted one after another in a background worker.`}
+        howToTitle="How to convert images to another format"
         howTo={[
-          "Drop or click to upload one or more images (PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, HEIC/HEIF, PSD, SVG and camera RAW files are all accepted).",
-          "Choose your output format: WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO or PDF.",
-          "Adjust the quality slider to balance file size against image quality.",
-          "Click Convert, then download each result individually or use \"Download all\" for the whole batch."
+          `Drop your images on the area at the top, or click it to choose one or several files.`,
+          `Pick the target in "Output format".`,
+          `For JPG, WebP, AVIF or PDF a "Quality" slider appears; PNG, GIF, BMP, TIFF and ICO have none.`,
+          `Click the "Convert" button, which names the number of files and the format.`,
+          `Click "Download" next to each result, or "Download all" to get converted-images.zip when there are two or more.`
         ]}
+        specs={[
+          { label: 'Input formats', value: `PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, HEIC, HEIF, PSD, PSB, SVG and RAW: CR2, CR3, CRW, NEF, NRW, ARW, SRF, SR2, DNG, ORF, RW2, RWL, RAF, PEF, SRW, 3FR, IIQ, ERF, KDC, DCR, MRW, MEF, MOS` },
+          { label: 'Output formats', value: `WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO (16 px up to 256 px, never above the image's own size except the 16 px minimum), PDF` },
+          { label: 'Largest image', value: `${MAX_MEGAPIXELS} megapixels on a computer, ${MOBILE_MAX_MEGAPIXELS} on phones, iPhone and iPad; files up to ${MAX_FILE_SIZE_LABEL}` },
+          { label: 'WebP output', value: `At most ${WEBP_MAX_SIDE.toLocaleString('en-US')} px wide or tall, a limit of the WebP format` },
+          { label: 'Files at once', value: `As many as you add; they are converted one after another` }
+        ]}
+        privacy={`Your images are decoded and re-encoded inside your browser, mostly in a background worker; Photoshop files, SVG drawings and, in browsers that cannot open HEIC, HEIC photos are opened on the page first. No image is uploaded. The AVIF and WebP encoders and the LibRaw decoder are downloaded from our site the first time they are needed. When a file fails, a report goes to our error log: cleaned message, file extension, size range, tool name, browser name and version.`}
         faqs={[
-          { q: "Is Image Converter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Are my images uploaded anywhere?", a: "No. Every conversion happens locally in your browser, in a background Web Worker — your files never leave your device." },
-          { q: "Can I make WebP on an iPhone or in Safari?", a: "Yes. Safari has no WebP encoder of its own (it would quietly produce a PNG), so on Safari the WebP file is made by libwebp compiled to WebAssembly — the same encoder Squoosh uses — right in your browser. The result is a real WebP file." },
-          { q: "Which formats are supported?", a: "You can upload PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, HEIC/HEIF (iPhone photos), Photoshop PSD/PSB, SVG and camera RAW images, and convert them to WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO or PDF. GIF is limited to 256 colours (photos are dithered, as desktop converters do), BMP has no transparency (it is flattened onto white), ICO produces a favicon holding every standard size from 16 to 256 px, and PDF puts the image on a page of its own size. AVIF is encoded with a WebAssembly encoder (browsers cannot encode it natively), so it takes a few seconds per photo. TIFF is decoded with a dedicated in-browser decoder (planar-color-storage TIFFs aren't supported and are rejected with a clear error), and HEIC/HEIF is decoded on the main thread before being re-encoded to your chosen format." },
-          { q: "Can it convert camera RAW files?", a: "Yes. RAW files are developed right in your browser at full resolution, with the white balance recorded by the camera, the camera's own colour matrix, sRGB colours and the orientation stored in the file. Accepted: Canon CR2, CR3 and CRW, Nikon NEF and NRW, Sony ARW, SRF and SR2, Adobe DNG (including iPhone ProRAW), Olympus/OM System ORF, Panasonic RW2, Leica RWL, Fujifilm RAF, Pentax PEF, Samsung SRW, Hasselblad 3FR, Phase One IIQ, Leaf MOS, Mamiya MEF, Epson ERF, Kodak KDC and DCR, and Minolta MRW. The first RAW file downloads the decoder once (about 0.35 MB); a 24-megapixel file takes from about ten seconds to under a minute on a computer depending on the browser, and Fujifilm X-Trans files take longer. Sigma X3F (Foveon) files are refused: their colours cannot be developed correctly here. A damaged or incomplete RAW file is refused with a message, never turned into a wrong picture." },
-          { q: "What reads the RAW files?", a: "LibRaw 0.22.2 (by LibRaw LLC, the library behind many photo applications), compiled to WebAssembly by us and used unmodified under the CDDL 1.0 licence — licence and source code at /wasm/libraw-LICENSE.txt." },
-          { q: "Can I convert several images at once?", a: "Yes, you can add multiple files and convert them all in one batch, then download them individually or together." },
-          { q: "Is there an image-size limit?", a: `Each image can be up to ${MAX_MEGAPIXELS} megapixels on a computer and ${MOBILE_MAX_MEGAPIXELS} on phones and tablets — every iPhone photo fits, 48-megapixel ones included — and files up to ${MAX_FILE_SIZE_LABEL}. Safari on iPhone cannot hold more than about 16.7 megapixels in one canvas, so a larger photo is decoded in strips and encoded by WebAssembly encoders at full resolution: it works, it just takes longer (about a minute or two for a 48-megapixel photo to WebP on a phone). There's no limit on how many images you can batch-convert, since they're processed one at a time.` }
+          { q: "Can I convert camera RAW files?", a: `Yes. CR2, CR3, NEF, ARW, DNG (iPhone ProRAW included), ORF, RW2, RAF, PEF and the other listed formats are developed at full resolution with the camera's white balance and colour matrix. Measured on a 24-megapixel file: about 10 seconds in Chromium and 40 seconds in Firefox. Sigma X3F files are refused, since their colours cannot be developed correctly here.` },
+          { q: "Is there an image size limit?", a: `Yes. Each image can be up to ${MAX_MEGAPIXELS} megapixels on a computer and ${MOBILE_MAX_MEGAPIXELS} on a phone, iPhone or iPad, which covers 48-megapixel iPhone photos, and each file up to ${MAX_FILE_SIZE_LABEL}. A larger file is skipped with a message naming it.` },
+          { q: "Can I make WebP or AVIF files on an iPhone?", a: `Yes. Safari, like every browser on iPhone and iPad, has no WebP encoder of its own, so libwebp compiled to WebAssembly makes the WebP; AVIF always comes from a WebAssembly encoder, in every browser. Each encoder is fetched from our site when you convert to its format; on a computer, Chrome, Edge and Firefox make WebP up to 30 megapixels with their own encoder instead. AVIF takes longer than the other formats.` },
+          { q: "Do PNG and TIFF keep every pixel?", a: `Yes, both are written without loss. JPG, WebP and AVIF are lossy and follow the "Quality" slider; GIF is reduced to 256 colours with dithering; BMP has no transparency and is flattened onto white; ICO is resized to the icon sizes.` },
+          { q: "Does PDF output merge the batch into one file?", a: `No. Choosing PDF here gives one PDF per image, each page the size of the image at 72 dpi. To put several images in a single PDF, use Image to PDF.` }
         ]}
         tips={[
-          "WebP usually gives the best balance of quality and file size for web use — a solid default choice.",
-          "The quality slider is shown only for the formats it changes (JPG, WebP, AVIF, and photos in a PDF); PNG, BMP, TIFF and ICO are written without loss, GIF with 256 colours.",
-          "AVIF gives the smallest files of the four but takes a few seconds per photo, because it is encoded by a WebAssembly encoder; WebP is much faster.",
-          "Check the size shown under each result: when the new format is larger (PNG is lossless; HEIC and WebP pack more than JPG), a line says why and what to pick for a smaller file."
+          `Read the line under a result that grew: it explains why the new format is larger and which format gives a smaller file.`,
+          `For a favicon with sizes you pick yourself, including 24 px, use PNG to ICO.`
         ]}
       />
     </div>

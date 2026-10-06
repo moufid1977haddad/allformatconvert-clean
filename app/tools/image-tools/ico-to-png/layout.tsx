@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "ICO to PNG — Convert an ICO Icon File Online Free" },
-  description: "ICO to PNG converts an ICO icon file to PNG format entirely in your browser using the HTML canvas — your file is never uploaded to a server.",
+  title: { absolute: "ICO to PNG — Extract Every Icon Size as a Separate PNG" },
+  description: "Turn a Windows .ico icon into PNG: take its largest image, or every size stored inside as separate PNG files or one ZIP. All in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/ico-to-png" },
   openGraph: {
-    title: "ICO to PNG — Convert an ICO Icon File Online Free",
-    description: "ICO to PNG converts an ICO icon file to PNG format entirely in your browser using the HTML canvas — your file is never uploaded to a server.",
+    title: "ICO to PNG — Extract Every Icon Size as a Separate PNG",
+    description: "Turn a Windows .ico icon into PNG: take its largest image, or every size stored inside as separate PNG files or one ZIP. All in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/ico-to-png",
   },
 };

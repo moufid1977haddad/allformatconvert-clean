@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Grammar Fixer — Use Openai's Gpt-4o Mini Model Online Free" },
-  description: "Grammar Fixer is a free online tool that uses OpenAI's GPT-4o mini model to correct spelling, punctuation, and grammatical errors in your writing.",
+  title: { absolute: "Grammar Fixer — Fix Grammar and Spelling, See Every Change" },
+  description: "Correct grammar, spelling and punctuation with minimal edits. Every change is shown in place and can be undone one by one before you copy.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/grammar-fixer" },
   openGraph: {
-    title: "Grammar Fixer — Use Openai's Gpt-4o Mini Model Online Free",
-    description: "Grammar Fixer is a free online tool that uses OpenAI's GPT-4o mini model to correct spelling, punctuation, and grammatical errors in your writing.",
+    title: "Grammar Fixer — Fix Grammar and Spelling, See Every Change",
+    description: "Correct grammar, spelling and punctuation with minimal edits. Every change is shown in place and can be undone one by one before you copy.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/grammar-fixer",
   },
 };

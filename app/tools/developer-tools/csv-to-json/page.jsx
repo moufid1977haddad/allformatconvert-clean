@@ -198,7 +198,7 @@ export default function CsvToJsonPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">CSV to JSON</h1>
         <p className="text-neutral-500 dark:text-neutral-400 text-center mb-2">Convert CSV to JSON format</p>
-        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Uploaded files: up to {fileMaxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {MAX_FILE_SIZE_LABEL}). Pasted text: up to {PASTE_MAX_ROWS_LABEL} rows. Conversion runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Uploaded files: up to {fileMaxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {MAX_FILE_SIZE_LABEL}). Pasted text: up to {PASTE_MAX_ROWS_LABEL} rows. The conversion runs in a background worker; the Cancel button stops it.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || <UploadPrompt what="a .csv file" />}</p>
@@ -230,7 +230,7 @@ export default function CsvToJsonPage() {
             </div>
           </div>
           {timeEstimate && !converting && !error && (
-            <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
+            <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimate from our tests on a desktop computer: {timeEstimate}</p>
           )}
           {!converting && (
             <div className="flex items-center justify-center gap-2 text-sm">
@@ -276,24 +276,34 @@ export default function CsvToJsonPage() {
       </div>
       <SeoContent
         title="CSV to JSON"
-        description="CSV to JSON converts a CSV file (or pasted CSV text) into an array of JSON objects entirely in your browser — nothing is uploaded to a server. The first line is treated as the header row. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it. Parsing is quote-aware: a field wrapped in double quotes can safely contain a comma, the delimiter itself, or a newline (like 'Smith, John') without being split into extra columns. Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive, and the result is offered as a .json file to download. The file's character encoding is detected too — Excel's classic CSV export is Windows-1252, not UTF-8, and its accents come through intact — and whole columns of numbers become JSON numbers, European decimal commas included (12,5 → 12.5); values with a leading zero, like phone numbers, stay text."
-        howTo={[
-          "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
-          "The delimiter is detected automatically — check the dropdown and correct it if needed.",
-          "Click 'Convert' to generate the JSON.",
-          "For a file upload, click 'Download' to save converted.json; pasted text appears in the output box for you to copy.",
-          "Validate the JSON in a linter or your target application before relying on it."
-        ]}
-        faqs={SEO.faqs}
+        description={"CSV to JSON reads a .csv file or pasted CSV and writes JSON in one of three shapes: an array of objects whose keys come from the header row, an array of arrays with the header row first, or JSON Lines with one object per line. The separator and a file's encoding are detected. Columns made only of numbers become JSON numbers, while values with a leading zero stay strings. The result of a file is offered as a download; the result of pasted text appears in the output box. Excel workbooks are not read here."}
         example={SEO.example}
-        related={SEO.related}
-        tips={[
-          "Include a header row as the first line — those values become the keys in each JSON object.",
-          "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and won't shift into the wrong keys.",
-          "Rows with fewer values than headers get empty strings for the missing fields.",
-          "The delimiter dropdown shows what was auto-detected — double check it on unusual files, and switch it manually if a column split looks wrong.",
-          "For a large CSV, upload it as a file rather than pasting it — the file path supports far more rows and offers the result as a file to download instead of rendering it on the page."
+        howToTitle="How to convert CSV to JSON"
+        howTo={[
+          "Choose a .csv file in the upload area, or paste CSV into \"...or paste CSV Input\".",
+          "Check \"Delimiter:\" and, for a file, \"Encoding:\".",
+          "Pick a shape under \"Output\" and keep or untick \"Numbers as numbers\".",
+          "Click \"Convert\".",
+          "For a file, click \"Download\" to save converted.json, or converted.jsonl for JSON Lines; for pasted text, use \"Copy\".",
         ]}
+        specs={[
+          { label: "Input", value: `.csv file up to ${MAX_FILE_SIZE_LABEL}, or pasted CSV` },
+          { label: "Output", value: "JSON array of objects, JSON array of arrays, or JSON Lines (.jsonl)" },
+          { label: "Rows from a file on a computer", value: `${MAX_ROWS.toLocaleString('en-US')}, header row included` },
+          { label: "Rows from a file on phones, iPhone and iPad", value: `${MOBILE_MAX_ROWS.toLocaleString('en-US')}, header row included` },
+          { label: "Rows of pasted text", value: `${PASTE_MAX_ROWS.toLocaleString('en-US')} on every device` },
+        ]}
+        privacy={"Parsing and building the JSON happen in a background worker in your browser. Your CSV file and the text you paste are not uploaded. A failure, whether shown on the page or not, sends us a short report holding the cleaned error text, this tool's name and your browser and its version, never your data itself."}
+        faqs={[
+          { q: "Are columns with the same header kept?", a: "Yes. With \"Array of objects\" or JSON Lines, a second column named name becomes name_2, an empty header becomes column_ followed by its position, and values beyond the last header also get a column_ key. The status line lists each rename. \"Array of arrays\" keeps the header row exactly as written." },
+          { q: "Do numeric columns become JSON numbers?", a: "Yes, when every value in a column is a number; in a semicolon file a decimal comma is read too, so 12,5 becomes 12.5. Values with a leading zero, such as 02134, and numbers with more than 15 significant digits stay strings. Untick \"Numbers as numbers\" to keep all values as strings." },
+          { q: "Can I get JSON Lines instead of one array?", a: "Yes. Choose \"JSON Lines (one object per line)\" under \"Output\": each row becomes one compact JSON object on its own line, the format many log and data tools read. A file converted this way downloads as converted.jsonl." },
+          { q: "How large a CSV can I convert?", a: `${MAX_ROWS.toLocaleString('en-US')} rows from a file on a computer and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} on phones, iPhone and iPad, header row included, for files up to ${MAX_FILE_SIZE_LABEL}. Pasted text stops at ${PASTE_MAX_ROWS.toLocaleString('en-US')} rows on every device, because it is held in the page itself, so upload the file instead for more rows.` },
+        ]}
+        tips={[
+          "To turn the JSON back into CSV, use JSON to CSV, which also flattens nested objects into dotted columns.",
+        ]}
+        related={SEO.related}
       />
     </div>
   );

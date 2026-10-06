@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JSON Formatter — Parse Your JSON Online Free" },
-  description: "JSON Formatter validates and re-indents your JSON in your browser, keeping every number and escape exactly as written.",
+  title: { absolute: "JSON Formatter & Validator — Exact Numbers, Sort Keys" },
+  description: "Validate and beautify JSON with 2 spaces, 4 spaces or tabs, sort keys A-Z, or minify. Errors show line and column; numbers stay exactly as typed.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-formatter" },
   openGraph: {
-    title: "JSON Formatter — Parse Your JSON Online Free",
-    description: "JSON Formatter validates and re-indents your JSON in your browser, keeping every number and escape exactly as written.",
+    title: "JSON Formatter & Validator — Exact Numbers, Sort Keys",
+    description: "Validate and beautify JSON with 2 spaces, 4 spaces or tabs, sort keys A-Z, or minify. Errors show line and column; numbers stay exactly as typed.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-formatter",
   },
 };

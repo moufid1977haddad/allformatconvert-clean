@@ -16,7 +16,7 @@ export default function WhitespaceRemoverPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Whitespace Remover</h1>
-        <p className="text-neutral-500 text-center mb-8">Remove extra spaces and blank lines without merging your lines</p>
+        <p className="text-neutral-500 text-center mb-8">Remove extra spaces and blank lines, or join lines into one</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Paste your text here..." value={text} onChange={e => setText(e.target.value)} />
           <div className="grid grid-cols-2 gap-3">
@@ -40,27 +40,37 @@ export default function WhitespaceRemoverPage() {
       </div>
       <SeoContent
         title="Whitespace Remover"
-        description={"Whitespace Remover cleans up spacing in your text five ways — remove all extra spaces and blank lines, collapse repeated spaces only, trim the start or the end of each line, or join everything into one line — entirely in your browser. Only \"Join Into One Line\" removes line breaks."}
+        description={"Whitespace Remover cleans spacing in five ways. Remove All Extra collapses repeated spaces and tabs, trims every line, and turns each run of blank lines into one, dropping those at the very start and end. Remove Extra Spaces does the same inside lines but keeps every blank line. Remove Leading and Remove Trailing trim one side of each line only. Join Into One Line replaces every run of whitespace, line breaks included, with a single space; it is the only button that merges lines. All five run on your device, inside this page."}
+        example={{
+          caption: "Remove All Extra: spaces and the tab are collapsed, each line is trimmed, and three blank lines become one.",
+          inputLabel: "Text",
+          input: "  Dear   team,\t\n\n\n\nThe  report is   ready.  \nThanks,\n\n",
+          outputLabel: "After \"Remove All Extra\"",
+          output: "Dear team,\n\nThe report is ready.\nThanks,",
+        }}
+        howToTitle={"How to remove extra spaces from text"}
         howTo={[
-          "Paste your text into the input field.",
-          "Click \"Remove All Extra\" to collapse repeated spaces and tabs, trim each line and turn runs of blank lines into a single blank line — every line of text is kept.",
-          "\"Remove Extra Spaces\" collapses repeated spaces and tabs and trims each line but leaves blank lines alone; \"Remove Leading\" and \"Remove Trailing\" only trim the start or the end of each line.",
-          "Click \"Join Into One Line\" only if you want every line break replaced by a space.",
-          "Click \"Copy\" or \"Download\" to keep the cleaned text."
+          "Paste your text.",
+          "Click \"Remove All Extra\", \"Remove Extra Spaces\", \"Remove Leading\" or \"Remove Trailing\" to clean spacing while keeping every line of text.",
+          "Click \"Join Into One Line\" only to turn the whole text into a single line.",
+          "Click \"Copy\", or save the cleaned text with \"Download\" (cleaned.txt)."
         ]}
+        specs={[
+          { label: "Spaces handled", value: "Spaces, tabs, non-breaking spaces and the other Unicode spaces JavaScript treats as whitespace" },
+          { label: "Not removed", value: "Zero-width spaces (U+200B), which JavaScript does not treat as whitespace" },
+          { label: "Line breaks", value: "Windows, Mac and Unix read; the result uses Unix line breaks" },
+          { label: "Output", value: "Cleaned text shown under the buttons, which Download saves as cleaned.txt" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"The five clean-ups are regular-expression replacements run by your browser on this page, so the text is not uploaded or stored anywhere. If the clipboard refuses a copy, the page shows Copy failed and sends the message \"Copy to the clipboard failed.\" with the tool name and browser version, without any of your text, to our error log."}
         faqs={[
-          { q: "Does it remove all spaces?", a: "No — it collapses extra or unwanted whitespace while keeping single spaces between words." },
-          { q: "Will it merge my lines?", a: "Only if you click \"Join Into One Line\". The four other buttons keep every line of text where it is; \"Remove All Extra\" only removes extra blank lines (a run of blank lines becomes one, so paragraphs stay separated)." },
-          { q: "Is Whitespace Remover free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What's the difference between the buttons?", a: "\"Remove All Extra\" collapses repeated spaces and tabs, trims each line and removes extra blank lines. \"Remove Extra Spaces\" does the same inside lines but keeps every blank line. \"Remove Leading\"/\"Remove Trailing\" trim whitespace from the start or end of each line without touching spacing inside the line. \"Join Into One Line\" replaces every run of whitespace, line breaks included, with one space." },
-          { q: "Does it handle non-breaking spaces?", a: "Yes — non-breaking and other Unicode spaces, common in text copied from web pages and PDFs, are collapsed like ordinary spaces." },
-          { q: "Is my data private?", a: "Yes, all processing happens locally in your browser — what you enter is never sent to a server." }
+          { q: "Will it merge my lines?", a: "No, unless you click \"Join Into One Line\". The four other buttons keep every line of text where it is; \"Remove All Extra\" only shortens runs of blank lines to one and drops blank lines at the start and end." },
+          { q: "Does it clean non-breaking spaces from web or PDF text?", a: "Yes. Non-breaking spaces and the other Unicode spaces that JavaScript treats as whitespace are collapsed like ordinary spaces. Zero-width spaces are not whitespace for JavaScript, so they stay in the text." },
+          { q: "Can I remove every space, even between words?", a: "No. Every button keeps at least one space between words, and \"Remove Leading\" and \"Remove Trailing\" leave the spacing inside lines untouched. To delete all spaces, use Find and Replace with a single space in Find and nothing in Replace with." },
+          { q: "Can it fix a PDF paragraph broken into short lines?", a: "Yes. \"Join Into One Line\" puts it back on one line with single spaces. A word split by a hyphen at the end of a line keeps the hyphen and gains a space, as in hyph- enated, so check those afterwards." }
         ]}
         tips={[
-          "Use \"Remove Extra Spaces\" instead of \"Remove All Extra\" when the number of blank lines matters (for example in code or a formatted list).",
-          "\"Remove Leading\"/\"Remove Trailing\" are useful for cleaning up indentation copied from emails or PDFs without collapsing spacing within each line.",
-          "Clean up code snippets with \"Remove Trailing\" to strip accidental trailing spaces before sharing them.",
-          "Text copied from a PDF often breaks every line in the middle of a sentence: \"Join Into One Line\" puts it back into one paragraph."
+          "Run \"Remove Trailing\" on code before sharing it: it strips spaces at line ends and touches nothing inside the lines."
         ]}
       />
     </div>

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { readAiJson } from '../../../lib/aiClient';
-import { countBillableWords, AI_DETECT_MIN_WORDS, AI_DETECT_MAX_WORDS, AI_DETECT_MAX_CHARS, AI_DETECT_FREE_WORDS_PER_DAY } from '@/lib/ai/pangram';
+import { countBillableWords, AI_DETECT_MIN_WORDS, AI_DETECT_MAX_WORDS, AI_DETECT_MAX_CHARS, AI_DETECT_FREE_WORDS_PER_DAY, CHARS_PER_BILLABLE_WORD } from '@/lib/ai/pangram';
 import { useToolError } from '../../../lib/useToolError';
 import TextArea from '@/app/components/TextArea';
 
@@ -74,25 +74,32 @@ export default function AIDetectorPage() {
       </div>
       <SeoContent
         title="AI Detector"
-        description="AI Detector estimates whether a text was written by AI, by a person, or by both, with Pangram's trained detection model — the detector that made the fewest false accusations in an independent 2025 study by the University of Chicago. You get a verdict and the share of the text that reads as AI-written, AI-assisted or human, for texts of 40 to 1,000 words in English, French and many other languages."
+        description={`AI Detector estimates whether a text was written by AI, by a person or by a mix of both. It sends your text to Pangram, whose detection model was trained on human and AI writing, and shows one of three verdicts with the share of the text that reads as AI-written, AI-assisted and human. Paste ${AI_DETECT_MIN_WORDS} to ${AI_DETECT_MAX_WORDS.toLocaleString('en-US')} words, at most ${AI_DETECT_MAX_CHARS.toLocaleString('en-US')} characters. The verdict is a clue, not proof, and the page says not to use it alone to accuse anyone. It does not check plagiarism and does not highlight which sentences were flagged.`}
+        example={{ caption: "Measured on 30/09/2026 through the site's own detection route", inputLabel: "Text", input: "The 2016 LIGO discovery abstract (arXiv), written by its human authors", outputLabel: "Result", output: "Likely written by a person · AI-written: 0 %" }}
+        howToTitle="How to check if a text was written by AI"
         howTo={[
-          "Paste the text you want to analyze (40 to 1,000 words).",
-          "Click 'Detect AI Content': the text is sent to the detection model.",
-          "Read the verdict: likely AI, likely a person, or a mix of both.",
-          "Check the shares of AI-written, AI-assisted and human text."
+          "Paste the text into the box; the counter under it shows how many words will be counted.",
+          "Click \"Detect AI Content\".",
+          "Read the verdict: \"Likely written by AI\", \"Mix of AI and human writing\" or \"Likely written by a person\".",
+          "Check the three shares below it: \"AI-written\", \"AI-assisted\" and \"Human\"."
         ]}
+        specs={[
+          { label: "Length", value: `${AI_DETECT_MIN_WORDS} to ${AI_DETECT_MAX_WORDS.toLocaleString('en-US')} words and up to ${AI_DETECT_MAX_CHARS.toLocaleString('en-US')} characters per analysis` },
+          { label: "Daily allowance", value: `${AI_DETECT_FREE_WORDS_PER_DAY.toLocaleString('en-US')} words per visitor per UTC day, each analysis rounded up to the next hundred words` },
+          { label: "Monthly limit", value: "The detector has a budget of its own, separate from the site's other paid tools; once it is used up, analyses stop until the first day of the next month (UTC)" },
+          { label: "Word count", value: `The highest of three counts: words between spaces, runs of letters and digits, and one word per ${CHARS_PER_BILLABLE_WORD} characters; in scripts written without spaces, each character is a word` },
+          { label: "Result", value: "A verdict and three percentages, without sentence-by-sentence highlighting" }
+        ]}
+        privacyTitle="Where your text is analyzed"
+        privacy="Your text is sent to our server and then to Pangram's detection API, which returns the verdict. We do not save the text. To apply the daily allowance and the budget, our database counts the words billed per visitor, under a hashed IP address, and the cost of each analysis. What Pangram keeps is governed by its own terms."
         faqs={[
-          { q: "Is AI Detector completely free to use?", a: "Yes: 2,000 words a day, free, with no signup or subscription — the same daily allowance as Pangram's own free account. Each analysis counts as the next 100 words (a 150-word text uses 200), and the count resets at midnight UTC." },
-          { q: "How does it work?", a: "The text is analyzed by Pangram's detection model, a classifier trained on large amounts of human and AI writing. It splits the text into segments, labels each one AI-written, AI-assisted or human, and gives an overall verdict." },
-          { q: "How accurate is the detection?", a: "In an independent study by the University of Chicago (Jabarian & Imas, 2025), Pangram's detector called essentially no human text AI and recognised 96–98 % of texts written by recent AI models, the best result among the detectors tested. Accuracy is lower on short texts and on texts rewritten by a person. No detector is 100 % reliable: treat the result as a clue, not proof." },
-          { q: "Why 40 to 1,000 words?", a: "Under 40 words, no detector is reliable. 1,000 words (12,000 characters) covers an essay page; analyze longer texts in parts. In Chinese, Japanese and Thai, each character counts as a word." },
-          { q: "Is my submitted text stored or shared?", a: "Your text is sent to Pangram's API to be analyzed. It is not stored on our servers or used for any other purpose." }
+          { q: "How accurate is this AI detector?", a: "No detector is certain. In an independent 2025 study by the University of Chicago, Pangram's detector called almost no human text AI and recognised 96–98 % of texts written by recent models, in English. Results in other languages and on AI drafts edited by a person are less certain." },
+          { q: "Why is there a minimum and a maximum length?", a: `${AI_DETECT_MIN_WORDS} words is the shortest text the page sends: below it, there is too little writing to judge. ${AI_DETECT_MAX_WORDS.toLocaleString('en-US')} words is the longest per analysis, so split a long essay into parts and compare the verdicts of each part.` },
+          { q: "Can the word count be higher than my word processor's?", a: "Yes, on purpose. To never count fewer words than Pangram bills, the page keeps the highest of three counts, so hyphenated or very long words weigh more. Each analysis is then rounded up to the next hundred words of your daily allowance." },
+          { q: "Can a text be judged both AI and human?", a: "Yes. A mixed verdict means Pangram found parts that read as AI-written and parts that read as human or AI-assisted. Look at the three percentages to see how the text splits; a mix is common when a person edits an AI draft." }
         ]}
         tips={[
-          "Paste whole paragraphs (100 words or more) for the clearest results.",
-          "A 'mix' verdict often means a human edited an AI draft, or the reverse.",
-          "Treat the output as a clue, not proof — human review is still needed for high-stakes decisions.",
-          "Try a text you wrote yourself to see how the tool responds."
+          `Analyze a long text in parts of up to ${AI_DETECT_MAX_WORDS.toLocaleString('en-US')} words: one AI-written section is easier to spot on its own than inside the whole text.`
         ]}
       />
     </div>

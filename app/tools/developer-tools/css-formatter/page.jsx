@@ -19,7 +19,7 @@ export default function CssFormatterPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">CSS Formatter</h1>
-        <p className="text-neutral-500 text-center mb-8">Format and beautify CSS</p>
+        <p className="text-neutral-500 text-center mb-8">Beautify or minify CSS</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm text-neutral-500 mb-1">Input</label><TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-64 resize-none font-mono" placeholder="Paste CSS here..." value={input} onChange={e => setInput(e.target.value)} /></div>
@@ -35,22 +35,37 @@ export default function CssFormatterPage() {
       </div>
       <SeoContent
         title={"CSS Formatter"}
-        description={"CSS Formatter beautifies CSS with js-beautify (the engine of beautifier.io) and minifies it with CSSO, entirely in your browser. Both understand CSS syntax rather than replacing characters: strings, comments, data: URLs such as url(data:image/png;base64,…) and at-rules like @media keep their meaning. Minifying also merges identical rules and shortens colors and values when that is safe."}
+        description={"CSS Formatter has two buttons for one stylesheet. Format runs js-beautify, the engine of beautifier.io: one declaration per line, 2-space indentation, at most one blank line kept between rules, and comments and url(data:…) values left intact. Minify runs CSSO: comments (except /*! license comments) and whitespace go, identical rules are merged (a and button with the same declarations become a,button), colors and zero values are shortened. js-beautify and CSSO both run in your browser. Neither one validates: invalid CSS is formatted as it is, and Minify can silently drop what it cannot parse."}
+        example={{
+          caption: "Minify: two rules with the same declarations are merged and #ff0000 becomes red.",
+          inputLabel: "Input",
+          input: "a{color:#ff0000;margin:0px 0px}\nbutton{color:#ff0000;margin:0px 0px}\n/* end */",
+          outputLabel: "Output",
+          output: "a,button{color:red;margin:0}",
+        }}
+        howToTitle={"How to format or minify CSS"}
         howTo={[
-          "Paste your CSS into the input box.",
-          "Click 'Format' for readable CSS or 'Minify' for the smallest equivalent CSS.",
-          "Review the result.",
-          "Click 'Copy' to copy it."
+          "Paste a stylesheet into \"Input\".",
+          "Click \"Format\" for indented CSS, or \"Minify\" for the compact version.",
+          "Compare \"Output\" with your original before replacing it.",
+          "Click \"Copy\", or \"Download\"; the file is named \"formatted.css\" after either button.",
         ]}
+        specs={[
+          { label: "Input", value: "CSS text, at-rules such as @media included" },
+          { label: "Format", value: "js-beautify: 2-space indentation, at most one blank line in a row" },
+          { label: "Minify", value: "CSSO: merges identical rules, shortens colors and zeros, removes whitespace and comments (not /*! ones)" },
+          { label: "Validation", value: "None: syntax errors are not reported" },
+        ]}
+        privacyTitle={"Where your CSS is processed"}
+        privacy={"Both engines are JavaScript libraries that your browser downloads on the first click; the CSS you paste is processed on your device and is not uploaded. Should an error be displayed, its text is sent to our error log with the tool name and your browser's name and version, after quoted passages, long numbers and addresses are removed."}
         faqs={[
-          { q: "Is CSS Formatter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can formatting or minifying break my CSS?", a: "No — both parse the CSS first; semicolons or braces inside strings and URLs are never treated as syntax." },
-          { q: "What does minifying remove?", a: "Comments, whitespace, redundant semicolons and zeros; CSSO also merges duplicate rules and shortens values when the result is equivalent." },
-          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; the engine is downloaded once when you first click." }
+          { q: "Can minifying break my CSS?", a: "No, for valid CSS: CSSO only applies changes that give the same result, such as merging identical rules. Invalid CSS is another matter, because CSSO may drop the part it cannot read without a warning, so check the output." },
+          { q: "Does Format change my values?", a: "No. Format only changes whitespace: line breaks, 2-space indentation and the space after each colon. Strings, comments and url(data:…) values are kept character for character." },
+          { q: "What does Minify remove?", a: "Comments other than /*! license comments, line breaks, spaces, the last semicolon of each rule and units on zero values; it also turns #ff0000 into red and joins rules that share the same declarations, as in the example above." },
         ]}
         tips={[
-          "Format third-party minified CSS to read or debug it.",
-          "Keep your formatted source and publish the minified version."
+          "Format a minified third-party stylesheet first to find the rule you need, then edit your own source.",
+          "For SCSS or LESS, use Code Formatter, which formats both with Prettier.",
         ]}
       />
     </div>

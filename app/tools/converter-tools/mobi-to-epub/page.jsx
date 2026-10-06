@@ -369,10 +369,10 @@ export default function MobiToEpubPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">MOBI to EPUB</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert MOBI ebooks to EPUB format</p>
+        <p className="text-neutral-500 text-center mb-8">Convert DRM-free MOBI, AZW, AZW3 and PRC ebooks to EPUB</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
-            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a MOBI file" />}</p>
+            <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a MOBI, AZW, AZW3 or PRC file" />}</p>
             <input ref={inputRef} type="file" accept=".mobi,.azw,.azw3,.prc" className="hidden" onChange={handleFile} />
           </div>
           <button onClick={convert} disabled={!file || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
@@ -389,25 +389,32 @@ export default function MobiToEpubPage() {
       </div>
       <SeoContent
         title="MOBI to EPUB"
-        description="MOBI to EPUB converts your Kindle ebook into a real, standards-compliant EPUB file entirely in your browser — nothing is uploaded to a server. It properly decodes MOBI's internal PalmDOC or Huffman/CDIC text compression and the newer KF8 structure used by .azw3 files, using a dedicated parser rather than reading the raw bytes as plain text, so chapters, images, and the cover are extracted correctly and packaged into a real ZIP-based EPUB that opens in standard e-reader apps. .prc files (the same MOBI6 format under a different extension) are supported too. DRM-protected ebooks aren't supported, since decrypting Kindle DRM is outside the scope of this tool."
+        description={`MOBI to EPUB reads a Kindle-format ebook — .mobi, .azw, .azw3 or .prc — and repackages it as an EPUB 3 file with a nav page and an NCX table of contents. It copies the chapters in reading order with their images and stylesheets, the cover, and the title, authors, publisher, description and language. It does not remove DRM and does not detect it either, so a protected file may fail or come out unreadable. Links between chapters, such as footnote links, are left as they were. The ebook is unpacked and zipped again by the page itself, so even a long book never travels to a server.`}
+        howToTitle="How to convert MOBI to EPUB"
         howTo={[
-          "Click the upload area and select a .mobi, .azw, .azw3, or .prc file.",
-          "Click \"Convert to EPUB\" to parse and repackage the file locally.",
-          "Wait for the \"Done!\" message to appear.",
-          "Download the resulting EPUB and open it in your e-reader app to confirm it looks right."
+          'Click the dashed box, or drop the file on it, and choose one .mobi, .azw, .azw3 or .prc ebook.',
+          `Press "Convert to EPUB".`,
+          `When "Done!" appears, the result row gives the .epub name, taken from your ebook, and its size; "Download" saves it.`,
+          `On a device that can share files, "Save / Share" hands the EPUB straight to another app instead.`,
         ]}
+        specs={[
+          { label: 'Input formats', value: '.mobi, .azw, .azw3 and .prc without DRM, in the MOBI6 or KF8 layout, with PalmDOC or Huffman/CDIC text compression' },
+          { label: 'Output', value: 'One EPUB 3 file (.epub): OPF package, nav page, NCX table of contents, images and stylesheets' },
+          { label: 'Files at once', value: 'One' },
+          { label: 'Maximum file size', value: 'None set by the page; the whole ebook is held in your device memory while it is converted' },
+          { label: 'Not converted', value: 'DRM-protected books (not detected); links between chapters are not rewritten' },
+        ]}
+        privacyTitle="Where your ebook is processed"
+        privacy="The ebook is opened by a JavaScript MOBI reader and zipped into the EPUB by your browser: the file and its text are not uploaded. If the conversion fails, the cleaned error message, the tool's name and your browser's name and major version are sent to our error log, without the book or its file name."
         faqs={[
-          { q: "Will this reliably convert my MOBI ebook to a working EPUB?", a: "Yes, for unencrypted .mobi, .azw, .azw3, and .prc files. The tool properly decompresses MOBI's PalmDOC or Huffman/CDIC-compressed text and parses the KF8 structure used by most .azw3 files, then packages the result into a standards-compliant, ZIP-based EPUB. DRM-protected ebooks purchased from stores like Amazon can't be converted, since removing that encryption isn't something this tool does." },
-          { q: "Is MOBI to EPUB free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file types can I upload?", a: ".mobi, .azw, .azw3, and .prc files. The parser automatically detects whether a file uses the older MOBI6 structure (used by .mobi, .azw, and .prc) or the newer KF8 structure used by most .azw3 files." },
-          { q: "Is my file uploaded anywhere?", a: "No. All processing happens locally in your browser — your file is never uploaded to a server." },
-          { q: "Will chapter titles and in-book links from the original ebook be preserved?", a: "Chapter content, images, and the cover are preserved in reading order, and the table of contents uses the book's own chapter titles when the ebook has one (numbered titles otherwise). Internal cross-reference links (like footnotes) aren't guaranteed to remain clickable." }
+          { q: 'Can I convert Kindle books bought from a store?', a: 'No, not if they carry DRM. The converter neither removes nor checks for encryption, so a protected file may stop with an error or give an unreadable EPUB. It is meant for DRM-free files, such as ebooks you made yourself or downloaded from a free library.' },
+          { q: 'Will the EPUB keep the chapters, images and cover?', a: 'Yes. Chapters keep their reading order, images and stylesheets are embedded, and the cover is copied, read straight from the EXTH record of a MOBI6 file when the reader library misses it. Chapter titles come from the book\'s own table of contents, or are numbered Chapter 1, Chapter 2 when it has none.' },
+          { q: 'Does it work with AZW3 files?', a: 'Yes. A .azw3 file is read with the KF8 reader first, and a .mobi, .azw or .prc file with the MOBI6 reader; if that reader fails, the other one is tried. Text compressed with PalmDOC or Huffman/CDIC is decoded.' },
+          { q: 'Will an EPUB validator accept the file?', a: 'No, not without a warning or error. The package is EPUB 3 with the mimetype entry first, a nav page and an NCX table of contents, but it has no dcterms:modified date, which EPUB 3 requires, and the language can be written as unknown. Open the result in your reading app before deleting the original.' },
+          { q: 'Do footnote links still work?', a: 'No, not reliably. The footnote text stays where the original put it, but links that jump between chapters keep their Kindle targets and are not rewritten for the EPUB, so some of them lead nowhere.' },
         ]}
         tips={[
-          "For DRM-protected Kindle purchases, remove the DRM first with a tool you're authorized to use — this converter only handles unencrypted files.",
-          "Both .mobi/.azw/.prc (MOBI6) and .azw3 (KF8) files are supported, with the internal format detected automatically.",
-          "Chapter titles come from the ebook's own table of contents; a book without one gets numbered titles (Chapter 1, Chapter 2, ...).",
-          "Always open the resulting EPUB in your e-reader app to confirm it looks right before deleting your original file."
+          'Want a PDF to print or annotate instead? MOBI to PDF reads the same .mobi, .azw and .azw3 files, but not .prc.',
         ]}
       />
     </div>

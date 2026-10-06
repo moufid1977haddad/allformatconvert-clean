@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { MAX_IMAGE_CAPTIONER_ORIGINAL_BYTES } from '@/lib/quota/limits';
-import { imageToVisionJpeg } from '../../../lib/imageForVision';
+import { imageToVisionJpeg, VISION_MAX_SIDE } from '../../../lib/imageForVision';
 import { formatBytes } from '../../../lib/formatBytes';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -83,24 +83,31 @@ export default function ImageCaptionerPage() {
       </div>
       <SeoContent
         title="Image Captioner"
-        description="Image Captioner is a free online tool that uses OpenAI's GPT-4o mini vision model to generate a descriptive caption for any image you upload. Perfect for content creators and anyone who needs quick alt text or a social media caption, without any software installation required."
+        description={`Image Captioner writes a short, descriptive caption for a photo or picture, using OpenAI's GPT-4o mini vision model. You pick one image of up to ${MAX_MB} MB: JPEG, PNG and WebP open in every browser, and a HEIC photo opens in Safari. Before it is sent, the page turns it on your device into a JPEG of at most ${VISION_MAX_SIDE.toLocaleString('en-US')} pixels on the longest side; only that copy goes through our server to OpenAI. The caption is plain text to copy or download as caption.txt. Transparent areas are sent as white, and one image is captioned at a time.`}
+        howToTitle="How to generate a caption for an image"
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Click the 'Generate Caption' button to send it to the AI.",
-          "Wait a few seconds while the AI analyzes your image.",
-          "Copy the generated caption and use it for your website, social media, or accessibility needs."
+          "Click the upload area and choose an image; a preview appears.",
+          "Click \"Generate Caption\" and wait while it shows \"Generating...\".",
+          "Read the text under \"Caption\".",
+          "Click \"Copy\" or \"Download\" (caption.txt) to keep it."
         ]}
+        specs={[
+          { label: "Input formats", value: "Any image your browser can decode, such as JPEG, PNG or WebP" },
+          { label: "Maximum size", value: `${MAX_MB} MB per image` },
+          { label: "Sent for analysis", value: `A JPEG copy, ${VISION_MAX_SIDE.toLocaleString('en-US')} px at most on the longest side` },
+          { label: "Output", value: "One caption in plain text, with a .txt download" },
+          { label: "Usage limits", value: "A limited number of requests per connection each hour and each day, shared with the site's other paid tools, and a monthly budget for the whole site" }
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={`Before it is sent, your image is redrawn on your device as a JPEG with its longest side at ${VISION_MAX_SIDE.toLocaleString('en-US')} px or less and any transparency turned white; only that redrawn copy is sent to our server, and your original file stays on your device. Our server passes the copy to OpenAI's GPT-4o mini vision model, which writes the caption. We do not store the image or the caption.`}
         faqs={[
-          { q: "Is Image Captioner really free to use?", a: "Yes, Image Captioner is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "What image formats are supported?", a: "It accepts common image formats including JPG, PNG, GIF, and WebP." },
-          { q: "How accurate are the AI-generated captions?", a: "The vision model generally produces relevant, descriptive captions, but as with any AI output, you should review and edit the caption before relying on it for accessibility purposes." },
-          { q: "Is my privacy protected when I upload images?", a: "Your image is sent to OpenAI's API to generate the caption. It is not stored on our servers, but it is processed by that third-party service to produce your result." }
+          { q: "Is my full-size photo uploaded?", a: `No. Only a JPEG copy, at most ${VISION_MAX_SIDE.toLocaleString('en-US')} pixels on its longest side, leaves your device, and it goes through our server to OpenAI. The original file is read in your browser and is never sent.` },
+          { q: "Can I use a HEIC photo from an iPhone?", a: `Yes in Safari, which opens HEIC itself; in Chrome, Edge or Firefox, convert it first with HEIC to JPG. JPEG, PNG and WebP work in every browser, up to ${MAX_MB} MB, and an animated GIF is captioned from a single frame.` },
+          { q: "Can I use the caption as alt text?", a: "Yes, after checking it. The model is asked for a creative, descriptive caption, so it may add mood or style words that alt text does not need. Trim it to what the image shows and why it matters on your page." },
+          { q: "Why was my image refused?", a: `${MAX_MB} MB is the size limit, and an image the browser cannot read is refused too; both are explained before anything goes to our server. A request can also be stopped by your connection's hourly or daily limit or the site's monthly budget, and the message says when to try again.` }
         ]}
         tips={[
-          "Use specific, keyword-rich edits to generated captions for better SEO performance on your website.",
-          "Add relevant hashtags or brand details manually after generating a caption for social media posts.",
-          "Always review AI-generated alt text for accuracy before publishing, especially for accessibility use.",
-          "Upload one image at a time — there's no batch processing, so generate captions individually."
+          "For a logo with a transparent background, check the caption: transparent areas reach the model as white."
         ]}
       />
     </div>

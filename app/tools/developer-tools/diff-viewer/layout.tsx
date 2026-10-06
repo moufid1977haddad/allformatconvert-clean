@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Diff Viewer — Compare Two Texts Line by Line Online Free" },
-  description: "Diff Viewer compares two texts line by line, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "Diff Viewer — Line-by-Line Text Diff with Line Numbers" },
+  description: "Compare an original and a modified text in one column: removed lines in red, added lines in green, changed words highlighted, both line numbers.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/diff-viewer" },
   openGraph: {
-    title: "Diff Viewer — Compare Two Texts Line by Line Online Free",
-    description: "Diff Viewer compares two texts line by line, entirely in your browser — nothing is uploaded to a server.",
+    title: "Diff Viewer — Line-by-Line Text Diff with Line Numbers",
+    description: "Compare an original and a modified text in one column: removed lines in red, added lines in green, changed words highlighted, both line numbers.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/diff-viewer",
   },
 };

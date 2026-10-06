@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "HTML Formatter — Add Line Breaks Online Free" },
-  description: "HTML Formatter adds line breaks and indentation to HTML entirely in your browser using simple pattern-based rules, not a full parser.",
+  title: { absolute: "HTML Formatter — Indent HTML, Inline CSS and JavaScript" },
+  description: "Re-indent HTML with 2 spaces using js-beautify, in your browser. Inline <script> and <style> are formatted too; <pre> and <textarea> stay as typed.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/html-formatter" },
   openGraph: {
-    title: "HTML Formatter — Add Line Breaks Online Free",
-    description: "HTML Formatter adds line breaks and indentation to HTML entirely in your browser using simple pattern-based rules, not a full parser.",
+    title: "HTML Formatter — Indent HTML, Inline CSS and JavaScript",
+    description: "Re-indent HTML with 2 spaces using js-beautify, in your browser. Inline <script> and <style> are formatted too; <pre> and <textarea> stay as typed.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/html-formatter",
   },
 };

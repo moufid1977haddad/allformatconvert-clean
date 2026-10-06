@@ -101,7 +101,7 @@ export default function FileSplitterPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">File Splitter</h1>
         <p className="text-neutral-500 text-center mb-2">Split large files into smaller parts</p>
-        <p className="text-neutral-500 text-xs text-center mb-8">Supports files up to {MAX_FILE_SIZE_LABEL} and up to {MAX_CHUNKS.toLocaleString()} parts. Splitting is instant — chunks are lazy byte-range views, not copied into memory.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">Files up to {MAX_FILE_SIZE_LABEL}; when splitting by size, up to {MAX_CHUNKS.toLocaleString()} parts. Each part is an exact byte range of your file, and nothing is uploaded.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           {mode === 'split' && <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a file" />}</p>
@@ -142,24 +142,31 @@ export default function FileSplitterPage() {
       </div>
       <SeoContent
         title="File Splitter"
-        description="File Splitter is a free online tool that divides any file into smaller, numbered parts by size — entirely in your browser, with nothing uploaded to a server. It's useful for staying under email attachment limits, upload size caps, or storage constraints."
+        description="File Splitter cuts any file into numbered pieces named file.part1, file.part2 and so on, either by a size you set in bytes, KB or MB, or into a number of equal parts. Its Join parts mode puts the pieces back together in order and refuses a missing or doubled part, or one whose size does not fit. Use it to pass a large file through an email, an upload form or a storage service that caps file size. Splitting does not compress or change any byte: joined parts give back the exact original. The parts are byte ranges cut by this page from your file."
+        howToTitle="How to split a file into parts"
         howTo={[
-          "Click the upload area and select the file you want to split.",
-          "Choose 'By size' and set the chunk size and unit (Bytes, KB, or MB), or 'Into equal parts' and the number of parts.",
-          "Click \"Split File\" to divide it into numbered parts locally.",
-          "Download each part individually — to rebuild the file later, choose 'Join parts' and select all of them."
+          "In \"Split a file\", choose the file.",
+          "Pick \"By size\" and set \"Chunk Size\" with its \"Unit\", or \"Into equal parts\" and the \"Number of parts\".",
+          "Click \"Split File\".",
+          "Save each part with \"Download\", or all of them at once with \"Download all\".",
+          "To rebuild the file later, open \"Join parts\", click \"Choose all the parts (name.part1, name.part2…)\" and download the joined file."
         ]}
+        specs={[
+          { label: "File to split", value: `Up to ${MAX_FILE_SIZE_LABEL}, of any type` },
+          { label: "Parts", value: `Up to ${MAX_CHUNKS.toLocaleString('en-US')} when splitting by size; equal parts differ by one byte at most` },
+          { label: "Units", value: "B, KB (1024 bytes) and MB (1,048,576 bytes)" },
+          { label: "Part names", value: "name.part1, name.part2… after the original file name" },
+          { label: "Joining", value: "Every part of one split, chosen together; no size limit set" }
+        ]}
+        privacy={"Parts are cut from your file by this page and the joined file is assembled here too; nothing is uploaded. When the parts are listed, the page reads each one to prepare its download, and \"Download all\" builds the ZIP in memory, so a very large split needs free memory. Error messages, if any, reach our error log cleaned of file names, with the tool name and browser version."}
         faqs={[
-          { q: "What file types can I split?", a: "Any file type — splitting works purely on raw bytes, so there are no format restrictions." },
-          { q: "Does File Splitter include a way to merge the parts back together?", a: "Yes — choose 'Join parts' and select every .part file of the same file: they are put back together in order, and a missing part is pointed out. On a computer, \"copy /b\" (Windows) or \"cat\" (Mac, Linux) do the same." },
-          { q: "Is there a file size limit?", a: `Files up to ${MAX_FILE_SIZE_LABEL} are supported, and a split can't produce more than ${MAX_CHUNKS.toLocaleString()} parts (pick a larger chunk size if you hit that). Splitting itself doesn't load your file into memory -- each part is a lazy byte-range view of the original, only read when you actually download it -- so file size isn't the limiting factor the way it is for tools that have to process a file's full contents.` },
-          { q: "Is my data private?", a: "Yes. Splitting happens entirely in your browser — your file is never uploaded to a server." }
+          { q: "Can I join the parts back into the original file?", a: "Yes. Choose \"Join parts\" and select every .part file of the same file at once. They are joined in number order; a missing or doubled part, or a part whose size does not fit the others, is refused with a message. Parts are matched by name and size only, so keep the parts of each split apart. On a computer, \"copy /b\" on Windows or cat on Mac and Linux do the same." },
+          { q: "Is there a size limit?", a: `Yes: ${MAX_FILE_SIZE_LABEL} per file to split, and, when splitting by size, at most ${MAX_CHUNKS.toLocaleString('en-US')} parts, so choose a bigger chunk size if you reach it. Joining is not capped by the tool.` },
+          { q: "Does splitting change or compress the file?", a: "No. The parts are exact byte ranges of the original, so joining them gives back the identical file. Nothing is compressed: together, the parts are exactly as large as the original." },
+          { q: "Are KB and MB counted in multiples of 1024?", a: "Yes. In \"Unit\", KB means 1024 bytes and MB means 1,048,576 bytes. If a service states its limit in decimal megabytes, choose a chunk size a little under that limit." }
         ]}
         tips={[
-          "Parts are numbered sequentially and automatically — keep them together in the same folder and in order for easy reassembly.",
-          "Pick a chunk size just under your target limit (e.g. 24MB for a 25MB email attachment) to leave room for any encoding overhead.",
-          "Splitting is instant regardless of file size, since parts are lazy views rather than copies — only downloading a part actually reads its bytes.",
-          "Keep the original file until you've confirmed you can successfully rejoin and use the split parts."
+          "Keep the original file until you have joined the parts once and checked the result."
         ]}
       />
     </div>

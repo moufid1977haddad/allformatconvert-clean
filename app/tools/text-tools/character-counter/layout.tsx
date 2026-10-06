@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Character Counter — Instantly Breaks Down Any Text Online" },
-  description: "Character Counter instantly breaks down any text into total characters, letters, numbers, spaces, and special characters, live.",
+  title: { absolute: "Character Counter — Letters, Digits, Spaces, Byte Size" },
+  description: "Count characters as they appear on screen, plus letters, digits, spaces, lines, UTF-16 code units and UTF-8 bytes, updated as you type.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/character-counter" },
   openGraph: {
-    title: "Character Counter — Instantly Breaks Down Any Text Online",
-    description: "Character Counter instantly breaks down any text into total characters, letters, numbers, spaces, and special characters, live.",
+    title: "Character Counter — Letters, Digits, Spaces, Byte Size",
+    description: "Count characters as they appear on screen, plus letters, digits, spaces, lines, UTF-16 code units and UTF-8 bytes, updated as you type.",
     url: "https://www.onlineconvertools.com/tools/text-tools/character-counter",
   },
 };

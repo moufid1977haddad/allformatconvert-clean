@@ -108,7 +108,7 @@ export default function QrGeneratorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">QR Code Generator</h1>
-        <p className="text-neutral-500 text-center mb-8">Links, Wi-Fi, contacts and more — colours, logo, up to 2000 px, PNG, SVG or PDF. Every code is scanned back before you download it.</p>
+        <p className="text-neutral-500 text-center mb-8">Links, Wi-Fi, contacts and more — colours, logo, up to 2000 px, PNG, SVG or PDF. The PNG drawing is scanned back before you can download the files.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label="Content type">
             {QR_TYPES.map((t) => (
@@ -185,26 +185,38 @@ export default function QrGeneratorPage() {
       </div>
       <SeoContent
         title="QR Code Generator"
-        description="QR Code Generator creates QR codes for links, text, email, phone calls, SMS, Wi-Fi networks, contact cards (vCard) and map locations, with your own colours, a choice of module shapes, adjustable error correction and an optional logo, up to 2000 × 2000 px, as PNG, SVG or vector PDF. Everything runs in your browser — nothing you type is uploaded. Unlike most generators, every code is read back by a QR decoder before you can download it, so a bad colour choice or an oversized logo is caught before it reaches print."
+        description={`QR Code Generator builds what a QR code should hold from simple fields — a web link, text, an email, a phone number, an SMS, Wi-Fi login details, a vCard 3.0 contact or a map location — and draws it with your colors, square, rounded or dot modules, an error-correction level and an optional logo. The PNG is ${MIN_SIZE} to ${MAX_SIZE} pixels wide; SVG and PDF are vector. Before the downloads appear, the PNG drawing is decoded with jsQR and must give back exactly the content built from your fields. Codes are static, with no redirect, expiry or scan counting, and your Wi-Fi password or contact details stay on the page that drew them.`}
+        example={{
+          caption: 'What the code holds for two sets of fields (the page\'s own buildPayload function, run in Node on October 6, 2026).',
+          inputLabel: 'You fill in',
+          input: 'Wi-Fi — Network name (SSID): Cafe Wi-Fi\n  Password: tea;time\n  Security: WPA / WPA2 / WPA3\nURL — Web address: example.com/menu',
+          outputLabel: 'Text inside the QR code',
+          output: 'WIFI:T:WPA;S:Cafe Wi-Fi;P:tea\\;time;;\nhttps://example.com/menu',
+        }}
+        howToTitle="How to create a QR code"
         howTo={[
-          "Choose what the code should hold — URL, text, email, phone, SMS, Wi-Fi, contact or location — and fill in the fields.",
-          "Optionally pick colours, a module shape, the error-correction level, the PNG size and a logo.",
-          "Click \"Generate QR Code\": the code is drawn, then scanned back to check it holds exactly what you typed.",
-          "Download it as PNG, SVG (any size, for print) or PDF."
+          `Pick what the code should hold — "URL", "Wi-Fi", "Contact (vCard)", "Location" or one of the four other types — and fill in its fields.`,
+          `Under "Design", set "Code colour", "Background", the "Shape" and the "Error correction" level, and move the "PNG size" slider.`,
+          `Optionally click "Add a logo (optional)" and choose a PNG, JPG, GIF, WebP or SVG image of up to ${MAX_LOGO_BYTES / 1024 / 1024} MB.`,
+          `Click "Generate QR Code"; once "Scanned back successfully" appears, use "Download" for PNG, SVG or PDF, or "Download all" for a ZIP of the three.`,
         ]}
+        specs={[
+          { label: 'Content types', value: 'URL, text, email with subject and message, phone, SMS, Wi-Fi (WPA, WEP or open, hidden networks too), vCard 3.0 contact, map location' },
+          { label: 'Output formats', value: `PNG from ${MIN_SIZE} to ${MAX_SIZE} pixels wide; SVG; PDF on a 4-inch square page` },
+          { label: 'Logo', value: `PNG, JPG, GIF, WebP or SVG up to ${MAX_LOGO_BYTES / 1024 / 1024} MB; it switches error correction to High and covers at most 22 % of the code width` },
+          { label: 'In the PDF', value: 'Rounded modules are drawn as squares, and a logo is embedded as a PNG of at most 512 px' },
+        ]}
+        privacyTitle="Where your QR code is made"
+        privacy="The content is encoded by the qrcode library, drawn and checked with jsQR in your browser, and the PDF is written by pdf-lib on the page. Your text, your Wi-Fi password and your logo are not uploaded. If an error message is shown, its text, which never contains your content, is sent cleaned to our error log with the tool's name and your browser's name and major version."
         faqs={[
-          { q: "Is QR Code Generator free to use?", a: "Yes, it's completely free with no signup, no watermark and no limit on how many QR codes you create. The codes are static: they never expire." },
-          { q: "What can I put in a QR code?", a: "A web link, plain text, an email (with subject and message), a phone number, an SMS, Wi-Fi login details (phones join the network when they scan it), a contact card (vCard 3.0) or a map location." },
-          { q: "Can I change the colours or add a logo?", a: "Yes. The code must stay darker than its background, with enough contrast — the tool refuses combinations most cameras cannot read. A logo switches error correction to High and is kept small enough in the centre for the code to be rebuilt around it; if a logo still stops the code from scanning, the tool tells you instead of offering the file." },
-          { q: "How do I know the code works?", a: "After drawing it, the tool decodes it with a QR reader, the way a phone camera does, and only offers the downloads if the result is exactly what you entered. Testing with your own phone before printing is still a good idea." },
-          { q: "Which format should I download?", a: "PNG for screens and documents (up to 2000 px), SVG or PDF for print: both are vector files that stay sharp at any size." },
-          { q: "Is my data private?", a: "Yes. The QR code is generated entirely in your browser — nothing you type, and not your logo, is sent to a server." }
+          { q: 'Do these QR codes expire?', a: 'No. The content is written into the code itself, with no redirect through our site, so the code works as long as it can be read. The other side of that: you cannot change where it points later, you make a new code instead.' },
+          { q: 'Can I add a logo without breaking the code?', a: 'Yes. A logo switches error correction to High and sits on a plain pad in the center, at most 22 % of the code width. If the drawing no longer decodes, the page offers no file and asks for a simpler or smaller logo, or none.' },
+          { q: 'Can I make a white QR code on a black background?', a: 'No. The page accepts only a code darker than its background, with a contrast of at least 3:1; light-on-dark codes and colors that are too close are refused before drawing. Swap the two colors, or pick a darker code color.' },
+          { q: 'Can I print the QR code large?', a: 'Yes. Download the SVG or the PDF: their modules are vector shapes that stay sharp at any size. A logo inside stays the image you gave, and the PDF holds a copy of at most 512 px, so start from a large logo for posters.' },
+          { q: 'Is my Wi-Fi password stored?', a: 'No. The password is written into the code as plain WIFI: text and nowhere else; the page does not send it or keep it once you leave. Anyone who scans the printed code can read the password, so print it only where guests should have it.' },
         ]}
         tips={[
-          "Use SVG or PDF for anything printed, especially posters — they stay crisp at any size.",
-          "Shorter content makes a simpler code that scans from further away: use a short link where you can.",
-          "Keep the quiet white border around the code when you place it on a design; scanners need it.",
-          "Dark code on a light background scans everywhere; light on dark does not."
+          'Keep the blank border of four modules around the code when you place it on a design; readers need it to find the code.',
         ]}
       />
     </div>

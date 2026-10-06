@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Captioner — Use Openai's Gpt-4o Mini Vision Model" },
-  description: "Image Captioner is a free online tool that uses OpenAI's GPT-4o mini vision model to generate a descriptive caption for any image you upload.",
+  title: { absolute: "Image Captioner — AI Caption for a Photo or Picture" },
+  description: "Upload a photo and get a descriptive caption from GPT-4o mini vision. Large photos are reduced on your device before upload; copy or save the caption.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/image-captioner" },
   openGraph: {
-    title: "Image Captioner — Use Openai's Gpt-4o Mini Vision Model",
-    description: "Image Captioner is a free online tool that uses OpenAI's GPT-4o mini vision model to generate a descriptive caption for any image you upload.",
+    title: "Image Captioner — AI Caption for a Photo or Picture",
+    description: "Upload a photo and get a descriptive caption from GPT-4o mini vision. Large photos are reduced on your device before upload; copy or save the caption.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/image-captioner",
   },
 };

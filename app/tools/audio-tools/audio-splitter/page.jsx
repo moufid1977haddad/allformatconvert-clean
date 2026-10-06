@@ -226,25 +226,32 @@ export default function AudioSplitterPage() {
       </div>
       <SeoContent
         title="Audio Splitter"
-        description="Audio Splitter cuts an audio file into parts using ffmpeg.wasm in your browser — nothing is uploaded, except for Opus, which our own server encodes with libopus and then deletes. Split at one point (the middle of the file by default), into 2 to 100 equal parts, or into a piece every N seconds, and pick the output format for all parts from a dropdown."
+        description={`Audio Splitter cuts one audio file into several files. Choose a single split point (the middle by default), 2 to ${MAX_PARTS} equal parts, or one part every N seconds; before you split, the page shows how many parts you will get and where the first ones start and end. Each part is cut to the sample and encoded in the format you pick from 18 choices, the same for all parts. Formats your browser cannot play, such as WMA, are measured by ffmpeg.wasm and split the same way. The cutting is done in the page; for Opus, each part is encoded separately on our media service.`}
+        howToTitle="How to split an audio file into parts"
         howTo={[
-          "Click the upload area and select an audio file.",
-          "Choose how to split: at one point (the middle by default: type it to a tenth of a second or use the slider), into equal parts, or every N seconds. The page lists where the parts start and end.",
-          "Choose an output format for all the parts.",
-          "Click \"Split Audio\": the file is cut in your browser (Opus parts are encoded by our own server, then deleted).",
-          "Preview and download each part, or all of them in one ZIP."
+          `Pick or drop the recording to cut; the page reads its length, even when there is no player for its format.`,
+          `Choose "At one point", "Equal parts" or "Every N seconds", then set the point, the number of parts or the length of each part.`,
+          `Check the line that lists the parts, then choose the "Output Format".`,
+          `Click "Split Audio".`,
+          `Play each part, then click "Download" for one of them or "Download all" for a ZIP.`,
         ]}
+        specs={[
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Output formats`, value: `MP3, WAV, AAC, FLAC, OGG (Vorbis), M4A, Opus, WMA, AIFF, ALAC, AC3, M4R, M4B, MP2, WV (WavPack), CAF, AU, MKA` },
+          { label: `Parts`, value: `2 to ${MAX_PARTS} per run, each at least ${MIN_PART} s long` },
+          { label: `Precision`, value: `Cut to the sample. In a test of 28/09/2026, WAV, FLAC, MP3 and OGG parts put back together matched the original length; M4A added 17 ms and WMA lost 0.1 s.` },
+          { label: `Usage limits`, value: `Opus only: each part is a separate job on our media service, counted in an hourly and daily allowance per connection, with a maximum size and length per part.` },
+        ]}
+        privacy={`The file is cut in your browser by ffmpeg.wasm, except when the output is Opus. Then each part is rendered here as FLAC and sent on its own to our media service for libopus encoding; each part's FLAC is removed there once encoded, and its Opus file after your browser takes it or a set time. A failed split leaves us one report: its cleaned message, the tool, the file's extension and size range, and your browser with its version.`}
         faqs={[
-          { q: "Can I split into more than two parts?", a: "Yes — choose \"Equal parts\" (2 to 100 parts of the same length) or \"Every N seconds\" (a piece every minute, say; the last part holds what is left). Up to 100 parts per run, each at least 0.1 s long." },
-          { q: "What output format do the parts use?", a: "Your source's own format by default when it can be written here, otherwise MP3; or your choice — MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, or AC3 — applied to all parts. The cut is made to the sample: measured on WAV, FLAC, MP3 and OGG, the parts put back together last exactly as long as the original; with M4A (AAC) and WMA, whose audio comes in fixed-size frames, a part can be up to a tenth of a second longer or shorter (measured: M4A +17 ms, WMA −0.1 s)." },
-          { q: "Is there a file size limit?", a: "No hard limit is enforced by the tool — you're limited by your browser's available memory." },
-          { q: "Is my file uploaded anywhere?", a: "For every format except Opus, no: processing happens in your browser via ffmpeg.wasm. For Opus, the processed audio is sent to our own server (not a third party), encoded with the reference libopus encoder (the in-browser one is not as good), and deleted as soon as you have downloaded the result." }
+          { q: `Can I split into more than two parts?`, a: `Yes. "Equal parts" makes 2 to ${MAX_PARTS} parts of the same length, and "Every N seconds" makes a part every N seconds, with the remainder in the last one. Each run allows at most ${MAX_PARTS} parts of at least ${MIN_PART} s.` },
+          { q: `Does the splitter keep my file's format?`, a: `Yes, when its extension matches one of the 18 outputs: a .flac stays FLAC and a .wav stays WAV, written in 16 bits. Other extensions, such as .aif or .amr, default to MP3, and an Apple Lossless .m4a defaults to M4A (AAC). You can pick any of the 18 formats for all parts.` },
+          { q: `Will splitting lose quality?`, a: `Yes for lossy formats: every part is encoded again, even in the source format, so an MP3 is compressed a second time. Parts saved as FLAC or ALAC are exact; WAV and AIFF parts come out at 16 bits, which trims a deeper recording.` },
+          { q: `Do Opus parts go through a server?`, a: `Yes, each one is sent to our media service as a separate job, so a long split can reach the hourly or daily job allowance of your connection. Any part in another format is cut and encoded right in this tab.` },
         ]}
         tips={[
-          "Preview the audio near your intended split point first to make sure you're cutting at the right moment.",
-          "Pick the same format as your source if you want to avoid a lossy re-encode.",
-          "For a long recording, \"Every N seconds\" makes pieces of the same length in one run.",
-          "The first split after loading the page takes longer since the ffmpeg.wasm engine needs to download."
+          `To keep a single passage instead of splitting the whole file, use Audio Trimmer.`,
+          `Put parts back together, in any order, with Audio Merger.`,
         ]}
       />
     </div>

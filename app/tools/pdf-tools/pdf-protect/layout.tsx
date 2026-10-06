@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Protect — Encrypt Your PDF Online Free" },
-  description: "PDF Protect encrypts your PDF with a password you choose, using a standard PDF security handler, entirely in your browser.",
+  title: { absolute: "Protect PDF with a Password — AES-128 Encryption" },
+  description: "Lock a PDF with an open password and AES-128 encryption, and choose whether readers may print, copy, edit, comment or rearrange its pages.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-protect" },
   openGraph: {
-    title: "PDF Protect — Encrypt Your PDF Online Free",
-    description: "PDF Protect encrypts your PDF with a password you choose, using a standard PDF security handler, entirely in your browser.",
+    title: "Protect PDF with a Password — AES-128 Encryption",
+    description: "Lock a PDF with an open password and AES-128 encryption, and choose whether readers may print, copy, edit, comment or rearrange its pages.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-protect",
   },
 };

@@ -70,24 +70,28 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Unlock"
-        description="PDF Unlock decrypts a password-protected PDF using the password you provide, via the @cantoo/pdf-lib library's standard PDF security handler entirely in your browser — your file is never uploaded to a server. It then saves the same document without encryption, so the downloaded copy opens without a password and without printing or copying restrictions, and keeps its bookmarks, form fields and document information. A PDF that is not protected is reported as such."
+        description={`PDF Unlock decrypts a protected PDF with its password and saves the same document without encryption, so the copy opens without a password and without printing, copying or editing restrictions. Bookmarks, form fields and document information are kept. Either the open (user) password or the permissions (owner) password works, and a PDF that only has restrictions opens with the field left empty. It does not guess or crack an unknown password, and a PDF that is not protected is reported instead of being copied. The password check and the decryption both happen on your device.`}
+        howToTitle="How to remove a password from a PDF"
         howTo={[
-          "Click the upload area and select a password-protected PDF file.",
-          "Type the PDF's password into the field.",
-          "Click 'Unlock PDF' to decrypt it.",
-          "Click 'Download' next to unlocked.pdf to save the password-free result."
+          `Choose the protected PDF.`,
+          `Type its password in "Password (if required)", or leave the field empty if the file opens without one.`,
+          `Click "Unlock PDF", then "Download" to save unlocked.pdf.`,
         ]}
+        specs={[
+          { label: 'Input', value: `Encrypted PDF` },
+          { label: 'Password', value: `Open or permissions password; none for restrictions only` },
+          { label: 'Kept', value: `Bookmarks, form fields, document information` },
+          { label: 'Result', value: `unlocked.pdf, without encryption` },
+        ]}
+        privacy={`The password you type and the PDF are used only inside your browser, where @cantoo/pdf-lib decrypts the file; neither of them is ever sent to our servers. A PDF that only carries restrictions is opened with an empty password, so in that case you type nothing at all.`}
         faqs={[
-          { q: "Is PDF Unlock free to use?", a: "Yes, it's free with no signup required." },
-          { q: "Can this remove a real password from an encrypted PDF?", a: "Yes — given the correct password, it decrypts the document's standard PDF encryption and re-saves it without protection." },
-          { q: "What if I enter the wrong password?", a: "Decryption fails and you'll see \"Could not unlock PDF. Wrong password?\" — double-check the password and try again." },
-          { q: "Is my file uploaded to a server?", a: "No, decryption happens entirely in your browser using the pdf-lib library." }
+          { q: "Can it unlock a PDF if I forgot the password?", a: `No. The tool needs the real password and never tries to guess one. If the file opens without a password and only blocks printing or copying, leave the field empty: those restrictions are removed without any password.` },
+          { q: "Does Wrong password mean the password does not match?", a: `Yes. The password you typed does not open this file. Check upper and lower case and the keyboard layout. If you left the field empty and the PDF asks for a password to open, the message asks you to enter it instead.` },
+          { q: "Do I get a file for a PDF that is not protected?", a: `No. Such a PDF opens without a password and has no restrictions, so there is nothing to remove. The page says so instead of giving you an identical copy.` },
+          { q: "Are bookmarks and form fields kept?", a: `Yes. The decrypted document itself is saved, so bookmarks, form fields and document information stay; only the encryption and the objects that referred to it are removed.` },
         ]}
         tips={[
-          "You need the PDF's actual password (user or owner) — this tool removes protection, it doesn't crack or guess unknown passwords.",
-          "If the PDF isn't password-protected at all, you can leave the password field blank and it will still process normally.",
-          "Download and reopen the result to confirm it no longer prompts for a password.",
-          "Keep your original protected file as a backup until you've confirmed the unlocked version looks correct."
+          `To protect the unlocked copy again with new permissions, use PDF Protect.`,
         ]}
       />
     </div>

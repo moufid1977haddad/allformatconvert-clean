@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Repair — Fix Damaged PDF Files Online" },
-  description: "PDF Repair fixes PDFs with damaged structure, like a broken cross-reference table or a cut-off end, and checks that the repaired file keeps your text.",
+  title: { absolute: "Repair PDF — Fix Broken Structure, Text Checked" },
+  description: "Fix a damaged PDF with a broken cross-reference table or a cut-off end on our server, and get it back only if its text still reads the same.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-repair" },
   openGraph: {
-    title: "PDF Repair — Fix Damaged PDF Files Online",
-    description: "PDF Repair fixes PDFs with damaged structure, like a broken cross-reference table or a cut-off end, and checks that the repaired file keeps your text.",
+    title: "Repair PDF — Fix Broken Structure, Text Checked",
+    description: "Fix a damaged PDF with a broken cross-reference table or a cut-off end on our server, and get it back only if its text still reads the same.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-repair",
   },
 };

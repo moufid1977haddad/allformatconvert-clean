@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Word Counter — Instantly Analyzes Text Online Free" },
-  description: "Word Counter instantly analyzes text for word count, character count, sentence count, paragraph count, and estimated reading time.",
+  title: { absolute: "Word Counter — Words, Characters, Reading Time, Keywords" },
+  description: "Count words, characters, sentences and paragraphs live, see reading and speaking time, and list your most used words and phrases.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/word-counter" },
   openGraph: {
-    title: "Word Counter — Instantly Analyzes Text Online Free",
-    description: "Word Counter instantly analyzes text for word count, character count, sentence count, paragraph count, and estimated reading time.",
+    title: "Word Counter — Words, Characters, Reading Time, Keywords",
+    description: "Count words, characters, sentences and paragraphs live, see reading and speaking time, and list your most used words and phrases.",
     url: "https://www.onlineconvertools.com/tools/text-tools/word-counter",
   },
 };

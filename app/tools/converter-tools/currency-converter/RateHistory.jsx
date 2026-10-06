@@ -137,7 +137,7 @@ export default function RateHistory({ from, to }) {
             </dl>
             <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
               1 {from} in {to}, {state.rows.length} {RANGES.find((r) => r.id === range).group ? `${RANGES.find((r) => r.id === range).group}ly` : 'daily'} reference rates of central banks
-              {state.since ? ` (published since ${fmtDate(state.since)})` : ''}, not intraday quotes — they can differ slightly from the live rate above.
+              {state.since ? ` (published since ${fmtDate(state.since)})` : ''}, not intraday quotes — they can differ slightly from the daily rate above.
               {' '}Source: <a href="https://frankfurter.dev" target="_blank" rel="noopener noreferrer" className="underline">Frankfurter</a>.
             </p>
             <TextDownload text={csv} name={`${from}-${to}-${range}.csv`} type="text/csv;charset=utf-8" className="mt-2" />

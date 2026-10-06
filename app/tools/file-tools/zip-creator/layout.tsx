@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "ZIP Creator — Bundle Multiple Files Online Free" },
-  description: "ZIP Creator bundles multiple files into a single ZIP archive, entirely in your browser — no upload, no software installation.",
+  title: { absolute: "ZIP Creator — Zip Files in Your Browser, AES-256 Option" },
+  description: "Bundle files into a ZIP in your browser, choose the compression level and add an optional AES-256 password. Up to 700 MB, or 100 MB on phones and iPad.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/zip-creator" },
   openGraph: {
-    title: "ZIP Creator — Bundle Multiple Files Online Free",
-    description: "ZIP Creator bundles multiple files into a single ZIP archive, entirely in your browser — no upload, no software installation.",
+    title: "ZIP Creator — Zip Files in Your Browser, AES-256 Option",
+    description: "Bundle files into a ZIP in your browser, choose the compression level and add an optional AES-256 password. Up to 700 MB, or 100 MB on phones and iPad.",
     url: "https://www.onlineconvertools.com/tools/file-tools/zip-creator",
   },
 };

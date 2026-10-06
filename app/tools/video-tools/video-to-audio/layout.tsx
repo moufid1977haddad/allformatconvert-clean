@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video to Audio — Extract the Audio Track Online Free" },
-  description: "Video to Audio extracts the audio track from a video file using ffmpeg.wasm, in stereo, to MP3, WAV, AAC, FLAC, and more, entirely in your browser.",
+  title: { absolute: "Video to Audio — Extract Sound as MP3, WAV, FLAC & More" },
+  description: "Pull the sound out of a video as MP3, WAV, AAC, FLAC, M4A, Opus or 12 other audio formats, with ffmpeg.wasm running in this browser tab, no upload.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-to-audio" },
   openGraph: {
-    title: "Video to Audio — Extract the Audio Track Online Free",
-    description: "Video to Audio extracts the audio track from a video file using ffmpeg.wasm, in stereo, to MP3, WAV, AAC, FLAC, and more, entirely in your browser.",
+    title: "Video to Audio — Extract Sound as MP3, WAV, FLAC & More",
+    description: "Pull the sound out of a video as MP3, WAV, AAC, FLAC, M4A, Opus or 12 other audio formats, with ffmpeg.wasm running in this browser tab, no upload.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-to-audio",
   },
 };

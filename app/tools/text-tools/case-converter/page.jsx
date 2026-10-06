@@ -31,7 +31,7 @@ export default function CaseConverterPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Case Converter</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert text to any case format</p>
+        <p className="text-neutral-500 text-center mb-8">Convert text to 12 letter and programming cases</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none" placeholder="Type or paste your text here..." value={text} onChange={e => setText(e.target.value)} />
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -56,24 +56,37 @@ export default function CaseConverterPage() {
       </div>
       <SeoContent
         title="Case Converter"
-        description="Case Converter transforms text between UPPERCASE, lowercase, Title Case, Capitalized Case, Sentence case, and aLtErNaTe (toggle) case, entirely in your browser. Sentence case capitalises every sentence (not just the first), restores the pronoun “I”, and keeps acronyms like NASA and brand names like iPhone; Title Case keeps short words such as “of” and “the” lower-case, as style guides do."
+        description={"Case Converter rewrites the text in its box in one of twelve letter cases: UPPERCASE, lowercase, Title Case, Capitalized Case, Sentence case, aLtErNaTe, iNVERSE, and the programming cases camelCase, PascalCase, snake_case, kebab-case and CONSTANT_CASE. Use it to fix text typed with caps lock on, format headings, or name variables and files. Each button converts the text in place, with no undo. It does not recognize proper nouns, so Sentence case writes friday rather than Friday. Nothing leaves the page: your browser applies its own Unicode letter rules."}
+        example={{
+          caption: "Title Case on a heading typed in capitals: short words stay lower-case and NASA is kept as an acronym.",
+          inputLabel: "Text",
+          input: "THE LORD OF THE RINGS: A NASA REVIEW",
+          outputLabel: "After \"Title Case\"",
+          output: "The Lord of the Rings: A NASA Review",
+        }}
+        howToTitle={"How to change text case"}
         howTo={[
-          "Paste or type your text into the text box.",
-          "Click a case button: UPPERCASE, lowercase, Title Case, Capitalized Case, Sentence case, aLtErNaTe, iNVERSE, or a programming case (camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE).",
-          "The text box updates immediately with the converted result.",
-          "Click \"Copy\" to copy the converted text to your clipboard."
+          "Paste the text to fix, for example a heading typed with caps lock on.",
+          "Click a case button, for example \"Sentence case\", \"Title Case\" or \"snake_case\"; the box is rewritten at once.",
+          "To try another case on the original wording, paste it again, since each button converts what the box holds now.",
+          "Copy the converted text with \"Copy\", or keep it as converted.txt with \"Download\"."
         ]}
+        specs={[
+          { label: "Input", value: "Typed or pasted text" },
+          { label: "Text cases", value: "UPPERCASE, lowercase, Title Case, Capitalized Case, Sentence case, aLtErNaTe, iNVERSE" },
+          { label: "Programming cases", value: "camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE; each line converted on its own" },
+          { label: "Output", value: "The same box; Copy, or Download as converted.txt" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Every case is computed by JavaScript in this page, with your browser's Unicode rules for letters and sentences. The text you paste is never sent to us or to anyone else, and it is gone when you close the tab."}
         faqs={[
-          { q: "Is Case Converter free to use?", a: "Yes, it's completely free with no signup and no limit on conversions." },
-          { q: "What case formats does this tool support?", a: "UPPERCASE, lowercase, Title Case (short words like \"of\" and \"the\" stay lower-case), Capitalized Case (every word capitalised), Sentence case, iNVERSE (each letter's case swapped), the programming cases camelCase, PascalCase, snake_case, kebab-case and CONSTANT_CASE, and aLtErNaTe (alternating) case." },
-          { q: "Can I convert multiple texts at once?", a: "No, one text block is converted at a time — repeat the process for additional texts." },
-          { q: "Is my data private?", a: "Yes, everything happens locally in your browser — what you enter is never sent to a server." }
+          { q: "What is the difference between Title Case and Capitalized Case?", a: "Title Case keeps short words such as a, the, of, in or to in lower case unless they open or close the title, while Capitalized Case capitalizes every word. The short words come from a fixed list, so through or between are capitalized. Both keep words like iPhone, and in a text typed all in capitals only known acronyms such as NASA, PDF or USA stay in capitals." },
+          { q: "Does Sentence case capitalize after every period?", a: "No. It capitalizes the first word of the text, of each line, and after ! or ?, and after a period when the next word already starts with a capital. After a period followed by a lower-case word, as in hello world. this is, the word stays lower-case, because Unicode sentence rules read that period as an abbreviation." },
+          { q: "Can I fix text typed with caps lock on?", a: "Yes. Click \"Sentence case\": a sentence written mostly in capitals is lowered, then its first letter is raised; known acronyms such as NASA, USA or PDF keep their capitals, and i, i'm or i'll become I, I'm, I'll. For text like hELLO wORLD, \"iNVERSE\" gives Hello World." },
+          { q: "Does snake_case split words joined together, like myHTTPServer?", a: "Yes, at changes of case as well as at spaces and punctuation: myHTTPServer becomes my_http_server. Apostrophes inside a word are dropped, so don't stop becomes dont_stop, accented letters are kept (café_crème), and every line is converted separately." }
         ]}
         tips={[
-          "Use Title Case for headlines and headings to keep formatting consistent.",
-          "Apply Sentence case when cleaning up text pasted from all-caps sources.",
-          "For variable and file names, use camelCase, PascalCase, snake_case, kebab-case or CONSTANT_CASE: each line is converted on its own.",
-          "Copy the converted text right away, since clicking a different case button overwrites the current result."
+          "Paste a column of names copied from a spreadsheet to turn them all into kebab-case or snake_case at once, one per line."
         ]}
       />
     </div>

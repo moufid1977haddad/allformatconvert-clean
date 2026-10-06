@@ -83,7 +83,7 @@ export default function ImageMetadataPage() {
           )}
           {metadata && <div className="space-y-2">{Object.entries(metadata).map(([k,v]) => <div key={k} className="flex justify-between bg-neutral-50 rounded-lg border border-neutral-200 p-3"><span className="text-neutral-500 capitalize">{k}</span><span className="text-indigo-400 font-mono">{v}</span></div>)}</div>}
           {embedded && (embedded.length === 0
-            ? <p className="text-neutral-500 text-sm text-center">No embedded metadata (EXIF, GPS, IPTC, XMP, ICC) in this file.</p>
+            ? <p className="text-neutral-500 text-sm text-center">No embedded metadata (EXIF, GPS, IPTC, XMP, ICC) found in this file. The metadata of WebP files is not read here.</p>
             : embedded.map(([group, rows]) => (
               <div key={group} className="space-y-1">
                 <div className="text-sm font-semibold text-neutral-600 mt-3">{group === 'LOCATION' ? 'GPS location — visible to anyone you send this file to' : group}</div>
@@ -94,23 +94,31 @@ export default function ImageMetadataPage() {
       </div>
       <SeoContent
         title={"Image Metadata Viewer"}
-        description={"Image Metadata Viewer shows everything stored in an image, entirely in your browser — the file is never uploaded. It can also remove that metadata from JPG, PNG and WebP files — GPS position included — without re-encoding the picture. Besides file name, size, type and pixel dimensions, it reads the embedded metadata with exifr: EXIF (camera make and model, lens, exposure, ISO, focal length, date taken, orientation), GPS location, IPTC (caption, keywords, copyright), XMP and the ICC color profile, from JPEG, HEIC, TIFF, PNG, WebP and AVIF files. A GPS location is highlighted, since anyone you send the photo to can read it."}
+        description={"Image Metadata Viewer shows what a picture carries besides its pixels: camera and lens, exposure, ISO, date taken, orientation, GPS position, IPTC caption and copyright, XMP and the ICC color profile. It reads JPEG, HEIC/HEIF, TIFF, PNG and AVIF files with the exifr library; WebP metadata is not read, so a WebP is shown as having none. It gives the name, size and type of any image, plus the pixel size and last-modified date when the browser can display it. A GPS position is listed first. For JPG and PNG, Remove metadata makes a copy without that data and with the same pixels."}
+        howToTitle={"How to view and remove photo metadata"}
         howTo={[
-          "Click the upload area and select an image.",
-          "Read the file properties at the top.",
-          "Scroll through the embedded metadata groups (EXIF, GPS, IPTC, XMP, ICC).",
-          "If a GPS location is shown, remove it before sharing the photo if you don't want it known."
+          "Click the upload box and choose a photo; reading starts at once.",
+          "Read the file properties, then the groups of embedded data; a GPS position comes first, flagged as visible to anyone you send the file to.",
+          "To strip the data, click \"Remove metadata\" (shown only when the file has embedded metadata).",
+          "Click \"Download\" to save the copy, named with \"-no-metadata\" added before the extension.",
         ]}
+        specs={[
+          { label: "Metadata read from", value: "JPEG, HEIC/HEIF, TIFF, PNG and AVIF: EXIF, GPS, IPTC, XMP, ICC" },
+          { label: "WebP files", value: "Their metadata is not read: the page says the file has none, even if it holds camera or GPS data" },
+          { label: "Removal", value: "JPG and PNG; EXIF, GPS, XMP, IPTC and comments go, the color profile and orientation stay" },
+          { label: "Not shown", value: "The embedded thumbnail (IFD1) and its tags" },
+          { label: "Basic properties", value: "Name, size and type of any image; width, height and last-modified date when the browser can display it" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The exifr library reads the file inside this page, and the cleaned copy is assembled from its bytes in the same tab; no part of the photo, its GPS position or its metadata is sent to a server. Any error message on screen is sent to us in cleaned form, labelled with this tool and with your browser and its version; the photo and its metadata never are."}
         faqs={[
-          { q: "Is Image Metadata Viewer free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does this tool show EXIF data like camera settings or GPS location?", a: "Yes — camera and lens, exposure, ISO, date taken, orientation and GPS coordinates are shown when the file contains them." },
-          { q: "Which formats are supported?", a: "Embedded metadata is read from JPEG, HEIC/HEIF, TIFF, PNG, WebP and AVIF; basic file properties are shown for any image." },
-          { q: "Can I remove metadata from my images with this tool?", a: "Yes, for JPG, PNG and WebP: click 'Remove metadata'. Camera, date, GPS position, software, comments, IPTC and XMP are removed without re-encoding the picture, so it stays pixel-for-pixel identical; the colour profile and the orientation are kept so it still looks the same. For HEIC or TIFF, convert to JPG with Image Converter first." },
-          { q: "Is my image uploaded?", a: "No — the file is read entirely in your browser." }
+          { q: "Does it show where a photo was taken?", a: "Yes, when the file contains GPS coordinates. Latitude and longitude are shown first, to six decimals, under a heading warning that anyone you send the file to can read them." },
+          { q: "Does removing metadata change the picture?", a: "No. The image data is copied byte for byte, not re-encoded, so the picture stays pixel-for-pixel identical. The color profile and the orientation are kept on purpose, so it looks the same and stays upright; camera, date, GPS, XMP, IPTC and comments are removed." },
+          { q: "Can it remove metadata from HEIC, TIFF or WebP?", a: "No. Removal works on JPG and PNG only. A HEIC or TIFF file is refused with a message, and a WebP never shows the \"Remove metadata\" button, because its metadata is not read here. Convert the photo to JPG with Image Converter first." },
+          { q: "Is the last-modified date the day I took the photo?", a: "No, not necessarily. The last-modified line in the file properties is the date the file was last saved on your device. The moment of the shot is the DateTimeOriginal entry in the EXIF group, when the camera recorded one." },
         ]}
         tips={[
-          "Screenshots and images saved by most web apps have little or no EXIF data; photos straight from a phone or camera have the most.",
-          "Check for a GPS location before posting a photo publicly."
+          "Before posting a photo publicly, look for the GPS group and click \"Remove metadata\" if it is there.",
         ]}
       />
     </div>

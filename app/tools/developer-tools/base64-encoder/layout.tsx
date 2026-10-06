@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Base64 Encoder — Convert Text Online Free" },
-  description: "Base64 Encoder converts text to and from Base64 directly in your browser using the built-in btoa()/atob() functions — nothing is uploaded to a server.",
+  title: { absolute: "Base64 Encode and Decode — UTF-8 Text, URL-Safe Option" },
+  description: "Encode text to Base64 or decode it back. UTF-8 keeps accents and emoji intact, and a URL-safe option fits JWTs. Runs in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/base64-encoder" },
   openGraph: {
-    title: "Base64 Encoder — Convert Text Online Free",
-    description: "Base64 Encoder converts text to and from Base64 directly in your browser using the built-in btoa()/atob() functions — nothing is uploaded to a server.",
+    title: "Base64 Encode and Decode — UTF-8 Text, URL-Safe Option",
+    description: "Encode text to Base64 or decode it back. UTF-8 keeps accents and emoji intact, and a URL-safe option fits JWTs. Runs in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/base64-encoder",
   },
 };

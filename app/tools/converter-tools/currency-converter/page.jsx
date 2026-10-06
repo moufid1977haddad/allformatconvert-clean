@@ -141,25 +141,32 @@ export default function CurrencyConverterPage() {
       </div>
       <SeoContent
         title="Currency Converter"
-        description="Currency Converter converts between 166 world currencies, each shown with its full name, using exchange rates fetched directly in your browser from ExchangeRate-API (exchangerate-api.com). The rates are refreshed once a day, not in real time: the result shows when they were published and when the next update is due. A chart shows the rate history over 1 week to 10 years, with its high, low, average and change, from the daily reference rates of central banks (Frankfurter) — for 158 of the 166 currencies."
+        description={`Currency Converter multiplies your amount by the cross rate between two currencies, taken from the table that ExchangeRate-API publishes once a day (166 currencies when we checked on September 23, 2026). The line under the result says when the rates were published and when the next update is due, so this is a daily reference, not a live market quote, and no bank fee is added. Below the converter, a chart from Frankfurter, which republishes central-bank reference rates, shows the pair over 1 week to 10 years with its high, low, average and change. The multiplication itself is done by your browser, from the table it downloaded.`}
+        howToTitle="How to convert currencies with today's rates"
         howTo={[
-          "Enter the amount you want to convert.",
-          "Select your source currency from the \"From\" dropdown.",
-          "Select your target currency from the \"To\" dropdown, or use the swap button (⇄) to flip both.",
-          "The converted amount appears instantly; click \"Refresh Rates\" to fetch the latest available rates."
+          `Type the sum to convert in "Amount".`,
+          `Pick the two currencies in "From" and "To", or use the ⇄ button between them to swap them.`,
+          `Read the result and both unit rates; open the line ending in "in other currencies" to see the same sum in the most used currencies.`,
+          `Choose a period from "1W" to "10Y" above the chart, and download the rates of that period as a CSV file if you need them.`,
         ]}
+        specs={[
+          { label: 'Currencies', value: 'Every code in the daily ExchangeRate-API table, the 20 most used first, then the others from A to Z; names come from your browser, so a code your browser does not know, such as FOK or KID in some browsers, shows alone' },
+          { label: 'Rate updates', value: 'Once a day at the source; the page shows the publication time and the next update' },
+          { label: 'History', value: 'Daily points up to 1Y, weekly over 5Y, monthly over 10Y; not available for 8 of the 166 currencies when we checked on October 3, 2026' },
+          { label: 'History download', value: 'CSV file with one date and rate per line, named after the pair and the period' },
+          { label: 'Amount', value: 'Any number, negative included; amounts and results below 1 show up to four significant digits instead of 0.00' },
+        ]}
+        privacyTitle="Where your amount is processed"
+        privacy="Your browser downloads the whole daily table of rates from open.er-api.com, the same request for every visitor, and does the arithmetic itself: the amount never leaves the page. For the chart, the two currency codes you chose are sent to api.frankfurter.dev, without any amount. If the rates cannot load, the message shown is sent, cleaned, to our error log with the tool's name and your browser's name and major version."
         faqs={[
-          { q: "Is Currency Converter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "How often are the exchange rates updated?", a: "Rates come from a free public exchange-rate API that's typically refreshed roughly once a day — not continuously throughout the day." },
-          { q: "Which currencies are supported?", a: "166 currencies — every currency with a published daily rate, from USD, EUR, GBP and JPY to the Moroccan dirham, the Nigerian naira or the Vietnamese dong. The most used ones are listed first, then all the others alphabetically, each with its full name." },
-          { q: "Can I see the history of an exchange rate?", a: "Yes. Below the converter, a chart shows the rate between your two currencies over 1 week, 1 month, 6 months, 1 year, 5 years or 10 years, with its high, low, average and change over the period; hover or touch the chart to read the rate of a given day, or download it as CSV. The history comes from Frankfurter, which publishes the daily reference rates of central banks (the European Central Bank first). It covers 158 of the 166 currencies: BGN, CLF, FOK, HRK, KID, SLL, TVD and ZWL have no history there, and a few currencies start later (for example ZWG in 2024) — the page says so instead of drawing a partial chart without warning. These are daily reference rates, not intraday quotes, so they can differ slightly from the live rate shown above." },
-          { q: "Is my data private?", a: "Yes. Your browser downloads the day's full rate table from the exchange-rate API (the same request for every visitor); the amount and the currencies you choose are never sent anywhere — the conversion is calculated in your browser. For the history chart, your browser asks Frankfurter for the rates of the two currencies you chose (no amount is sent)." }
+          { q: 'How often are the exchange rates updated?', a: `The rates change once a day: ExchangeRate-API publishes one table daily, and the line under the result gives its publication time and the time of the next update. "Refresh Rates" downloads the table again, which brings new values only after that next update.` },
+          { q: 'Is this the rate my bank will give me?', a: 'No. The page uses the daily rate published by ExchangeRate-API and adds no fee or margin. A bank or card network applies its own rate and charges, so use the result as a reference for budgeting or comparing prices.' },
+          { q: 'Can I see how a rate has changed over time?', a: 'Yes. The chart under the converter plots your pair over one week, one, six or twelve months, five or ten years, with its high, low, average and change; touch or hover the line to read one point, a day, or a week or a month on 5Y and 10Y. Its central-bank reference rates can differ slightly from the daily rate shown above.' },
+          { q: 'Why is there no history for some currencies?', a: '8 of the 166 currencies when we checked on October 3, 2026, among them BGN, CLF, HRK and ZWL, have no series at Frankfurter, and a few start later, such as ZWG in 2024. The page then says that no history is published, or marks the date it starts, and the conversion above still works.' },
         ]}
         tips={[
-          "Click \"Refresh Rates\" if you've had the page open a while, to make sure you're using the latest available rates.",
-          "Use the swap button (⇄) to quickly flip your \"From\" and \"To\" currencies.",
-          "Since rates update roughly daily, don't rely on this tool for time-sensitive trading decisions.",
-          "Bookmark the tool for quick reference during travel or online shopping in another currency."
+          `Leave the page open past the "next update" time, then press "Refresh Rates" to load the new table.`,
+          'Planning a trip? Keep the same amount and open the list of the most used currencies under the result; for a currency that is not in it, change "To".',
         ]}
       />
     </div>

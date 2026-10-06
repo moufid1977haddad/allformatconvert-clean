@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "AI Chatbot — Use Openai's Gpt-4o Mini Model Online Free" },
-  description: "AI Chatbot is a free online tool that uses OpenAI's GPT-4o mini model to provide instant answers and conversational assistance for a wide range of questions.",
+  title: { absolute: "AI Chatbot — Free GPT-4o mini Chat That Keeps the Thread" },
+  description: "Ask questions and get answers from OpenAI's GPT-4o mini. Recent turns go along with each message, so follow-up questions are understood.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/ai-chatbot" },
   openGraph: {
-    title: "AI Chatbot — Use Openai's Gpt-4o Mini Model Online Free",
-    description: "AI Chatbot is a free online tool that uses OpenAI's GPT-4o mini model to provide instant answers and conversational assistance for a wide range of questions.",
+    title: "AI Chatbot — Free GPT-4o mini Chat That Keeps the Thread",
+    description: "Ask questions and get answers from OpenAI's GPT-4o mini. Recent turns go along with each message, so follow-up questions are understood.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/ai-chatbot",
   },
 };

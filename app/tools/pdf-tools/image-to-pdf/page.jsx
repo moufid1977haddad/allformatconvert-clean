@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { addImagePage, PHONE_MAX_MP, MAX_DECODED_MP_COMPUTER } from '../../../lib/pdfImages';
+import { addImagePage, PHONE_MAX_MP, MAX_DECODED_MP_COMPUTER, MAX_PAGE_POINTS } from '../../../lib/pdfImages';
 import UploadPrompt from '@/app/components/UploadPrompt';
 import { FileDownload } from '../../../components/FileDownload';
 import ImagePageLayout, { DEFAULT_IMAGE_LAYOUT } from '../../../components/ImagePageLayout';
@@ -64,8 +64,8 @@ export default function ImageToPdfPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Image to PDF</h1>
-        <p className="text-neutral-500 text-center mb-2">Convert JPG, PNG, HEIC, WebP, GIF, BMP, TIFF or AVIF images to a PDF file</p>
-        <p className="text-neutral-500 text-xs text-center mb-8">JPEG photos go into the PDF as they are, without being decoded (measured up to 200 megapixels); other images up to {MAX_DECODED_MP_COMPUTER} megapixels each on a computer, {PHONE_MAX_MP} on a phone (a larger one can be reduced to {PHONE_MAX_MP} MP first).</p>
+        <p className="text-neutral-500 text-center mb-2">Combine JPG, PNG, HEIC, WebP, GIF, BMP, TIFF or AVIF pictures, added in several rounds, into one PDF</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">JPEG photos, except mirrored ones, go into the PDF without being decoded; other pictures can have up to {MAX_DECODED_MP_COMPUTER} megapixels each on a computer and {PHONE_MAX_MP} on phones, iPhone and iPad, where a larger one other than a TIFF can be reduced to {PHONE_MAX_MP} MP first.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500"><UploadPrompt what="images" /> (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF)</p>
@@ -99,26 +99,30 @@ export default function ImageToPdfPage() {
       </div>
       <SeoContent
         title="Image to PDF"
-        description="Image to PDF turns any mix of images — JPG, PNG, HEIC, WebP, GIF, BMP, TIFF or AVIF — into one downloadable PDF, processed locally with the pdf-lib library so nothing ever reaches a server. Build your file list across as many uploads as you like, drop any image you change your mind about with its ✕ button, then convert — each page comes out at that source image's exact pixel size."
+        description={`Image to PDF puts pictures of different formats into one PDF, one picture per page. It reads JPG, PNG, HEIC and HEIF, WebP, GIF (first frame), BMP, TIFF (every page) and AVIF. You can add pictures in several rounds and remove any of them with its ✕ button; the pages follow the order in which you added them. JPEG photos (unless mirrored), PNG pictures and TIFF pages keep their pixels; WebP, GIF, BMP and AVIF, and HEIC in Safari, are first drawn upright, while in other browsers a HEIC becomes a lossless PNG page. The PDF is assembled by pdf-lib right on your device.`}
+        howToTitle="How to combine images into one PDF"
         howTo={[
-          "Click the upload area and select one or more images (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF) from your device.",
-          "Remove any image you don't want by clicking the ✕ next to it — files appear in the order you added them.",
-          "Click 'Convert to PDF' to combine them into a single PDF.",
-          "Click 'Download' to save the PDF."
+          `Click or drop images on the upload area, and add more the same way if you need to.`,
+          `Remove a picture with its ✕ button, then choose a "Page size", an "Orientation" and a "Margin".`,
+          `Click "Convert to PDF", and once "Done!" appears, "Download" saves the combined PDF.`,
         ]}
+        specs={[
+          { label: 'Input formats', value: `JPG, PNG, HEIC, HEIF, WebP, GIF, BMP, TIFF, AVIF` },
+          { label: 'Output', value: `One PDF, one page per picture and per TIFF page` },
+          { label: 'Picture size on a computer', value: `JPEG: not limited by pixels, since it is not decoded (mirrored photos excepted); other formats: ${MAX_DECODED_MP_COMPUTER} MP each` },
+          { label: 'On phones, iPhone and iPad', value: `${PHONE_MAX_MP} MP for formats other than JPEG; a larger picture other than a TIFF can be reduced to ${PHONE_MAX_MP} MP` },
+          { label: 'Page size', value: `"Fit to each picture": one pixel becomes one point, up to ${MAX_PAGE_POINTS.toLocaleString('en-US')} points per side; or A4, US Letter, US Legal, A5` },
+        ]}
+        privacy={`Your pictures are not uploaded. pdf-lib builds the PDF inside this browser tab, HEIC files are decoded by heic2any where the browser cannot open them, and TIFF files by the site's own decoder. If an error message appears, the cleaned message, the tool's name and your browser's name and version may reach us, never the images.`}
         faqs={[
-          { q: "What image formats does Image to PDF support?", a: "JPG, PNG, HEIC / HEIF (iPhone photos), WebP, GIF (first frame), BMP, TIFF (every page) and AVIF. A file that cannot be read is named in an error message, never skipped silently." },
-          { q: "Can I choose the page size and margins?", a: "Yes. Keep \"Fit to each picture\" for pages the size of each picture, or choose A4, US Letter, US Legal or A5, with an automatic, portrait or landscape orientation and no, small (10 mm) or big (20 mm) margin. Each picture is scaled to fit inside the margins and centred, never cropped or stretched." },
-          { q: "Is there a limit to how many images I can convert?", a: "No fixed number of images — it's bound by your device's memory." },
-          { q: "Is there a size limit for each image?", a: `JPEG photos are put in the PDF as they are, without being decoded: their memory use follows the size of the file, not its pixels (measured in WebKit, Safari's engine, up to a 200-megapixel, 103 MB JPEG: under 800 MB of memory). Every other image must be decoded first, so it can be up to ${MAX_DECODED_MP_COMPUTER} megapixels on a computer and ${PHONE_MAX_MP} on a phone (48 MP phone photos fit; measured memory use, a phone browser reloads a page that goes beyond). On a phone a larger one (a 63 MP HEIC panorama, a 108 MP photo) is named as soon as you choose it, and one button reduces it to ${PHONE_MAX_MP} MP and converts it in the same step.` },
-          { q: "Is my data secure when using this tool?", a: "Yes, everything happens locally in your browser. Your images are never uploaded to a server." },
-          { q: "Can I reorder images before converting?", a: "No, images appear in the PDF in the order you selected them — there's no drag-and-drop reordering or arrow buttons." }
+          { q: `Can I mix JPG, PNG and HEIC in one PDF?`, a: `Yes. Every picture becomes its own page, whatever its format. A GIF gives its first frame and a multi-page TIFF gives one page per frame. A file that cannot be read is named in an error message; it is never dropped silently.` },
+          { q: `Will the image quality drop?`, a: `No for JPEG photos, copied into the PDF byte for byte unless they are mirrored, and no for PNG and TIFF, which keep their pixels. WebP, AVIF, BMP and GIF pictures, and HEIC in Safari, are redrawn first, as JPEG for photos or PNG with transparency; in other browsers a HEIC becomes a lossless PNG page.` },
+          { q: `Can I use A4 or Letter pages?`, a: `Yes. "Fit to each picture" makes every page the size of its picture. A4, US Letter, US Legal and A5 center each picture inside a margin of None, Small (10 mm) or Big (20 mm), scaled down to fit, never cropped or enlarged.` },
+          { q: `Is there a picture size limit on a phone?`, a: `Yes: ${PHONE_MAX_MP} megapixels for formats other than JPEG on phones, iPhone and iPad, against ${MAX_DECODED_MP_COMPUTER} on a computer or an Android tablet. A bigger picture is named as soon as you pick it, and, unless it is a TIFF, the Reduce button shrinks it and converts it in one step.` },
         ]}
         tips={[
-          "Add your images in the order you want them to appear, since there's no reordering step after upload.",
-          "Each page is sized to match its source image's exact pixel dimensions, so mixing very different image sizes will produce pages of different sizes.",
-          "JPG photos go into the PDF as they are; other formats are drawn upright first, and an image that cannot be read is named, never skipped.",
-          "Remove an image with the ✕ button before converting if you added the wrong one."
+          `Add the pictures in the order you want: they cannot be reordered once added.`,
+          `For a lighter file made of photos, run the PDF through PDF Compress afterwards.`,
         ]}
       />
     </div>

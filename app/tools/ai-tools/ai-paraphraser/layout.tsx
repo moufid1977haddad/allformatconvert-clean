@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "AI Paraphraser — Use Openai's Gpt-4o Mini Model Online Free" },
-  description: "AI Paraphraser uses an AI language model to rewrite your text with different words and sentence structures while preserving its meaning.",
+  title: { absolute: "AI Paraphraser — Reword Text, Keep the Meaning" },
+  description: "Rewrite a sentence or a paragraph with new words and sentence structure while keeping its meaning. One version per click; copy it or save it.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/ai-paraphraser" },
   openGraph: {
-    title: "AI Paraphraser — Use Openai's Gpt-4o Mini Model Online Free",
-    description: "AI Paraphraser uses an AI language model to rewrite your text with different words and sentence structures while preserving its meaning.",
+    title: "AI Paraphraser — Reword Text, Keep the Meaning",
+    description: "Rewrite a sentence or a paragraph with new words and sentence structure while keeping its meaning. One version per click; copy it or save it.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/ai-paraphraser",
   },
 };

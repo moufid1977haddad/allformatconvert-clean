@@ -125,25 +125,30 @@ export default function VideoScreenshotPage() {
       </div>
       <SeoContent
         title="Video Screenshot"
-        description="Video Screenshot captures the current frame of a video as a PNG, JPG or WebP image, entirely in your browser — pause or seek to the moment you want, choose your format and (for JPG) quality, then capture as many stills as you need."
+        description="Video Screenshot saves the frame shown in the player as an image file. Pause or seek to the moment you want, or type the second you want, then capture as many stills as you like. Each image has the video's own width and height, whatever the size of the player on screen. PNG keeps every pixel; JPG and WebP make smaller files and have a quality setting. Everything happens in your browser with a canvas, so it works only with videos your browser can play; convert other files to MP4 first."
+        howToTitle="How to take a screenshot from a video"
         howTo={[
-          "Click the upload area and select a video file.",
-          "Use the player controls to pause on the exact frame you want.",
-          "Choose PNG (lossless) or JPG (with an adjustable quality level).",
-          "Click \"Capture Screenshot\" to save that frame — repeat for as many frames as you like.",
-          "Click \"Download\" under any captured image to save it."
+          "Choose or drop a video file; it opens in a player.",
+          "Pause on the moment you want, or type a time in \"Go to (seconds)\" to jump there.",
+          "Pick PNG, JPG or WebP in \"Format\", and for JPG or WebP set \"Quality\".",
+          "Click \"Capture Screenshot\"; repeat at other moments for more images.",
+          "Click \"Download\" under an image, or \"Download all\" to get every capture in one ZIP file."
         ]}
+        specs={[
+          { label: 'Input', value: "Any video file your browser can play; the file picker lists MP4, MOV, WebM, MKV, AVI and other video types" },
+          { label: 'Output', value: "PNG, JPG or WebP, at the video's own width and height" },
+          { label: 'Quality', value: "From 10 % to the top of the slider for JPG and WebP, 90 % at first; PNG has no quality setting" },
+          { label: 'Captures', value: "As many as you want, each named after the video and the moment it shows" }
+        ]}
+        privacy="The video plays in your browser's own player and each frame is drawn on a canvas in this tab: neither the video nor the images are uploaded. When Safari cannot write WebP itself, the page encodes it with a WebAssembly copy of libwebp, still on your device. If an error message appears, its cleaned text, the error type, the tool name and your browser's name and version are reported to us; never the video or the images."
         faqs={[
-          { q: "What image formats do screenshots download as?", a: "PNG (lossless), JPG or WebP (both with an adjustable quality slider) — pick whichever you need before capturing. Type a time in 'Go to (seconds)' to jump to an exact moment." },
-          { q: "Can I capture multiple frames?", a: "Yes, click \"Capture Screenshot\" as many times as you like at different points in the video, even mixing PNG and JPG captures." },
-          { q: "Is Video Screenshot free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is my file uploaded anywhere?", a: "No, capturing happens entirely in your browser using canvas — your video is never uploaded to a server." }
+          { q: "What resolution is the screenshot?", a: "The video's own resolution: the image has the same width and height as the video file, whatever the size of the player on your screen. A 4K video gives a 4K image, a vertical phone video a vertical image." },
+          { q: "PNG, JPG or WebP: which should I choose?", a: "PNG for an exact copy of the frame, as a larger file; JPG or WebP for a smaller file to share. Both use the \"Quality\" slider, which starts at 90 %; lower values give smaller, softer images." },
+          { q: "Why can the page not capture my video?", a: "Your browser cannot play its format, and the capture uses the browser's own player. This happens with AVI and some MKV files in particular. Convert the video to MP4 with Video Converter, then capture again." },
+          { q: "Can I save all screenshots at once?", a: "Yes. As soon as there are two or more captures, \"Download all\" saves them in one ZIP file named after the video, next to a \"Download\" button for each image." }
         ]}
         tips={[
-          "Pause the video before capturing to avoid motion blur from a frame mid-transition.",
-          "Use the timeline scrubber for precise frame selection rather than relying on play/pause timing.",
-          "Capture several nearby frames if you need to pick the sharpest one afterward.",
-          "Use PNG for lossless quality (best for further editing) or JPG for a smaller file size when sharing stills."
+          "Type the second you want in \"Go to (seconds)\", then step 0.04 seconds at a time from there with the field's spin buttons."
         ]}
       />
     </div>

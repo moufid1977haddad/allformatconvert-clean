@@ -35,24 +35,37 @@ export default function JsonToPythonPage() {
       </div>
       <SeoContent
         title={"JSON to Python Class"}
-        description={"JSON to Python Class generates Python @dataclass definitions from a JSON sample — the type schema, not a dict of your data — entirely in your browser. It uses quicktype, the open-source engine behind app.quicktype.io: every nested object gets its own dataclass, arrays of objects become List[Item], integers are typed int and decimals float, fields that are missing or null become Optional, and JSON keys are turned into valid snake_case Python names."}
+        description={"JSON to Python Class generates Python 3.7+ dataclasses that describe the shape of a JSON sample: type definitions, not a dict holding your values. It runs quicktype-core in your browser. Each nested object becomes a @dataclass, field names are converted to snake_case (first-name becomes first_name), and types use int, float, str, bool, List and Optional from typing, plus Union when a value has two types and Any for an empty array. Fields absent from some array elements get Optional[...] = None and are placed after the required ones, as dataclasses require. There is no from_dict or to_dict helper: you create the objects yourself."}
+        example={{
+          caption: "Two people; only Ada has a spouse, so spouse becomes Optional.",
+          inputLabel: "JSON Input",
+          input: "[{\"first-name\": \"Ada\", \"age\": 36, \"spouse\": {\"name\": \"Bob\"}},\n {\"first-name\": \"Lin\", \"age\": 29}]",
+          outputLabel: "Python Output",
+          output: "from dataclasses import dataclass\nfrom typing import Optional\n\n@dataclass\nclass Spouse:\n    name: str\n\n@dataclass\nclass RootElement:\n    first_name: str\n    age: int\n    spouse: Optional[Spouse] = None",
+        }}
+        howToTitle={"How to convert JSON to Python dataclasses"}
         howTo={[
-          "Paste a JSON object or array (an API response, a config file) into the input box.",
-          "Click 'Convert': one named type is generated for every nested object, and the fields of every element of an array are merged.",
-          "Review the output — fields missing from some elements or holding null are marked optional.",
-          "Click 'Copy' to copy the code into your project."
+          "Paste your JSON into \"JSON Input\"; an array of several records gives better types than a single one.",
+          "Click \"Convert\" to see the dataclasses in \"Python Output\".",
+          "Check renamed fields: keys that clash with Python keywords get a prefix, such as root_class for class.",
+          "Click \"Copy\", or \"Download\" for a \"model.py\" file.",
         ]}
+        specs={[
+          { label: "Input", value: "JSON object, or array of objects; an array of plain values such as [1, 2] gives an empty output" },
+          { label: "Output", value: "Python dataclasses with typing annotations, saved as model.py" },
+          { label: "Names", value: "snake_case fields; a top-level array gives a class named RootElement" },
+          { label: "Python version", value: "3.7 or later (dataclasses module)" },
+        ]}
+        privacyTitle={"Where your JSON is processed"}
+        privacy={"The dataclasses are produced locally, in your browser, by the quicktype engine that loads on your first conversion; your JSON is not transmitted to us. If the tool displays an error, the message text is reported to our error log with the tool's name and your browser and its version, after quoted parts, long numbers and addresses are stripped from it."}
         faqs={[
-          { q: "Is JSON to Python Class free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it generate a Python dict or list with my actual data?", a: "No — it generates @dataclass type definitions. To load your actual JSON as a Python dict, use json.loads(json_string)." },
-          { q: "Does it handle nested JSON objects?", a: "Yes — each nested object becomes its own dataclass, referenced from its parent; arrays of objects become List of that class." },
-          { q: "Are integers and decimals distinguished?", a: "Yes — whole numbers are typed int, decimals float." },
-          { q: "Is my data uploaded to a server?", a: "No, generation happens entirely in your browser." }
+          { q: "Does it create a dict with my data?", a: "No. It writes dataclass definitions that describe the data. To get a dict with your values, use json.loads on the text; to fill a dataclass, pass the matching values to its constructor." },
+          { q: "How are optional and null fields typed?", a: "Optional[T] = None, when a key is missing from some array elements or null in some of them. A key that is null in every element has nothing to infer from and is typed None, so give it a real value in the sample if you want a type." },
+          { q: "Does it generate Pydantic models?", a: "No. The output uses the standard dataclasses module only. Because the annotations are ordinary typing hints, you can turn a class into a Pydantic model by replacing @dataclass with a BaseModel subclass." },
+          { q: "Are whole numbers and decimals kept apart?", a: "Yes. Whole numbers are typed int, and numbers written with a decimal point or an exponent are typed float, even 10.0, so a later value such as 10.5 still matches the annotation." },
         ]}
         tips={[
-          "Paste several array elements so optional fields are detected.",
-          "Keys such as \"first-name\" become valid snake_case attribute names; map them back when you load data.",
-          "Rename the Root class to something specific to your data."
+          "Rename RootElement or Root to a name that describes your records before you use the classes.",
         ]}
       />
     </div>

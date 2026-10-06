@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Grayscale Converter — Turn a Color Image Online Free" },
-  description: "Grayscale Converter turns a color image into black and white by averaging each pixel's red, green, and blue values, entirely in your browser.",
+  title: { absolute: "Grayscale Converter — Luminance, Channel or Pure B&W" },
+  description: "Turn a color photo gray with Rec. 709 luminance or six other methods, or make it pure black and white with a threshold. JPG stays JPG.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/grayscale-converter" },
   openGraph: {
-    title: "Grayscale Converter — Turn a Color Image Online Free",
-    description: "Grayscale Converter turns a color image into black and white by averaging each pixel's red, green, and blue values, entirely in your browser.",
+    title: "Grayscale Converter — Luminance, Channel or Pure B&W",
+    description: "Turn a color photo gray with Rec. 709 luminance or six other methods, or make it pure black and white with a threshold. JPG stays JPG.",
     url: "https://www.onlineconvertools.com/tools/image-tools/grayscale-converter",
   },
 };

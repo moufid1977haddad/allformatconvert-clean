@@ -73,24 +73,29 @@ export default function ImagePixelatorPage() {
       </div>
       <SeoContent
         title="Image Pixelator"
-        description="Image Pixelator applies a mosaic effect across your entire image by averaging blocks of pixels at a size you choose, entirely in your browser using the canvas element. Your image is never uploaded to a server."
+        description={"Image Pixelator turns a picture into a mosaic of square blocks. Each block takes the average color of the pixels it covers, weighted by their transparency. The block size is set either in pixels, from 2 to 50, or as a share of the shorter side, from 1 to 20 percent, which keeps the same look on a small screenshot and on a large phone photo. The whole picture is pixelated: there is no area selection. The mosaic is computed in your browser."}
+        howToTitle={"How to pixelate an image"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Adjust the pixel size slider (2–50px) to set the block size.",
-          "Click 'Apply Pixelate' to process the image.",
-          "Click the download button to save your pixelated PNG image."
+          "Click the upload box and choose the picture to pixelate.",
+          "Choose \"In pixels\" and set \"Pixel Size\", or choose \"% of the picture\" and set the block size.",
+          "Click \"Apply Pixelate\".",
+          "Check the mosaic and click \"Download\"; JPG, PNG and WebP originals keep their format, all others come back as PNG.",
         ]}
+        specs={[
+          { label: "Block size", value: "2 to 50 px (default 10), or 1 to 20% of the shorter side (default 2, never under 2 px)" },
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF and other pictures a browser opens" },
+          { label: "Output format", value: "JPG at quality 92 if the original is JPG, PNG or WebP as the original, PNG for other formats" },
+          { label: "Image size", value: "Limited to 268 megapixels" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"Blocks are averaged by this page in your browser and the picture is not uploaded. The pixelated copy is kept only in the tab until you download it. If an error message appears on screen, its cleaned text, the tool's name and the browser's name and version are reported to us, never the picture."}
         faqs={[
-          { q: "Is Image Pixelator really free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "What image formats does Image Pixelator support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
-          { q: "Is my image data secure and private?", a: "Yes, all processing happens locally in your browser — your image is never uploaded to a server." },
-          { q: "Can I pixelate only a specific area, like a face?", a: "No, the effect is applied uniformly across the whole image — there's no selection tool for pixelating a specific region." }
+          { q: "Can I pixelate only a face or a license plate?", a: "No. The whole picture is pixelated; there is no brush or rectangle. For one area, use a photo editor with a selection tool, or crop that area with Image Cropper if the rest is not needed." },
+          { q: "Does the percent mode adapt to the picture size?", a: "Yes. Percent follows the shorter side, so the mosaic looks alike on a small screenshot and on a large phone photo, where even the 50 px maximum of the pixel mode would look fine-grained. Pixels give the same block size on every picture." },
+          { q: "Can a pixelated image be reversed?", a: "No. Each block is replaced by one average color, so the detail inside it is gone from the saved file. Your original file is never changed, so keep it if you may need it." },
         ]}
         tips={[
-          "Use a larger pixel size for stronger privacy protection on sensitive details, and a smaller size for a subtler mosaic look.",
-          "Since the effect applies to the whole image, crop out just the area you want obscured first if you don't want the rest pixelated.",
-          "Try a couple of pixel sizes on a copy of your image to find the right balance between privacy and visibility.",
-          "Pixelate one image at a time — there's no batch processing option."
+          "For a soft look instead of square blocks, use Image Blur.",
         ]}
       />
     </div>

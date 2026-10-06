@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Converter — Convert Images Between Png, Jpg, Webp" },
-  description: "Image Converter converts images, camera RAW files (CR2, CR3, NEF, ARW, DNG…) included, to PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, ICO (favicon) or PDF entirely in your browser — nothing is ever uploaded to a server.",
+  title: { absolute: "Image Converter — HEIC, RAW, PSD to JPG, PNG, WebP & More" },
+  description: "Convert a batch of images to WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO or PDF. Opens HEIC, PSD, SVG and camera RAW files, all in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-converter" },
   openGraph: {
-    title: "Image Converter — Convert Images Between Png, Jpg, Webp",
-    description: "Image Converter converts images, camera RAW files (CR2, CR3, NEF, ARW, DNG…) included, to PNG, JPG, WebP, AVIF, GIF, BMP, TIFF, ICO (favicon) or PDF entirely in your browser — nothing is ever uploaded to a server.",
+    title: "Image Converter — HEIC, RAW, PSD to JPG, PNG, WebP & More",
+    description: "Convert a batch of images to WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO or PDF. Opens HEIC, PSD, SVG and camera RAW files, all in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-converter",
   },
 };

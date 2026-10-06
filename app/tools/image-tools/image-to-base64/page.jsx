@@ -53,7 +53,7 @@ export default function ImageToBase64Page() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Image to Base64</h1>
-        <p className="text-neutral-500 text-center mb-8">Convert images to Base64 data URI</p>
+        <p className="text-neutral-500 text-center mb-8">Encode an image file as Base64 text</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{fileName || <UploadPrompt what="an image" />}</p>
@@ -65,24 +65,30 @@ export default function ImageToBase64Page() {
       </div>
       <SeoContent
         title="Image to Base64"
-        description="Image to Base64 reads an image file and encodes it as a Base64 data URI, entirely in your browser using the FileReader API — your file is never uploaded to a server. The encoding happens automatically as soon as you select a file, ready to copy."
+        description={`Image to Base64 reads an image file and writes its bytes as Base64 text, ready to paste into HTML, CSS, JavaScript or a JSON payload. Any image type can be chosen (JPG, PNG, GIF, WebP, AVIF, SVG, BMP, ICO, TIFF, HEIC), because the file is not opened or re-compressed: the bytes your browser receives are encoded as they are, so the text is about a third larger than the file. The "Output" menu switches between a data URI, plain Base64, an HTML img tag, a CSS background-image rule and JSON with the name and MIME type. Encoding starts as soon as you pick the file, in your browser.`}
+        example={{ caption: 'A 1 × 1 red PNG named red-dot.png (69 bytes) and the JSON form this tool writes for it, produced by the same steps as the page (FileReader data URI, then the "JSON" choice).', inputLabel: 'red-dot.png (bytes, hex)', input: '89 50 4e 47 0d 0a 1a 0a 00 00 00 0d 49 48 44 52\n00 00 00 01 00 00 00 01 08 02 00 00 00 90 77 53\nde 00 00 00 0c 49 44 41 54 78 9c 63 f8 cf c0 00\n00 03 01 01 00 c9 fe 92 ef 00 00 00 00 49 45 4e\n44 ae 42 60 82', outputLabel: 'Output: JSON', output: '{"name":"red-dot.png","mime":"image/png","base64":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"}' }}
+        howToTitle="How to convert an image to Base64"
         howTo={[
-          "Click the upload area and select an image file from your device.",
-          "The Base64 data URI is generated automatically — there's no separate convert button.",
-          "Review the encoded text in the output box.",
-          "Click 'Copy Base64' to copy the full data URI to your clipboard."
+          `Pick an image in the upload area; the Base64 text appears at once, with no convert button.`,
+          `Choose the form you need in the "Output" menu.`,
+          `Click "Copy Base64" to copy the text in that form.`,
+          `Or click "Download" to save the same text as a .base64.txt file.`
         ]}
+        specs={[
+          { label: 'Input', value: `Any image file: JPG, PNG, GIF, WebP, AVIF, SVG, BMP, ICO, TIFF, HEIC and others` },
+          { label: 'Output forms', value: `Data URI, plain Base64, HTML img tag, CSS background-image, JSON; copy or .txt download` },
+          { label: 'Text box', value: `Shows the first ${PREVIEW_CHARS.toLocaleString('en-US')} characters; copy and download give the full text` },
+          { label: 'Files at once', value: `One` }
+        ]}
+        privacy={`The file is read with your browser's FileReader and encoded on this page; it is not uploaded, and the text exists only in this tab until you copy or save it. If the page shows an error, such as an empty file, that cleaned message is logged for us with the tool's name and your browser's name and version, without the file or its name.`}
         faqs={[
-          { q: "What image formats does Image to Base64 support?", a: "It accepts common formats your browser can open, such as JPG, PNG, GIF, and WebP." },
-          { q: "Is there a file size limit for the Image to Base64 converter?", a: "There's no fixed size limit — encoding happens locally, so it's limited only by your device's available memory. Keep in mind large images produce very long Base64 strings." },
-          { q: "Can I use Base64 images in all browsers?", a: "Yes, data URIs are supported by all current browsers." },
-          { q: "Why would I need to convert an image to Base64?", a: "It's useful for embedding small images directly in HTML, CSS, or JavaScript without a separate file request." }
+          { q: "Can I get the Base64 string without the data: prefix?", a: `Yes. Choose "Plain Base64" in the "Output" menu: the text then starts directly with the encoded bytes, which is what most APIs and JSON fields expect.` },
+          { q: "Is the image compressed or resized before encoding?", a: `No. The bytes the page receives are encoded as they are. On an iPhone, a photo picked from the photo library can arrive already converted by iOS (HEIC becomes JPEG); pick it through the Files app to encode the original file.` },
+          { q: "Can I encode HEIC or TIFF images?", a: `Yes, the file is encoded byte for byte whatever its type. But a data URI only shows as a picture in a browser that can open that format: on a computer, Chrome, Edge and Firefox do not display HEIC or TIFF.` },
+          { q: "Is the whole image in the text box?", a: `No, not for large files. The box shows the first ${PREVIEW_CHARS.toLocaleString('en-US')} characters so that the page stays responsive; "Copy Base64" and "Download" always give the complete text.` }
         ]}
         tips={[
-          "Base64 encoding works best for small images and icons — large images produce very long strings that bloat your code.",
-          "Compress or resize an image before encoding it if you want a shorter Base64 string.",
-          "Paste the full data URI (starting with data:image/...) directly into an src or url() property.",
-          "Test the encoded image in your actual application before relying on it, to confirm it renders correctly."
+          `To get a shorter string, make the image smaller first with Image Compressor or Image Resizer, then encode the result.`
         ]}
       />
     </div>

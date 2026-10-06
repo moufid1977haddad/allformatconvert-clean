@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JSON to YAML — Convert JSON to Indented YAML Online Free" },
-  description: "JSON to YAML recursively converts JSON objects into indented YAML, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "JSON to YAML Converter — Exact Numbers, Safe Quoting" },
+  description: "Paste JSON and get block-style YAML. Numbers stay as written, and strings such as yes, no or 1.10 are quoted so they stay text. In your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-yaml" },
   openGraph: {
-    title: "JSON to YAML — Convert JSON to Indented YAML Online Free",
-    description: "JSON to YAML recursively converts JSON objects into indented YAML, entirely in your browser — nothing is uploaded to a server.",
+    title: "JSON to YAML Converter — Exact Numbers, Safe Quoting",
+    description: "Paste JSON and get block-style YAML. Numbers stay as written, and strings such as yes, no or 1.10 are quoted so they stay text. In your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-yaml",
   },
 };

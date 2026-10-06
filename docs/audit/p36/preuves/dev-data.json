@@ -1,0 +1,7 @@
+{
+  "/tools/developer-tools/csv-to-excel": [
+    { "claim": "65,536 rows", "file": "app/tools/developer-tools/csv-to-excel/csvToExcel.worker.js", "pattern": "rows\\.length > 65536" },
+    { "claim": "256 columns", "file": "app/tools/developer-tools/csv-to-excel/csvToExcel.worker.js", "pattern": "cols > 256" },
+    { "claim": "32,767 characters", "file": "app/tools/developer-tools/csv-to-excel/csvToExcel.worker.js", "pattern": "length > 32767" }
+  ]
+}

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JS Minifier — Minify JS Online Free" },
-  description: "JS Minifier strips comments and tightens spacing around punctuation entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "JS Minifier — Terser in Your Browser, Locals Renamed" },
+  description: "Minify JavaScript with Terser: shorter local names, dead code and comments removed, modern syntax and modules accepted. Shows the characters saved.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/js-minifier" },
   openGraph: {
-    title: "JS Minifier — Minify JS Online Free",
-    description: "JS Minifier strips comments and tightens spacing around punctuation entirely in your browser — nothing is uploaded to a server.",
+    title: "JS Minifier — Terser in Your Browser, Locals Renamed",
+    description: "Minify JavaScript with Terser: shorter local names, dead code and comments removed, modern syntax and modules accepted. Shows the characters saved.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/js-minifier",
   },
 };

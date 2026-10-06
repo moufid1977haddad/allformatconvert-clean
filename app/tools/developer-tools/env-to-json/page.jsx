@@ -51,25 +51,26 @@ export default function EnvToJsonPage() {
       </div>
       <SeoContent
         title={".env to JSON"}
-        description={".env to JSON parses a .env file into a JSON object, and converts a JSON object back into .env lines, entirely in your browser — nothing is uploaded to a server. It follows the rules of dotenv, the parser used by Node.js, Next.js and Vite: an optional export prefix, KEY=value or KEY: value, single quotes kept literally, double quotes expanding \\n, backtick quotes, values spanning several lines inside quotes, and # comments (a # inside quotes is kept). Options convert numbers, booleans and null to JSON types (a value with a leading zero such as 007 stays text) and expand ${VAR} references like dotenv-expand. Lines that aren't KEY=value are reported, not silently dropped."}
+        description={".env to JSON converts a .env file into a JSON object, and a JSON object back into .env lines. It follows the rules of the dotenv library: an optional export, KEY=value or KEY: value, single quotes kept literally, double quotes turning \\n into a line break, backticks, quoted values over several lines and # comments outside quotes. By default every value stays a string; options give typed numbers, true, false and null, and expand ${VAR} references. Lines that are not variables are listed by number. Both directions run in your browser."}
+        example={{"caption":"A .env file with export, a comment, an inline comment and a line that is not a variable, converted with both options unticked; the line under the JSON is the note the page shows:","inputLabel":".env","input":"export APP_NAME=\"My App\"\nPORT=3000\n# database\nDB_URL=postgres://localhost/app # local only\nGREETING=\"Hello\\nWorld\"\nRAW='$HOME stays'\nnot a variable","outputLabel":"JSON","output":"{\n  \"APP_NAME\": \"My App\",\n  \"PORT\": \"3000\",\n  \"DB_URL\": \"postgres://localhost/app\",\n  \"GREETING\": \"Hello\\nWorld\",\n  \"RAW\": \"$HOME stays\"\n}\n\n5 variables — line 7 is not KEY=value and was skipped"}}
+        howToTitle="How to convert a .env file to JSON"
         howTo={[
-          "Paste your .env content into the input box, or a JSON object to convert the other way.",
-          "Optionally tick 'Convert numbers…' to get typed JSON values, or 'Expand ${VAR}' to resolve references to earlier variables.",
-          "Click '.env to JSON' or 'JSON to .env'.",
-          "Click 'Copy' to copy the result."
+          "Paste your .env content, or a JSON object, into \"Input\".",
+          "Tick \"Convert numbers, true/false and null to JSON types\" or \"Expand ${VAR} references\" if you need them.",
+          "Click \".env to JSON\", or \"JSON to .env\" for the other direction.",
+          "Click \"Copy\", or \"Download\": the file is named env.json in both directions.",
         ]}
+        specs={[
+          { label: "Input", value: ".env text, or a JSON object" },
+          { label: "Output", value: "JSON object with two-space indentation, or .env lines" },
+          { label: "Repeated keys", value: "the last definition wins" },
+        ]}
+        privacy={"Both directions run in your browser; the variables you paste, secrets included, are not uploaded, and the result is only shown on this page. If an error occurs, for example invalid JSON, its wording is reported to us with quoted text masked, with the tool name and browser version, so keep secrets out of key names."}
         faqs={[
-          { q: "Is .env to JSON free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What .env syntax does it understand?", a: "The dotenv syntax: export KEY=value, KEY=value and KEY: value, # comments on their own line or after an unquoted value, single, double and backtick quotes, \\n in double quotes, and multi-line values inside quotes. Blank lines and comments are ignored; any other line that isn't a variable is listed under the result." },
-          { q: "Does it expand variable references like ${OTHER_VAR}?", a: "Yes, if you tick 'Expand ${VAR} references': ${VAR}, ${VAR:-default} and $VAR are replaced by variables defined earlier in the file, as dotenv-expand does. A backslash before $ keeps a literal dollar sign." },
-          { q: "Are values converted to numbers and booleans?", a: "Only if you tick the option. .env values are text by nature, so by default every value stays a string; with the option, 42, 3.5, true, false and null become JSON types, while 007 or 1.10 stay text so nothing is altered." },
-          { q: "Is my data uploaded to a server?", a: "No, parsing and conversion happen entirely in your browser." }
-        ]}
-        tips={[
-          "JSON to .env quotes a value whenever it's needed (spaces, #, quotes, line breaks) so dotenv reads back exactly the same text; nested objects or arrays are written as JSON text.",
-          "When a variable is defined twice, the last definition wins in the JSON.",
-          "Comments are dropped when converting .env to JSON, so JSON to .env won't reproduce them.",
-          "Since output may contain secrets like API keys, avoid pasting it somewhere it could be logged or committed to version control."
+          { q: "Does it expand ${OTHER_VAR} references?", a: "Yes, when \"Expand ${VAR} references\" is ticked: ${VAR}, ${VAR:-default} and $VAR take the value of a variable defined earlier in the file, as dotenv-expand does, and \\$ keeps a literal dollar sign. With the option ticked, single-quoted values are expanded too." },
+          { q: "Are numbers and booleans typed?", a: "No, not by default, since .env values are text. Tick \"Convert numbers, true/false and null to JSON types\" and 3000 becomes a number and true, false and null become JSON values, while 007 and 1.10 stay strings because a number would change them." },
+          { q: "Are comments kept?", a: "No. A line starting with #, or # after an unquoted value, is a comment and is dropped, so JSON to .env cannot restore it; a # inside quotes stays part of the value. A line that is neither a comment nor a variable is reported by its number." },
+          { q: "Can JSON to .env handle nested objects?", a: "Yes. A nested object or array is written as JSON text inside quotes, and each value gets the quoting that makes dotenv read it back unchanged; a value mixing ', \", \\ and ` together is refused, since no .env quoting can hold it, and null gives an empty value. Keys may use only letters, digits, _, . and -." },
         ]}
       />
     </div>

@@ -513,27 +513,32 @@ export default function PdfEditorPage() {
 
       <SeoContent
         title="PDF Editor"
-        description="PDF Editor lets you organize a PDF's pages (reorder, delete, rotate, and extract a subset into a new file), and add new text, images, and freehand or highlight annotations on top of any page — entirely in your browser using pdf-lib and PDF.js, in a background Web Worker. It does not, and cannot cleanly, rewrite or edit existing text already in the PDF: browsers have no reliable way to parse a PDF's content stream back into editable text and reflow it, so this tool only adds new content on top rather than pretending to change what's already there. For that, edit the original source document (Word, Google Docs, etc.) and re-export to PDF."
+        description={`The PDF Editor adds new content on top of your pages: text in Helvetica, PNG or JPEG pictures, freehand pen strokes and translucent highlight rectangles. In the page panel you can move pages up or down, rotate them, delete them, or tick some and extract them into a separate PDF. Added items are drawn into the page itself, so they cannot be edited later as PDF annotations, and text already in the file cannot be changed. Added text accepts Latin letters, digits and common punctuation only. The editor draws a thumbnail of every page with PDF.js and saves with pdf-lib in a background worker, all in your browser.`}
+        howToTitle="How to edit a PDF in your browser"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "In the pages panel, reorder pages with the arrows, rotate with ⟳, delete with ✕, or check pages to extract separately.",
-          "Select a tool (Text, Image, Pen, or Highlight) and click or drag on the page preview to add it — edit text, size, and color in the list below the canvas.",
-          "Click 'Save Changes' to build the edited PDF, or check pages and click 'Extract Selected' to pull them into their own file.",
-          "Click 'Download' once processing finishes."
+          `Choose the PDF; a thumbnail of each page appears in the page panel.`,
+          `Use the arrows, ⟳ and ✕ under a thumbnail to move, rotate or delete that page.`,
+          `Pick "Text", "Image", "Pen" or "Highlight" and click or drag on the large page view; change text, size and color in the rows below it.`,
+          `Click "Save Changes" for the edited PDF, or tick pages and click "Extract Selected" for a file with only those pages.`,
+          `Click "Download" to get the -edited.pdf or -extracted.pdf file.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF; added pictures: PNG or JPEG` },
+          { label: 'Added text', value: `Helvetica, Latin characters only, at the size you type in its size field` },
+          { label: 'Page actions', value: `Move up or down, rotate, delete, extract the ticked pages` },
+          { label: 'Extract Selected', value: `Copies the original pages, without added items or rotations` },
+          { label: 'Size limits', value: `The editor's page and file caps are printed above the upload area, and are lower on phones, iPhone and iPad` },
+        ]}
+        privacy={`Everything happens in this browser tab: PDF.js draws the pages, and a background worker running pdf-lib builds the new file. Your PDF and the pictures you add are not uploaded. A JPEG photo stored sideways by a phone is turned upright in the browser before it is placed.`}
         faqs={[
-          { q: "Is PDF Editor free to use?", a: "Yes, completely free with no signup required." },
-          { q: "Can I edit or rewrite text that's already in the PDF?", a: "No. This tool can only add new text, images, and annotations on top of a page — it cannot parse and rewrite a PDF's existing text content. No browser-based tool can do this cleanly, since PDF text is stored as positioned drawing operations, not editable paragraphs." },
-          { q: "Is my file uploaded to a server?", a: "No. Everything — reading, editing, and saving — happens locally in your browser in a background Web Worker; your PDF is never uploaded anywhere." },
-          { q: `How large a PDF can I edit?`, a: `Up to ${MAX_PAGES.toLocaleString()} pages and ${MAX_FILE_SIZE_LABEL} on desktop (${MOBILE_MAX_PAGES.toLocaleString()} pages / ${MOBILE_MAX_FILE_SIZE_LABEL} on phones and tablets) — measured limits to keep editing reliable in a browser tab.` },
-          { q: "What image formats can I add?", a: "PNG and JPEG. Other formats aren't supported by the underlying PDF library." },
-          { q: "Can I undo a specific text, image, or annotation after adding it?", a: "Yes, each item has its own remove (✕) button, and annotations can be cleared per page. There's no undo history beyond that." },
+          { q: "Can I change text that is already in the PDF?", a: `No. The editor only adds new text, pictures and drawings on top of a page; it cannot select, delete or retype the words already in the file. To change wording, edit the source document and export it to PDF again.` },
+          { q: "Are pen strokes and highlights real PDF annotations?", a: `No. When you save, they are drawn into the page content, like the added text and pictures. Other PDF readers show them but cannot move or delete them as comments, so keep your original file if you may need a clean copy.` },
+          { q: "Can I remove something I added?", a: `Yes. Text and pictures each have their own ✕ button in the rows under the page. Pen strokes and highlights cannot be removed one by one: "Clear annotations on this page" removes all of them from the page shown. There is no undo history.` },
+          { q: "Can I add Cyrillic, Greek or Arabic text?", a: `No. Added text uses the standard Helvetica font, which writes Latin letters, digits and common punctuation only. Text with Cyrillic, Greek, Arabic or Asian characters, or emoji, is refused before saving; remove those characters, or add them as a PNG picture instead.` },
+          { q: "Does Extract Selected keep my edits?", a: `No. It copies the ticked pages exactly as they are in the original file, without added text, pictures, drawings or rotations. To keep your edits, save the changes first, then open the saved PDF and extract the pages from it.` },
         ]}
         tips={[
-          "Reordering, rotating, and deleting pages only affects the 'Save Changes' output — 'Extract Selected' always pulls pages from the original document.",
-          "Freehand pen strokes are drawn as connected straight-line segments between your pointer's sampled positions, not smoothed curves — for straight lines or boxes, use the Highlight tool instead.",
-          "Placed text, images, and annotations are tied to a specific page and travel with it if you reorder pages, but not if you delete that page.",
-          "For a quick single-purpose edit — just merging, splitting, watermarking, or numbering pages — the dedicated PDF tools for those tasks are faster than this full editor."
+          `To put the same logo on many pages in one step, PDF Watermark does it with an image watermark.`,
         ]}
       />
     </div>

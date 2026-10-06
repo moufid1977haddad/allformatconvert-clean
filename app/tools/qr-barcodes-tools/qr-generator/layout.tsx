@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "QR Code Generator — Instantly Turns Any Text or URL Online" },
-  description: "Free QR codes for links, Wi-Fi, contacts, SMS and more — colours, logo, up to 2000 px, PNG, SVG or PDF, each one scanned back before download. In your browser.",
+  title: { absolute: "QR Code Generator — URL, Wi-Fi, vCard, Logo; PNG, SVG, PDF" },
+  description: "Create a static QR code for a link, Wi-Fi network, contact card, SMS or map location, with colors and a logo, checked by a QR reader before download.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/qr-barcodes-tools/qr-generator" },
   openGraph: {
-    title: "QR Code Generator — Instantly Turns Any Text or URL Online",
-    description: "Free QR codes for links, Wi-Fi, contacts, SMS and more — colours, logo, up to 2000 px, PNG, SVG or PDF, each one scanned back before download. In your browser.",
+    title: "QR Code Generator — URL, Wi-Fi, vCard, Logo; PNG, SVG, PDF",
+    description: "Create a static QR code for a link, Wi-Fi network, contact card, SMS or map location, with colors and a logo, checked by a QR reader before download.",
     url: "https://www.onlineconvertools.com/tools/qr-barcodes-tools/qr-generator",
   },
 };

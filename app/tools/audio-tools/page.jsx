@@ -3,17 +3,17 @@ import Link from 'next/link';
 import { ToolIcon, CategoryIcon, toolTextColors, categoryColors } from '../../lib/toolIcons';
 
 const tools = [
-  { title: 'Audio Converter', description: 'Convert audio to different formats', href: '/tools/audio-tools/audio-converter' },
-  { title: 'Audio Trimmer', description: 'Trim and cut audio files', href: '/tools/audio-tools/audio-trimmer' },
-  { title: 'Audio Compressor', description: 'Compress audio files', href: '/tools/audio-tools/audio-compressor' },
-  { title: 'Audio Merger', description: 'Merge multiple audio files', href: '/tools/audio-tools/audio-merger' },
-  { title: 'Audio Splitter', description: 'Split audio into parts', href: '/tools/audio-tools/audio-splitter' },
-  { title: 'Audio Booster', description: 'Boost audio volume', href: '/tools/audio-tools/audio-booster' },
-  { title: 'Audio Equalizer', description: 'Adjust audio frequencies', href: '/tools/audio-tools/audio-equalizer' },
-  { title: 'Audio Waveform', description: 'Visualize audio waveform', href: '/tools/audio-tools/audio-waveform' },
-  { title: 'Audio Metadata', description: 'Codec, bitrate, tags and cover art of any audio file', href: '/tools/audio-tools/audio-metadata' },
-  { title: 'Voice Recorder', description: 'Record voice from microphone', href: '/tools/audio-tools/voice-recorder' },
-  { title: 'Audio to Text', description: 'Transcribe audio to text', href: '/tools/audio-tools/audio-to-text' },
+  { title: 'Audio Converter', description: 'Convert one file to 18 formats, from MP3 to FLAC', href: '/tools/audio-tools/audio-converter' },
+  { title: 'Audio Trimmer', description: 'Keep the part between two times, with fades', href: '/tools/audio-tools/audio-trimmer' },
+  { title: 'Audio Compressor', description: 'Re-encode at 64 to 320 kbps to shrink a file', href: '/tools/audio-tools/audio-compressor' },
+  { title: 'Audio Merger', description: 'Join files in order, end to end or crossfaded', href: '/tools/audio-tools/audio-merger' },
+  { title: 'Audio Splitter', description: 'Cut at a point, into equal parts or every N seconds', href: '/tools/audio-tools/audio-splitter' },
+  { title: 'Audio Booster', description: 'Change the volume 0.25× to 5×, or normalize it', href: '/tools/audio-tools/audio-booster' },
+  { title: 'Audio Equalizer', description: 'Adjust bass, mid and treble, export as WAV', href: '/tools/audio-tools/audio-equalizer' },
+  { title: 'Audio Waveform', description: 'Draw the waveform and save it as a PNG', href: '/tools/audio-tools/audio-waveform' },
+  { title: 'Audio Metadata', description: 'Codec, bitrate, tags and cover of an audio file', href: '/tools/audio-tools/audio-metadata' },
+  { title: 'Voice Recorder', description: 'Record the microphone, save as MP3 or WAV', href: '/tools/audio-tools/voice-recorder' },
+  { title: 'Audio to Text', description: 'Dictate live, or transcribe a file with Whisper', href: '/tools/audio-tools/audio-to-text' },
 ];
 
 export default function AudioToolsPage() {
@@ -21,7 +21,7 @@ export default function AudioToolsPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2 flex items-center justify-center gap-2"><CategoryIcon slug="audio-tools" className={`w-8 h-8 ${categoryColors['audio-tools']}`} /> Audio Tools</h1>
-        <p className="text-neutral-500 text-center mb-10">All your audio tools in one place - {tools.length} tools</p>
+        <p className="text-neutral-500 text-center mb-10">Convert, cut, join, record and transcribe audio - {tools.length} tools</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {tools.map((tool) => (
             <Link key={tool.href} href={tool.href} className="bg-white border border-neutral-200 hover:border-indigo-300 hover:shadow-md rounded-xl p-5 transition group flex flex-col items-center text-center w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)]">
@@ -35,33 +35,33 @@ export default function AudioToolsPage() {
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Audio Tools</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Audio Tools is a comprehensive free online platform offering a suite of audio processing utilities designed to enhance, convert, and edit sound files without requiring software installation. Whether you need to trim, merge, convert formats, or adjust audio quality, Audio Tools provides accessible solutions for professionals and casual users alike.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Most of these tools edit the audio in your browser with ffmpeg.wasm or the Web Audio API, without uploading it. Two cases use a server: an Opus output in Audio Converter, Compressor, Merger, Splitter or Booster is encoded with libopus on our own media service, and Audio to Text sends a file through our server to OpenAI's Whisper. In its microphone mode, your browser's speech service does the recognition, which in Chrome means Google. The editing tools open MP3, WAV, M4A, AAC, FLAC, OGG, Opus, WMA, AIFF and AMR files.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Audio Tools</h2>
           <ol className="space-y-2">
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Visit the Audio Tools website and select the specific audio tool you need from the main menu</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Upload your audio file by clicking the upload button or dragging and dropping your file into the designated area</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Configure your desired settings such as format, quality, or audio parameters according to your requirements</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Click the process or convert button to apply changes, then download your edited audio file to your device</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Choose the tool for the job: change the format (Converter), shrink the file (Compressor), cut (Trimmer, Splitter), join (Merger), change loudness (Booster, Equalizer) or inspect (Waveform, Metadata).</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Pick one audio file, or several in Audio Merger; Voice Recorder and the microphone mode of Audio to Text use your microphone instead.</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Set the options, such as output format, bitrate, cut times or gain; the tools built on ffmpeg.wasm download that engine from unpkg.com on first use.</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download the result in the format you chose: Audio Splitter gives one file per part, and Audio to Text gives TXT, SRT or VTT.</li>
           </ol>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
           <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">What audio formats does Audio Tools support?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Audio Tools supports all major audio formats including MP3, WAV, FLAC, OGG, AAC, M4A, and more, allowing seamless conversion between different file types.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit for uploads?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most Audio Tools run in your browser, so your file never leaves your device and we do not set an upload limit; the practical limit is your device memory, and very long files can be slow or fail, especially on phones. Audio to Text is the exception: it sends the audio to our servers and accepts files up to 25 MB, the maximum the transcription engine itself supports.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Do I need to create an account to use Audio Tools?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No account is required to use Audio Tools; every feature is available to anyone with a web browser.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Will my uploaded files be stored or shared?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Most Audio Tools run entirely in your browser — your files never leave your device. Exceptions: Audio to Text sends an uploaded file through our server to OpenAI to make the transcript (not kept by us), and in its microphone mode your browser sends the recording to its maker's speech service (Google, Microsoft or Apple); and when you pick Opus as the output of Audio Converter, Booster, Splitter, Compressor or Merger, the audio is encoded on our own server with libopus and deleted as soon as you have downloaded the result.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Which audio formats can I open?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AMR, MKA, WEBA and CAF, in the editing tools. Audio Converter writes 18 formats, from MP3 and FLAC to ALAC and WavPack, and Audio Merger 14.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is there a file size limit?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No fixed limit in the editing tools: the whole file is loaded into your device memory, so a very long file can fail when memory runs out. Audio to Text accepts files up to 25 MB, the most OpenAI Whisper takes, and an Opus output is capped by our media service.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is my audio uploaded?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Only in two cases. An Opus output goes to our own media service, which deletes your upload when encoding ends and the Opus file after download or a set time. Audio to Text sends a file through our server to OpenAI and leaves the microphone mode to your browser's speech service.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Is the number of Opus conversions limited?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes. Our media service counts jobs per connection per hour and per day, and Audio Splitter counts one job per Opus part. The page shows a message when the limit is reached. The other output formats are made in your browser instead and are not counted.</p></div>
           </div>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Batch process multiple audio files simultaneously to save time when handling large projects or collections</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the audio preview feature before finalizing conversions to ensure the output quality meets your expectations</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Experiment with different compression settings to find the optimal balance between file size and audio quality for your specific needs</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Keep your browser updated and use a stable internet connection to prevent interruptions during large file uploads and processing</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>To remove a passage from the middle, split the file at both ends with Audio Splitter and join the outer parts with Audio Merger.</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Pick FLAC or WAV in Audio Merger to join files without adding another lossy encoding.</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Audio Compressor never raises the bitrate above the source's own; read it in Audio Metadata to choose a lower one.</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Voice Recorder saves the format your browser records, M4A or WebM; use its MP3 or WAV export when another program needs one of those.</li>
           </ul>
         </div>
       </div>

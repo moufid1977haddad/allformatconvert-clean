@@ -97,25 +97,39 @@ export default function RegexTesterPage() {
       </div>
       <SeoContent
         title="Regex Tester"
-        description="Regex Tester runs your pattern against JavaScript's native RegExp engine, entirely in your browser — nothing is uploaded to a server. Matches are highlighted in your text, each with its position and its numbered and named capture groups, and an optional replacement ($1, $<name>, $&) shows the resulting text. The match runs in a separate thread stopped after 2 seconds, so a pattern that backtracks catastrophically is reported instead of freezing the page. It tests JavaScript regex syntax only."
+        description={"Regex Tester runs a pattern with JavaScript’s own RegExp engine, the one built into your browser, on text you paste. Up to 5,000 matches are found and highlighted in the text, and the first 200 are listed with their start and end positions and the value of each numbered and named capture group. Ticking Replace with previews the result of String.replace with $1, $<name>, $& or $$. The search runs in a separate worker that is stopped after 2 seconds, so a pattern with catastrophic backtracking is reported instead of freezing the tab. Other flavors (PCRE, Python, .NET) are not available."}
+        example={{
+          caption: "Output of the page’s own search code (the worker it runs), with the replacement option on.",
+          inputLabel: "Pattern, Flags, text, Replace with",
+          input: "Pattern: (?<year>\\d{4})-(\\d{2})\nFlags: g\nText: Released 2024-03, updated 2025-11.\nReplace with: $2/$<year>",
+          outputLabel: "Result",
+          output: "2 matches\n#1  9–16   2024-03   $1: 2024  $2: 03  year: 2024\n#2  26–33  2025-11   $1: 2025  $2: 11  year: 2025\nResult of the replacement: Released 03/2024, updated 11/2025.",
+        }}
+        howToTitle={"How to test a regular expression in JavaScript"}
         howTo={[
-          "Type or paste your regex pattern into the Pattern field.",
-          "Set flags (e.g. gi for global, case-insensitive) in the Flags field.",
-          "Paste the text you want to test into the text area; tick 'Replace with' to also try a replacement.",
-          "Click 'Test' to see the matches highlighted, with their positions and capture groups, and the replaced text."
+          "Type the pattern in \"Pattern\" without slashes, and the flags in \"Flags\" (g by default; d, i, m, s, u, v and y are also accepted).",
+          "Paste the text to search in the large box below.",
+          "To try a substitution, tick \"Replace with\" and type the replacement, for example $2/$<year>.",
+          "Click \"Test\": matches are highlighted and listed with positions and groups, and the replaced text can be saved with \"Download\" as replaced.txt.",
         ]}
+        specs={[
+          { label: "Flavor", value: "JavaScript RegExp only; named groups are written (?<name>…)" },
+          { label: "Flags accepted", value: "d, g, i, m, s, u, v, y, each at most once" },
+          { label: "Time limit", value: "2 seconds per test, then the worker is stopped and the pattern reported" },
+          { label: "Matches", value: "Up to 5,000 found and highlighted; the first 200 listed in the table" },
+          { label: "Replacement", value: "$1, $<name>, $& and $$; with g every match is replaced, without g only the first" },
+        ]}
+        privacyTitle={"Where your pattern and text are processed"}
+        privacy={"The pattern and your text are processed in a worker inside your browser; the text you test is never sent to our servers. If the pattern is invalid, the error message shown is sent to our error log with the tool’s name and your browser’s name and version; a time-out sends only the words \"pattern timeout (2 s)\". The message is cleaned first, but the cleaning may not hide everything: an invalid pattern containing quotes or angle brackets can reach the log as typed."}
         faqs={[
-          { q: "What is a regular expression?", a: "A pattern-matching syntax used to search, validate, or extract text based on rules rather than exact strings." },
-          { q: "Which regex flavors does it support?", a: "Only JavaScript's native regex syntax — there's no flavor selector for Python, PHP, Java, .NET, or Perl. Named groups use the JavaScript form (?<name>…)." },
-          { q: "Does it highlight matches within my text?", a: "Yes — every match is highlighted in the text, and listed with its start–end position and the value of each capture group (numbered and named)." },
-          { q: "How do I use groups in the replacement?", a: "$1, $2… insert numbered groups, $<name> a named group, $& the whole match, and $$ a dollar sign — as in JavaScript's String.replace." },
-          { q: "Can I save my regex patterns?", a: "No, there's no save feature or pattern library — copy patterns elsewhere if you want to keep them." }
+          { q: "Does it support Python or PCRE regex syntax?", a: "No. Only JavaScript syntax is tested. Constructs such as possessive quantifiers, atomic groups or Python’s (?P<name>…) named groups are rejected as invalid; write named groups as (?<name>…) instead." },
+          { q: "Does the replace preview change every match?", a: "No, only with the g flag. The search adds g on its own so that every match is found (up to 5,000), but the replacement uses your flags as typed: without g, only the first match is replaced." },
+          { q: "Can a slow pattern freeze the page?", a: "No. The test runs in a separate worker that is terminated after 2 seconds; the page then says the pattern is probably backtracking catastrophically, as nested quantifiers like (a+)+ do on a long text that does not match." },
+          { q: "Is there a limit on the number of matches?", a: "Yes. The search stops at 5,000 matches, shown as 5000+, and the table lists the first 200; every match found is highlighted in the text above the table." },
         ]}
         tips={[
-          "Use the g flag to replace every match rather than only the first one (matches are always all listed).",
-          "If your pattern throws an error, check for unescaped special characters or unbalanced parentheses/brackets.",
-          "A pattern stopped after 2 seconds usually nests quantifiers like (a+)+ or (.*)*: rewrite it with a single quantifier.",
-          "Test with a range of inputs, including edge cases and empty strings, to confirm your pattern behaves as expected."
+          "Type each backslash once, as you would between /…/: \\d in \"Pattern\" is a digit, while \\\\d matches a backslash followed by d.",
+          "The v flag needs Safari 17 or later; older Safari versions report it as an invalid flag.",
         ]}
       />
     </div>

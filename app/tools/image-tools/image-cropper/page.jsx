@@ -115,25 +115,30 @@ export default function ImageCropperPage() {
       </div>
       <SeoContent
         title="Image Cropper"
-        description="Image Cropper lets you cut out a rectangular region of an image with X, Y, width and height in the picture's real pixels, or an aspect ratio preset (1:1, 4:3, 3:2, 16:9, 9:16, 4:5, 2:1); a box on the preview shows the area kept — there's no drag-to-select handle on the image itself. Everything happens locally in your browser using the canvas element, and your image is never uploaded to a server."
+        description={"Image Cropper cuts a rectangle out of a picture and discards the rest. Position and size are set in the picture's real pixels with four sliders, X, Y, Width and Height, and a blue box on the preview shows the area that will be kept. Aspect ratio presets (1:1, 4:3, 3:2, 16:9, 9:16, 4:5 and 2:1) place the largest centered box of that shape in one step. There are no handles to drag on the image and no rotation. The crop is made in your browser."}
+        howToTitle={"How to crop an image"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Optionally pick an aspect ratio (1:1, 4:3, 16:9…): the largest centred box of that shape is set.",
-          "Set the X and Y position sliders to choose where the crop starts; the box on the preview shows the area.",
-          "Set the Width and Height sliders to define the crop size.",
-          "Click 'Crop Image' and then the download button to save the result."
+          "Click the upload box and choose the picture; the crop box starts as the whole image.",
+          "Optionally pick a shape in \"Aspect ratio\" to set the largest centered box of that ratio.",
+          "Adjust \"X\", \"Y\", \"Width\" and \"Height\"; the blue box and the crop size above the sliders follow.",
+          "Click \"Crop Image\", then \"Download\"; a cropped JPG, PNG or WebP keeps its format, any other format is saved as PNG.",
         ]}
+        specs={[
+          { label: "Controls", value: "X, Y, Width and Height sliders in real pixels; presets Free, 1:1, 4:3, 3:2, 16:9, 9:16, 4:5, 2:1" },
+          { label: "Input formats", value: "Pictures the browser can display: JPG, PNG, WebP, GIF, BMP, AVIF" },
+          { label: "Output format", value: "JPG kept at quality 92, PNG and WebP kept, other formats saved as PNG" },
+          { label: "Large crops on iPhone", value: "A crop above 16.7 megapixels is drawn in strips instead of failing" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"Cropping happens on a canvas in this page, and the picture is not sent to a server or a third party. The cropped file sits in the tab until you download it. Should the tool display an error, the cleaned message, the tool's name and the browser's name and version reach us, for debugging."}
         faqs={[
-          { q: "What image formats does Image Cropper support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
-          { q: "Is Image Cropper really free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "Can I drag crop handles directly on the image?", a: "No — the area is set with the X/Y/width/height sliders (in real pixels) or an aspect ratio preset, and a box on the preview shows it as you go." },
-          { q: "Will my uploaded images be saved or shared?", a: "No, your images are processed locally in your browser and are never uploaded to a server." }
+          { q: "Can I type exact numbers?", a: "No. Position and size are set with sliders that move in single pixels of the real image, and each value is shown next to its slider. Click a slider and use the arrow keys for one-pixel steps." },
+          { q: "Does a preset keep its ratio when I move the sliders?", a: "No. A preset sets the box once; moving \"Width\" or \"Height\" afterwards changes the shape freely. Pick the preset again to get the exact ratio back, then shift the box with \"X\" or \"Y\" if there is room." },
+          { q: "Does the crop keep my format?", a: "Yes for JPG, PNG and WebP: a JPG stays a JPG at quality 92, a PNG keeps its transparency, a WebP stays a WebP. GIF, BMP and other formats are saved as PNG, and only one frame of an animation is kept." },
         ]}
         tips={[
-          "Watch the pixel values update live as you move each slider to fine-tune your crop area.",
-          "Positions and sizes are the picture's real pixels; the preview box shows the area that will be kept.",
-          "Preview the result after clicking Crop Image before downloading, in case you need to adjust the values.",
-          "Crop one image at a time — there's no batch processing option."
+          "For a profile picture, choose \"1:1 (square)\" and shift \"X\" to center the face.",
+          "For a phone story or reel cover, \"9:16 (story)\" gives the tallest centered box.",
         ]}
       />
     </div>

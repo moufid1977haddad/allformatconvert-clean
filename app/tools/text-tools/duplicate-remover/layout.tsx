@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Duplicate Remover — Strip Out Repeated Lines Online Free" },
-  description: "Duplicate Remover strips out repeated lines from a block of text, keeping only the first occurrence of each line, entirely in your browser.",
+  title: { absolute: "Remove Duplicate Lines — Keep the First, Same Order" },
+  description: "Delete repeated lines from a list and keep the first copy of each, in order. Options ignore case or edge spaces and drop empty lines.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/duplicate-remover" },
   openGraph: {
-    title: "Duplicate Remover — Strip Out Repeated Lines Online Free",
-    description: "Duplicate Remover strips out repeated lines from a block of text, keeping only the first occurrence of each line, entirely in your browser.",
+    title: "Remove Duplicate Lines — Keep the First, Same Order",
+    description: "Delete repeated lines from a list and keep the first copy of each, in order. Options ignore case or edge spaces and drop empty lines.",
     url: "https://www.onlineconvertools.com/tools/text-tools/duplicate-remover",
   },
 };

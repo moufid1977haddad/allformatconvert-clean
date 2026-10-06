@@ -6,6 +6,7 @@ import { CANVAS_MAX_PIXELS, canvasBeyondSafariCap, rasterFromCanvas, rasterFromR
 import { derivedName } from '../../../lib/download';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
+import UploadPrompt from '@/app/components/UploadPrompt';
 
 export default function ImageEditorPage() {
   const [image, setImage] = useState<string | null>(null);
@@ -263,7 +264,7 @@ export default function ImageEditorPage() {
             {image ? (
               <canvas ref={canvasRef} className="max-w-full h-auto rounded-lg mx-auto"></canvas>
             ) : (
-              <p className="text-neutral-500">Click or drop an image here</p>
+              <p className="text-neutral-500"><UploadPrompt what="an image" /></p>
             )}
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
           </div>
@@ -332,24 +333,33 @@ export default function ImageEditorPage() {
       </div>
       <SeoContent
         title="Image Editor"
-        description="Image Editor is a free, full-featured photo editor that runs entirely in your browser — no upload, no signup, and no software to install. Adjust colors, transform and crop, apply creative effects like pixelation and vignette, and decorate your image with borders and text, then download the result as a PNG."
+        description={"Image Editor gathers simple edits on one canvas so you can combine them before saving. Four tabs hold the controls: Adjust (brightness, contrast, saturation, grayscale, invert), Transform (rotation in quarter turns, horizontal and vertical flip, pixelate), Effects (grain, vignette) and Decorate (rounded corners, border, one line of text). Apply refreshes the preview; Save image renders the full-size result: JPG, PNG and WebP photos keep their format, while other formats and any picture with rounded corners are saved as PNG. There is no crop, blur, sepia or undo history; the single-purpose tools cover those. Editing happens in your browser."}
+        howToTitle={"How to edit a photo in the browser"}
         howTo={[
-          "Upload an image from your device to load it into the canvas editor.",
-          "Use the Adjust, Transform, Effects, and Decorate tabs to tweak brightness, contrast, saturation, rotation, flips, pixelation, noise, vignette, borders, and text.",
-          "Click \"Apply\" to render your changes onto the preview.",
-          "Click \"Save image\" once you're happy with the result, then \"Download\" (on an iPhone or iPad, \"Save / Share\" also offers Photos and Files)."
+          "Click the upload box and choose a photo; it appears on the canvas.",
+          "Open the \"Adjust\", \"Transform\", \"Effects\" and \"Decorate\" tabs and set the sliders and boxes you need.",
+          "Click \"Apply\" to redraw the preview with all the settings, or \"Reset\" to clear them.",
+          "Click \"Save image\", then \"Download\" in the row that appears; on iPhone and iPad, \"Save / Share\" opens the share sheet.",
         ]}
+        specs={[
+          { label: "Adjust", value: "Brightness, Contrast, Saturation from −100 to 100; Grayscale; Invert Colors" },
+          { label: "Transform", value: "Rotation 0, 90, 180 or 270 degrees; Flip Horizontal; Flip Vertical; Pixelate 0 to 20 px" },
+          { label: "Effects and Decorate", value: "Grain 0 to 50, Vignette 0 to 100; Corner Radius 0 to 100 px; Border Width 0 to 20 px, inside the picture; text in Arial, 12 to 72 px, at the top left" },
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF or another picture the browser displays, up to 100 megapixels" },
+          { label: "Output format", value: "JPG (quality 92), PNG and WebP keep their format; GIF, BMP and other formats, and any result with Corner Radius above 0, are saved as PNG" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"Every edit is painted by this page on a canvas in your browser, and the photo is not uploaded at any step. The saved image is made in the tab when you click Save image and is lost if you close the tab without downloading it. Should the editor show an error, its cleaned message travels to us with the tool's name and your browser's name and version; the photo stays out of it."}
         faqs={[
-          { q: "Is Image Editor free to use?", a: "Yes, it's completely free with no signup and no limit on how many images you can edit." },
-          { q: "Is my image uploaded to a server?", a: "No. All editing happens locally in your browser using the Canvas API — your image never leaves your device." },
-          { q: "What kinds of edits can I make?", a: "Color adjustments (brightness, contrast, saturation, grayscale, invert), transforms (rotate, flip, pixelate), effects (noise/grain, vignette), and decorations (rounded corners, borders, text overlay)." },
-          { q: "What format can I download my edited image in?", a: "The format of your photo: a JPG stays a JPG, a WebP stays a WebP, a PNG stays a PNG. With rounded corners (which need transparency) the result is a PNG. The download is always at the full size of your photo." }
+          { q: "Can I crop or blur in Image Editor?", a: "No. There is no crop, blur or sepia control here. Use Image Cropper, Image Blur or Sepia Filter, then load the result into the editor if you want to add other changes." },
+          { q: "Do changes show while I move a slider?", a: "No. The preview is redrawn when you click \"Apply\". Click \"Apply\" before \"Save image\" as well, so that the preview shows what you save. A slider or box you change afterwards takes effect at the next click." },
+          { q: "Is the saved image full size?", a: "Yes. It has the full pixel size of your photo, turned if you rotated it. JPG, PNG and WebP keep their format; GIF, BMP and other formats, and any result with \"Corner Radius\" above 0, are saved as PNG, because rounded corners need transparency." },
+          { q: "Can I rotate by any angle?", a: "No. The \"Rotation\" slider moves in steps of 90 degrees. For a slight tilt, use Image Rotate, which accepts any angle and fills the corners with transparency or a color." },
+          { q: "Does it handle big iPhone photos?", a: "Yes, up to 100 megapixels. On iPhone and iPad, a photo above 16.7 megapixels is previewed scaled down, and \"Save image\" rebuilds the full-size result strip by strip with the current settings." },
         ]}
         tips={[
-          "Changes only appear after you click \"Apply\" — adjusting a slider or checkbox doesn't update the preview until you do.",
-          "Use \"Reset\" to clear every adjustment and start over without re-uploading the image.",
-          "Combine desaturation with a vignette for a quick vintage or moody look.",
-          "Rounded corners and a border are a fast way to turn a photo into a ready-to-use avatar or card image."
+          "A border and rounded corners do not combine well here, as the border stays square over the rounded corners: use Add Border to Image first, then Round Corners.",
+          "\"Reset\" clears every setting without reloading the photo.",
         ]}
       />
     </div>

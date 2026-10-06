@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JPG to WebP — Convert a JPG Image Online Free" },
-  description: "JPG to WebP converts a JPG image to WebP format entirely in your browser using the HTML canvas — your file is never uploaded to a server.",
+  title: { absolute: "JPG to WebP Converter — Set Quality or Go Lossless, Free" },
+  description: "Turn a JPG photo into WebP with a quality from 1 to 100 or a lossless mode, and compare the KB before and after on the same page.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/jpg-to-webp" },
   openGraph: {
-    title: "JPG to WebP — Convert a JPG Image Online Free",
-    description: "JPG to WebP converts a JPG image to WebP format entirely in your browser using the HTML canvas — your file is never uploaded to a server.",
+    title: "JPG to WebP Converter — Set Quality or Go Lossless, Free",
+    description: "Turn a JPG photo into WebP with a quality from 1 to 100 or a lossless mode, and compare the KB before and after on the same page.",
     url: "https://www.onlineconvertools.com/tools/image-tools/jpg-to-webp",
   },
 };

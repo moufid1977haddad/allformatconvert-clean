@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image to PDF — Turn Any Mix Online Free" },
-  description: "Image to PDF turns any mix of JPG, PNG, HEIC, WebP and other images into one downloadable PDF, processed locally with the pdf-lib library so nothing ever reaches a server.",
+  title: { absolute: "Image to PDF — Combine JPG, PNG, HEIC & More in One PDF" },
+  description: "Combine JPG, PNG, HEIC, WebP, GIF, BMP, TIFF or AVIF pictures into one PDF in your browser. Add files in several rounds and remove any before converting.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/image-to-pdf" },
   openGraph: {
-    title: "Image to PDF — Turn Any Mix Online Free",
-    description: "Image to PDF turns any mix of JPG, PNG, HEIC, WebP and other images into one downloadable PDF, processed locally with the pdf-lib library so nothing ever reaches a server.",
+    title: "Image to PDF — Combine JPG, PNG, HEIC & More in One PDF",
+    description: "Combine JPG, PNG, HEIC, WebP, GIF, BMP, TIFF or AVIF pictures into one PDF in your browser. Add files in several rounds and remove any before converting.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/image-to-pdf",
   },
 };

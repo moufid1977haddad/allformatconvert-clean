@@ -117,24 +117,31 @@ export default function VideoToAudioPage() {
       </div>
       <SeoContent
         title="Video to Audio"
-        description="Video to Audio extracts the audio track from a video file using ffmpeg.wasm, entirely in your browser — your file is never uploaded to a server. Stereo (and multi-channel) audio is preserved, and you can export to MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, or AC3."
+        description="Video to Audio keeps only the sound of a video file and saves it in one of 18 audio formats: MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, AC3, M4R (iPhone ringtone), M4B (audiobook), MP2, WavPack, CAF, AU or MKA. The picture is skipped, so only the audio is decoded and encoded. The work is done by ffmpeg.wasm on your device, inside this browser tab, and the video is not uploaded. It does not cut the sound; for that, use Audio Trimmer on the result."
+        howToTitle="How to extract the audio from a video"
         howTo={[
-          "Click the upload area and select a video file.",
-          "Choose your target audio format from the dropdown.",
-          "Click \"Extract Audio\" to demux and encode the audio track locally.",
-          "Preview the result in the audio player and download it."
+          "Choose or drop the video whose sound you want to keep.",
+          "Pick the output in \"Target Format\".",
+          "For MP3, AAC, M4A, M4R, M4B, OGG, WMA, AC3 or MP2, choose a bitrate in \"Quality\" (192 kbps is selected first).",
+          "Click \"Extract Audio\"; the first run also downloads the ffmpeg.wasm engine, about 10 MB.",
+          "Listen to the result and click \"Download\" to save the audio file, named after the video."
         ]}
+        specs={[
+          { label: 'Input formats', value: "MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS" },
+          { label: 'Output formats', value: "MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, AC3, M4R, M4B, MP2, WV, CAF, AU, MKA" },
+          { label: 'Bitrate', value: "128, 192, 256 or 320 kbps for the lossy formats that take one (AC3 and MP2: at least 192 kbps); lossless formats ignore it" },
+          { label: 'File size', value: "The page sets no cap, yet the whole video is copied into the tab's memory, so a very large file can fail" }
+        ]}
+        privacy="The video is read and converted by ffmpeg.wasm in this tab; neither the video nor the extracted sound is uploaded. The engine itself, about 10 MB, is downloaded from unpkg.com, a public code host, the first time. If extraction fails, we receive the cleaned error text, its type, the tool name, your browser and its version, the file extension and a size range, never the file."
         faqs={[
-          { q: "What audio formats can I export?", a: "MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, and AC3." },
-          { q: "Does it keep stereo audio?", a: "Yes — the original channel layout (mono, stereo, or multi-channel) is preserved; nothing is downmixed." },
-          { q: "Is Video to Audio free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is my file uploaded anywhere?", a: "No, extraction happens entirely in your browser via ffmpeg.wasm (WebAssembly) — nothing is uploaded to a server." }
+          { q: "Does extracting the audio lose quality?", a: "No with WAV, FLAC, AIFF, ALAC, WavPack or MKA: they store the decoded sound without loss. MP3, AAC, M4A, OGG, Opus, WMA, AC3 and MP2 compress it again, so some detail goes; a higher \"Quality\" bitrate keeps more. No format can restore what the video's own sound track already lost." },
+          { q: "Which bitrate should I choose?", a: "192 kbps is selected first. 128 kbps makes a smaller file, for example for speech, while 256 or 320 kbps makes a larger one that keeps more detail. The setting appears only for MP3, AAC, M4A, M4R, M4B, OGG, WMA, AC3 and MP2." },
+          { q: "Will mono or stereo sound stay the same?", a: "Yes: the page sends no channel setting to ffmpeg, so mono stays mono and stereo stays stereo. Sound with more than two channels was not tested here; to keep it, prefer a lossless format such as FLAC or WAV." },
+          { q: "Can I make an iPhone ringtone from a video?", a: "Yes. Choose \"M4R (iPhone ringtone, AAC)\" in the format list to get an .m4r file. To use only part of the sound, cut the result with Audio Trimmer before you add it to your phone." },
+          { q: "Is there a file size limit?", a: "No. The page sets none, but the whole video is copied into the browser tab's memory before extraction, so a very large file can make the tab run out of memory. If that happens, cut the video with Video Trimmer first." }
         ]}
         tips={[
-          "The first extraction after loading the page takes longer since your browser needs to download the ffmpeg.wasm engine (roughly 25–30MB).",
-          "Pick FLAC, WAV, or AIFF if you need the extracted audio at full lossless quality; MP3, AAC, or Opus for a smaller file.",
-          "This works on the video's audio stream directly — if your browser downloads a very large video, extraction may take a moment even though only the audio is decoded.",
-          "Extraction only reads the audio track, so it's typically much faster than a full video re-encode."
+          "Need the sound of one scene only? Cut it with Video Trimmer's default fast cut first: nothing is re-encoded before the extraction."
         ]}
       />
     </div>

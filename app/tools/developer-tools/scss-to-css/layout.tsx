@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "SCSS to CSS — Lightweight SCSS to CSS Transform Online Free" },
-  description: "SCSS to CSS is a lightweight text transform, not a real Sass compiler: it strips comments and rewrites simple parent-selector patterns.",
+  title: { absolute: "SCSS to CSS Compiler — Dart Sass in Your Browser" },
+  description: "Compile SCSS to expanded or compressed CSS with Dart Sass: variables, nesting, mixins, @extend and @use sass:math. Sass errors give the line:column.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/scss-to-css" },
   openGraph: {
-    title: "SCSS to CSS — Lightweight SCSS to CSS Transform Online Free",
-    description: "SCSS to CSS is a lightweight text transform, not a real Sass compiler: it strips comments and rewrites simple parent-selector patterns.",
+    title: "SCSS to CSS Compiler — Dart Sass in Your Browser",
+    description: "Compile SCSS to expanded or compressed CSS with Dart Sass: variables, nesting, mixins, @extend and @use sass:math. Sass errors give the line:column.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/scss-to-css",
   },
 };

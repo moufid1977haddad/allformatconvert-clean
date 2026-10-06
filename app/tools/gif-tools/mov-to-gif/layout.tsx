@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "MOV to GIF — Convert a Video Clip to an Animated GIF" },
-  description: "Convert a clip of your MOV video into an animated GIF: choose start, length up to 60 s, width and frame rate. Proportions kept, any browser.",
+  title: { absolute: "MOV to GIF — Turn iPhone and QuickTime Clips into GIFs" },
+  description: "Convert a moment of an iPhone or QuickTime MOV video into an animated GIF on our server. Portrait clips keep their proportions; pick length and width.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/mov-to-gif" },
   openGraph: {
-    title: "MOV to GIF — Convert a Video Clip to an Animated GIF",
-    description: "Convert a clip of your MOV video into an animated GIF: choose start, length up to 60 s, width and frame rate. Proportions kept, any browser.",
+    title: "MOV to GIF — Turn iPhone and QuickTime Clips into GIFs",
+    description: "Convert a moment of an iPhone or QuickTime MOV video into an animated GIF on our server. Portrait clips keep their proportions; pick length and width.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/mov-to-gif",
   },
 };

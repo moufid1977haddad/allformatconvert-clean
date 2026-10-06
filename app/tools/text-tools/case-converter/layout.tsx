@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Case Converter — Convert Cases Online Free" },
-  description: "Case Converter transforms text between UPPERCASE, lowercase, Title Case, Capitalized Case, Sentence case, and aLtErNaTe (toggle) case, entirely in your browser.",
+  title: { absolute: "Case Converter — Sentence, Title, camelCase, snake_case" },
+  description: "Change text to UPPERCASE, lowercase, Title Case, Sentence case, iNVERSE or five programming cases such as camelCase, line by line, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/case-converter" },
   openGraph: {
-    title: "Case Converter — Convert Cases Online Free",
-    description: "Case Converter transforms text between UPPERCASE, lowercase, Title Case, Capitalized Case, Sentence case, and aLtErNaTe (toggle) case, entirely in your browser.",
+    title: "Case Converter — Sentence, Title, camelCase, snake_case",
+    description: "Change text to UPPERCASE, lowercase, Title Case, Sentence case, iNVERSE or five programming cases such as camelCase, line by line, in your browser.",
     url: "https://www.onlineconvertools.com/tools/text-tools/case-converter",
   },
 };

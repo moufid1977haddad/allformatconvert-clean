@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Audio Merger — Join Two or More Audio Files Online Free" },
-  description: "Join audio files in any order, seamlessly or with an optional crossfade, in your browser: 14 output formats (FLAC, WAV, MP3, M4A, Opus…; Opus is encoded on our own server, then deleted), and lossless files stay lossless.",
+  title: { absolute: "Audio Merger — Join Audio Files, Reorder & Crossfade" },
+  description: "Join two or more audio files in the order you set, end to end or with crossfades. 14 output formats; lossless inputs stay lossless by default.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-merger" },
   openGraph: {
-    title: "Audio Merger — Join Two or More Audio Files Online Free",
-    description: "Join audio files in any order, seamlessly or with an optional crossfade, in your browser: 14 output formats (FLAC, WAV, MP3, M4A, Opus…; Opus is encoded on our own server, then deleted), and lossless files stay lossless.",
+    title: "Audio Merger — Join Audio Files, Reorder & Crossfade",
+    description: "Join two or more audio files in the order you set, end to end or with crossfades. 14 output formats; lossless inputs stay lossless by default.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-merger",
   },
 };

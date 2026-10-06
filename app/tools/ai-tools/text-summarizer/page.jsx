@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { checkPromptLength } from '@/lib/quota/limits';
+import { checkPromptLength, MAX_PROMPT_CHARS } from '@/lib/quota/limits';
 import { readAiJson } from '../../../lib/aiClient';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -59,24 +59,29 @@ export default function TextSummarizerPage() {
       </div>
       <SeoContent
         title="Text Summarizer"
-        description="Text Summarizer is a free online tool that uses OpenAI's GPT-4o mini model to condense long documents, articles, and passages into a concise summary while preserving the key points. Paste your text and get back a shorter version in seconds — useful for students, professionals, and researchers who need to quickly grasp lengthy content."
+        description={`Text Summarizer condenses a passage you paste, such as an article, meeting notes or a chapter, into a short summary of its key points and main ideas. The summary is written by OpenAI's GPT-4o mini model; your text is sent through our server to reach it. Each request takes up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters, and longer text is refused rather than cut. There is no length or bullet-point setting, and this page does not open files: for a PDF, use AI PDF Summary, which reads the document for you. Copy the summary or download it as summary.txt.`}
+        howToTitle="How to summarize a text"
         howTo={[
-          "Paste or type your text into the input field.",
-          "Click the 'Summarize' button to send it to the AI.",
-          "Wait a moment while the AI generates your summary.",
-          "Copy the summary to your clipboard for later use."
+          "Paste the text into the \"Paste text to summarize...\" box.",
+          "Click \"Summarize\"; it shows \"Summarizing...\" while the model works.",
+          "Read the summary under \"Result\".",
+          "Click \"Copy\", or \"Download\" to save summary.txt."
         ]}
+        specs={[
+          { label: "Input", value: `Notes, an article or a chapter, up to ${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters` },
+          { label: "Output", value: "A concise summary in plain text, up to 1,000 tokens" },
+          { label: "Settings", value: "None: no length or format choice" },
+          { label: "Usage limits", value: "Each connection has an hourly and a daily number of requests, shared with the site's other paid tools; the site also has a monthly budget" }
+        ]}
+        privacyTitle="Where your text is summarized"
+        privacy="Summarizing happens at OpenAI, not in your browser: the text is sent to our server, which forwards it to GPT-4o mini and returns the summary. A text over the length limit is refused before sending, with a message on the page, never cut. Only the summary comes back, and we store neither it nor your text."
         faqs={[
-          { q: "Is Text Summarizer really free to use?", a: "Yes, Text Summarizer is free to use with no signup or subscription required; because each request costs us at the AI provider, there is an hourly and daily limit per connection." },
-          { q: "How long can the text I input be?", a: "There's no fixed word limit, but very long input may be truncated by the underlying AI model's limits. For very long documents, consider breaking them into smaller sections and summarizing each part separately." },
-          { q: "What languages does Text Summarizer support?", a: "It works best with English content, though the underlying AI model can generally handle other languages with varying accuracy." },
-          { q: "Will my text be saved or shared?", a: "Your text is sent to OpenAI's API to generate the summary. It is not stored on our servers or shared for any purpose beyond producing your result." }
+          { q: "What is the longest text I can summarize?", a: `${MAX_PROMPT_CHARS.toLocaleString('en-US')} characters; over that, the page shows the length of your text and sends nothing. For a longer document, summarize it section by section, then summarize the section summaries together.` },
+          { q: "Can I summarize a PDF?", a: "No, not on this page, which takes pasted text only. AI PDF Summary extracts the text of a PDF in your browser and then sends that text to our server for a summary; you can also copy the text out of the PDF and paste it here." },
+          { q: "Can I choose the length of the summary?", a: "No. There is no setting for length or bullet points; the model is asked for a concise summary that keeps the key points. For a shorter result, paste the summary back in and summarize it again." }
         ]}
         tips={[
-          "For academic papers, use the tool to create quick reference summaries of methodology and conclusions.",
-          "Summarize section by section for very long documents to keep each summary focused.",
-          "Run the same text through the tool again if you want to compare a different phrasing of the summary.",
-          "Use Text Summarizer alongside your reading to double-check you've caught the key points of an article or report."
+          "Remove references, footnotes and navigation text before pasting, so the summary covers the content itself."
         ]}
       />
     </div>

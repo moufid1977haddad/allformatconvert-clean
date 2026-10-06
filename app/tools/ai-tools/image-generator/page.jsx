@@ -70,7 +70,7 @@ export default function ImageGeneratorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">AI Image Generator</h1>
-        <p className="text-neutral-500 text-center mb-8">Describe an image and get it in seconds — {PER_DAY} free images a day, no signup</p>
+        <p className="text-neutral-500 text-center mb-8">Describe an image and get one AI-made picture — {PER_DAY} free images a day, no signup</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div>
             <label htmlFor="prompt" className="block text-sm text-neutral-600 mb-1">Describe your image</label>
@@ -92,7 +92,7 @@ export default function ImageGeneratorPage() {
             ))}
           </div>
           <button onClick={generate} disabled={!prompt.trim() || loading} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition">
-            {loading ? 'Generating… (about 10–30 seconds)' : 'Generate Image'}
+            {loading ? 'Generating…' : 'Generate Image'}
           </button>
           {error && <p className="text-red-600 text-center text-sm">{error}</p>}
           {result && (
@@ -109,25 +109,32 @@ export default function ImageGeneratorPage() {
       </div>
       <SeoContent
         title="AI Image Generator"
-        description={`AI Image Generator turns a text description into an image with OpenAI's gpt-image-2 model — among the highest-rated image models in independent blind comparisons. Choose square, portrait or landscape, then download the result as WebP or PNG. It's free, with no signup: ${PER_DAY} images per day per visitor, like the daily limits of the best-known free generators.`}
+        description={`AI Image Generator creates one image from a text description with OpenAI's gpt-image-2 model at its low quality setting. You write up to ${MAX_CHARS.toLocaleString('en-US')} characters, choose square, portrait or landscape (${SIZES.map((s) => s.note).join(', ')} pixels) and get a WebP image back from OpenAI; the page also makes a PNG copy in your browser. Your description goes through our server to OpenAI, whose safety filter refuses some requests. Each visitor gets ${PER_DAY} images per day. The site adds no watermark and keeps no copy of the image.`}
+        howToTitle="How to generate an image from text"
         howTo={[
-          'Describe the image you want: subject, setting, style and lighting.',
-          'Choose square, portrait or landscape.',
-          "Click 'Generate Image' and wait 10 to 30 seconds.",
-          'Download the result as WebP, or as PNG if you need it.'
+          "Describe the image under \"Describe your image\": subject, setting, style and lighting, or click one of the examples.",
+          "Choose \"Square\", \"Portrait\" or \"Landscape\".",
+          "Click \"Generate Image\" and wait until the image appears.",
+          "Click \"Download\" next to ai-image.webp or ai-image.png, or \"Download all\" to get both in a ZIP."
         ]}
+        specs={[
+          { label: "Description", value: `Up to ${MAX_CHARS.toLocaleString('en-US')} characters` },
+          { label: "Sizes", value: SIZES.map((s) => `${s.label} ${s.note}`).join(', ') },
+          { label: "Output", value: "WebP sent by OpenAI, plus a PNG copy made in your browser" },
+          { label: "Daily allowance", value: `${PER_DAY} images per visitor per UTC day; a request refused by the safety filter is not counted` },
+          { label: "Other limits", value: "A monthly budget of the generator's own and the site's monthly budget for paid tools; the hourly and daily per-connection limits of the paid tools also apply" }
+        ]}
+        privacyTitle="Where your image is made"
+        privacy="Your description and the chosen size are sent to our server, which asks OpenAI's gpt-image-2 for one image and passes the WebP back to your browser without saving it. Only the PNG copy is made on your device. For each image our server log keeps the size and the token counts, never the description."
         faqs={[
-          { q: 'Is the AI Image Generator free?', a: `Yes: ${PER_DAY} images per day per visitor, no signup and no watermark. The count resets at midnight UTC.` },
-          { q: 'Which AI model does it use?', a: "OpenAI's gpt-image-2, at its fast quality setting, in 1024×1024, 1024×1536 or 1536×1024 pixels." },
-          { q: 'Can I use the images commercially?', a: "OpenAI's terms assign you the rights to images you create, subject to their usage policies. Check that your image doesn't copy a protected work, logo or a real person's likeness." },
-          { q: 'Why was my description refused?', a: "The provider's safety filter refuses content that breaks its usage policy (for example violence, sexual content or real people in misleading situations). A refused request does not count against your daily images." },
-          { q: 'Is my description stored?', a: 'We do not store your description or the image. The description is sent to OpenAI to generate the image, under their API privacy terms.' }
+          { q: "How many images can I make per day?", a: `${PER_DAY} per visitor per UTC day; the count resets at midnight UTC, and a description refused by the safety filter is given back. The generator also stops if its own monthly budget or the site's budget runs out, and the hourly and daily per-connection limits of the paid tools apply.` },
+          { q: "Can I choose the model or the quality?", a: `No. OpenAI's gpt-image-2 at its low quality setting, one image per request, in ${SIZES.map((s) => s.note).join(', ')} pixels, is fixed on our server; the page sends only your description and the size you chose.` },
+          { q: "Can a description be refused?", a: "Yes. OpenAI's safety filter blocks descriptions that break OpenAI's usage policies. The page shows a message, and the request does not use one of your daily images. Describe something else and try again." },
+          { q: "Do you keep my description or the image?", a: "No. The image is passed to your browser and not stored by us, and the description is not written to our logs. OpenAI receives the description to make the image, under its own API data terms." }
         ]}
         tips={[
-          'Name a style for consistent results: "watercolor", "35mm photo", "flat vector illustration", "3D render".',
-          'Describe lighting and mood: "golden hour", "neon-lit", "soft studio light".',
-          'Text inside images works best when short and put in quotes.',
-          'Not quite right? Adjust one detail at a time rather than rewriting everything.'
+          "Name a style for consistent results: \"watercolor\", \"35mm photo\", \"flat vector illustration\", \"3D render\".",
+          "Describe lighting and mood: \"golden hour\", \"neon-lit\", \"soft studio light\"."
         ]}
       />
     </div>

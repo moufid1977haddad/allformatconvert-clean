@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "SQL Formatter — Break a Fixed List Online Free" },
-  description: "SQL Formatter breaks common SQL keywords onto new lines and adds a line break after every comma, entirely in your browser.",
+  title: { absolute: "SQL Formatter — 12 Dialects, Uppercase Keywords" },
+  description: "Format SQL queries for MySQL, PostgreSQL, SQL Server, Oracle, SQLite, BigQuery and more: keywords uppercased, clauses indented, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/sql-formatter" },
   openGraph: {
-    title: "SQL Formatter — Break a Fixed List Online Free",
-    description: "SQL Formatter breaks common SQL keywords onto new lines and adds a line break after every comma, entirely in your browser.",
+    title: "SQL Formatter — 12 Dialects, Uppercase Keywords",
+    description: "Format SQL queries for MySQL, PostgreSQL, SQL Server, Oracle, SQLite, BigQuery and more: keywords uppercased, clauses indented, in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/sql-formatter",
   },
 };

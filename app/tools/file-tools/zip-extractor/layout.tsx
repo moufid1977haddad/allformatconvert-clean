@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "ZIP Extractor — Extract ZIP Online Free" },
-  description: "Open ZIP, RAR, 7Z, TAR, GZ, ISO and 40+ other archive formats in your browser with 7-Zip and zip.js — password-protected and split archives included, nothing uploaded, no software to install.",
+  title: { absolute: "ZIP Extractor — Open ZIP, RAR and 7Z Files in Your Browser" },
+  description: "Open ZIP, RAR, 7Z, TAR, GZ and other archives with 7-Zip and zip.js in your browser, including password-protected and split archives.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/zip-extractor" },
   openGraph: {
-    title: "ZIP Extractor — Extract ZIP Online Free",
-    description: "Open ZIP, RAR, 7Z, TAR, GZ, ISO and 40+ other archive formats in your browser with 7-Zip and zip.js — password-protected and split archives included, nothing uploaded, no software to install.",
+    title: "ZIP Extractor — Open ZIP, RAR and 7Z Files in Your Browser",
+    description: "Open ZIP, RAR, 7Z, TAR, GZ and other archives with 7-Zip and zip.js in your browser, including password-protected and split archives.",
     url: "https://www.onlineconvertools.com/tools/file-tools/zip-extractor",
   },
 };

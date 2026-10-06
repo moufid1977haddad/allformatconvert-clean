@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
-import { MAX_PDF_TO_WORD_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_PDF_TO_WORD_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { PDF_NO_TABLES_MESSAGE } from '@/lib/pdfNoTables';
 import { pdfTextToXlsx } from '../../../lib/pdfTextToSheet';
@@ -90,23 +90,27 @@ export default function PdfToExcelPage() {
       </div>
       <SeoContent
         title="PDF to Excel"
-        description="PDF to Excel converts the tables of your PDF into an editable .xlsx spreadsheet, with rows and columns you can sort, filter and calculate with. In our tests on two spreadsheet PDFs (a 40-row sales table with dates, prices and percentages, and a sheet with five tables), every table came out with the same cells as the leading online PDF converter's, with numbers and dates as real values you can calculate with. The conversion is done by ConvertAPI, the same provider as our PDF to Word tool; your file is sent over HTTPS and deleted after conversion."
+        description={`PDF to Excel pulls the tables out of a PDF into an .xlsx workbook whose cells you can sort, filter and use in formulas. ConvertAPI, our conversion provider, finds the tables and keeps numbers and dates as real values. When it finds none, the sheet is built from the PDF's text instead, one sheet per page and one row per line, with a new cell wherever aligned text is separated by a wide gap. A scanned page has no text to read until PDF OCR has been run on it.`}
+        howToTitle="How to convert PDF to Excel"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Click 'Convert to .xlsx'. Your file is uploaded securely for conversion; once the Excel file is ready, click 'Download'.",
-          "Open the .xlsx file in Excel or a compatible app and check the result."
+          `Click or drop the PDF whose tables you want in Excel.`,
+          `Click "Convert to .xlsx" and wait while the file is uploaded and converted.`,
+          `When "Excel file ready" appears, click "Download" to save the .xlsx workbook.`,
         ]}
+        specs={[
+          { label: 'Input format', value: `PDF` },
+          { label: 'Output format', value: `XLSX workbook` },
+          { label: 'Maximum file size', value: `${officeMaxLabel(MAX_PDF_TO_WORD_STAGED_BYTES)} per file` },
+          { label: 'Usage limits', value: `Hourly and daily limits per network, shared with the site's other paid tools, plus a monthly budget for the whole site` },
+        ]}
+        privacy={`The PDF travels over HTTPS through our server to ConvertAPI, which converts it with its file storage switched off. If no table is found, the fallback sheet is built in this browser tab from the same file, with no further transfer. Above ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB, the PDF first goes in parts through our media service, which deletes it after the conversion and deletes the workbook as soon as this page has received it, or after a time limit.`}
         faqs={[
-          { q: "Is PDF to Excel free to use?", a: "Yes, it's free with no signup required." },
-          { q: "Will my PDF be uploaded to a server?", a: "Yes. Your file is sent over HTTPS to our conversion provider (ConvertAPI) to create the Excel file, and deleted afterwards — it isn't stored." },
-          { q: "What does the output contain?", a: "An .xlsx workbook. Tables found in the PDF become cells you can edit, sort and use in formulas." },
-          { q: "What if my PDF has no table?", a: "You still get a workbook: when no table is found, the PDF's text is placed in the sheet line by line (one sheet per page, aligned columns kept as columns), built in your browser. A scanned PDF has no text layer — run it through PDF OCR first." },
-          { q: "What is the file-size limit?", a: "Up to 99 MB per PDF." }
+          { q: `Are numbers and dates kept as real values?`, a: `Yes. In our test of 23 September 2026 against iLovePDF on the same files, the tables came out with the same typed values: 160 numbers and 40 dates in a sales table, and five identical tables from a sheet that held five of them.` },
+          { q: `Do I get a workbook if my PDF has no table?`, a: `Yes. The page builds one from the PDF's text: one sheet per page, named after it, one row per line of text, and a new cell wherever a wide gap separates aligned text. A note under the result says how many rows were made.` },
+          { q: `Is there a usage limit?`, a: `Yes. Each conversion is billed to us by ConvertAPI, so your network has an hourly and a daily allowance, counted together with the site's other paid tools, and the site as a whole has a monthly budget. The page tells you when you can convert again.` },
         ]}
         tips={[
-          "Works best on PDFs exported from a spreadsheet or report, where tables are real text.",
-          "Check totals and merged cells after converting — complex layouts can split differently.",
-          "Keep the tab open until the Download button appears — large files take longer."
+          `For a scanned PDF, run PDF OCR first so that its text can be read, then convert the searchable PDF here.`,
         ]}
       />
     </div>

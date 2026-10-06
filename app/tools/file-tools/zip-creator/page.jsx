@@ -139,7 +139,7 @@ export default function ZipCreatorPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <input id="zip-password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} placeholder="Password" aria-label="Password" className="border border-neutral-200 rounded-lg px-3 py-2 text-sm" />
                 <input id="zip-password2" type="password" autoComplete="new-password" value={password2} onChange={(e) => setPassword2(e.target.value)} disabled={loading} placeholder="Repeat the password" aria-label="Repeat the password" className="border border-neutral-200 rounded-lg px-3 py-2 text-sm" />
-                <p className="sm:col-span-2 text-xs text-neutral-500">{pwProblem || (/[^ -~]/.test(password) ? 'This password has accented or non-Latin characters: zip.js and 7-Zip write them as UTF-8, but some programs (older WinRAR, Windows tools) read them in another encoding and then refuse the password. Letters, digits and punctuation of an English keyboard are the safest. ' : '') + 'Opens in 7-Zip, WinRAR, Windows 11 and The Unarchiver. The password is not stored or sent anywhere: if it is lost, the files cannot be recovered. File names stay readable in a ZIP; only the contents are encrypted.'}</p>
+                <p className="sm:col-span-2 text-xs text-neutral-500">{pwProblem || (/[^ -~]/.test(password) ? 'This password has accented or non-Latin characters: zip.js writes them as UTF-8, but some programs read them in another encoding and then refuse the password (bsdtar on Windows did in our test). Letters, digits and punctuation of an English keyboard are the safest. ' : '') + 'Encrypted as AES-256 in the WinZip AE-2 format; in our test, bsdtar (libarchive) opened it. The password is not stored or sent anywhere: if it is lost, the files cannot be recovered. File names stay readable in a ZIP; only the contents are encrypted.'}</p>
               </div>
             )}
           </div>
@@ -160,28 +160,28 @@ export default function ZipCreatorPage() {
       </div>
       <SeoContent
         title="ZIP Creator"
-        description="ZIP Creator is a free online tool that bundles multiple files into a single ZIP archive, entirely in your browser using JSZip (or zip.js for password-protected, AES-256 archives) — no upload, no software, and works with any file type. Choose a compression level, and zipping runs in a background Web Worker so the page stays responsive, with a live progress bar and a Cancel button."
+        description="ZIP Creator puts several files into one ZIP archive inside your browser, in a background worker so the page stays usable, with a progress bar and a Cancel button. You choose the compression level, from store-only to the strongest DEFLATE setting. An optional password encrypts the contents with AES-256 (WinZip AE-2), never the weak old ZipCrypto; file names stay readable, as in every ZIP. Files are placed at the root of the archive under their own names, without folders. The archive is always called archive.zip."
+        howToTitle="How to create a ZIP file"
         howTo={[
-          "Click the upload area and select one or more files to add to your archive.",
-          "Remove any files you don't want by clicking \"Remove\" next to them.",
-          "Pick a compression level (None, Fast, Normal, or Best).",
-          "Click \"Create ZIP\" to bundle everything into a single archive locally.",
-          "Click \"Download\" next to archive.zip to save the archive."
+          "Click \"Click to add files\" and choose the files; add more the same way.",
+          "Take out a wrong file with \"Remove\".",
+          "Pick the \"Compression level\".",
+          "To protect the archive, tick \"Protect with a password (AES-256)\" and type it in \"Password\" and \"Repeat the password\".",
+          "Click \"Create ZIP\", then \"Download\" to save archive.zip."
         ]}
+        specs={[
+          { label: "Total size on a computer", value: `Up to ${MAX_TOTAL_SIZE_LABEL} for all files together` },
+          { label: "On phones, iPhone and iPad", value: `Up to ${MOBILE_MAX_TOTAL_SIZE_LABEL} in total` },
+          { label: "Compression", value: "Store only, or DEFLATE at level 1, 6 (the default) or 9" },
+          { label: "Encryption", value: "Optional AES-256 in the WinZip AE-2 format; file names are not encrypted" },
+          { label: "Output", value: "archive.zip, with every file at its root" }
+        ]}
+        privacy="The archive is built in a Web Worker in your browser, with JSZip, or with zip.js when a password is set; the files are not uploaded. The password is used inside that worker and not stored, so a lost password cannot be recovered. A failed archive leaves one cleaned error line in our log, naming the tool and your browser; the files themselves never travel."
         faqs={[
-          { q: "Is ZIP Creator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file types can I zip?", a: "Any file type — there are no format restrictions since files are added to the archive as-is." },
-          { q: "Do you store my uploaded files?", a: "No. The ZIP is built entirely in your browser, in a background Web Worker — files are never uploaded to a server." },
-          { q: "Can I rename the archive or set a compression level?", a: "You can choose a compression level (None/Fast/Normal/Best) before zipping. The archive is always named archive.zip — rename the downloaded file afterward if you need something else." },
-          { q: "Can I protect the ZIP with a password?", a: "Yes: tick 'Protect with a password (AES-256)' and type it twice. The contents are encrypted with AES-256 (WinZip AE-2), which 7-Zip, WinRAR, Windows 11 Explorer and The Unarchiver open; the weak old ZipCrypto is never used. File names stay visible, as in every ZIP. The password is not stored: if it is lost, the files cannot be recovered." },
-          { q: "Is there a size limit?", a: `Yes: the files you add can add up to ${MAX_TOTAL_SIZE_LABEL} total on desktop (${MOBILE_MAX_TOTAL_SIZE_LABEL} on phones and tablets) -- a measured limit to keep zipping reliable in the browser tab rather than risking a crash on a very large combined archive.` }
-        ]}
-        tips={[
-          "Add all the files you need before clicking \"Create ZIP\" — use the Remove button to fix any mistakes first.",
-          "Use \"None\" for files that are already compressed (JPG, MP4, ZIP) to save time, and \"Best\" for text or uncompressed files to shrink the archive the most.",
-          "Large batches of files may take longer to process since compression runs in your browser — watch the progress bar.",
-          "Rename the downloaded archive.zip file afterward if you need a more descriptive name.",
-          "Great for bundling multiple documents or images into a single file before emailing or uploading elsewhere."
+          { q: "Can other programs open a password-protected ZIP made here?", a: "Yes, programs that read AES-encrypted ZIP files in the WinZip AE-2 format can. In our test, bsdtar (libarchive) extracted such an archive byte for byte and refused a wrong password. Accented passwords may be read differently by some programs, so letters, digits and English punctuation are the safest." },
+          { q: "Is there a size limit?", a: `Yes: ${MAX_TOTAL_SIZE_LABEL} in total on a computer and ${MOBILE_MAX_TOTAL_SIZE_LABEL} on phones, iPhone and iPad. The archive is built in the memory of the browser tab, and these caps keep the tab from running out of it.` },
+          { q: "Does compression help for photos and videos?", a: "No, very little: JPG, MP4 and ZIP files are already compressed, so the store-only level is quicker and the archive barely grows. Text, CSV files and uncompressed images shrink much more at the stronger levels." },
+          { q: "Can I add folders?", a: "No. Files are added one by one and stored at the root of the archive under their own names. Rename files that share a name before adding them, so each one keeps its own entry." }
         ]}
       />
     </div>

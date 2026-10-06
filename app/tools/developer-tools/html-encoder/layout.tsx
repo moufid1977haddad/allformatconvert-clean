@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "HTML Encoder — Convert the Five Characters That Matter" },
-  description: "HTML Encoder converts unsafe characters — &, <, >, quote, and apostrophe — into their HTML entities, entirely in your browser.",
+  title: { absolute: "HTML Encoder — Escape & < > and Quotes as Entities" },
+  description: "Escape &, <, >, quotes and apostrophes before you put text into HTML, or decode entities back in one pass. Runs in your browser, nothing saved.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/html-encoder" },
   openGraph: {
-    title: "HTML Encoder — Convert the Five Characters That Matter",
-    description: "HTML Encoder converts unsafe characters — &, <, >, quote, and apostrophe — into their HTML entities, entirely in your browser.",
+    title: "HTML Encoder — Escape & < > and Quotes as Entities",
+    description: "Escape &, <, >, quotes and apostrophes before you put text into HTML, or decode entities back in one pass. Runs in your browser, nothing saved.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/html-encoder",
   },
 };

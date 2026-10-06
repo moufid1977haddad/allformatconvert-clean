@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Voice Recorder — Capture Audio From Your Microphone Directly" },
-  description: "Voice Recorder captures audio from your microphone directly in your browser using the MediaRecorder API — nothing is uploaded to a server.",
+  title: { absolute: "Voice Recorder — Record, Pause, Save as M4A, MP3 or WAV" },
+  description: "Record your microphone in the browser with pause and resume, then download it as recorded (M4A or WebM) or export it to MP3 at 192 kbps or to WAV.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/voice-recorder" },
   openGraph: {
-    title: "Voice Recorder — Capture Audio From Your Microphone Directly",
-    description: "Voice Recorder captures audio from your microphone directly in your browser using the MediaRecorder API — nothing is uploaded to a server.",
+    title: "Voice Recorder — Record, Pause, Save as M4A, MP3 or WAV",
+    description: "Record your microphone in the browser with pause and resume, then download it as recorded (M4A or WebM) or export it to MP3 at 192 kbps or to WAV.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/voice-recorder",
   },
 };

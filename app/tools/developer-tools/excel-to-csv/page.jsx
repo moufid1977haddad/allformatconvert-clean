@@ -164,7 +164,7 @@ export default function ExcelToCsvPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">Excel to CSV</h1>
         <p className="text-neutral-500 dark:text-neutral-400 text-center mb-2">Convert Excel files to CSV</p>
-        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports workbooks up to {maxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports workbooks up to {maxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {maxFileLabel}). The conversion runs in a background worker; the Cancel button stops it.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-600 dark:text-neutral-300">
             <label className="flex items-center gap-2 min-w-0 max-w-full">Separator
@@ -180,7 +180,7 @@ export default function ExcelToCsvPage() {
             <input ref={inputRef} type="file" accept=".xlsx,.xls,.ods" className="hidden" onChange={handleFile} />
           </div>
           {timeEstimate && !converting && !error && fileName && (
-            <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
+            <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimate from our tests on a desktop computer: {timeEstimate}</p>
           )}
           {sheetNames && sheetNames.length > 1 && (
             <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-sm rounded-lg px-4 py-3">
@@ -202,27 +202,32 @@ export default function ExcelToCsvPage() {
       </div>
       <SeoContent
         title="Excel to CSV"
-        description="Excel to CSV reads an uploaded .xlsx, .xls, or .ods file using the xlsx library and converts it to comma-separated CSV text, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files. A single-sheet workbook downloads as one .csv file, exactly as before; a workbook with multiple sheets downloads as a .zip containing one .csv per sheet, named after the real sheet name, so no sheet is ever silently dropped. The tool tells you up front how many sheets it found and their names."
+        description={"Excel to CSV turns each sheet of an .xlsx, .xls or .ods workbook into CSV. A workbook with one sheet gives one .csv file; with several sheets you get a .zip holding one .csv per sheet, named after the sheet, hidden sheets included. Cells are written as values: formulas give the result saved in the file, dates become ISO text such as 2024-01-15, and numbers with a format of their own, such as a percentage or a dollar amount, are written as Excel shows them; colors and fonts are dropped. Options set the separator, a decimal comma for European Excel and a byte order mark (UTF-8 BOM). Conversion starts as soon as you choose the file, in your browser."}
+        example={{"caption":"A one-sheet workbook with date cells and formulas, converted with \"Separator\" set to semicolon and \"Decimal comma\" ticked:","inputLabel":"Workbook","input":"Sheet Prices:\nItem | Price | Sold on | Total\nTea | 12.5 | 2024-01-15 (date cell) | =B2*2 → 25\nCoffee, ground | 1234.5 | 2024-02-15 (date cell) | =B3*2 → 2469","outputLabel":"CSV","output":"Item;Price;Sold on;Total\nTea;12,5;2024-01-15;25\nCoffee, ground;1234,5;2024-02-15;2469"}}
+        howToTitle="How to convert Excel to CSV"
         howTo={[
-          "Click the upload area and select an .xlsx, .xls, or .ods file.",
-          "Conversion starts automatically in the background — no button click needed.",
-          "If the workbook has more than one sheet, you'll see how many were detected and their names.",
-          "Click 'Download' to save the result — converted.csv for a single sheet, or converted.zip (one .csv per sheet) for multiple.",
-          "Open the CSV(s) in a spreadsheet app or text editor."
+          "Set \"Separator\" first, and tick \"Decimal comma\" or \"Add a UTF-8 BOM\" if you need them: they apply to the next file you choose.",
+          "Choose an .xlsx, .xls or .ods file in the upload area; the conversion starts at once and \"Cancel\" stops it.",
+          "If the workbook has several sheets, their names are listed while it is read.",
+          "Click \"Download\" to save converted.csv, or converted.zip with one .csv per sheet.",
         ]}
+        specs={[
+          { label: "Input", value: "XLSX, XLS or ODS workbook" },
+          { label: "Output", value: "CSV for one sheet, ZIP of CSV files for several" },
+          { label: "On a computer", value: `up to ${MAX_FILE_SIZE_LABEL} and ${MAX_ROWS.toLocaleString('en-US')} rows, all sheets together` },
+          { label: "On phones, iPhone and iPad", value: `up to ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows, all sheets together` },
+          { label: "Separators", value: "comma, semicolon, tab or pipe" },
+        ]}
+        privacy={"The workbook is opened and converted by a background worker in your browser, with the SheetJS library; it is not uploaded, and the CSV or ZIP is created in the page. Should an error happen, we get its text without the file name or quoted content, along with the tool name and the browser name and version."}
         faqs={[
-          { q: "What file formats does it support?", a: ".xlsx, .xls, and .ods (OpenDocument Spreadsheet)." },
-          { q: "Is my file uploaded to a server?", a: "No, the conversion happens entirely in your browser using the xlsx library, in a background Web Worker so the page never freezes." },
-          { q: "What happens with a workbook that has multiple sheets?", a: "Every sheet is converted — you get a .zip file containing one .csv per sheet, each named after the real sheet name. The tool shows you the sheet count and names next to the Download button." },
-          { q: "Why is there a row and file-size limit?", a: `Excel files can't be parsed incrementally the way plain text can, so converting a very large workbook risks the tab running out of memory or taking too long. Uploaded files are capped at ${maxRowsLabel} rows across all sheets combined and ${maxFileLabel}${isMobile ? ' on this device' : ' on desktop'}, measured to convert reliably.` },
-          { q: "Will formatting like colors or fonts carry over?", a: "No, CSV is plain text, so only cell values transfer — formatting, formulas' calculated results (not the formulas themselves as text), and structure like merged cells don't." },
-          { q: "Can I download the CSV as a file, or is it only shown on the page?", a: "As a file — click 'Download' once the conversion is done. There's no inline preview, since a large workbook's CSV output can be too big to safely render on the page." }
+          { q: "Do formulas come out as their results?", a: "Yes. Each formula cell is written with the result saved in the workbook, so =B2*2 gives 25 in the CSV, not the formula text. Colors, fonts and comments are dropped, but a number format such as a percentage or a currency is kept in the text." },
+          { q: "Can I make a CSV for Excel in France or Germany?", a: "Yes. Choose \"Semicolon\" in \"Separator\", tick \"Decimal comma\" so numbers read 12,5, and tick \"Add a UTF-8 BOM\" so Excel opens accents correctly. Set these before choosing the file, because the conversion starts as soon as the file is picked." },
+          { q: "Are all sheets converted?", a: "Yes, hidden sheets included. With more than one sheet you download converted.zip, holding one .csv per sheet named after it; characters a file name cannot hold, such as < > | or a double quote, become underscores, and a repeated name gets (2)." },
+          { q: "Are dates written as numbers?", a: "No. A cell formatted as a date is written as ISO 8601 text, 2024-01-15, or 2024-02-29T13:45:00 when it has a time, also for workbooks on the 1904 date system of old Mac Excel." },
+          { q: "How large can the workbook be?", a: `${MAX_FILE_SIZE_LABEL} and ${MAX_ROWS.toLocaleString('en-US')} rows across all sheets on a computer, ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows on phones, iPhone and iPad. A workbook has to be read whole before any row exists, so split a bigger one into several files first.` },
         ]}
         tips={[
-          "Multi-sheet workbooks now come back as a .zip with one .csv per sheet — check the sheet names shown on the page before downloading to confirm nothing you need is missing.",
-          "Merged cells and complex formatting won't survive the conversion — only the underlying values do.",
-          "Since it uses a proper spreadsheet-parsing library rather than naive text splitting, values containing commas or quotes are handled correctly.",
-          "For a very large workbook, split it into smaller files first if it exceeds the row or size limit."
+          "To get JSON instead, with one array of rows per sheet, use Excel to JSON.",
         ]}
       />
     </div>

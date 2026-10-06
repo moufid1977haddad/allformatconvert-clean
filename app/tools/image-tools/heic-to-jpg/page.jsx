@@ -7,6 +7,9 @@ import { loadRaster, encodeRaster } from '../../../lib/imageOutput';
 import { FileDownload } from '../../../components/FileDownload';
 import UploadPrompt from '@/app/components/UploadPrompt';
 
+import { RASTER_MAX_PIXELS } from '../../../lib/imageOutput';
+import { CANVAS_MAX_PIXELS } from '../../../lib/bigImage';
+import { PHONE_MAX_MP } from '../../../lib/reduceImage';
 export default function HeicToJpgPage() {
   const [file, setFile] = useState(null);
   const [quality, setQuality] = useState(85);
@@ -73,24 +76,29 @@ export default function HeicToJpgPage() {
       </div>
       <SeoContent
         title="HEIC to JPG"
-        description="HEIC to JPG converts an iPhone HEIC photo to standard JPG format entirely in your browser, using the open-source heic2any library — your photo is never uploaded to a server. Choose a JPEG quality level before converting to balance file size and image quality."
+        description={`HEIC to JPG converts a photo saved by an iPhone or iPad in HEIC or HEIF format into a JPG, for apps and websites that do not open HEIC. Before converting, a "Quality" slider from 10 to 100 (it starts at 85) sets the JPEG compression: higher keeps more detail, lower gives a smaller file. A browser that can open HEIC itself (Safari, and every browser on iPhone and iPad) decodes the photo at full size; one that cannot, such as Chrome, Edge or Firefox on a computer, uses the open-source heic2any library instead. One photo is converted per click, on your device.`}
+        howToTitle="How to convert HEIC to JPG"
         howTo={[
-          "Click the upload area and select a HEIC or HEIF file from your device.",
-          "Adjust the quality slider (10–100%) to set the JPEG output quality.",
-          "Click 'Convert to JPG' and wait a few seconds for the conversion to finish.",
-          "Click the download button to save your JPG file."
+          `Choose a .heic or .heif photo in the upload area; its file name appears there.`,
+          `Move the "Quality" slider if you want more detail or a smaller file.`,
+          `Click "Convert to JPG".`,
+          `Click "Download" to save the JPG; it keeps the photo's name with .jpg at the end.`
         ]}
+        specs={[
+          { label: 'Input formats', value: `HEIC, HEIF (.heic, .heif)` },
+          { label: 'Output format', value: `JPG (JPEG), quality 10 to 100` },
+          { label: 'Largest photo', value: `In Safari on a Mac, ${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels; with heic2any this page sets no pixel cap, so very large photos depend on the browser's memory` },
+          { label: 'On iPhone and iPad', value: `Photos up to ${PHONE_MAX_MP} megapixels are confirmed on a real iPhone; larger ones may need more memory than Safari gives a page` }
+        ]}
+        privacy={`The photo stays on your device. A browser that reads HEIC decodes it with its own decoder; otherwise the heic2any script is downloaded from our site when you click "Convert to JPG", and decodes it. The JPG is then encoded in the browser. If the conversion fails, a report goes to our error log: the cleaned error text, the file extension, a size range, the tool's name and your browser's name and version, never the photo or its name.`}
         faqs={[
-          { q: "Is HEIC to JPG completely free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "Can I convert multiple HEIC files at once?", a: "No, only one file can be converted at a time — there's no batch upload." },
-          { q: "Will my image quality be reduced during conversion?", a: "Some quality loss is expected since JPEG uses lossy compression — use a higher quality setting on the slider to minimize it." },
-          { q: "Do I need to install any software?", a: "No, conversion happens directly in your browser without any downloads or installations, and your photo never leaves your device." }
+          { q: "Will the JPG lose quality compared with the HEIC?", a: `Yes, a little. JPEG is a lossy format, so some fine detail is always dropped when the photo is saved. A higher "Quality" value keeps more of it and gives a bigger file; a lower value gives a smaller file with more visible blocks and blur.` },
+          { q: "Are 24- and 48-megapixel iPhone photos converted at full size?", a: `Yes. On iPhone and iPad the photo is opened by iOS itself at full resolution; above ${Math.floor(CANVAS_MAX_PIXELS / 1e5) / 10} megapixels it is decoded in strips, because Safari limits the size of one canvas.` },
+          { q: "Can I convert many HEIC photos at once?", a: `No. Each click on "Convert to JPG" handles a single photo. Image Converter accepts a whole batch of HEIC files and offers the JPGs together in a ZIP.` },
+          { q: "Does the JPG carry the iPhone's GPS position?", a: `No. The JPG is a new image made from the decoded pixels, so EXIF details such as GPS location and camera model are not copied into it.` }
         ]}
         tips={[
-          "Use a quality setting of 85% or higher if you plan to print or edit the photo further.",
-          "Lower the quality slider for smaller file sizes if you're just sharing the photo online.",
-          "Convert HEIC photos to JPG before sharing with people on devices or apps that don't support Apple's HEIC format.",
-          "Check the converted JPG immediately after downloading to confirm it looks the way you expect."
+          `If you need an exact copy without JPEG compression, use HEIC to PNG instead.`
         ]}
       />
     </div>

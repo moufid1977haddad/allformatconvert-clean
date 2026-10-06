@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video to GIF — Make an Animated GIF from a Video Online Free" },
-  description: "Video to GIF makes an animated GIF from any clip (MP4, iPhone MOV, WebM…): choose start, length, width and frame rate. Frames as PNG too.",
+  title: { absolute: "Video to GIF — Make a GIF or Extract PNG Frames From a Clip" },
+  description: "Turn a clip of up to 60 seconds into an animated GIF on our video service, or save up to 150 PNG frames in your browser, one by one or as a ZIP.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-to-gif" },
   openGraph: {
-    title: "Video to GIF — Make an Animated GIF from a Video Online Free",
-    description: "Video to GIF makes an animated GIF from any clip (MP4, iPhone MOV, WebM…): choose start, length, width and frame rate. Frames as PNG too.",
+    title: "Video to GIF — Make a GIF or Extract PNG Frames From a Clip",
+    description: "Turn a clip of up to 60 seconds into an animated GIF on our video service, or save up to 150 PNG frames in your browser, one by one or as a ZIP.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-to-gif",
   },
 };

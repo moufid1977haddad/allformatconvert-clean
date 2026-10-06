@@ -93,7 +93,7 @@ export default function Page() {
       <div className="max-w-3xl mx-auto">
         <Link href="/tools/pdf-tools" className="text-indigo-600 text-sm hover:underline mb-6 inline-block">Back to PDF Tools</Link>
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800">Translate PDF</h1>
-        <p className="text-neutral-500 text-center mb-8">Translate PDF content to any language with AI</p>
+        <p className="text-neutral-500 text-center mb-8">Translate the text of a PDF into another language</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="a PDF file" /></p>}
@@ -140,41 +140,29 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Translate"
-        description={docMode
-          ? `PDF Translate translates a whole PDF into a new PDF with the same layout, images and tables: the PDF is sent through our server to Google Cloud Translation, in any of ${docLanguages.length} languages, up to ${docMode.maxPages} pages per PDF and ${docMode.pagesPerDay} pages a day per visitor, free. A "Text only" mode also translates the text of the first 5 pages (3,000 characters) with OpenAI and shows it on the page.`
-          : "PDF Translate extracts text from the first 5 pages of your PDF in your browser using PDF.js, then sends up to the first 3,000 characters of that text to our server, which forwards it to OpenAI's API for translation. The result is plain translated text, not a new PDF — there's no reconstructed document with the original formatting, images, or layout."}
-        howTo={docMode ? [
-          "Click the upload area and select a PDF file from your device.",
-          "Keep 'Whole PDF (layout kept)' and choose the language to translate into.",
-          "Click 'Translate PDF': the PDF is uploaded and translated; click 'Download' to save the translated PDF.",
-          "Or choose 'Text only' to see the translated text of the first pages on the page."
-        ] : [
-          "Click the upload area and select a PDF file from your device.",
-          "Choose a target language from the dropdown (10 languages available).",
-          "Click 'Translate PDF' to send the extracted text for translation.",
-          "Click 'Copy Translation' to copy the result — there's no PDF download."
+        description={`PDF Translate has two modes. "Text only" reads the first ${MAX_PDF_TRANSLATE_PAGES} pages of your PDF in the browser and sends up to ${MAX_PDF_TRANSLATE_CHARS.toLocaleString('en-US')} characters of their text through our server to OpenAI's gpt-4o-mini, then shows the translation in one of ${languages.length} languages. "Whole PDF (layout kept)" is offered only when our Google Cloud Translation service is set up: the PDF becomes a new PDF with the same layout, images and tables, in any of ${docLanguages.length} languages. A scanned page gives no text in "Text only".`}
+        howToTitle="How to translate a PDF"
+        howTo={[
+          `Click or drop the PDF to translate.`,
+          `If the page shows "Whole PDF (layout kept)" and "Text only", pick one; otherwise the text mode is used.`,
+          `Choose the "Target Language" and click "Translate PDF".`,
+          `Save a translated PDF with "Download"; for text, use "Copy Translation" or "Download" to get translation.txt.`,
         ]}
+        specs={[
+          { label: 'Input format', value: `PDF` },
+          { label: 'Text only', value: `The first ${MAX_PDF_TRANSLATE_PAGES} pages, cut at ${MAX_PDF_TRANSLATE_CHARS.toLocaleString('en-US')} characters, into ${languages.length} languages; result on the page and as a .txt file` },
+          { label: 'Whole PDF (layout kept)', value: `Up to 20 pages and 20 MB per PDF, and 20 pages a day per visitor, into ${docLanguages.length} languages` },
+          { label: 'Usage limits', value: `Text only: hourly and daily limits per network shared with the site's paid tools, plus a monthly site budget. Whole PDF: its own monthly budget.` },
+        ]}
+        privacy={`In "Text only", the PDF stays in your browser and only the extracted text goes through our server to OpenAI. In "Whole PDF (layout kept)", the file is uploaded in parts to our media service, our server sends it to Google Cloud Translation, and the media service deletes the translated PDF as soon as this page has received it, or after a time limit.`}
         faqs={[
-          { q: "Is PDF Translate free to use?", a: "Yes, it's free with no signup required. Because each request costs us at the translation provider, there are daily limits per connection." },
-          ...(docMode ? [
-            { q: "How many languages does it support?", a: `Whole PDF: ${docLanguages.length} languages. Text only: 10 (English, French, Spanish, German, Arabic, Chinese, Japanese, Portuguese, Italian, Russian).` },
-            { q: "Can it translate the whole PDF and keep the layout?", a: `Yes, with "Whole PDF (layout kept)": the PDF is sent to Google Cloud Translation, which returns a new PDF in the language you choose, with the same layout, images and tables. Up to ${docMode.maxPages} pages per PDF and ${docMode.pagesPerDay} pages a day per visitor, free; split a longer PDF with Split PDF. Scanned pages are translated too, with some loss of formatting.` },
-            { q: "Is my PDF sent to a server?", a: "In 'Whole PDF' mode, yes: the PDF goes through our server to Google Cloud Translation, which returns the translated PDF; we keep neither. In 'Text only' mode, only the extracted text of the first pages is sent (to OpenAI), not the file." },
-          ] : [
-            { q: "How many languages does it support?", a: "10: English, French, Spanish, German, Arabic, Chinese, Japanese, Portuguese, Italian, and Russian." },
-            { q: "Will the formatting of my PDF be preserved?", a: "No — the output is plain translated text in a text box, not a formatted PDF. Images, layout, and structure aren't recreated." },
-            { q: "How much of my PDF actually gets translated?", a: "Only the first 5 pages are extracted, and only the first 3,000 characters of that extracted text are sent for translation — longer documents get cut off." },
-          ]),
+          { q: `How much of my PDF is translated?`, a: `${MAX_PDF_TRANSLATE_PAGES} pages at most in "Text only": the text of the first pages, cut at ${MAX_PDF_TRANSLATE_CHARS.toLocaleString('en-US')} characters. "Whole PDF (layout kept)", when the page offers it, translates up to 20 pages per PDF; split a longer file with Split PDF and translate the parts.` },
+          { q: `Does the translation keep the layout?`, a: `Yes in "Whole PDF (layout kept)": Google Cloud Translation returns a new PDF with the same layout, images and tables. No in "Text only", which gives plain text on the page that you can copy or download.` },
+          { q: `Which languages can a PDF be translated into?`, a: `${languages.length} in "Text only": English, French, Spanish, German, Arabic, Chinese, Japanese, Portuguese, Italian and Russian. ${docLanguages.length} in "Whole PDF (layout kept)", listed by name in the language menu.` },
+          { q: `Is there a daily limit?`, a: `Yes. "Text only" counts toward an hourly and daily limit per network shared with the site's other paid tools, and toward a monthly site budget. "Whole PDF (layout kept)" allows 20 pages a day per visitor and has a monthly budget of its own.` },
         ]}
-        tips={docMode ? [
-          "A PDF over the page limit can be split with Split PDF and translated in parts.",
-          "Scanned PDFs are translated too, but their formatting may be simplified: run PDF OCR first for the best result.",
-          "Review important translations carefully, since automated translation can miss nuance, especially for legal or technical content."
-        ] : [
-          "For long documents, only about the first 3,000 characters of extracted text (from up to the first 5 pages) get translated — split up longer PDFs if you need the rest covered.",
-          "Only the extracted text is sent to our server for translation, not the original PDF file — but scanned pages without a text layer won't produce any translatable text.",
-          "Review important translations carefully, since automated translation can miss nuance, especially for legal or technical content.",
-          "Copy the translation into a document editor if you want to format or save it as a file, since there's no direct download option here."
+        tips={[
+          `For a scanned PDF, run PDF OCR before using "Text only", since a scan has no text to extract.`,
         ]}
       />
     </div>

@@ -95,13 +95,15 @@ function metaOf(layout) {
 
 const words = (t) => (String(t || '').match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu) || []).length;
 const UNIT = String.raw`(?:KB|MB|GB|TB|kB|Mo|px|pixels?|MP|megapixels?|pages?|files?|images?|photos?|seconds?|secs?|minutes?|mins?|hours?|days?|characters?|chars|words?|lines?|rows?|columns?|%|fps|dpi|kbps|kb\/s|Hz|kHz|bits?|bytes?|languages?|colou?rs?|frames?|levels?|times|×|x\b)`;
-const NUM_RE = new RegExp(String.raw`(?<![\w.])(\d[\d,.  ]*\d|\d)\s?(?:-|–|to)?\s?(?:\d[\d,.]*\s?)?${UNIT}`, 'g');
+// not preceded by a letter, digit, dot or hyphen: "UTF-8 bytes" is not a size
+const NUM_RE = new RegExp(String.raw`(?<![\w.-])(\d[\d,.  ]*\d|\d)\s?(?:-|–|to)?\s?(?:\d[\d,.]*\s?)?${UNIT}`, 'g');
 const FORBIDDEN = [
   /\bunlimited\b/i, /\bno (file[- ]?size )?limits?\b/i, /\blimitless\b/i, /\b100 ?%/i, /\bfastest\b/i, /\bbest[- ]quality\b/i, /\bbest\b(?! (results?|for|when|on|with|if|to|balance|choice))/i,
   /\blightning\b/i, /\bblazing\b/i, /\bseamless(ly)?\b/i, /\bin (just )?(a few )?seconds\b/i, /\bany device\b/i, /\bindustry[- ](standard|leading)\b/i, /\btrusted by\b/i,
   /\binstall any software\b/i, /\bcompletely free with no (signup|sign-up|registration)\b/i, /\bfast, (easy|simple)\b/i, /\beasy[- ]to[- ]use\b/i, /\bhassle\b/i,
   /\bmilitary[- ]grade\b/i, /\bbank[- ](level|grade)\b/i, /\bGDPR[- ](compliant|certified)\b/i, /\bISO ?27001\b/i, /\b256-bit\b(?! AES)/i, /\bperfect(ly)?\b/i, /\bflawless(ly)?\b/i, /\bguarantee[ds]?\b/i,
 ];
+const GENERIC_SENTENCE = /^((it|everything|this|the (work|conversion|whole job|job|tool|processing))\s+)?(runs|happens|is done|works)( entirely| locally| right)? in your browser( with [\w.\- ]+)?\.?$|^(generated|decoded|converted|processed|done|made|computed|calculated) (locally )?in your browser\.?$|^(no|nothing to) (install|download)( needed| required)?\.?$/i;
 const SAYS_SERVER = /\b(our (own )?(\w+[- ])?(server|service)s?|server|ConvertAPI|OpenAI|Pangram|Google|Railway|Gotenberg|LibreOffice|uploaded|sent to)\b/i;
 const SAYS_UPLOAD = /\b(is|are|gets?) (uploaded|sent) to\b|\bon our (own )?server\b|\bour server\b/i;
 
@@ -184,6 +186,8 @@ for (const m of metas.filter((x) => pages.includes(pages.find((p) => p.slug === 
 
   // C6 forbidden phrases
   for (const t of texts) for (const re of FORBIDDEN) if (re.test(t)) fail(slug, 'C6', `forbidden phrase ${re} in «${t.slice(0, 120)}»`);
+  // generic whole sentences (P36 review): "Runs in your browser.", "Everything runs in your browser with smol-toml." ...
+  for (const t of texts) for (const sen of t.split(/(?<=[.!?])\s+/)) if (GENERIC_SENTENCE.test(sen.trim())) fail(slug, 'C6', `generic sentence «${sen.trim()}»`);
 }
 
 // C7 identical sentences between rewritten pages (whole site, so twins in other lots are caught too)

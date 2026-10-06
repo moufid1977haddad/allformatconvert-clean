@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image to GIF — Turn a Batch Online Free" },
-  description: "Image to GIF turns a batch of photos on your device into one animated GIF file, processed entirely client-side in your browser.",
+  title: { absolute: "Image to GIF — Looping GIF Slideshow That Keeps Transparency" },
+  description: "Turn a few pictures into a looping GIF slideshow in your browser. The first image sets the size, and transparent PNG areas stay transparent.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/gif-tools/image-to-gif" },
   openGraph: {
-    title: "Image to GIF — Turn a Batch Online Free",
-    description: "Image to GIF turns a batch of photos on your device into one animated GIF file, processed entirely client-side in your browser.",
+    title: "Image to GIF — Looping GIF Slideshow That Keeps Transparency",
+    description: "Turn a few pictures into a looping GIF slideshow in your browser. The first image sets the size, and transparent PNG areas stay transparent.",
     url: "https://www.onlineconvertools.com/tools/gif-tools/image-to-gif",
   },
 };

@@ -60,24 +60,30 @@ export default function SepiaFilterPage() {
       </div>
       <SeoContent
         title="Sepia Filter"
-        description="Sepia Filter applies a warm, vintage brown tone to your photo using a standard sepia color matrix, with an adjustable intensity slider, entirely in your browser. Your image is never uploaded to a server."
+        description={"Sepia Filter gives a picture the warm brown cast of early photographic prints. It uses the color matrix of the CSS sepia() filter: each new red, green and blue value is a weighted mix of the three old ones. The Intensity slider blends between the original colors (0) and full sepia (100, the default), so you can keep a hint of the original color. There is no grain, fading or vignette in this filter. Transparency is untouched. The toning runs in your browser."}
+        howToTitle={"How to apply a sepia tone"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Adjust the intensity slider to set how strong the sepia effect is.",
-          "Click 'Apply Sepia' to process the image.",
-          "Click the download button to save your sepia-toned PNG image."
+          "Click the upload box and choose the photo to tone.",
+          "Set \"Intensity\": 100 is full sepia, lower values keep part of the original color.",
+          "Click \"Apply Sepia\".",
+          "Check the preview and click \"Download\"; the toned picture keeps a JPG, PNG or WebP format and turns any other format into PNG.",
         ]}
+        specs={[
+          { label: "Matrix", value: "Red = 0.393 R + 0.769 G + 0.189 B; green = 0.349 R + 0.686 G + 0.168 B; blue = 0.272 R + 0.534 G + 0.131 B" },
+          { label: "Intensity", value: "From 0 (unchanged) to 100 (full sepia), default 100" },
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF and similar pictures the browser reads" },
+          { label: "Output format", value: "JPG back as JPG at quality 92, PNG and WebP unchanged in type, the rest as PNG" },
+          { label: "Largest photo", value: "Photos beyond 268 megapixels are refused" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The sepia matrix is applied by this page in your browser and the photo is not uploaded. The toned image stays in the tab until you download it. Error messages shown by the tool reach us as cleaned text, tagged with the tool and with the browser's name and version."}
         faqs={[
-          { q: "Is Sepia Filter completely free to use?", a: "Yes, it's 100% free with no subscriptions required." },
-          { q: "What image formats are supported?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
-          { q: "Do you store my uploaded images?", a: "No, your images are processed directly in your browser and are never uploaded to a server." },
-          { q: "Can I upload an image by pasting a URL?", a: "No, only file upload from your device is supported — there's no URL input option." }
+          { q: "What does an intensity of 50 do?", a: "50 puts each pixel halfway between its original color and full sepia. At 100, the default, the full sepia matrix is used; at 0 the picture is unchanged." },
+          { q: "Is it the same as the CSS sepia filter?", a: "Yes. It uses the matrix of the CSS sepia() function from the Filter Effects specification, so at 100 it gives the same colors as a browser's sepia(1). It adds no grain or vignette." },
+          { q: "Does the toned picture keep its transparency?", a: "Yes. Only red, green and blue change; the alpha channel is kept, so a transparent PNG or WebP keeps its see-through areas. A JPG has no transparency to keep." },
         ]}
         tips={[
-          "Use high-resolution source images since the sepia effect preserves the original resolution.",
-          "Try different intensity levels to find the balance between original color and sepia tone that suits your photo.",
-          "Sepia works especially well on portraits and landscapes for a nostalgic look.",
-          "Download a few versions at different intensities if you want to compare before picking a favorite."
+          "For an aged-photo look, add grain with Add Noise and darken the edges with Add Vignette after the sepia.",
         ]}
       />
     </div>

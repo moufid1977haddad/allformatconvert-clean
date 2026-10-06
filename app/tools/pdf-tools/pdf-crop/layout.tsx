@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Crop — Trim Each Page's Crop Box Online Free" },
-  description: "PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, entirely in your browser.",
+  title: { absolute: "Crop PDF — Trim Page Margins in Points" },
+  description: "Trim the margins of PDF pages by typing top, bottom, left and right values in points, for all pages or a page list, without uploading the file.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-crop" },
   openGraph: {
-    title: "PDF Crop — Trim Each Page's Crop Box Online Free",
-    description: "PDF Crop trims each page's crop box by the top, bottom, left, and right margins you enter, entirely in your browser.",
+    title: "Crop PDF — Trim Page Margins in Points",
+    description: "Trim the margins of PDF pages by typing top, bottom, left and right values in points, for all pages or a page list, without uploading the file.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-crop",
   },
 };

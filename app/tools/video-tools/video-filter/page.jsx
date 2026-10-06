@@ -19,25 +19,30 @@ const FILTERS = [
 
 const seo = {
   title: 'Video Filter',
-  description: 'Video Filter applies one visual effect (Grayscale, Sepia, Invert, Blur, Brightness, Contrast or Saturate) to your video on our ffmpeg server, so it works in every browser, including Safari on iPhone, and faster than the video plays. Preview the filter live on the player, then get an H.264 + AAC MP4 with the original sound, the format every phone and computer plays.',
+  description: `Video Filter applies one visual effect to a whole video: Grayscale, Sepia, Invert, Blur, Brightness, Contrast or Saturate. Each effect has a fixed strength, and the player shows it live with the same color formulas as the final file. The video is processed by ffmpeg on our video service and comes back as an MP4 with H.264 picture and AAC sound, named after your file and the effect. One run applies one effect to the full length: it cannot mix effects, change their strength or affect only part of the video.`,
+  howToTitle: 'How to apply a filter to a video',
   howTo: [
-    'Select or drop a video file (MP4, MOV, MKV, WebM, AVI and more, up to 1 GB).',
-    'Pick a filter: the player shows it live.',
-    'Click "Apply Filter" and follow the real progress.',
-    'Preview and download the filtered MP4.',
+    `Choose or drop a video; the player then shows the selected effect on it.`,
+    `Click one effect button, such as "Grayscale" or "Sepia": the player shows it at once.`,
+    `Click "Apply Filter" and follow the upload and processing percentage.`,
+    `Play the filtered MP4 and click "Download"; its name ends with the effect, such as -sepia.`,
   ],
+  specs: [
+    { label: 'Input formats', value: `MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, MPG, TS and the other video types the file picker lists` },
+    { label: 'Output', value: `MP4 (H.264 video with the effect in every frame, AAC sound at 160 kbps)` },
+    { label: 'Effect strength', value: `Fixed: Blur is a Gaussian blur of sigma 3, Brightness 150 %, Contrast 200 %, Saturate 300 %; Grayscale, Sepia and Invert are full` },
+    { label: 'Maximum file size', value: `1 GB, whatever the device` },
+    { label: 'Usage limits', value: `A set number of jobs per hour and per day for each internet connection on our video service, plus a maximum video duration; no account` },
+  ],
+  privacy: `To be filtered, the video is uploaded from your browser to our video service on Railway, in pieces and without passing through the website's server. ffmpeg applies the effect there; the source file is removed when processing ends and the filtered MP4 when this page has received it, or after a set time if it never does. The service's logs note the operation, a size range, the job status and timings, but not the file. An error shown on the page reaches us as cleaned text with its error type, the tool name, the browser and its version, the file type and a size range.`,
   faqs: [
-    { q: 'Can I combine multiple filters?', a: 'No, only one filter can be applied at a time — selecting a new one replaces the previous choice.' },
-    { q: 'Can I adjust filter intensity?', a: 'Not currently — each filter uses a fixed preset value (Blur 3 px, Brightness 150 %, Contrast 200 %, Saturate 300 %), the same as the live preview.' },
-    { q: 'Does the output have sound?', a: 'Yes — the original sound is kept; the visual filter does not change it.' },
-    { q: 'Does it work on iPhone and in Safari?', a: 'Yes. The filter is applied by our video service, not by your browser, so it works in every browser and the MP4 opens in the iPhone Photos app.' },
-    { q: 'Is my file uploaded anywhere?', a: 'Yes, to our own video service, because re-encoding a video needs a real video encoder. The original is deleted as soon as the filter is applied, and the result right after your download (or after 15 minutes if you never download it).' },
+    { q: 'Can I use two filters at once?', a: `No, one effect per run. To combine two, apply the first, download the MP4, then choose that file again and apply the second. Each run encodes the video once more, so a little detail is lost each time.` },
+    { q: 'Does the preview match the final video?', a: `Yes for colors: Grayscale, Sepia, Invert, Brightness, Contrast and Saturate use the same formulas in the preview and on our video service. No for Blur: the preview blurs the small player, while the service blurs the full-size picture, so a large video looks less blurred in the file than on screen.` },
+    { q: 'Is the sound changed?', a: `No effect is applied to it, but it is encoded again: the first audio track comes back as AAC at 160 kbps. Other audio tracks and subtitles are not kept in the filtered MP4.` },
+    { q: 'Can the filtered file be larger than the original?', a: `Yes, it can happen. When the MP4 comes out larger than your video, it is encoded again with stronger compression, up to 3 tries in all; if the last try is still larger, you get it, and the page shows by how much under "Larger by".` },
   ],
   tips: [
-    'Preview the filter on the live player (it updates instantly) before applying it.',
-    'The audio is carried through unchanged — the visual filter has no effect on sound.',
-    'Trim your video first if you only need a filtered clip from a longer video: it uploads and processes faster.',
-    'Grayscale uses the same luminance weights as image editors, so blue stays darker than green.',
+    `When you only need part of the video, cut it with Video Trimmer first: there is less to upload and less to process.`,
   ],
 };
 
@@ -47,7 +52,7 @@ export default function VideoFilterPage() {
       op="convert"
       tool="video-filter"
       title="Video Filter"
-      subtitle="Apply a filter to a video — any browser, up to 1 GB, MP4 out"
+      subtitle="Give a whole video one of seven effects, previewed live before you apply it"
       buttonLabel="Apply Filter"
       initialParams={{ filter: 'grayscale' }}
       buildParams={(p) => ({ target: 'mp4', quality: 'high', filter: p.filter })}

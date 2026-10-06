@@ -55,24 +55,31 @@ export default function FileEncryptorPage() {
       </div>
       <SeoContent
         title={"File Encryptor"}
-        description={"File Encryptor encrypts any file with a password using AES-256-GCM, through your browser's built-in Web Crypto API — the file never leaves your device. The key is derived from your password with PBKDF2-SHA-256 and 600,000 iterations (OWASP's 2023 recommendation), with a fresh random salt and IV for every file. Decryption is authenticated: a wrong password or a modified file is refused with a clear message instead of producing a corrupted file. Files encrypted with the tool's previous XOR method can still be decrypted."}
+        description={"File Encryptor protects one file with a password. Encrypt derives a key from your password with PBKDF2-SHA-256 and 600,000 iterations, adds a fresh random salt and IV, and seals the file with AES-256-GCM through the Web Crypto API of your browser; the result is saved as name.encrypted. Decrypt reverses it and gives the original name back when the file ends in .encrypted; otherwise .decrypted is added. GCM checks integrity, so a wrong password or a damaged file is refused. Files made by the older XOR version of this tool, which have no such check, can still be opened."}
+        howToTitle={"How to encrypt a file with a password"}
         howTo={[
-          "Choose Encrypt or Decrypt.",
-          "Select the file.",
-          "Enter the password.",
-          "Click the button, then download the result (the original name is restored when decrypting a .encrypted file)."
+          "Choose \"Encrypt\" or \"Decrypt\".",
+          "Choose the file: any file to encrypt, or a .encrypted file to decrypt.",
+          "Type the password in \"Password\".",
+          "Click \"Encrypt File\" or \"Decrypt File\".",
+          "Click \"Download\": you get name.encrypted, or, when decrypting, the name without .encrypted."
         ]}
+        specs={[
+          { label: "Algorithm", value: "AES-256-GCM, key from PBKDF2-SHA-256 with 600,000 iterations" },
+          { label: "Output", value: "name.encrypted, 48 bytes larger than the original" },
+          { label: "Added data", value: "A short marker, a random salt and IV, and the GCM authentication tag" },
+          { label: "Accepted files", value: "Any type" },
+          { label: "Size limit", value: "None set; the whole file is held in memory while it is processed" }
+        ]}
+        privacy={"Encryption and decryption run in your browser through the Web Crypto API. The file and the password are not uploaded, and the password is not stored: if you lose it, the file cannot be recovered. An error shown on the page may be logged for us as cleaned text with the tool and browser names, never with the file, its name or the password."}
         faqs={[
-          { q: "Is File Encryptor free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What kind of encryption does it use?", a: "AES-256 in GCM mode, the authenticated encryption standard used by browsers and messaging apps, with a key derived from your password by PBKDF2-SHA-256 (600,000 iterations)." },
-          { q: "What happens with a wrong password?", a: "Decryption is refused with a message; you never get a silently corrupted file." },
-          { q: "What happens if I forget my password?", a: "The file cannot be recovered — there is no back door." },
-          { q: "Is my file uploaded?", a: "No — encryption and decryption run entirely in your browser." }
+          { q: "Is a wrong password detected?", a: "Yes, for files made by the current AES version: decryption is refused with a message saying the password is wrong or the file was changed or cut, and no file is offered. Those files start with a marker the tool recognizes." },
+          { q: "Can I decrypt a file encrypted before 29 September 2026?", a: "Yes. A file without the AES marker is decrypted with the old XOR method, and a note warns that a wrong password cannot be detected there: if the result does not open, the password was wrong. Encrypt the file again to protect it with AES." },
+          { q: "What if I forget the password?", a: "No recovery is possible. The key exists only while the page derives it from what you type; the site never receives the password, and there is no reset or back door. Keep the password somewhere safe before you delete the original file." },
+          { q: "Does it work for large files?", a: "Yes, up to what the memory of your device holds: the tool sets no size limit, but the whole file and its encrypted copy are held in memory at the same time, so a very large file may fail on a phone." }
         ]}
         tips={[
-          "Use a long, unique password and share it through a different channel than the file.",
-          "The encrypted file is slightly larger than the original (48 bytes of salt, IV and authentication tag).",
-          "Keep the .encrypted extension so you know which files need decrypting."
+          "Send the password through a different channel than the encrypted file, for example a call or another app."
         ]}
       />
     </div>

@@ -7,6 +7,8 @@ import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { RASTER_MAX_PIXELS } from '../../../lib/imageOutput';
+import { PHONE_MAX_MP } from '../../../lib/reduceImage';
 export default function WebPtoJPGPage() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -64,24 +66,28 @@ export default function WebPtoJPGPage() {
       </div>
       <SeoContent
         title="WebP to JPG"
-        description="WebP to JPG converts a WebP image to JPG format entirely in your browser using the HTML canvas — your file is never uploaded to a server, and nothing is stored anywhere."
+        description={`WebP to JPG converts a WebP image, often saved from a website, into a JPG for apps and forms that do not accept WebP. Set "JPG quality" from 10 to 100 (92 at first) and choose the colour that replaces transparent areas, white unless you change it. An animated WebP is turned into its first frame, and a note says so as soon as you pick the file. One image per conversion; the JPG keeps the WebP's name. Decoding and encoding happen in your browser, with MozJPEG in WebAssembly for very large images on iPhone and iPad.`}
+        howToTitle="How to convert WebP to JPG"
         howTo={[
-          "Click the upload area and select a WebP file from your device.",
-          "Click 'Convert' to render it to JPG.",
-          "Preview the converted image.",
-          "Click the download button to save your JPG file."
+          `Pick the .webp image you saved; a note appears if it is animated.`,
+          `Adjust "JPG quality" and the colour next to "Transparent areas become".`,
+          `Click "Convert".`,
+          `Click "Download" for a JPG named like the WebP.`
         ]}
+        specs={[
+          { label: 'Input format', value: `WebP (.webp), still or animated (first frame), one file` },
+          { label: 'Output format', value: `JPG, quality 10 to 100` },
+          { label: 'Largest image', value: `${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels on a computer` },
+          { label: 'On iPhone and iPad', value: `Very large images are encoded by MozJPEG in memory; ${PHONE_MAX_MP} megapixels is the largest size confirmed on a real iPhone` }
+        ]}
+        privacy={`The WebP is opened by your browser and re-encoded as a JPG without leaving the device; we do not receive the image. If an error appears on screen, we log its cleaned wording with the tool's name and your browser's name and version (no file name, no image data) to find and fix the problem.`}
         faqs={[
-          { q: "Is WebP to JPG completely free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "Will my images be stored or shared after conversion?", a: "No. Conversion happens entirely in your browser — your file is never uploaded anywhere." },
-          { q: "What is the maximum file size I can convert?", a: "There's no fixed size limit — processing happens locally, so it's limited only by your device's available memory." },
-          { q: "Can I convert multiple WebP files at once?", a: "No, only one file can be converted at a time — there's no batch upload." }
+          { q: "Can I choose the JPG quality?", a: `Yes. The "JPG quality" slider goes from 10 to 100 and starts at 92. Lower values give a smaller file with more visible compression; set it before clicking "Convert", and convert again to try another value.` },
+          { q: "Can I pick the colour of a transparent background?", a: `Yes. Transparent areas are filled with the colour picked next to "Transparent areas become", white by default, because a JPG cannot store transparency. Pick black or any other colour to match where the picture will be used.` },
+          { q: "Does the JPG keep an animated WebP's motion?", a: `No. Only the first frame is kept, since JPG holds one still picture. The page warns you when the WebP is animated; to keep the motion, convert it to a GIF instead.` }
         ]}
         tips={[
-          "Converting can't add detail beyond what's in the original WebP file, so start with the highest-quality source you have.",
-          "There's no quality slider here — the browser's default JPEG encoding is used.",
-          "JPG doesn't support transparency, so any transparent areas in your WebP become white.",
-          "Convert one file at a time and download each result before starting the next."
+          `If you need to keep the transparency, use WebP to PNG rather than JPG.`
         ]}
       />
     </div>

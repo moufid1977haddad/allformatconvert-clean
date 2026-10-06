@@ -68,22 +68,36 @@ export default function TextComparatorPage() {
       </div>
       <SeoContent
         title={"Text Comparator"}
-        description={"Text Comparator compares two texts line by line and shows them side by side, entirely in your browser. It uses the Myers diff algorithm (the one git and diffchecker use), so an added or deleted line is shown as just that line — the lines after it are still matched with their counterparts instead of all being marked as different. Changed lines are paired across the two columns, with the words that differ highlighted inside them (red removed, green added); case and spaces can be ignored; Windows and Unix line endings compare as equal."}
+        description={"Text Comparator puts two versions of a text side by side and marks what changed. Lines are matched with the Myers diff algorithm of the jsdiff library; inside a changed line, the words that differ are highlighted, red in the first text and green in the second. An inserted or deleted line is shown on its own row and the rest stays aligned. It suits drafts, contract clauses and edited lists. It compares pasted text, not files, gives no line numbers, and runs in your browser."}
+        example={{
+          caption: "The ≠ sign stands for a red-tinted row and brackets for the words highlighted in red (left) and green (right); the page shows 2 difference(s) found.",
+          inputLabel: "Text 1 / Text 2",
+          input: "Text 1:\nDear Anna,\nThe meeting is on Monday.\nPlease bring the report.\nThanks,\n\nText 2:\nDear Anna,\nThe meeting is on Tuesday.\nPlease bring the report.\nSee you there.\nThanks,",
+          outputLabel: "Rows shown",
+          output: "  Dear Anna,                  | Dear Anna,\n≠ The meeting is on [Monday]. | The meeting is on [Tuesday].\n  Please bring the report.    | Please bring the report.\n≠ empty                       | See you there.\n  Thanks,                     | Thanks,",
+        }}
+        howToTitle={"How to compare two texts"}
         howTo={[
-          "Paste the first text on the left and the second on the right.",
-          "Click 'Compare'.",
-          "Matching lines are grey, differing lines are highlighted, with the number of differences above.",
-          "Edit and compare again as needed."
+          "Put the older wording in \"Text 1\" and the newer one in \"Text 2\".",
+          "Tick \"Ignore case\" when one version was retyped with other capitals, or \"Ignore spaces\" when only the spacing changed.",
+          "Click \"Compare\"; the button works once both boxes hold text.",
+          "Read the number of differences, then the rows: dark grey rows match, red-tinted rows differ, with changed words marked."
         ]}
+        specs={[
+          { label: "Input", value: "Two pasted texts; Windows, Mac and Unix line breaks compare as equal" },
+          { label: "Ignore spaces", value: "Ignores spaces at both ends of a line and the number of spaces between words; a b and ab still differ" },
+          { label: "Ignore case", value: "Lines compared in lower case; each side is still shown as written" },
+          { label: "Result", value: "Rows on screen only, with no copy, download or line numbers" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Both texts are compared in this tab by the jsdiff library, which the page fetches from this site the first time you click Compare. The texts themselves are never transmitted, and nothing is kept once you leave the page. This page offers no copy or download of the comparison, so it exists only on your screen."}
         faqs={[
-          { q: "Is Text Comparator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What if a line was inserted in the middle?", a: "Only that line is shown as a difference; the rest of the text stays aligned." },
-          { q: "Does it compare words within a line?", a: "Yes — lines are matched first, then inside a changed line the words that differ are highlighted: red in the first text, green in the second. Tick 'Ignore case' or 'Ignore spaces' to skip those differences." },
-          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
+          { q: "Does one inserted line make every following line different?", a: "No. Only the inserted line is marked, opposite an empty cell, and the lines after it stay paired with their counterparts. Each changed or unmatched row adds one to the difference count shown above the rows." },
+          { q: "Can it ignore extra spaces?", a: "Yes, partly. \"Ignore spaces\" ignores spaces at the start and end of each line and treats several spaces as one, but a space present on one side only still counts: a b and ab differ. Inside changed lines, the word highlighting then skips spacing changes." },
+          { q: "Can I compare two Word or PDF files?", a: "No. Paste the text of each version instead. To check that two files of any type are byte-for-byte identical, use File Comparator; to compare code with line numbers, use Diff Viewer." }
         ]}
         tips={[
-          "For code, the Diff Viewer shows line numbers and can ignore whitespace.",
-          "Trailing spaces count as a difference; remove them first with the Whitespace Remover if they don't matter."
+          "Text pasted from a PDF often breaks lines differently in each version; join each version into one line with Whitespace Remover first, then compare the words."
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Whitespace Remover — Remove Extra Spaces & Blank Lines Online Free" },
-  description: "Remove extra spaces, tabs and blank lines from text without merging your lines, or join it into one line — entirely in your browser.",
+  title: { absolute: "Whitespace Remover — Extra Spaces, Tabs and Blank Lines" },
+  description: "Collapse repeated spaces and tabs, trim each line and shorten runs of blank lines without merging your lines, or join everything into one line.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/whitespace-remover" },
   openGraph: {
-    title: "Whitespace Remover — Remove Extra Spaces & Blank Lines Online Free",
-    description: "Remove extra spaces, tabs and blank lines from text without merging your lines, or join it into one line — entirely in your browser.",
+    title: "Whitespace Remover — Extra Spaces, Tabs and Blank Lines",
+    description: "Collapse repeated spaces and tabs, trim each line and shorten runs of blank lines without merging your lines, or join everything into one line.",
     url: "https://www.onlineconvertools.com/tools/text-tools/whitespace-remover",
   },
 };

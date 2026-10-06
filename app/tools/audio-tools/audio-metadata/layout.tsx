@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Audio Metadata — Instantly Reads and Displays an Audio" },
-  description: "Audio Metadata shows an audio file's codec, bitrate, sample rate, channels, bit depth, tags and cover art — read in your browser, nothing uploaded, any file size.",
+  title: { absolute: "Audio Metadata Viewer — Codec, Bitrate, Tags, Cover Art" },
+  description: "See an audio file's codec, bitrate, sample rate, bit depth, tags, chapters and cover picture, read by ffprobe in your browser, and copy them as JSON.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-metadata" },
   openGraph: {
-    title: "Audio Metadata — Instantly Reads and Displays an Audio",
-    description: "Audio Metadata shows an audio file's codec, bitrate, sample rate, channels, bit depth, tags and cover art — read in your browser, nothing uploaded, any file size.",
+    title: "Audio Metadata Viewer — Codec, Bitrate, Tags, Cover Art",
+    description: "See an audio file's codec, bitrate, sample rate, bit depth, tags, chapters and cover picture, read by ffprobe in your browser, and copy them as JSON.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-metadata",
   },
 };

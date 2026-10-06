@@ -31,23 +31,37 @@ export default function TypescriptToJsPage() {
       </div>
       <SeoContent
         title={"TypeScript to JavaScript"}
-        description={"TypeScript to JS removes TypeScript syntax and keeps your JavaScript, entirely in your browser, using Sucrase's TypeScript transform (the same type-stripping approach as the TypeScript compiler and Babel). It parses the code, so type annotations, interfaces, type aliases, generics, access modifiers, non-null assertions and satisfies/as casts are removed without touching object literals, ternaries or arrow functions; enums become plain JavaScript objects. Modern JavaScript syntax is kept as is. Code that doesn't parse is reported with the error position."}
+        description={"TypeScript to JavaScript strips TypeScript syntax with Sucrase's parser and returns the JavaScript, in your browser. Type annotations, interfaces, type aliases, generics, access modifiers, non-null assertions, as and satisfies casts and import type lines are removed; enums become JavaScript objects filled by a small function; constructor parameter properties become this assignments. Modern syntax such as optional chaining is kept, not downgraded, and the code is not type-checked. Two limits: a namespace is deleted together with any values inside it, and JSX is only recognized when a component returns it after the return keyword."}
+        example={{
+          caption: "An interface, a typed function and an as const cast.",
+          inputLabel: "TypeScript Input",
+          input: "interface User { id: number; name?: string }\n\nexport function greet(u: User): string {\n  return `Hi ${u.name ?? \"guest\"}`;\n}\n\nconst ids = [1, 2] as const;",
+          outputLabel: "JavaScript Output",
+          output: "\n\nexport function greet(u) {\n  return `Hi ${u.name ?? \"guest\"}`;\n}\n\nconst ids = [1, 2] ;",
+        }}
+        howToTitle={"How to convert TypeScript to JavaScript"}
         howTo={[
-          "Paste your TypeScript into the input box.",
-          "Click 'Convert'.",
-          "Review the JavaScript output.",
-          "Click 'Copy' to copy it."
+          "Paste the content of a .ts file into \"TypeScript Input\".",
+          "Click \"Convert\".",
+          "Read \"JavaScript Output\": it holds the code, or a line starting with Error: and the line:column of the problem.",
+          "Click \"Copy\", or \"Download\" to save it as \"script.js\".",
         ]}
+        specs={[
+          { label: "Input", value: "TypeScript source pasted as text; JSX only when a return is followed by a tag" },
+          { label: "Output", value: "JavaScript at the same syntax level, saved as script.js" },
+          { label: "Removed", value: "Types, interfaces, type aliases, generics, modifiers, non-null assertions, as, satisfies, import type and unused imports" },
+          { label: "Not supported", value: "Namespaces (removed with their contents), type checking, conversion to older JavaScript" },
+        ]}
+        privacyTitle={"Where your code is processed"}
+        privacy={"Sucrase runs inside your browser and is downloaded only when you first click \"Convert\"; your TypeScript is not sent anywhere. Should the output show an error, the wording of that error, with quoted text, long numbers and addresses removed, is reported to our error log with the tool name and your browser's name and version, so we can see what failed."}
         faqs={[
-          { q: "Is TypeScript to JavaScript free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it type-check my code?", a: "No — like Babel and esbuild, it removes types without checking them; use tsc for type errors." },
-          { q: "What happens to enums and namespaces?", a: "Enums are converted to the equivalent JavaScript object; everything else that only exists for the type system is removed." },
-          { q: "Does it support TSX?", a: "Yes — JSX in the file is kept as JSX." },
-          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; the engine is downloaded once when you first click." }
+          { q: "Does it check my types?", a: "No. Sucrase only removes types and never compares them, so code with type errors converts without a message. Run tsc --noEmit in your project when you need to see type errors." },
+          { q: "Does it support TSX?", a: "Yes, but only when JSX is enabled, that is when the code contains a tag and the return keyword followed by one, as in return (<div>…). A component that returns JSX straight after =>, with no return, fails with an Unexpected token error." },
+          { q: "Are enums kept?", a: "Yes. Each enum becomes a variable filled by a small function, so Color.Red and reverse lookups such as Color[0] still work at run time. Const enums are converted the same way." },
+          { q: "Are namespaces converted?", a: "No. A namespace is removed together with everything inside it, values included, and no warning is shown. Move its functions and constants out of the namespace before converting, or compile that file with tsc." },
         ]}
         tips={[
-          "The output keeps your formatting and comments, so it stays readable.",
-          "import type statements disappear, since they only exist for the type checker."
+          "Unused imports are dropped as well, but side-effect imports such as import of a stylesheet stay in the output.",
         ]}
       />
     </div>

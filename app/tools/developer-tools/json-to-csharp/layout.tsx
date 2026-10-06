@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JSON to C# Class — Generate a Single 'root' Class Online" },
-  description: "JSON to C# Class generates a single 'Root' class with one property per top-level JSON key, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "JSON to C# Class Generator — System.Text.Json Ready" },
+  description: "Make C# classes from JSON: PascalCase properties, [JsonPropertyName] attributes, long, double and nullable types, built by quicktype in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-csharp" },
   openGraph: {
-    title: "JSON to C# Class — Generate a Single 'root' Class Online",
-    description: "JSON to C# Class generates a single 'Root' class with one property per top-level JSON key, entirely in your browser — nothing is uploaded to a server.",
+    title: "JSON to C# Class Generator — System.Text.Json Ready",
+    description: "Make C# classes from JSON: PascalCase properties, [JsonPropertyName] attributes, long, double and nullable types, built by quicktype in your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-csharp",
   },
 };

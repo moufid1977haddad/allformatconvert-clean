@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "JSON to TypeScript — Generate a Single Root Interface Online" },
-  description: "JSON to TypeScript generates a single Root interface with one field per top-level JSON key, entirely in your browser — nothing is uploaded to a server.",
+  title: { absolute: "JSON to TypeScript Interface Generator — Optional Fields" },
+  description: "Paste JSON and get TypeScript interfaces: one per nested object, ? for keys some items lack, | null for null values, written by quicktype on your device.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/json-to-typescript" },
   openGraph: {
-    title: "JSON to TypeScript — Generate a Single Root Interface Online",
-    description: "JSON to TypeScript generates a single Root interface with one field per top-level JSON key, entirely in your browser — nothing is uploaded to a server.",
+    title: "JSON to TypeScript Interface Generator — Optional Fields",
+    description: "Paste JSON and get TypeScript interfaces: one per nested object, ? for keys some items lack, | null for null values, written by quicktype on your device.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/json-to-typescript",
   },
 };

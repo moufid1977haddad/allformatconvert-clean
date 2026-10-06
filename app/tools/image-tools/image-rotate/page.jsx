@@ -53,7 +53,7 @@ export default function ImageRotatePage() {
               <input id="rot-angle" type="number" min="-360" max="360" step="0.5" value={angle} onChange={e => { const v = Number(e.target.value); if (Number.isFinite(v)) setAngle(((v % 360) + 360) % 360); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2" /></label>
             <label className="block"><span className="block text-neutral-500 mb-1">Background (any angle other than 90° steps)</span>
               <span className="flex gap-2 items-center">
-                <select id="rot-bg" value={bg} onChange={e => setBg(e.target.value)} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg p-2"><option value="transparent">Transparent (PNG)</option><option value="color">Colour (fills the corners and any transparency; keeps the format)</option></select>
+                <select id="rot-bg" value={bg} onChange={e => setBg(e.target.value)} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg p-2"><option value="transparent">Transparent (PNG)</option><option value="color">Colour (fills the corners and any transparency; JPG, PNG and WebP keep their format)</option></select>
                 {bg === 'color' && <input id="rot-bg-color" type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} aria-label="Corner colour" />}
               </span></label>
           </div>
@@ -65,24 +65,31 @@ export default function ImageRotatePage() {
       </div>
       <SeoContent
         title="Image Rotate"
-        description="Image Rotate turns your image by a preset (90°, 180°, 270°) or custom angle, entirely in your browser using the canvas element — your image is never uploaded to a server."
+        description={"Image Rotate turns a picture clockwise. The 90, 180 and 270 degree presets move the pixels exactly, with no resampling, and keep the format of a JPG, PNG or WebP. Any other angle, set with the slider or typed to the half degree, makes the canvas larger so the whole picture fits, and fills the new corners either with transparency (saved as PNG) or with a color you pick, which keeps a JPG, PNG or WebP in its format. Those angles are resampled bilinearly, which softens the picture slightly. Every format other than JPG, PNG and WebP is saved as PNG. The rotation runs in your browser."}
+        howToTitle={"How to rotate an image"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Pick a preset angle (90°, 180°, 270°), drag the slider, or type an exact angle; for a tilted image, choose a transparent or coloured background.",
-          "Click 'Rotate' to process the image.",
-          "Click the download button to save your rotated PNG image."
+          "Click the upload box and choose the picture to turn.",
+          "Click a preset (90, 180 or 270 degrees), move \"Custom angle\", or type the value in \"Angle (degrees, clockwise)\".",
+          "For an angle that is not a quarter turn, set \"Background\" to transparent or to a colour.",
+          "Click \"Rotate\", then click \"Download\".",
         ]}
+        specs={[
+          { label: "Angles", value: "Presets 90, 180 and 270 degrees; slider 0 to 360; typed −360 to 360 in steps of 0.5; always clockwise" },
+          { label: "Corners (other angles)", value: "Transparent, saved as PNG, or a color that also fills existing transparency; JPG, PNG and WebP then keep their format" },
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF, or other pictures the browser handles" },
+          { label: "Output format", value: "Quarter turns: JPG (quality 92), PNG or WebP as the original; other angles: PNG, or the JPG, PNG or WebP format with colored corners; other formats always PNG" },
+          { label: "Size limit", value: "Pictures of up to 268 megapixels" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The turn is computed by this page on your own device, and the picture is not uploaded. The rotated copy remains in the tab until you download it. For a displayed error, we get the message once cleaned, which tool raised it and which browser and version you use; we do not get the picture."}
         faqs={[
-          { q: "Is Image Rotate really free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "What image formats does Image Rotate support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. A rotation by 90, 180 or 270 degrees keeps your image's format (JPG stays JPG). For any other angle, choose transparent corners (a PNG) or a background colour, which keeps the format (it also fills any transparency the image had)." },
-          { q: "Will rotating my image reduce its quality?", a: "No, the pixels are redrawn at the same resolution with no compression applied." },
-          { q: "Can I rotate multiple images at once?", a: "No, the tool processes one image at a time — there's no batch upload." }
+          { q: "Does rotating by 90 degrees resample the picture?", a: "No. Quarter turns move the pixels exactly. Any other angle is resampled bilinearly on a larger canvas, which softens the picture slightly. The 90, 180 and 270 presets always take this exact path." },
+          { q: "Does the image get bigger at other angles?", a: "Yes. For any angle other than a quarter turn, the canvas grows so the whole tilted picture fits, and the four new corners are filled with transparency or the color you chose. Trim them afterwards with Image Cropper." },
+          { q: "Does it turn clockwise?", a: "Yes. A typed negative angle turns the other way: −90 gives the same result as 270. The angle box accepts −360 to 360 in steps of 0.5 degree." },
+          { q: "Can I straighten a tilted horizon?", a: "Yes. Type the small angle needed, such as 2, or 358 for a slight turn the other way, choose a background, click \"Rotate\", then trim the corners with Image Cropper." },
         ]}
         tips={[
-          "Preview the rotated result before downloading to confirm the angle is what you wanted.",
-          "For a quick landscape-to-portrait swap, use the 90° or 270° preset rather than the custom slider.",
-          "Keep your original file as a backup before rotating, in case you want to start over.",
-          "Use the custom-angle slider for fine adjustments beyond the standard 90° increments."
+          "To mirror a picture instead of turning it, use Image Flip.",
         ]}
       />
     </div>

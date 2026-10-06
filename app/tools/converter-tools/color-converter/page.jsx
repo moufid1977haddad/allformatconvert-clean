@@ -178,26 +178,39 @@ export default function ColorConverterPage() {
       </div>
       <SeoContent
         title="Color Converter"
-        description="Color Converter converts between HEX, RGB, HSL, HSV (HSB) and CMYK color values live, entirely in your browser. Edit the color using the picker, the HEX field or any of the RGB, HSL, HSV or CMYK fields — any of them updates all the others instantly, and each format has its own one-click copy button."
+        description={`Color Converter shows one color in five notations at once: HEX (3, 4, 6 or 8 digits), RGB, HSL, HSV/HSB and CMYK. Edit any of them, or use the color picker and the opacity slider, and the others follow as you type. Each notation has its own Copy button, and the page grades the color's WCAG 2 contrast as text on white and on black, transparency included. Color names such as rebeccapurple are not read, and CMYK comes from the plain formula, not from a printer profile. The page derives all five notations from one RGB value, so a HEX code typed with transparency keeps its alpha in rgba() and hsla() as well.`}
+        example={{
+          caption: `The HEX code #3b82f6 typed in the "HEX" field, at full opacity, and what the page shows for it (the page's own conversion code, run in Node on October 6, 2026).`,
+          inputLabel: 'You type',
+          input: 'HEX: #3b82f6\nOpacity (alpha): 100 %',
+          outputLabel: 'The page shows',
+          output: 'rgb(59, 130, 246)\nhsl(217, 91%, 60%)\nhsv(217, 76%, 96%)\ncmyk(76%, 47%, 0%, 4%)\nText on white: 3.67:1 — AA large text only\nText on black: 5.70:1 — AA',
+        }}
+        howToTitle="How to convert a color between HEX, RGB and CMYK"
         howTo={[
-          "Use the color picker, type a HEX code, or enter RGB (0–255), HSL, HSV (H: 0–360, other values 0–100%) or CMYK (0–100%) values — any of these update the others automatically.",
-          "Watch the color preview swatch update live as you adjust any field.",
-          "Click \"Copy\" next to a format, or \"Copy HEX\", to copy that format to your clipboard.",
-          "If a HEX code is not valid, the page says so and keeps showing the last valid color."
+          `Type a code in the "HEX" field, with or without #, or choose a color with the picker next to it.`,
+          `Or change any number under "RGB", "HSL", "HSV / HSB" or "CMYK": every other field updates at once.`,
+          `Move the opacity slider to add transparency; the HEX, rgba() and hsla() values then include it.`,
+          `Click "Copy" next to a notation, or "Copy HEX", to put that value on your clipboard.`,
         ]}
+        specs={[
+          { label: 'Input', value: 'HEX with 3, 4, 6 or 8 digits (the 4th and 8th digits set transparency), RGB 0–255, HSL and HSV with H 0–360 and the rest 0–100, CMYK 0–100, the color picker, opacity 0–100' },
+          { label: 'Output', value: 'Text to copy: #rrggbb or #rrggbbaa, rgb() or rgba(), hsl() or hsla(), hsv(), cmyk()' },
+          { label: 'Rounding', value: 'HSL, HSV and CMYK are shown as whole numbers, and decimals typed in a number field are cut off' },
+          { label: 'Transparency', value: 'Carried by HEX, rgba() and hsla(); the hsv() and cmyk() lines stay opaque' },
+          { label: 'Contrast', value: 'WCAG 2 ratio over white and over black, cut to two decimals: 7:1 AAA, 4.5:1 AA, 3:1 AA for large text only' },
+        ]}
+        privacyTitle="Where your colors are processed"
+        privacy="Each HEX, RGB, HSL, HSV and CMYK value and both contrast grades are worked out in your browser, and no color you type or pick leaves it. The Copy buttons write to your own clipboard. If the browser refuses that copy, or the page itself crashes, our error watch sends the cleaned error message, the tool's name and your browser's name and major version, never your color."
         faqs={[
-          { q: "What color formats does Color Converter support?", a: "HEX (3, 4, 6 or 8 digits — the 4th and 8th carry transparency), RGB, HSL, HSV/HSB and CMYK are all directly editable, and each has its own copy button." },
-          { q: "Is Color Converter free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "Is the CMYK value ready for print?", a: "It is the standard formula (K = 1 − max(R, G, B)), the same as most online converters. Printers convert with a color profile for their ink and paper, so check a proof for brand colors." },
-          { q: "Does it support RGBA, HSLA or named colors?", a: "RGBA and HSLA yes: set the opacity slider, or type an 8-digit HEX such as #3b82f680, and the rgba(), hsla() and HEX values carry the transparency. Named colors (like rebeccapurple) are not accepted." },
-          { q: "Does it check contrast?", a: "Yes: it shows the WCAG 2 contrast ratio of the colour as text on white and on black, with the AA / AAA grade (4.5:1 for body text, 3:1 for large text, 7:1 for AAA)." },
-          { q: "Is my data private?", a: "Yes, all color math happens locally in your browser — what you enter is never sent to a server." }
+          { q: 'Can I convert HEX to RGB and back?', a: `Yes. A code typed in the "HEX" field fills the R, G and B boxes (0 to 255) at once, and editing those boxes rewrites the HEX code. Short codes such as #fff are expanded, and a code that is not HEX is reported while the other fields keep the last valid color.` },
+          { q: 'Is the CMYK value ready for print?', a: 'No. It is the simple formula K = 1 − max(R, G, B), with no ink or paper profile behind it. A print shop converts with the profile of its press, so ask for a proof, or for its own CMYK values, before printing brand colors.' },
+          { q: 'Does it handle RGBA, HSLA and 8-digit HEX?', a: `Yes. Set "Opacity (alpha)" or type a code such as #3b82f680, and the HEX, rgba() and hsla() values carry the alpha. The contrast grade is then measured on the color as it looks over each background. The hsv() and cmyk() lines have no alpha.` },
+          { q: 'Are color names like rebeccapurple accepted?', a: `No. Only HEX codes and the number fields are read. A name typed in the "HEX" field is reported as not a HEX color, so look up its code first; rebeccapurple, for instance, is #663399.` },
         ]}
         tips={[
-          "Use the color picker swatch for quick visual selection instead of typing values manually.",
-          "Edit HSL or HSV directly if you're fine-tuning lightness or saturation — it's often more intuitive than guessing RGB values.",
-          "HSV is the model most design tools use in their color pickers (Photoshop calls it HSB).",
-          "Each format has its own copy button, so you can grab exactly the syntax your code needs."
+          `For lighter or darker shades of the same hue, change only "L%" under "HSL" and watch the contrast grade.`,
+          `To find a text color that passes AA on a white page, lower "L%" until "Text on white" shows AA.`,
         ]}
       />
     </div>

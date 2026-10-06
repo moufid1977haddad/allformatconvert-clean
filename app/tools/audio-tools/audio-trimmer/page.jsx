@@ -181,7 +181,7 @@ export default function AudioTrimmerPage() {
                 <label className="block text-sm"><span className="block text-neutral-500 mb-1">Fade out (seconds)</span>
                   <input id="at-fade-out" type="number" min="0" max="30" step="0.1" value={fadeOut} onChange={e => { setFadeOut(Math.max(0, tenth(Number(e.target.value) || 0))); setResult(null); }} className={num} /></label>
               </div>
-              {(fadeIn > 0 || fadeOut > 0) && <p className="text-xs text-neutral-500">With a fade, the audio is re-encoded (same format at a high setting; WAV if this format cannot be written here). Without one, it is copied exactly.</p>}
+              {(fadeIn > 0 || fadeOut > 0) && <p className="text-xs text-neutral-500">With a fade, MP3, OGG, M4A and AAC are re-encoded at a high setting, WAV, AIFF and FLAC losslessly, other formats as WAV. Without one, it is copied exactly.</p>}
             </>
           )}
           <button onClick={trim} disabled={!file || loading || !(duration > 0)} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">
@@ -191,7 +191,7 @@ export default function AudioTrimmerPage() {
           {result && (
             <div className="space-y-2">
               <PlayablePreview src={result.url} name={result.name} />
-              {result.changedFormat && <p className="text-xs text-amber-700">Saved as WAV: this format cannot be re-encoded with fades in the browser.</p>}
+              {result.changedFormat && <p className="text-xs text-amber-700">Saved as WAV: with a fade, this tool keeps only MP3, OGG, M4A, AAC, WAV, AIFF and FLAC in their own format.</p>}
               <FileDownload href={result.url} name={result.name} />
             </div>
           )}
@@ -199,25 +199,30 @@ export default function AudioTrimmerPage() {
       </div>
       <SeoContent
         title="Audio Trimmer"
-        description="Audio Trimmer cuts a section out of an audio file to a tenth of a second, with optional fade in and fade out, entirely in your browser with ffmpeg.wasm — nothing is uploaded to a server. Type the start and end, drag the sliders, or take them from the player's position."
+        description={`Audio Trimmer keeps one section of an audio file, from a start to an end set to a tenth of a second, and drops the rest; it cannot remove a passage from the middle. Without a fade, compressed audio is copied without re-encoding and keeps its format; WAV, AIFF and 16-bit FLAC are cut to the exact sample in their own format. A fade-in or fade-out re-encodes the audio: MP3, OGG (Vorbis), M4A and AAC at a high setting, WAV, AIFF and FLAC losslessly, and every other format as WAV; an Apple Lossless .m4a then becomes AAC, and Opus in an .ogg file becomes Vorbis. The cut is made by ffmpeg.wasm on your device.`}
+        howToTitle="How to trim an audio file"
         howTo={[
-          "Click the upload area and select an audio file.",
-          "Set the start and end: type them (to 0.1 s), drag the sliders, or play the file and click \"Set to the player's position\".",
-          "Optionally add a fade in and a fade out, in seconds.",
-          "Click \"Trim Audio\", then preview and download the result."
+          `Pick or drop the audio file; "Kept" then shows how long the section will be.`,
+          `Set "Start" and "End" by typing seconds, moving the sliders, or playing and clicking "Set to the player's position".`,
+          `If you want, enter a "Fade in (seconds)" and a "Fade out (seconds)".`,
+          `Click "Trim Audio", listen, then click "Download" to save trimmed_ followed by your file name.`,
         ]}
+        specs={[
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Output format`, value: `The source's format; with a fade, MP3, WAV, FLAC, OGG, M4A, AAC and AIFF keep theirs and other formats become WAV` },
+          { label: `Precision`, value: `Times to a tenth of a second; exact sample for WAV, AIFF, 16-bit FLAC and faded files; nearest audio frame for other copied files` },
+          { label: `Fades`, value: `In and out, each in tenths of a second; together no longer than the part kept` },
+        ]}
+        privacy={`Trimming happens on your device: ffmpeg.wasm, downloaded from unpkg.com the first time, cuts the file inside the browser tab, and the audio is not sent to any server. If a trim fails, the cleaned error message, your file's extension and size range, and your browser's name and version reach our error log.`}
         faqs={[
-          { q: "Is Audio Trimmer free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What audio formats can I trim?", a: "Any format ffmpeg.wasm can decode for input." },
-          { q: "How precise is the cut?", a: "Start and end are set to a tenth of a second. WAV, AIFF and 16-bit FLAC, and any file with a fade, are cut to the exact sample. Other compressed formats without a fade are copied without re-encoding, so the cut lands on the nearest audio frame (a few hundredths of a second for MP3)." },
-          { q: "Does it change the format?", a: "No: without a fade you get exactly your source's format and quality (WAV, AIFF and 16-bit FLAC are cut to the sample in their own format; other formats are copied without re-encoding). With a fade the audio must be re-encoded; it stays in the same format (MP3, WAV, FLAC, OGG, M4A, AAC, AIFF) at a high setting, and other formats are saved as WAV, which the page tells you." },
-          { q: "Is my file uploaded anywhere?", a: "No. Everything happens locally via ffmpeg.wasm — your file is never uploaded to a server." }
+          { q: `Can I remove a part from the middle of a song?`, a: `No. The trimmer keeps one continuous section, from "Start" to "End". To drop a middle passage, split the file at both ends with Audio Splitter and join the two outer parts with Audio Merger.` },
+          { q: `Will trimming reduce quality?`, a: `No, without fades: compressed files are copied as they are, and WAV, AIFF and 16-bit FLAC are rewritten sample for sample. A fade needs a new encode; MP3, OGG, M4A and AAC are then written at a high setting and lose a little, and an Apple Lossless .m4a is saved as AAC.` },
+          { q: `Is the cut exact to the millisecond?`, a: `No, the times are set to the tenth of a second. From there, WAV, AIFF, 16-bit FLAC and any file with a fade are cut to the exact sample, while a copied MP3 or other compressed file starts on the nearest audio frame: 0.3 to 39.5 ms late in our test of 27/09/2026.` },
+          { q: `Can I make an iPhone ringtone with it?`, a: `Yes, in two steps: keep at most 40 seconds here, then convert the result to M4R with Audio Converter. A short fade-out avoids an abrupt stop when the ringtone loops.` },
         ]}
         tips={[
-          "Play the file, pause where you want to cut, and click \"Set to the player's position\" for the start or end.",
-          "A short fade (0.5–2 s) avoids a click at the edges of the cut, useful for ringtones.",
-          "Without fades nothing is re-encoded, so the quality is exactly the source's.",
-          "The first trim after loading the page takes longer since the ffmpeg.wasm engine needs to download."
+          `Play the file, pause where the section should begin, and click "Set to the player's position" under Start.`,
+          `On a format your browser cannot play, such as WMA, type the start and end: there is no player, but trimming works the same.`,
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Color Picker — Let You Pick a Color Online Free" },
-  description: "Color Picker lets you pick a color and shows the matching HEX and RGB values, entirely client-side in your browser.",
+  title: { absolute: "Color Picker — HEX to RGB with Your Browser’s Picker" },
+  description: "Pick a color with your browser’s own color picker or type a 6-digit HEX code, then copy the HEX value or the RGB value written as rgb(r,g,b).",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/color-picker" },
   openGraph: {
-    title: "Color Picker — Let You Pick a Color Online Free",
-    description: "Color Picker lets you pick a color and shows the matching HEX and RGB values, entirely client-side in your browser.",
+    title: "Color Picker — HEX to RGB with Your Browser’s Picker",
+    description: "Pick a color with your browser’s own color picker or type a 6-digit HEX code, then copy the HEX value or the RGB value written as rgb(r,g,b).",
     url: "https://www.onlineconvertools.com/tools/developer-tools/color-picker",
   },
 };

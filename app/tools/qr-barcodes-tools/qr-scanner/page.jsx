@@ -156,7 +156,7 @@ export default function QrScannerPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">QR Code Scanner</h1>
-        <p className="text-neutral-500 text-center mb-8">Scan QR codes with your camera or from an image</p>
+        <p className="text-neutral-500 text-center mb-8">Scan QR codes with your camera, or QR codes and barcodes from an image</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {camera
@@ -217,26 +217,32 @@ export default function QrScannerPage() {
       </div>
       <SeoContent
         title="QR Code Scanner"
-        description="QR Code Scanner is a free online tool that decodes QR codes live from your camera or from any image, directly in your browser — no software installation, no registration, and no image or video ever leaves your device. Scan with your phone's or laptop's camera, or upload, drop or paste a photo or screenshot, and instantly retrieve the URL, text, or other data it contains."
+        description={`QR Code Scanner reads codes in three ways: live from your phone or laptop camera, from a picture you upload or drop, or from a screenshot you paste. The camera reads QR codes with jsQR. A picture goes to zxing-cpp first, which also finds barcodes such as EAN-13, UPC, Code 128, Data Matrix, PDF417 and Aztec, up to 20 in one image, then to jsQR if nothing was found. The decoded text appears with a Copy button, and web addresses get an Open link button. Pictures and camera frames are decoded in your browser.`}
+        howToTitle="How to scan a QR code from the camera or a picture"
         howTo={[
-          "Click \"Scan with camera\" and allow the camera, then point it at the QR code — it stops by itself when the code is read. Or upload, drop or paste an image containing a QR code — on a phone, copy the image (in Photos: Share, then Copy) and tap \"Paste image\", or long-press the paste box and choose Paste.",
-          "Wait a moment while the tool decodes the code locally in your browser.",
-          "View the decoded text or URL displayed on screen.",
-          "Click \"Copy\" to copy the result, or \"Open link\" for a web address."
+          `Click "Scan with camera" and allow the camera; scanning stops by itself once a QR code is read, and "Camera" switches lenses when you have several.`,
+          `Or click "Upload an image", drop a picture on the dashed box, or press Ctrl+V to paste a screenshot.`,
+          `On a phone, copy the picture (in Photos: Share, then Copy), then tap "Paste image" or long-press the paste box and choose Paste.`,
+          `Read the text, pick another code if several were found, then use "Copy" or "Open link".`,
         ]}
+        specs={[
+          { label: 'Image input', value: 'Any picture your browser can open (image/*); pictures above 12 megapixels are reduced to 12 before reading' },
+          { label: 'Formats read in pictures', value: 'QR Code, Micro QR, Data Matrix, Aztec, PDF417, EAN-13, EAN-8, UPC-A, UPC-E, Code 128, Code 39, Code 93, ITF, Codabar and the other formats of zxing-cpp' },
+          { label: 'Codes per picture', value: 'Up to 20, each listed with its format' },
+          { label: 'Live camera', value: 'QR codes only, about ten reads a second; needs an https page and your permission' },
+          { label: 'Time limit', value: 'zxing-cpp gives up after 20 seconds, then jsQR tries the picture' },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy="Pictures and camera frames are decoded on your device, by zxing-cpp, a WebAssembly file served from this site, and by jsQR; no image, frame or decoded text is uploaded. When a camera, clipboard or picture error is shown, its message, cleaned of names and long numbers, is sent to our error log with the tool's name and your browser's name and major version."
         faqs={[
-          { q: "Is QR Code Scanner free to use?", a: "Yes, it's completely free and requires no registration to decode unlimited QR codes." },
-          { q: "Can I scan with my phone's camera?", a: "Yes. Click \"Scan with camera\" and allow the camera; the rear camera is used when there is one, and you can switch cameras. Nothing is recorded or uploaded: each frame is read in your browser." },
-          { q: "Do I need to install any software?", a: "No, QR Code Scanner is a web-based tool that works directly in your browser without any downloads or installations." },
-          { q: "What kinds of QR codes can it read?", a: "Any standard QR code containing text or a URL — live from a camera, photos of printed codes, screenshots, and exported images, including light codes on a dark background." },
-          { q: "Can it read barcodes, or several codes in one picture?", a: "Yes, from an uploaded or pasted picture: EAN-13, EAN-8, UPC, Code 128, Code 39, ITF, Data Matrix, PDF417, Aztec and Micro QR as well as QR codes, up to 20 codes in one picture — each one listed with its format (zxing, the reference open-source decoder). The live camera reads QR codes." },
-          { q: "Is my data private?", a: "Yes. The image or camera view is decoded entirely in your browser and is never uploaded to a server." }
+          { q: 'Can it read barcodes, not only QR codes?', a: 'Yes, from a picture: EAN-13, EAN-8, UPC-A, UPC-E, Code 128, Code 39, Code 93, ITF, Codabar, Data Matrix, PDF417, Aztec and Micro QR among others, up to 20 in one image, each shown with its format. The live camera reads QR codes only.' },
+          { q: 'Can I scan without giving camera access?', a: 'Yes. Upload, drop or paste a photo or a screenshot instead. The camera needs a secure https page and your permission; when access is refused, no camera is found or another app is using it, the page says which and suggests a photo.' },
+          { q: 'Can it read a light code on a dark background?', a: 'Yes. Pictures are also tried with their colors inverted, and the camera reader tries every frame both as it is and inverted, so white codes on black screens or dark labels are found too.' },
+          { q: 'Is it safe to open the link from a QR code?', a: 'No, not blindly: a code can hide a harmful address. The page shows the full text first, offers "Open link" only for http and https addresses, and opens it in a new tab without telling that site which page sent you.' },
         ]}
         tips={[
-          "For the camera, hold the code flat and fill about half the view; good light helps more than getting very close.",
-          "If scanning fails on a full photo, try cropping the image tightly around just the QR code.",
-          "Always verify a decoded URL before opening it — QR codes can be used to hide malicious links.",
-          "Screenshots work just as well as photos: copy one and press Ctrl+V on this page."
+          'If a large photo fails, crop tightly around the code: a picture above 12 megapixels is reduced before reading, which shrinks a small code with it.',
+          'To make a code of your own, use the QR Code Generator for QR codes or the Barcode Generator for EAN, UPC and the other types.',
         ]}
       />
     </div>

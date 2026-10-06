@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Add Vignette — Darken the Edges Online Free" },
-  description: "Add Vignette darkens the edges of your image with a radial gradient to draw focus toward the center, entirely in your browser.",
+  title: { absolute: "Add Vignette to Photo — Dark Edges, Adjustable Clear Center" },
+  description: "Darken the edges of a photo with a black radial vignette. Two sliders set how dark the corners get and how wide the untouched center is.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/add-vignette" },
   openGraph: {
-    title: "Add Vignette — Darken the Edges Online Free",
-    description: "Add Vignette darkens the edges of your image with a radial gradient to draw focus toward the center, entirely in your browser.",
+    title: "Add Vignette to Photo — Dark Edges, Adjustable Clear Center",
+    description: "Darken the edges of a photo with a black radial vignette. Two sliders set how dark the corners get and how wide the untouched center is.",
     url: "https://www.onlineconvertools.com/tools/image-tools/add-vignette",
   },
 };

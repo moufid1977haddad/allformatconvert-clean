@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "AI Tools — AI-Powered Image and Text Tools Online Free" },
-  description: "AI Tools is a free online platform offering AI-powered utilities for productivity, content creation, and data analysis.",
+  title: { absolute: "AI Tools: Writing, Translation, AI Detection, Transcription" },
+  description: "16 AI tools to write, translate, detect AI text, cut out photos, upscale images and transcribe audio, free within hourly and daily limits.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools" },
   openGraph: {
-    title: "AI Tools — AI-Powered Image and Text Tools Online Free",
-    description: "AI Tools is a free online platform offering AI-powered utilities for productivity, content creation, and data analysis.",
+    title: "AI Tools: Writing, Translation, AI Detection, Transcription",
+    description: "16 AI tools to write, translate, detect AI text, cut out photos, upscale images and transcribe audio, free within hourly and daily limits.",
     url: "https://www.onlineconvertools.com/tools/ai-tools",
   },
 };

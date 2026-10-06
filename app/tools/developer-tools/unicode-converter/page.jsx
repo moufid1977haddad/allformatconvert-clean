@@ -27,25 +27,36 @@ export default function UnicodeConverterPage() {
         </div>
       </div>
       <SeoContent
-        title="Unicode Converter"
-        description="Unicode Converter converts text to and from JavaScript-style \uXXXX escape sequences, entirely in your browser — nothing is uploaded to a server. There's no format selector: it supports exactly one format (4-hex-digit \uXXXX escapes), not UTF-8, UTF-16, UTF-32, HTML entities, or other encodings. Emoji and other characters outside the Basic Multilingual Plane still convert correctly, since they're represented as a pair of \uXXXX surrogate escapes, matching how JavaScript itself stores them."
+        title={"Unicode Converter"}
+        description={"Unicode Converter writes every character of your text as a \\uXXXX escape, the form used in JavaScript, JSON and Java string literals, and turns escapes back into text. To Unicode escapes all characters, plain ASCII letters included, in lowercase hex; a character above U+FFFF, such as the emoji 😀, becomes two escapes (a UTF-16 surrogate pair), while ☕ (U+2615) takes one. From Unicode reads \\uXXXX, the ES2015 form \\u{1F600} and U+1F600 code points, and leaves any other text as it is. It does not produce UTF-8 bytes or HTML entities, and needs no server."}
+        example={{
+          caption: "A letter, an accented letter and an emoji escaped with To Unicode, then three escape styles read with From Unicode:",
+          inputLabel: "Input",
+          input: "Aé😀\n\n\\u0041 \\u{1F600} U+00E9",
+          outputLabel: "Result",
+          output: "To Unicode: \\u0041\\u00e9\\ud83d\\ude00\n\nFrom Unicode: A 😀 é",
+        }}
+        howToTitle={"How to convert text to \\uXXXX escapes"}
         howTo={[
-          "Paste text into the input box.",
-          "Click 'To Unicode' to convert each character to a \\uXXXX escape sequence.",
-          "Or paste \\uXXXX escape sequences and click 'From Unicode' to convert them back to text.",
-          "Click 'Copy' to copy the result."
+          "Paste text, or escapes such as \\u00e9, \\u{1F600} or U+00E9.",
+          "Click \"To Unicode\" to escape every character, or \"From Unicode\" to turn escapes back into text.",
+          "Copy the line with \"Copy\"; \"Download\" writes it to converted.txt."
         ]}
+        specs={[
+          { label: "To Unicode output", value: "One \\uXXXX per UTF-16 code unit, lowercase hex, no separators" },
+          { label: "Read by From Unicode", value: "\\uXXXX; \\u{…} with one to six hex digits; U+ (capital U) followed by four to six hex digits" },
+          { label: "Not handled", value: "UTF-8 bytes (see Hex to Text) and HTML entities (see HTML Entity Decoder)" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Both buttons run a short script inside this page: your text is not sent to a server and is not saved. The converter has no error messages of its own; only if the page itself crashed would we receive the error, the tool's name and your browser's name and version, never the text you pasted."}
         faqs={[
-          { q: "What Unicode formats does this tool support?", a: "Only one: 4-hex-digit \\uXXXX escape sequences, the format JavaScript uses in string literals. It doesn't support UTF-8 byte sequences, UTF-32, or HTML entities." },
-          { q: "Is it free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "Can I convert emoji?", a: "Yes — emoji and other characters outside the Basic Multilingual Plane convert correctly as a pair of \\uXXXX surrogate escapes." },
-          { q: "Is my text uploaded to a server?", a: "No, all conversion happens locally in your browser." }
+          { q: "How many \\u escapes does an emoji take?", a: "Two for emoji above U+FFFF, such as 😀 (\\ud83d\\ude00), which JavaScript stores as a surrogate pair; one for older emoji in the basic plane, such as ☕ (\\u2615). From Unicode joins a pair back into one character." },
+          { q: "Can it read \\u{1F600} or U+1F600?", a: "Yes. Besides \\uXXXX, From Unicode reads the ES2015 \\u{…} form and U+ code points with four to six hex digits. A lowercase u+ is not recognized and stays as typed." },
+          { q: "Does To Unicode escape plain letters too?", a: "Yes. Every character is escaped, ASCII included, so A becomes \\u0041 and the whole output is plain ASCII. Paste only the characters that need escaping if you want ordinary letters to stay readable around them." },
+          { q: "Is this the same as UTF-8?", a: "No. \\uXXXX numbers are UTF-16 code units: é is \\u00e9, while its UTF-8 bytes are c3 a9. To see or decode bytes, use Hex to Text." }
         ]}
         tips={[
-          "The \\uXXXX format is exactly what you'd paste into a JavaScript string literal to represent that character.",
-          "When converting from Unicode, make sure each escape uses exactly 4 hex digits (\\u0041), since that's the only pattern recognized.",
-          "For byte-level encodings like UTF-8, use a dedicated encoding tool instead — this converts characters, not bytes.",
-          "Emoji round-trip correctly, but each will show up as two \\uXXXX escapes (a surrogate pair), not one."
+          "The output of To Unicode can go inside a JSON string, where \\uXXXX escapes are valid as they are."
         ]}
       />
     </div>

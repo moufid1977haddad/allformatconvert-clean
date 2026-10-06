@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "MOBI to PDF — Properly Decodes Your Kindle Ebook's Internal" },
-  description: "MOBI to PDF decodes your Kindle ebook in your browser, then our own conversion service prints its text and images to a real PDF and deletes them right after.",
+  title: { absolute: "MOBI to PDF — Kindle MOBI, AZW & AZW3 Books to PDF Free" },
+  description: "Turn a Kindle .mobi, .azw or .azw3 book without DRM into a PDF. The book is decoded in your browser, then printed as pages by our Chromium service.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/mobi-to-pdf" },
   openGraph: {
-    title: "MOBI to PDF — Properly Decodes Your Kindle Ebook's Internal",
-    description: "MOBI to PDF decodes your Kindle ebook in your browser, then our own conversion service prints its text and images to a real PDF and deletes them right after.",
+    title: "MOBI to PDF — Kindle MOBI, AZW & AZW3 Books to PDF Free",
+    description: "Turn a Kindle .mobi, .azw or .azw3 book without DRM into a PDF. The book is decoded in your browser, then printed as pages by our Chromium service.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/mobi-to-pdf",
   },
 };

@@ -1,0 +1,288 @@
+{
+ "/tools/gif-tools/apng-to-gif": [
+  {
+   "claim": "256 colors",
+   "file": "app/lib/gifEncode.js",
+   "pattern": "quantize\\(rgba, 256\\)"
+  },
+  {
+   "claim": "50 %",
+   "file": "app/lib/gifEncode.js",
+   "pattern": "rgba\\[i\\] < 128"
+  },
+  {
+   "claim": "1-bit",
+   "file": "app/lib/gifEncode.js",
+   "pattern": "GIF has 1-bit transparency"
+  },
+  {
+   "claim": "100 ms",
+   "file": "app/tools/gif-tools/apng-to-gif/page.jsx",
+   "pattern": "\\.delay\\) \\|\\| 100"
+  }
+ ],
+ "/tools/gif-tools/gif-compressor": [
+  {
+   "claim": "16 colors",
+   "file": "app/tools/gif-tools/gif-compressor/page.jsx",
+   "pattern": "\\[256, 128, 64, 32, 16\\]"
+  },
+  {
+   "claim": "75%",
+   "file": "app/tools/gif-tools/gif-compressor/page.jsx",
+   "pattern": "\\[100, 75, 50, 33, 25\\]"
+  },
+  {
+   "claim": "50%",
+   "file": "app/tools/gif-tools/gif-compressor/page.jsx",
+   "pattern": "\\[100, 75, 50, 33, 25\\]"
+  },
+  {
+   "claim": "33%",
+   "file": "app/tools/gif-tools/gif-compressor/page.jsx",
+   "pattern": "\\[100, 75, 50, 33, 25\\]"
+  },
+  {
+   "claim": "25%",
+   "file": "app/tools/gif-tools/gif-compressor/page.jsx",
+   "pattern": "\\[100, 75, 50, 33, 25\\]"
+  }
+ ],
+ "/tools/gif-tools/gif-maker": [
+  {
+   "claim": "1-bit",
+   "file": "app/lib/gifEncode.js",
+   "pattern": "GIF has 1-bit transparency"
+  },
+  {
+   "claim": "300 frames",
+   "file": "app/tools/gif-tools/gif-maker/page.jsx",
+   "pattern": "MAX_GIF_FRAMES = 300"
+  },
+  {
+   "claim": "50 to 1000 ms",
+   "file": "app/tools/gif-tools/gif-maker/page.jsx",
+   "pattern": "min=\"50\" max=\"1000\""
+  },
+  {
+   "claim": "20 to 10000",
+   "file": "app/tools/gif-tools/gif-maker/page.jsx",
+   "pattern": "min=\"20\" max=\"10000\""
+  },
+  {
+   "claim": "20 ms",
+   "file": "app/tools/gif-tools/gif-maker/page.jsx",
+   "pattern": "own >= 20 \\? own : delay"
+  },
+  {
+   "claim": "300 per GIF",
+   "file": "app/tools/gif-tools/gif-maker/page.jsx",
+   "pattern": "MAX_GIF_FRAMES = 300"
+  }
+ ],
+ "/tools/gif-tools/image-to-gif": [
+  {
+   "claim": "1920 px",
+   "file": "app/tools/gif-tools/image-to-gif/page.jsx",
+   "pattern": "Math\\.min\\(1, 1920 / "
+  },
+  {
+   "claim": "300 frames",
+   "file": "app/tools/gif-tools/gif-maker/page.jsx",
+   "pattern": "MAX_GIF_FRAMES = 300"
+  },
+  {
+   "claim": "256 colors",
+   "file": "app/lib/gifEncode.js",
+   "pattern": "quantize\\(rgba, 256\\)"
+  },
+  {
+   "claim": "100 megapixels",
+   "file": "app/tools/gif-tools/image-to-gif/page.jsx",
+   "pattern": "naturalHeight > 100_000_000"
+  },
+  {
+   "claim": "1-bit",
+   "file": "app/lib/gifEncode.js",
+   "pattern": "GIF has 1-bit transparency"
+  },
+  {
+   "claim": "50 to 1000 ms",
+   "file": "app/tools/gif-tools/image-to-gif/page.jsx",
+   "pattern": "min=\"50\" max=\"1000\""
+  }
+ ],
+ "/tools/gif-tools/mov-to-gif": [
+  {
+   "claim": "3 times",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "<option value=\"3\">3 times</option>"
+  },
+  {
+   "claim": "5 times",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "<option value=\"5\">5 times</option>"
+  }
+ ],
+ "/tools/gif-tools/mp4-to-gif": [
+  {
+   "claim": "5-second",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "length: '5'"
+  },
+  {
+   "claim": "480 px",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "width: '480'"
+  },
+  {
+   "claim": "10 frames",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "fps: '10'"
+  },
+  {
+   "claim": "1080 px",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "WIDTHS = \\[160, .*, 1080\\]"
+  },
+  {
+   "claim": "0.2",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "length < 0\\.2\\)"
+  }
+ ],
+ "/tools/gif-tools/video-to-gif": [
+  {
+   "claim": "3 times",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "<option value=\"3\">3 times</option>"
+  },
+  {
+   "claim": "5 times",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "<option value=\"5\">5 times</option>"
+  },
+  {
+   "claim": "17 file",
+   "file": "app/lib/mediaSupport.js",
+   "pattern": "'video/\\*,\\.mp4,\\.m4v,\\.mov,\\.qt,\\.webm,\\.mkv,\\.avi,\\.wmv,\\.flv,\\.ogv,\\.3gp,\\.3g2,\\.mpg,\\.mpeg,\\.ts,\\.mts,\\.m2ts'"
+  },
+  {
+   "claim": "160 to 1080 px",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "WIDTHS = \\[160, .*, 1080\\]"
+  },
+  {
+   "claim": "30 frames",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "FPS = \\[5, 8, 10, 12, 15, 20, 25, 30\\]"
+  }
+ ],
+ "/tools/file-tools/file-encryptor": [
+  {
+   "claim": "48 bytes",
+   "file": "app/lib/textCrypto.js",
+   "pattern": "bytes\\.length >= 48 && FILE_MAGIC"
+  },
+  {
+   "claim": "600,000",
+   "file": "app/lib/textCrypto.js",
+   "pattern": "const ITERATIONS = 600000;"
+  }
+ ],
+ "/tools/file-tools/file-metadata": [
+  {
+   "claim": "300 MB",
+   "file": "app/lib/embeddedMetadata.js",
+   "pattern": "MAX_FULL_READ = 300 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "46",
+   "file": "app/lib/fileSignature.js",
+   "pattern": "^const SIGS = \\[\\r?\\n(?:  \\[[^\\n]*\\n){46}\\];"
+  }
+ ],
+ "/tools/file-tools/file-splitter": [
+  {
+   "claim": "5 GB",
+   "file": "app/tools/file-tools/file-splitter/config.js",
+   "pattern": "MAX_FILE_SIZE_BYTES = 5 \\* 1024 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "1024 bytes",
+   "file": "app/tools/file-tools/file-splitter/page.jsx",
+   "pattern": "KB: 1024,"
+  },
+  {
+   "claim": "1,048,576 bytes",
+   "file": "app/tools/file-tools/file-splitter/page.jsx",
+   "pattern": "MB: 1024\\*1024"
+  }
+ ],
+ "/tools/file-tools/tar-extractor": [
+  {
+   "claim": "100 bytes",
+   "file": "app/lib/tarReader.js",
+   "pattern": "let name = field\\(bytes, offset, 100\\)"
+  }
+ ],
+ "/tools/file-tools/zip-creator": [
+  {
+   "claim": "700 MB",
+   "file": "app/tools/file-tools/zip-creator/config.js",
+   "pattern": "MAX_TOTAL_SIZE_BYTES = 700 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "100 MB",
+   "file": "app/tools/file-tools/zip-creator/config.js",
+   "pattern": "MOBILE_MAX_TOTAL_SIZE_BYTES = 100 \\* 1024 \\* 1024"
+  }
+ ],
+ "/tools/file-tools/file-comparator": [
+  {
+   "claim": "8 MiB",
+   "file": "app/tools/file-tools/file-comparator/page.jsx",
+   "pattern": "const CHUNK = 8 \\* 1024 \\* 1024"
+  }
+ ],
+ "/tools/gif-tools/avi-to-gif": [
+  {
+   "claim": "0.2",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "length < 0\\.2\\)"
+  }
+ ],
+ "/tools/gif-tools/webm-to-gif": [
+  {
+   "claim": "0.2",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "length < 0\\.2\\)"
+  }
+ ],
+ "/tools/gif-tools/gif-to-apng": [
+  {
+   "claim": "100 ms",
+   "file": "app/lib/gifFrames.js",
+   "pattern": "delay: delay \\|\\| 100"
+  }
+ ],
+ "/tools/gif-tools/gif-to-mp4": [
+  {
+   "claim": "20 ms",
+   "file": "app/tools/gif-tools/gif-to-mp4/page.jsx",
+   "pattern": "d < 20 \\? 100 : d"
+  },
+  {
+   "claim": "100 ms",
+   "file": "app/tools/gif-tools/gif-to-mp4/page.jsx",
+   "pattern": "d < 20 \\? 100 : d"
+  }
+ ],
+ "/tools/file-tools/zip-extractor": [
+  {
+   "claim": "24.09",
+   "file": "app/tools/file-tools/zip-extractor/extract.worker.js",
+   "pattern": "7-Zip 24\\.09"
+  }
+ ]
+}

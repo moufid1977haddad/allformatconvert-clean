@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "YAML to JSON — Convert Full YAML (Nested, Lists) Online Free" },
-  description: "YAML to JSON parses YAML using the js-yaml library and converts it to JSON, entirely in your browser — nested structures, lists, and comments all parse correctly.",
+  title: { absolute: "YAML to JSON Converter — Anchors, Merge Keys, Many Documents" },
+  description: "Paste YAML, such as a Kubernetes or Docker Compose file, and get JSON. Anchors, merge keys and --- documents are handled; yes stays text. In your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/yaml-to-json" },
   openGraph: {
-    title: "YAML to JSON — Convert Full YAML (Nested, Lists) Online Free",
-    description: "YAML to JSON parses YAML using the js-yaml library and converts it to JSON, entirely in your browser — nested structures, lists, and comments all parse correctly.",
+    title: "YAML to JSON Converter — Anchors, Merge Keys, Many Documents",
+    description: "Paste YAML, such as a Kubernetes or Docker Compose file, and get JSON. Anchors, merge keys and --- documents are handled; yes stays text. In your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/yaml-to-json",
   },
 };

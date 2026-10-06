@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Merge PDF — Combine Multiple PDF Files Online Free" },
-  description: "Merge PDF is a free online tool that lets you combine multiple PDF files into a single document instantly.",
+  title: { absolute: "Merge PDF — Combine PDFs, Images and Office Files" },
+  description: "Combine PDF files with photos and Word, Excel or PowerPoint documents into one PDF, in the order you set, with a bookmark added for each file.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-merge" },
   openGraph: {
-    title: "Merge PDF — Combine Multiple PDF Files Online Free",
-    description: "Merge PDF is a free online tool that lets you combine multiple PDF files into a single document instantly.",
+    title: "Merge PDF — Combine PDFs, Images and Office Files",
+    description: "Combine PDF files with photos and Word, Excel or PowerPoint documents into one PDF, in the order you set, with a bookmark added for each file.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-merge",
   },
 };

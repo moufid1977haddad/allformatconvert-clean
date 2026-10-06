@@ -1,0 +1,20 @@
+{
+  "/tools/developer-tools/base64-encoder": [
+    { "claim": "1,000,000 characters", "file": "app/components/TextArea.jsx", "pattern": "const LIMIT = 1_000_000;" },
+    { "claim": "UTF-8 bytes", "file": "app/lib/textCodecs.js", "pattern": "TextDecoder\\('utf-8'" }
+  ],
+  "/tools/developer-tools/hash-generator": [
+    { "claim": "8 MiB", "file": "app/tools/developer-tools/hash-generator/hash.worker.js", "pattern": "const CHUNK = 8 \\* 1024 \\* 1024;" },
+    { "claim": "700 MiB", "file": "app/tools/developer-tools/hash-generator/page.jsx", "pattern": "isMobileDevice\\(\\) \\? 100 : 700\\) \\* 1024 \\* 1024" },
+    { "claim": "100 MiB", "file": "app/tools/developer-tools/hash-generator/page.jsx", "pattern": "isMobileDevice\\(\\) \\? 100 : 700\\) \\* 1024 \\* 1024" }
+  ],
+  "/tools/developer-tools/hex-to-text": [
+    { "claim": "UTF-8 bytes", "file": "app/lib/textCodecs.js", "pattern": "TextDecoder\\('utf-8'" }
+  ],
+  "/tools/developer-tools/unicode-converter": [
+    { "claim": "UTF-8 bytes", "file": "app/lib/textCodecs.js", "pattern": "TextDecoder\\('utf-8'" }
+  ],
+  "/tools/text-tools/url-encoder": [
+    { "claim": "UTF-8 bytes", "file": "app/tools/text-tools/url-encoder/page.jsx", "pattern": "decodeURIComponent" }
+  ]
+}

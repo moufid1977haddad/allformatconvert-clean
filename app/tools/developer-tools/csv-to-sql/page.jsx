@@ -195,7 +195,7 @@ export default function CsvToSqlPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">CSV to SQL</h1>
         <p className="text-neutral-500 dark:text-neutral-400 text-center mb-2">Generate SQL INSERT statements from CSV</p>
-        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Uploaded files: up to {fileMaxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {MAX_FILE_SIZE_LABEL}). Pasted text: up to {PASTE_MAX_ROWS_LABEL} rows. Conversion runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Uploaded files: up to {fileMaxRowsLabel} rows{isMobile ? ' on this device' : ''} (including the header row, files up to {MAX_FILE_SIZE_LABEL}). Pasted text: up to {PASTE_MAX_ROWS_LABEL} rows. The conversion runs in a background worker; the Cancel button stops it.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div>
             <label htmlFor="sql-dialect" className="block text-sm text-neutral-500 dark:text-neutral-400 mb-1">Database</label>
@@ -237,7 +237,7 @@ export default function CsvToSqlPage() {
             </div>
           </div>
           {timeEstimate && !converting && !error && (
-            <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
+            <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimate from our tests on a desktop computer: {timeEstimate}</p>
           )}
           {!converting && (
             <div className="flex items-center justify-center gap-2 text-sm">
@@ -276,24 +276,35 @@ export default function CsvToSqlPage() {
       </div>
       <SeoContent
         title="CSV to SQL"
-        description="CSV to SQL generates a CREATE TABLE statement and one INSERT statement per row from a CSV file (or pasted CSV text), entirely in your browser — nothing is uploaded to a server. The field delimiter (comma, semicolon, tab, or pipe) is detected automatically, with a dropdown to override it. CSV parsing is quote-aware: a field wrapped in double quotes can safely contain a comma or the delimiter itself (like 'Smith, John') without being split into extra values. Values are also escaped for SQL string literals (a quote inside a value is doubled, the standard SQL escaping). Large files are read and parsed off the main thread in a Web Worker, so the page stays responsive. Column and table names typed into the Table Name field are not escaped, so avoid spaces or SQL reserved words there. The file's character encoding is detected too — Excel's classic CSV export is Windows-1252, not UTF-8, and its accents come through intact — and whole columns of numbers become INTEGER or DECIMAL columns, European decimal commas included (12,5 → 12.5)."
-        howTo={[
-          "Type your table name, or keep the default.",
-          "Click the upload area and select a .csv file, or paste CSV text directly into the box below it.",
-          "The delimiter is detected automatically — check the dropdown and correct it if needed.",
-          "Click 'Convert' to generate a CREATE TABLE statement plus one INSERT per row.",
-          "For a file upload, click 'Download' to save converted.sql; pasted text appears in the output box for you to copy."
-        ]}
-        faqs={SEO.faqs}
+        description={"CSV to SQL writes a CREATE TABLE statement and one INSERT statement per data row from a .csv file or pasted CSV. Pick the database first: Standard SQL (PostgreSQL, SQLite), MySQL / MariaDB, or SQL Server. Table and column names are quoted, and strings escaped, the way that database expects. Column types are sized from your data: INTEGER, BIGINT or DECIMAL for columns of numbers, VARCHAR (NVARCHAR on SQL Server) as long as the longest value for the others. The tool only writes SQL text; it never connects to a database."}
         example={SEO.example}
-        related={SEO.related}
-        tips={[
-          "Values are escaped for SQL, but the table name and column headers are inserted as-is — avoid spaces, quotes, or reserved SQL keywords in the Table Name field or your CSV header row.",
-          "Whole numeric columns become INTEGER (or BIGINT) and decimal ones DECIMAL sized to the data; the rest VARCHAR as long as the longest value. Adjust the CREATE TABLE statement afterward if you need date or other column types.",
-          "Wrap a value in double quotes if it contains a comma (e.g. \"Smith, John\") — quoted fields are parsed correctly and stay as a single value.",
-          "The delimiter dropdown shows what was auto-detected — double check it on unusual files, and switch it manually if a column split looks wrong.",
-          "Always review generated SQL — and test it on a development database — before running it against production."
+        howToTitle="How to convert CSV to SQL"
+        howTo={[
+          "Choose the target in \"Database\" and type a \"Table Name\", or keep my_table.",
+          "Add the data: a .csv file through the upload area, or CSV text in \"...or paste CSV Input\".",
+          "Make sure \"Delimiter:\" shows the right separator, and for a file that \"Encoding:\" shows the right character set.",
+          "Click \"Convert\".",
+          "For a file, click \"Download\" to save converted.sql; for pasted text, the SQL appears in \"SQL Output\" with a \"Copy\" button.",
         ]}
+        specs={[
+          { label: "Input", value: `a .csv file (up to ${MAX_FILE_SIZE_LABEL}) or CSV text pasted in the page` },
+          { label: "Output", value: "SQL text: CREATE TABLE plus one INSERT per row" },
+          { label: "Databases", value: "Standard SQL (PostgreSQL, SQLite), MySQL / MariaDB, SQL Server" },
+          { label: "Rows from a file", value: `${MAX_ROWS.toLocaleString('en-US')} on a computer, ${MOBILE_MAX_ROWS.toLocaleString('en-US')} on phones, iPhone and iPad, header row included` },
+          { label: "Rows of pasted text", value: `${PASTE_MAX_ROWS.toLocaleString('en-US')} on every device` },
+        ]}
+        privacy={"The CSV is parsed and the SQL is written in a background worker in your browser; your file and pasted data are not uploaded, and no database is contacted. If an error occurs, its wording, cleaned of file names and quoted text, is reported to us with the tool name and your browser version."}
+        faqs={[
+          { q: "Are the column types sized from the data?", a: "Yes. Whole numbers of up to 9 digits give INTEGER, of 10 to 15 digits BIGINT, and decimals DECIMAL with exactly the digits they need. A value with more than 15 significant digits or an exponent makes its column text: VARCHAR (NVARCHAR on SQL Server) as long as the longest value, or TEXT, LONGTEXT or NVARCHAR(MAX) beyond the limit. Untick \"Numeric columns as INTEGER / DECIMAL\" for text columns only." },
+          { q: "Are names with spaces or reserved words safe?", a: "Yes. Every table and column name is quoted for the chosen database: double quotes in Standard SQL, backticks in MySQL / MariaDB, square brackets in SQL Server, with a quote character inside a name doubled. A header such as unit price or order therefore still gives valid SQL." },
+          { q: "Are apostrophes in values escaped?", a: "Yes. An apostrophe is doubled, so O'Brien is written 'O''Brien'; MySQL / MariaDB also doubles backslashes, and SQL Server strings get the N prefix. An empty cell becomes NULL in a numeric column and an empty string in a text column." },
+          { q: "Is pasted CSV limited to fewer rows than a file?", a: `Yes, on a computer: pasted text stops at ${PASTE_MAX_ROWS.toLocaleString('en-US')} rows because it lives in the page, while a file can have ${MAX_ROWS.toLocaleString('en-US')} rows and be up to ${MAX_FILE_SIZE_LABEL}. On phones, iPhone and iPad both limits are ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows, header row included.` },
+        ]}
+        tips={[
+          "Dates are not detected: change their VARCHAR or NVARCHAR type to DATE or TIMESTAMP in the CREATE TABLE statement before running it.",
+          "To read INSERT statements back into a spreadsheet, use SQL to CSV.",
+        ]}
+        related={SEO.related}
       />
     </div>
   );

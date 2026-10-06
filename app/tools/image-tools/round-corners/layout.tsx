@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Round Corners — Clip Your Image Online Free" },
-  description: "Round Corners clips your image to a rounded-rectangle shape at a radius you choose, entirely in your browser using the canvas element.",
+  title: { absolute: "Round Corners of an Image — Transparent or Colored" },
+  description: "Round the four corners of a photo with a radius slider. Corners turn transparent in a PNG, or take a color you pick so a JPG stays a JPG.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/round-corners" },
   openGraph: {
-    title: "Round Corners — Clip Your Image Online Free",
-    description: "Round Corners clips your image to a rounded-rectangle shape at a radius you choose, entirely in your browser using the canvas element.",
+    title: "Round Corners of an Image — Transparent or Colored",
+    description: "Round the four corners of a photo with a radius slider. Corners turn transparent in a PNG, or take a color you pick so a JPG stays a JPG.",
     url: "https://www.onlineconvertools.com/tools/image-tools/round-corners",
   },
 };

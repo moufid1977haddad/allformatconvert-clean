@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "QR & Barcode Tools — Generate and Scan QR Codes and Barcodes" },
-  description: "QR & Barcode Tools is a free online platform that allows you to generate, decode, and manage QR codes and barcodes instantly without any software installation.",
+  title: { absolute: "QR Code and Barcode Generator and Scanner" },
+  description: "Create static QR codes for links, Wi-Fi and contacts, make 37 barcode types one by one or in batches, and read codes with your camera or from an image.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/qr-barcodes-tools" },
   openGraph: {
-    title: "QR & Barcode Tools — Generate and Scan QR Codes and Barcodes",
-    description: "QR & Barcode Tools is a free online platform that allows you to generate, decode, and manage QR codes and barcodes instantly without any software installation.",
+    title: "QR Code and Barcode Generator and Scanner",
+    description: "Create static QR codes for links, Wi-Fi and contacts, make 37 barcode types one by one or in batches, and read codes with your camera or from an image.",
     url: "https://www.onlineconvertools.com/tools/qr-barcodes-tools",
   },
 };

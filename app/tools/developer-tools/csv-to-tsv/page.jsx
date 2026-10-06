@@ -108,21 +108,30 @@ export default function CsvToTsvPage() {
       </div>
       <SeoContent
         title="CSV to TSV"
-        description="CSV to TSV converts comma-, semicolon- or pipe-separated values to tab-separated values entirely in your browser — nothing is uploaded to a server. The delimiter is detected automatically (a European Excel export uses semicolons, with commas as decimal separators), and a file's character encoding too: Excel's classic CSV export is not UTF-8, and its accents are read correctly. Parsing is quote-aware: a field wrapped in double quotes can safely contain the delimiter (like 'Smith, John'), and a value containing a tab or a line break is quoted in the TSV output, so no column or row is split."
-        howTo={[
-          "Choose a .csv file, or paste your CSV text into the input box.",
-          "Check the detected delimiter (and, for a file, the detected encoding); change them if needed.",
-          "Click 'Convert'.",
-          "Copy the result or download it as a .tsv file."
-        ]}
-        faqs={SEO.faqs}
+        description={"CSV to TSV rewrites CSV with tabs between the values. It reads text you paste, or a .csv or .txt file, which it opens in the input box. The separator (comma, semicolon, tab or pipe) is detected, and so is the encoding of a file, including the Windows code pages Excel uses for CSV. A value that contains a tab or a line break, or begins with a double quote, is put in quotes in the TSV so it stays one cell; every other value is copied unchanged. The result can be copied or downloaded as a .tsv file."}
         example={SEO.example}
-        related={SEO.related}
-        tips={[
-          "If a column looks split in the wrong place, switch the delimiter from the dropdown and convert again.",
-          "Files up to 50 MB are read in one go in your browser; very large pastes depend on your browser's performance.",
-          "Download the result as .tsv, or copy it straight into a spreadsheet."
+        howToTitle="How to convert CSV to TSV"
+        howTo={[
+          "Choose a .csv or .txt file in the upload area, or paste CSV into \"CSV Input\".",
+          "Check \"Delimiter:\" and, for a file, \"Encoding:\"; choosing another encoding reads the file again.",
+          "Click \"Convert\" to fill \"TSV Output\".",
+          "Click \"Copy\", or \"Download\" to save a .tsv named after your file (converted.tsv for pasted text).",
         ]}
+        specs={[
+          { label: "Input", value: `CSV or TXT file up to ${`${MAX_FILE_BYTES / 1048576} MB`}, or pasted text` },
+          { label: "Output", value: "TSV text, one row per line, except a quoted value that holds a line break" },
+          { label: "Separators read", value: "comma, semicolon, tab or pipe, detected or chosen" },
+        ]}
+        privacy={"Your file is read in full by the browser and converted on the page itself, so the CSV is not uploaded. Errors, including one that happens without a message on screen, reach us as a report: the error text stripped of file names and quoted text, the name of this tool, and your browser and its version."}
+        faqs={[
+          { q: "Does it read semicolon CSV files from European Excel?", a: "Yes. The semicolon is one of the four separators detected, so Nom;Prix with 12,5 keeps its columns. Values are not changed: the decimal comma is copied as it is into the TSV." },
+          { q: "Will a value with a line break split my rows?", a: "No. Inside quotes in the CSV, a line break or a tab belongs to the value, and the TSV writes that value in double quotes so Excel and LibreOffice read it back as one cell." },
+          { q: "Can I choose the encoding of an old CSV file?", a: "Yes. After you open a file, \"Encoding:\" shows what was detected, and choosing another reads the file again with it. A file with a byte order mark or valid UTF-8 is recognised; otherwise the code page of your browser language is assumed." },
+        ]}
+        tips={[
+          "To go back from tabs to commas, use TSV to CSV.",
+        ]}
+        related={SEO.related}
       />
     </div>
   );

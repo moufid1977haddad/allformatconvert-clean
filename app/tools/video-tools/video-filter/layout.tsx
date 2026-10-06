@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Filter — Apply One Visual Effect (grayscale, Sepia," },
-  description: "Video Filter applies one visual effect — Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate — to your video on our own server, in every browser including Safari and iPhone, and gives an MP4 with the original sound.",
+  title: { absolute: "Video Filter — Grayscale, Sepia, Blur, Invert & More" },
+  description: "Apply one effect to a whole video (grayscale, sepia, invert, blur, brightness, contrast or saturate), see it live, and get an MP4 from our video service.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-filter" },
   openGraph: {
-    title: "Video Filter — Apply One Visual Effect (grayscale, Sepia,",
-    description: "Video Filter applies one visual effect — Grayscale, Sepia, Invert, Blur, Brightness, Contrast, or Saturate — to your video on our own server, in every browser including Safari and iPhone, and gives an MP4 with the original sound.",
+    title: "Video Filter — Grayscale, Sepia, Blur, Invert & More",
+    description: "Apply one effect to a whole video (grayscale, sepia, invert, blur, brightness, contrast or saturate), see it live, and get an MP4 from our video service.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-filter",
   },
 };

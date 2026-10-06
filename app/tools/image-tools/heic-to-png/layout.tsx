@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "HEIC to PNG — Convert an Iphone HEIC Photo Online Free" },
-  description: "HEIC to PNG converts an iPhone HEIC photo to PNG format entirely in your browser — your photo is never uploaded to a server.",
+  title: { absolute: "HEIC to PNG — Lossless Copy of an iPhone Photo, Free" },
+  description: "Save an iPhone HEIC or HEIF photo as a lossless PNG, with no quality setting to choose. The photo is decoded on your own device, never uploaded.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/heic-to-png" },
   openGraph: {
-    title: "HEIC to PNG — Convert an Iphone HEIC Photo Online Free",
-    description: "HEIC to PNG converts an iPhone HEIC photo to PNG format entirely in your browser — your photo is never uploaded to a server.",
+    title: "HEIC to PNG — Lossless Copy of an iPhone Photo, Free",
+    description: "Save an iPhone HEIC or HEIF photo as a lossless PNG, with no quality setting to choose. The photo is decoded on your own device, never uploaded.",
     url: "https://www.onlineconvertools.com/tools/image-tools/heic-to-png",
   },
 };

@@ -1,0 +1,38 @@
+{
+  "/tools/text-tools/ascii-art": [
+    { "claim": "60 characters", "file": "app/tools/text-tools/ascii-art/page.jsx", "pattern": "maxLength=\\{60\\}" },
+    { "claim": "10 Fonts", "file": "app/tools/text-tools/ascii-art/page.jsx", "pattern": "'3-D': \\(\\) => import\\('figlet/importable-fonts/3-D\\.js'\\)" }
+  ],
+  "/tools/text-tools/character-counter": [
+    { "claim": "UTF-8 bytes", "file": "app/tools/text-tools/character-counter/page.jsx", "pattern": "UTF-8 bytes" },
+    { "claim": "UTF-8 bytes", "file": "app/lib/textTools.js", "pattern": "utf8Bytes: new TextEncoder\\(\\)\\.encode\\(text\\)\\.length" }
+  ],
+  "/tools/text-tools/lorem-ipsum": [
+    { "claim": "8 to 16 words", "file": "app/lib/textTools.js", "pattern": "const len = 8 \\+ \\(\\(k \\* 7\\) % 9\\); // 8-16 words" },
+    { "claim": "five sentences", "file": "app/lib/textTools.js", "pattern": "Array\\.from\\(\\{ length: 5 \\}, \\(_, k\\) => sentence\\(p \\* 5 \\+ k\\)\\)" },
+    { "claim": "the arrows stop at 100", "file": "app/tools/text-tools/lorem-ipsum/page.jsx", "pattern": "min=\"1\" max=\"100\"" }
+  ],
+  "/tools/text-tools/text-encryptor": [
+    { "claim": "16-byte", "file": "app/lib/textCrypto.js", "pattern": "const salt = crypto\\.getRandomValues\\(new Uint8Array\\(16\\)\\)" },
+    { "claim": "12-byte", "file": "app/lib/textCrypto.js", "pattern": "const iv = crypto\\.getRandomValues\\(new Uint8Array\\(12\\)\\)" },
+    { "claim": "600,000 iterations", "file": "app/lib/textCrypto.js", "pattern": "const ITERATIONS = 600000;" }
+  ],
+  "/tools/text-tools/text-repeater": [
+    { "claim": "1 to 100 times", "file": "app/tools/text-tools/text-repeater/page.jsx", "pattern": "n < 1 \\|\\| n > 100" },
+    { "claim": "100 times", "file": "app/tools/text-tools/text-repeater/page.jsx", "pattern": "n < 1 \\|\\| n > 100" },
+    { "claim": "100 Times", "file": "app/tools/text-tools/text-repeater/page.jsx", "pattern": "n < 1 \\|\\| n > 100" }
+  ],
+  "/tools/text-tools/text-sorter": [
+    { "claim": "32-bit", "file": "app/tools/text-tools/text-sorter/page.jsx", "pattern": "new Uint32Array\\(lines\\.length\\)" }
+  ],
+  "/tools/text-tools/text-truncator": [
+    { "claim": "starts at 100", "file": "app/tools/text-tools/text-truncator/page.jsx", "pattern": "useState\\(100\\)" }
+  ],
+  "/tools/text-tools/word-counter": [
+    { "claim": "200 words", "file": "app/tools/text-tools/word-counter/page.jsx", "pattern": "Math\\.ceil\\(words / 200\\)" },
+    { "claim": "130 words", "file": "app/tools/text-tools/word-counter/page.jsx", "pattern": "Math\\.ceil\\(words / 130\\)" },
+    { "claim": "1 word", "file": "app/components/KeywordDensity.jsx", "pattern": "n === 1 \\? '1 word'" },
+    { "claim": "15 words", "file": "app/components/KeywordDensity.jsx", "pattern": "\\.slice\\(0, 15\\)" },
+    { "claim": "15 rows", "file": "app/components/KeywordDensity.jsx", "pattern": "\\.slice\\(0, 15\\)" }
+  ]
+}

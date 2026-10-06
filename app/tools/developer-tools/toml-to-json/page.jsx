@@ -52,22 +52,32 @@ export default function TomlToJsonPage() {
       </div>
       <SeoContent
         title="TOML to JSON"
-        description="TOML to JSON parses TOML using the smol-toml library and converts it to JSON, entirely in your browser — nothing is uploaded to a server. Nested tables (including [section.subsection] and arrays of tables), inline and multi-line arrays, and TOML's native date/time and number types all parse correctly, matching how a real TOML parser reads the file."
-        howTo={[
-          "Paste any valid TOML into the input box — flat, nested, or with arrays.",
-          "Click 'Convert' to parse it into JSON.",
-          "The output preserves nested tables, arrays, and native types (numbers, booleans, dates) correctly.",
-          "Click 'Copy' to copy the JSON to your clipboard."
-        ]}
-        faqs={SEO.faqs}
+        description={"TOML to JSON parses pasted TOML, such as a Cargo.toml or pyproject.toml, with the smol-toml parser and writes the result as JSON indented by two spaces. Tables and dotted keys become nested objects, arrays of tables become arrays, and inline tables become objects. Dates and times become ISO 8601 strings with milliseconds, integers keep every digit, and inf or nan, which JSON cannot hold, are written as null with a notice. A syntax error is reported with the lines around it. The text you paste does not leave your browser."}
         example={SEO.example}
-        related={SEO.related}
-        tips={[
-          "Works on any valid TOML file, not just simple flat key-value pairs — nested tables and arrays of tables both convert correctly.",
-          "TOML date/time values come through as ISO 8601 strings in the JSON, since JSON has no native date type.",
-          "If conversion fails, the error message names the line where the parser got stuck, which is usually the fastest way to find a TOML syntax mistake.",
-          "Review the output for very large integers — JSON numbers lose precision beyond 2^53, same limitation as any other JSON tool."
+        howToTitle="How to convert TOML to JSON"
+        howTo={[
+          "Paste TOML into \"TOML Input\".",
+          "Click \"Convert\".",
+          "Read the JSON in \"JSON Output\", or the error, which quotes the lines around the mistake.",
+          "Copy the JSON with \"Copy\", or press \"Download\" for data.json.",
         ]}
+        specs={[
+          { label: "Input", value: "TOML text" },
+          { label: "Output", value: "JSON indented by two spaces, downloaded as data.json" },
+          { label: "Dates and times", value: "ISO 8601 strings, such as 2024-01-15T09:30:00.000Z" },
+          { label: "inf and nan", value: "written as null, with a notice" },
+        ]}
+        privacy={"The TOML is parsed and turned into JSON in this browser tab; the text is not uploaded, which matters for files that list private package sources. If parsing or copying fails, we receive the error text with quoted text masked, the tool name and your browser and its version."}
+        faqs={[
+          { q: "Can I download the JSON as a file?", a: "Yes. Once the conversion is done, \"Download\" saves data.json, and \"Copy\" puts the same text on your clipboard. Leaving the page before taking the result makes the browser ask you to confirm first." },
+          { q: "Are big integers rounded?", a: "No. An integer beyond what a JavaScript number holds exactly, such as 9007199254740993, is read as a big integer and written digit for digit. Decimals are ordinary numbers, so 1.10 is written 1.1." },
+          { q: "Are TOML dates kept?", a: "Yes, as ISO 8601 strings: 2024-01-15T09:30:00Z becomes 2024-01-15T09:30:00.000Z, an offset such as -07:00 is kept, a local date stays 2024-01-15 and a local time gets milliseconds. Digits below the millisecond are dropped." },
+          { q: "Does the error show where my TOML is wrong?", a: "Yes. The message starts with Invalid TOML and quotes the numbered lines around the problem, with a caret under the place where the parser stopped." },
+        ]}
+        tips={[
+          "To go back, paste the JSON into JSON to TOML; keys whose value is null are left out there.",
+        ]}
+        related={SEO.related}
       />
     </div>
   );

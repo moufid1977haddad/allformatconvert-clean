@@ -63,21 +63,27 @@ export default function TsvToCsvPage() {
       </div>
       <SeoContent
         title="TSV to CSV"
-        description="TSV to CSV converts tab-separated values to comma-separated values entirely in your browser — nothing is uploaded to a server. Output fields are quoted per the standard CSV convention whenever needed: a value containing a comma, a double quote, or a newline is wrapped in double quotes (with any internal quote doubled), so that value is read back as a single column rather than splitting apart in a spreadsheet."
-        howTo={[
-          "Paste your TSV text into the input box (there's no file upload — paste the contents directly).",
-          "Click 'Convert' to replace tabs with commas.",
-          "Review the result in the output box.",
-          "Click 'Copy' to copy it to your clipboard."
-        ]}
-        faqs={SEO.faqs}
+        description={"TSV to CSV turns tab-separated text into comma-separated values. Paste the text, for instance cells copied from Excel, Google Sheets or LibreOffice, which the clipboard holds as tab-separated lines. A field that starts with a double quote is read the way Excel writes it, so it can hold tabs and line breaks. In the CSV, a value with a comma, a double quote or a line break is wrapped in double quotes with inner quotes doubled, and rows end with CRLF. There is no file picker: paste the text."}
         example={SEO.example}
-        related={SEO.related}
-        tips={[
-          "Values containing a comma, quote, or newline are quoted automatically in the output — no manual cleanup needed for those.",
-          "There's no file size limit enforced by the tool, but very large pastes are limited by your browser's performance.",
-          "Copy the result or download it as a file; nothing is saved on a server, and leaving the page before either asks first."
+        howToTitle="How to convert TSV to CSV"
+        howTo={[
+          "Copy cells in your spreadsheet, or the text of a TSV file, and paste it into \"TSV Input\".",
+          "Click \"Convert\".",
+          "Check the columns in \"CSV Output\".",
+          "Click \"Copy\" to paste the CSV elsewhere, or \"Download\" to save it as data.csv.",
         ]}
+        specs={[
+          { label: "Input", value: "pasted TSV text (no file picker)" },
+          { label: "Output", value: "CSV with commas and CRLF line ends, file data.csv" },
+          { label: "Line ends read", value: "CRLF, LF or CR" },
+        ]}
+        privacy={"The tab-separated text is converted by the page itself in your browser, and nothing you paste is uploaded. The page shows no error message; an unexpected failure, such as copying refused by the browser, is reported to us as error text with the tool name and your browser version, without your data."}
+        faqs={[
+          { q: "Can I paste cells straight from Excel or Google Sheets?", a: "Yes. Copied cells reach the clipboard as tab-separated text; paste them into \"TSV Input\" and click \"Convert\". A cell that holds a line break arrives in quotes and is kept as one value." },
+          { q: "Will commas inside my values split the columns?", a: "No. Any value with a comma, a double quote or a line break is written in double quotes, with inner quotes doubled, so a value like Smith, John stays in one column when the CSV is opened." },
+          { q: "Can I upload a .tsv file?", a: "No. This page has no file picker; open the file in a text editor or spreadsheet, copy its contents and paste them. For the opposite direction, CSV to TSV does accept files." },
+        ]}
+        related={SEO.related}
       />
     </div>
   );

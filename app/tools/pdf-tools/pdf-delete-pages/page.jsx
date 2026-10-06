@@ -93,24 +93,28 @@ export default function PdfDeletePagesPage() {
       </div>
       <SeoContent
         title="PDF Delete Pages"
-        description="PDF Delete Pages removes the page numbers you specify from a PDF entirely in your browser using the pdf-lib library — your file is never uploaded to a server. There's no visual page preview or thumbnails; you type the page numbers to remove into a text field."
+        description={`PDF Delete Pages removes the pages you list from a PDF and saves the others as a new file named after yours with -edited at the end. Type single pages and ranges separated by commas: 5-7 is a range and 10- runs to the last page. The page count appears once the file is read; there are no thumbnails, and at least one page must remain. A page number past the end, or a word that is not a page, is pointed out instead of being skipped. Pages are removed in your browser with pdf-lib.`}
+        howToTitle="How to delete pages from a PDF"
         howTo={[
-          "Click the upload area and select a PDF file — the total page count appears once it loads.",
-          "Type the page numbers to delete into the text field, separated by commas, with ranges (e.g. 1, 3, 5-7).",
-          "Click 'Delete Pages' to remove them.",
-          "Click 'Download' to save the edited PDF."
+          `Choose the PDF; its total page count appears under the field.`,
+          `Type the pages to remove in "Pages to delete (e.g. 1, 3, 5-7)".`,
+          `Click "Delete Pages"; the line under it says how many pages were deleted and how many are left.`,
+          `Take the copy without those pages with the "Download" button.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF` },
+          { label: 'Page list', value: `Single pages and ranges separated by commas, spaces or semicolons; 10- means up to the end` },
+          { label: 'Kept', value: `At least one page must stay` },
+          { label: 'Result', value: `Your file name followed by -edited.pdf` },
+        ]}
+        privacy={`Your PDF is read and rewritten in your browser with pdf-lib, and no page of it is uploaded. A file that only restricts printing or copying is decrypted locally before the pages are removed; a PDF that asks for a password to open is refused.`}
         faqs={[
-          { q: "Is PDF Delete Pages free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is there a visual preview to click on pages?", a: "No — there are no page thumbnails. You enter the page numbers as text, based on their position in the document." },
-          { q: "Is my PDF file uploaded to a server?", a: "No. Pages are removed entirely in your browser using the pdf-lib library." },
-          { q: "Can I delete multiple pages at once?", a: "Yes, list page numbers and ranges separated by commas (1, 3, 5-7, or 10- for page 10 to the end) and they're all removed in one pass." }
+          { q: "Can I remove several pages at once?", a: `Yes. Type them all in one go, separated by commas: 2, 4, 9-12 removes pages 2, 4 and 9 to 12, and 20- removes page 20 and every page after it. They are removed in a single pass, and the remaining pages keep their original order.` },
+          { q: "Can I see thumbnails of the pages before deleting?", a: `No. This page works from page numbers only. PDF Organize lists the pages with a Remove button for each, and the PDF Editor shows a thumbnail of every page with its own delete button.` },
+          { q: "Can I delete every page except one?", a: `Yes, as long as one page remains. If your list covers every page of the file, the tool refuses with a message saying at least one page must stay, so you never get an empty PDF.` },
         ]}
         tips={[
-          "Page numbers are 1-indexed and match the total page count shown after you upload the file.",
-          "Double-check page numbers against the original document, since there's no visual preview before deleting.",
-          "A page number past the end of the document, or text that is not a page, is pointed out instead of being ignored.",
-          "Keep your original file until you've confirmed the downloaded result looks right — the tool can't undo a deletion."
+          `To keep only a few pages out of many, PDF Split in Select pages mode needs less typing.`,
         ]}
       />
     </div>

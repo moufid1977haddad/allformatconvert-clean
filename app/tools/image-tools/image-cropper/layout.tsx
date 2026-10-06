@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Cropper — Crop Images Online Free" },
-  description: "Image Cropper lets you cut out a rectangular region of an image by entering exact X, Y, width, and height values in pixels.",
+  title: { absolute: "Crop Image Online — Exact Pixels or Aspect Ratio Presets" },
+  description: "Crop a photo to an exact rectangle in real pixels, or to 1:1, 4:3, 16:9, 9:16 or 4:5 centered. A box on the preview shows what is kept.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-cropper" },
   openGraph: {
-    title: "Image Cropper — Crop Images Online Free",
-    description: "Image Cropper lets you cut out a rectangular region of an image by entering exact X, Y, width, and height values in pixels.",
+    title: "Crop Image Online — Exact Pixels or Aspect Ratio Presets",
+    description: "Crop a photo to an exact rectangle in real pixels, or to 1:1, 4:3, 16:9, 9:16 or 4:5 centered. A box on the preview shows what is kept.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-cropper",
   },
 };

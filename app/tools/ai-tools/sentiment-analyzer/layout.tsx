@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Sentiment Analyzer — Analyze Sentiments Online Free" },
-  description: "Sentiment Analyzer uses an AI language model to judge whether text is Positive, Negative, or Neutral, with a confidence estimate.",
+  title: { absolute: "Sentiment Analyzer — Positive, Negative or Neutral with AI" },
+  description: "Find out if a review, comment or message reads as positive, negative or neutral, with a confidence estimate and the words behind the verdict.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/sentiment-analyzer" },
   openGraph: {
-    title: "Sentiment Analyzer — Analyze Sentiments Online Free",
-    description: "Sentiment Analyzer uses an AI language model to judge whether text is Positive, Negative, or Neutral, with a confidence estimate.",
+    title: "Sentiment Analyzer — Positive, Negative or Neutral with AI",
+    description: "Find out if a review, comment or message reads as positive, negative or neutral, with a confidence estimate and the words behind the verdict.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/sentiment-analyzer",
   },
 };

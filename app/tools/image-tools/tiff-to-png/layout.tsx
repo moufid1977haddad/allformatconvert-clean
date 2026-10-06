@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "TIFF to PNG — Convert a TIFF Image Online Free" },
-  description: "TIFF to PNG converts a TIFF image to PNG format entirely in your browser using the open-source UTIF.js decoder — your file is never uploaded to a server.",
+  title: { absolute: "TIFF to PNG Converter — Lossless, Transparency Kept, Free" },
+  description: "Turn a TIF or TIFF image into a lossless PNG that keeps transparency, and choose the page of a multi-page file. Read in a background worker.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/tiff-to-png" },
   openGraph: {
-    title: "TIFF to PNG — Convert a TIFF Image Online Free",
-    description: "TIFF to PNG converts a TIFF image to PNG format entirely in your browser using the open-source UTIF.js decoder — your file is never uploaded to a server.",
+    title: "TIFF to PNG Converter — Lossless, Transparency Kept, Free",
+    description: "Turn a TIF or TIFF image into a lossless PNG that keeps transparency, and choose the page of a multi-page file. Read in a background worker.",
     url: "https://www.onlineconvertools.com/tools/image-tools/tiff-to-png",
   },
 };

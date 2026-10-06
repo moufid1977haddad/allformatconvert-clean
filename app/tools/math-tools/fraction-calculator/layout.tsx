@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Fraction Calculator — Adds, Subtracts, Multiplies Online" },
-  description: "Fraction Calculator adds, subtracts, multiplies, and divides two fractions entirely in your browser, reducing every result automatically.",
+  title: { absolute: "Fraction Calculator — Mixed Numbers, Steps, Exact Decimals" },
+  description: "Add, subtract, multiply or divide two fractions or mixed numbers, and get the reduced fraction, the mixed number, an exact decimal and every step.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/math-tools/fraction-calculator" },
   openGraph: {
-    title: "Fraction Calculator — Adds, Subtracts, Multiplies Online",
-    description: "Fraction Calculator adds, subtracts, multiplies, and divides two fractions entirely in your browser, reducing every result automatically.",
+    title: "Fraction Calculator — Mixed Numbers, Steps, Exact Decimals",
+    description: "Add, subtract, multiply or divide two fractions or mixed numbers, and get the reduced fraction, the mixed number, an exact decimal and every step.",
     url: "https://www.onlineconvertools.com/tools/math-tools/fraction-calculator",
   },
 };

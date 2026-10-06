@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PowerPoint to PDF — Convert Your .pptx or .ppt File Online Free" },
-  description: "PowerPoint to PDF converts your .pptx or .ppt file to PDF using LibreOffice. In our tests layout, images, gradients and tables carried over; a text box narrower than its text can wrap.",
+  title: { absolute: "PowerPoint to PDF — PPTX, PPT, PPS & ODP Slides Free" },
+  description: "Convert a PowerPoint deck, slide show or OpenDocument presentation to PDF with LibreOffice on our server. Segoe UI text is set in Selawik.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/ppt-to-pdf" },
   openGraph: {
-    title: "PowerPoint to PDF — Convert Your .pptx or .ppt File Online Free",
-    description: "PowerPoint to PDF converts your .pptx or .ppt file to PDF using LibreOffice. In our tests layout, images, gradients and tables carried over; a text box narrower than its text can wrap.",
+    title: "PowerPoint to PDF — PPTX, PPT, PPS & ODP Slides Free",
+    description: "Convert a PowerPoint deck, slide show or OpenDocument presentation to PDF with LibreOffice on our server. Segoe UI text is set in Selawik.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/ppt-to-pdf",
   },
 };

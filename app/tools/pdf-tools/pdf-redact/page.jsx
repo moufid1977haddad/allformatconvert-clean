@@ -12,7 +12,7 @@ import UploadPrompt from '@/app/components/UploadPrompt';
 import TextArea from '@/app/components/TextArea';
 import { withActualTextUnicode } from '../../../lib/pdfActualText';
 import { fitScale, withTimeout, StepTimeout } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
-import { serverRenderAvailable, ServerPageRenderer, LOCAL_PAGE_LIMIT_MS, LOCAL_PAGE_LIMIT_LABEL, listPages } from '../../../lib/serverPageRender';
+import { serverRenderAvailable, ServerPageRenderer, LOCAL_PAGE_LIMIT_MS, LOCAL_PAGE_LIMIT_LABEL, listPages, STAGED_MAX_BYTES } from '../../../lib/serverPageRender';
 import { sanitizeForCopy, verifyRedacted, relinkDestinations, UNREADABLE_ANNOTATIONS } from '../../../lib/redactSanitize';
 
 // P32 (04/10): a page drawn by our PDF service comes with the page's /Rotate applied (pdftoppm); the redaction works
@@ -293,30 +293,32 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Redact"
-        description="PDF Redact searches your PDF's text for the words or phrases you list (one per line) and, if you tick them, every e-mail address, phone number (9 to 15 digits) and card number (checked with the Luhn formula), using PDF.js — ignoring case, spaces and line breaks, so a phrase is found even when it wraps onto the next line or changes font mid-way — as well as form field values and comments. It then permanently destroys the matches rather than just covering them: any page containing a match is rendered to a flattened image with only the matched words blacked out in the pixels themselves (the rest of the line stays readable), and that image replaces the page's original content entirely. Over the image, the words outside the black boxes are written back as invisible text, so they can still be selected, copied and searched; the blacked-out words, the words right next to a black box, vertical text and words with letters our text font cannot write (Greek, Cyrillic, Arabic, Asian scripts and some accented letters) are not. Pages with no match are left untouched, keeping their original selectable, searchable text. On a computer, everything runs locally in your browser and your file is not uploaded. On an iPhone or iPad, a page with a match that the device cannot draw within 20 seconds is drawn by our own PDF service (not a third party) before the blacking out, which is still done in your browser: the PDF is sent there, then deleted, and the page tells you."
+        description={`PDF Redact finds the words or phrases you list, one per line, and if you tick them every e-mail address, phone number and card number, in the text of your PDF and in its form fields and comments. The search ignores case, spaces, line breaks, accents and hyphens. Each page with a match is rebuilt as a picture with the matches blacked out in the pixels, plus an invisible text layer for the other words, so the hidden text is gone from the file. The finished PDF is searched again and withheld if a term can still be found. Scanned pages have no text to search: run PDF OCR first.`}
+        howToTitle="How to redact text in a PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Type each word or phrase to redact on its own line, and/or tick e-mail addresses, phone numbers or card numbers.",
-          "Click 'Redact PDF' — pages containing a match are flattened to an image with the matched words permanently blacked out, and the words outside the black boxes stay selectable as invisible text; the tool tells you how many occurrences it covered and on which pages.",
-          "Click 'Download' next to redacted.pdf to save the result."
+          `Choose the PDF; a file that needs a password to open is refused at once.`,
+          `Type each word or phrase on its own line in "Text to redact (one word or phrase per line)", and tick "E-mail addresses", "Phone numbers" or "Card numbers" if needed.`,
+          `Click "Redact PDF" and follow the page-by-page progress.`,
+          `Read the summary of occurrences per page, then click "Download" to save redacted.pdf.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF with a text layer` },
+          { label: 'Automatic patterns', value: `E-mail addresses; phone numbers of 9 to 15 digits; card numbers of 13 to 19 digits that pass the Luhn check` },
+          { label: 'Pages with a match', value: `Replaced by a picture with black boxes and invisible text for the remaining words` },
+          { label: 'Pages without a match', value: `Copied, minus stamps, attachments, media and links to redacted pages, scripts or other files; the redacted file keeps no bookmarks, document properties or fillable form fields` },
+          { label: 'On iPhone and iPad', value: `A matched page that fails or is not drawn within ${LOCAL_PAGE_LIMIT_LABEL} is drawn by our PDF service, for PDFs up to ${Math.floor(STAGED_MAX_BYTES / 1048576)} MB, up to 300 pages per hour and 1,000 pages per day per network` },
+          { label: 'Result', value: `redacted.pdf` },
+        ]}
+        privacy={`On a computer or an Android device, searching, drawing and blacking out all happen in your browser, and the PDF is not uploaded. On an iPhone or iPad, a page with a match that the device fails to draw, or does not draw within ${LOCAL_PAGE_LIMIT_LABEL}, is drawn by our own PDF service (pdf-tools, not a third party): the PDF is sent there and then deleted, and the black boxes are still applied in your browser. The page tells you when this happens.`}
         faqs={[
-          { q: "Is PDF Redact free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does this tool truly remove sensitive text from the PDF, or just cover it up?", a: "It truly removes it. Any page with a match is rendered to a flattened image with the matched text blacked out in the pixels, and that image replaces the page's content — the underlying text is gone, not just hidden, so it can't be recovered by selecting or extracting text from that page. The only text put back on that page is an invisible layer of the words outside the black boxes. The pages without a match are copied without anything that could still lead to a redacted page (links to it, shared resources, form-field links), and the finished file is read again before it is given to you: if a term could still be found in it, no file is given." },
-          { q: "What changes on the pages without a match?", a: "Their text, images and links stay as they are. Removed from them: stamps, file attachments and media (this tool cannot check what they contain), links that jump to a redacted page or run a script, and private application data. The summary says how many were removed." },
-          { q: "Does the search ignore accents and hyphens?", a: "Yes. Searching for Muller also finds Müller, and a word split by a hyphen at the end of a line is found too; a little more may be blacked out than you typed, never less." },
-          { q: "Does this affect other text on the same page that I didn't ask to redact?", a: "Yes — a matched page is flattened entirely into an image, and its text is replaced by an invisible text layer of the words outside the black boxes: they can still be selected and searched, but not edited, and their font and layout are now those of the picture. Not kept selectable: the words right next to a black box (a safety margin), vertical text, and words with letters our text font cannot write (Greek, Cyrillic, Arabic, Asian scripts and some accented letters). Links and form fields on that page are gone. Pages with no match are left as original, fully searchable text." },
-          { q: "Can I visually select an area to redact, or preview matches first?", a: "No — there's no click-to-select or highlighting interface. You list words or phrases and tick automatic patterns; every page containing a match is processed automatically, and the tool lists the pages it changed so you can check them." },
-          { q: "What do the automatic patterns find?", a: "E-mail addresses; phone numbers of 9 to 15 digits written with spaces, dots, dashes, brackets or a +country code (dates like 2026-10-02 are left alone); card numbers of 13 to 19 digits that pass the Luhn check every real card number passes. A number of another kind with as many digits can be covered too: check the listed pages." },
-          { q: "Are form fields and comments redacted?", a: "Yes — a form field value or a comment containing the phrase is blacked out too, and the page is flattened, so the field and its value no longer exist in the file." },
-          { q: "Can it redact text in a scanned PDF?", a: "No — a scan is a picture with no text in it, so there is nothing to search. Run PDF OCR first, then redact the OCR'd file." },
-          { q: "Is my file uploaded to a server?", a: "Not on a computer: matching and redaction both happen locally in your browser. On an iPhone or iPad, if the device cannot draw a page that has a match within 20 seconds, our own PDF service draws that page (your PDF is sent there, then deleted; the page tells you), and the matches are still found and blacked out in your browser." }
+          { q: "Is the text really removed, not just covered?", a: `Yes. A matched page is replaced by a picture of itself with the matches blacked out in the pixels, so no text sits under the boxes; only the other words come back as invisible text. The saved file is searched again, and if a term can still be found, no file is given.` },
+          { q: "Will the rest of a redacted page stay searchable?", a: `Yes, mostly. Words outside the black boxes are written back as invisible, selectable text. Not kept: words right next to a box, vertical text, and words with letters the standard font cannot write, such as Greek, Cyrillic, Arabic or Asian scripts. Links and form fields on that page are gone.` },
+          { q: "Does it find a name written with or without accents?", a: `Yes. Accents, case, spaces, line breaks and hyphens are ignored, so Muller also finds Müller, and a word split across two lines is found too. This can black out slightly more than you typed, never less, so check the pages listed in the summary.` },
+          { q: "Do pages without a match stay as they were?", a: `Yes, mostly: their text, images and ordinary links stay. Stamps, file attachments and media are removed because their content cannot be checked, with links that jump to a redacted page or run a script. The whole redacted file also loses its bookmarks, document properties and fillable form fields.` },
+          { q: "Can it redact a scanned PDF?", a: `No. A scan has no text layer, so nothing can be found and the tool reports that there was no match. Run PDF OCR to get a searchable PDF, then redact that file.` },
         ]}
         tips={[
-          "Because matched pages are fully flattened to images, expect a larger file size for those pages, and only the words outside the black boxes (minus those next to one) kept as invisible, selectable text — that trade-off is what makes the redaction genuinely irreversible.",
-          "Search terms are matched as a case-insensitive substring that ignores spaces and line breaks, so short or common keywords can over-match and flatten more pages than intended — use a specific phrase rather than a short fragment.",
-          "After downloading, try selecting or searching for the redacted text in a PDF reader — it should no longer be selectable or found on that page, while the other words of the page still are.",
-          "Pages that don't contain your search term are left completely untouched, preserving their original text quality and searchability."
+          `Prefer full phrases to short fragments: a short term can match inside other words and turn more pages into pictures than needed.`,
         ]}
       />
     </div>

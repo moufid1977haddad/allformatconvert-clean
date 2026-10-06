@@ -55,23 +55,36 @@ export default function TextSorterPage() {
       </div>
       <SeoContent
         title={"Text Sorter"}
-        description={"Text Sorter sorts lines alphabetically (A-Z or Z-A), by length, or in random order, entirely in your browser. Alphabetical order is the one people expect, not raw character codes: upper and lower case sort together (apple, Banana, cherry), accented letters sit next to their base letter (éclair before zebra), and numbers inside lines are compared by value (item 2 before item 10). Windows line endings are handled, and length counts characters as you see them."}
+        description={"Text Sorter reorders the lines of a list. Sort A-Z and Sort Z-A follow dictionary order in the language of your browser: capitals and lower case sort together, accented letters sit next to their base letter in most languages, and numbers inside a line are compared by value. Sort by Length goes from shortest to longest. The two Sort by Number buttons read the number at the start of each line, decimals and minus signs included. Shuffle puts the lines in random order. It sorts whole lines, not words, in your browser."}
+        example={{
+          caption: "Sort A-Z: case is ignored, é sorts with e, and item 2 comes before item 10.",
+          inputLabel: "Lines",
+          input: "item 10\nBanana\nzebra\néclair\napple\nitem 2",
+          outputLabel: "After \"Sort A-Z\"",
+          output: "apple\nBanana\néclair\nitem 2\nitem 10\nzebra",
+        }}
+        howToTitle={"How to sort lines of text"}
         howTo={[
-          "Paste the lines to sort.",
-          "Click A-Z, Z-A, By Length or Shuffle.",
-          "Review the result.",
-          "Copy it."
+          "Paste the lines to reorder, for example names, file names or numbers.",
+          "Click \"Sort A-Z\", \"Sort Z-A\", \"Sort by Length\", \"Shuffle\", \"Sort by Number (0-9)\" or \"Sort by Number (9-0)\".",
+          "Take the sorted list with \"Copy\", or \"Download\" it as sorted.txt."
         ]}
+        specs={[
+          { label: "Alphabetical", value: "Case-insensitive, accents second, numbers by value, in your browser's language" },
+          { label: "By number", value: "Number at the start of each line, with sign, decimals and exponent; other lines follow in A-Z order" },
+          { label: "By length", value: "Characters as displayed, shortest first; equal lengths in A-Z order" },
+          { label: "Output", value: "Sorted lines as one text block with Unix line breaks, copied or downloaded as sorted.txt" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Sorting uses the collator built into your browser and, for Shuffle, its cryptographic random generator. The lines never leave the page and are not stored. Should a copy to the clipboard fail, our error log receives that error message with the tool name and browser version, never the lines themselves."}
         faqs={[
-          { q: "Is Text Sorter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is sorting case-sensitive?", a: "No — Apple and apple sort together, as in a dictionary; when two lines differ only by case or accents, the order is still stable and predictable." },
-          { q: "How are numbers sorted?", a: "Sort A-Z compares numbers inside text naturally (file2 before file10). For lists of numbers, Sort by Number reads the number each line starts with — negative numbers and decimals included (-10, -2, 1.25, 1.3, 1.5) — and puts lines without a number after them." },
-          { q: "Is the shuffle really random?", a: "Yes — it uses the browser's cryptographic random generator with an unbiased Fisher-Yates shuffle." },
-          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
+          { q: "Does item 10 sort after item 2?", a: "Yes. Sort A-Z compares runs of digits by value, as file managers do, so file2 comes before file10. For a list of plain numbers with decimals or minus signs, use \"Sort by Number (0-9)\": -10, -2, 1.25, 1.3, 1.5." },
+          { q: "Is sorting case-sensitive?", a: "No. apple, Banana and cherry sort together, as in a dictionary. When two lines differ only by case or accents, a second comparison decides between them, so the result is the same every time." },
+          { q: "Do accented letters sort next to their base letter?", a: "Yes, in English, French, German and most other languages: éclair comes before zebra. The order follows the language of your browser, so in Swedish or Danish å, ä, ö, æ and ø come after z, as in those alphabets." },
+          { q: "Is Shuffle really random?", a: "Yes. It is a Fisher-Yates shuffle fed by crypto.getRandomValues, the cryptographic generator of the browser. Because each draw is a 32-bit number, a modulo bias remains, at most n in 4,294,967,296 for a list of n lines." }
         ]}
         tips={[
-          "Remove duplicates first with the Duplicate Remover if needed.",
-          "Sort by length orders from shortest to longest; lines of the same length are alphabetical."
+          "Remove repeated lines first with Duplicate Remover, then sort the shorter list here."
         ]}
       />
     </div>

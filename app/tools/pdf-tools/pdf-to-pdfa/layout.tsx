@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF to PDF/A — Convert & Validate for Archiving Online" },
-  description: "PDF to PDF/A converts your PDF for long-term archiving — PDF/A-1b, 2b, 3b, 2u, 3u, and 2a or 3a for tagged PDFs — then validates it with veraPDF: you only get a file back if it's verified compliant.",
+  title: { absolute: "PDF to PDF/A Converter — 1b to 3a, Checked by veraPDF" },
+  description: "Convert a PDF to PDF/A-1b, 2b, 3b, 2u, 3u, 2a or 3a for archiving. veraPDF validates the result and its text is compared before you get the file.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-pdfa" },
   openGraph: {
-    title: "PDF to PDF/A — Convert & Validate for Archiving Online",
-    description: "PDF to PDF/A converts your PDF for long-term archiving — PDF/A-1b, 2b, 3b, 2u, 3u, and 2a or 3a for tagged PDFs — then validates it with veraPDF: you only get a file back if it's verified compliant.",
+    title: "PDF to PDF/A Converter — 1b to 3a, Checked by veraPDF",
+    description: "Convert a PDF to PDF/A-1b, 2b, 3b, 2u, 3u, 2a or 3a for archiving. veraPDF validates the result and its text is compared before you get the file.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-pdfa",
   },
 };

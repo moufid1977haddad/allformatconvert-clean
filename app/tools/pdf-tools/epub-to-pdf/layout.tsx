@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "EPUB to PDF — Parse Your Ebook's Chapters, Images," },
-  description: "EPUB to PDF reads your ebook's chapters, images, stylesheets and cover in your browser, then our own conversion service prints them to a real PDF and deletes them right after.",
+  title: { absolute: "EPUB to PDF — Convert an Ebook to a Printable PDF Free" },
+  description: "Convert an EPUB ebook without DRM to PDF. Your browser gathers the chapters, images and cover, and our Chromium service prints them as pages.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/epub-to-pdf" },
   openGraph: {
-    title: "EPUB to PDF — Parse Your Ebook's Chapters, Images,",
-    description: "EPUB to PDF reads your ebook's chapters, images, stylesheets and cover in your browser, then our own conversion service prints them to a real PDF and deletes them right after.",
+    title: "EPUB to PDF — Convert an Ebook to a Printable PDF Free",
+    description: "Convert an EPUB ebook without DRM to PDF. Your browser gathers the chapters, images and cover, and our Chromium service prints them as pages.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/epub-to-pdf",
   },
 };

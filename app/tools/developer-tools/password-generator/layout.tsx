@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Password Generator — Build a Random Password Online Free" },
-  description: "Password Generator builds a random password from the character sets you select, using a cryptographically secure random number source.",
+  title: { absolute: "Password Generator — Random Passwords and EFF Passphrases" },
+  description: "Generate 1 to 50 random passwords of 8 to 64 characters or passphrases from the EFF word list, made with crypto.getRandomValues, with a strength estimate.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/password-generator" },
   openGraph: {
-    title: "Password Generator — Build a Random Password Online Free",
-    description: "Password Generator builds a random password from the character sets you select, using a cryptographically secure random number source.",
+    title: "Password Generator — Random Passwords and EFF Passphrases",
+    description: "Generate 1 to 50 random passwords of 8 to 64 characters or passphrases from the EFF word list, made with crypto.getRandomValues, with a strength estimate.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/password-generator",
   },
 };

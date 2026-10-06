@@ -64,22 +64,29 @@ export default function JsonToTomlPage() {
       </div>
       <SeoContent
         title="JSON to TOML"
-        description="JSON to TOML converts a JSON object into valid TOML using the smol-toml library, entirely in your browser — nothing is uploaded to a server. Nested objects convert into TOML tables at any depth, arrays become proper TOML array syntax (including arrays of tables), and numbers, booleans, and ISO date strings are typed correctly rather than left as quoted text."
-        howTo={[
-          "Paste a JSON object into the input box (the top level must be an object, not an array).",
-          "Click 'Convert' to generate TOML text.",
-          "The output is copy-paste-ready TOML, including nested tables and arrays.",
-          "Click 'Copy' to copy the result to your clipboard."
-        ]}
-        faqs={SEO.faqs}
+        description={"JSON to TOML writes a pasted JSON object as a TOML file, the format of Cargo.toml and pyproject.toml. Nested objects become [section] tables, arrays of objects become [[section]] arrays of tables, and other arrays stay inline. Strings, numbers and booleans keep their types; a date written as a JSON string stays a quoted string. TOML has no null, so a null value on a key is left out and a null inside an array stops the conversion. Integers beyond the TOML range are written as quoted text with a notice. smol-toml writes the TOML inside your browser tab."}
         example={SEO.example}
-        related={SEO.related}
-        tips={[
-          "Wrap top-level arrays in an object first (e.g. { \"items\": [...] }), since TOML itself has no concept of a top-level array.",
-          "Remove any null values inside arrays before converting — TOML can't represent them there.",
-          "ISO 8601 date strings in your JSON convert to TOML's native date-time type automatically.",
-          "Always validate the output with a TOML linter or parser before using it in a real configuration file."
+        howToTitle="How to convert JSON to TOML"
+        howTo={[
+          "Paste a JSON object, not an array, into \"JSON Input\".",
+          "Click \"Convert\".",
+          "Read the TOML in \"TOML Output\" and any notice about numbers written as text.",
+          "Click \"Copy\", or \"Download\" to save data.toml.",
         ]}
+        specs={[
+          { label: "Input", value: "JSON object at the top level" },
+          { label: "Output", value: "TOML text, file data.toml" },
+          { label: "Integers", value: "up to 9,223,372,036,854,775,807; larger ones become quoted text" },
+          { label: "null", value: "left out on a key, refused inside an array" },
+        ]}
+        privacy={"smol-toml writes the TOML in your browser; the JSON you paste is not uploaded, and the TOML stays on the page until you copy it or save data.toml. Error reports, whether or not a message is shown, carry the cleaned error text, the error type, the tool name and your browser name and version."}
+        faqs={[
+          { q: "Can TOML hold a JSON null?", a: "No. TOML has no null type, so a key whose value is null is simply left out. A null inside an array cannot be dropped without changing the array, so the tool stops with the message arrays cannot contain null or undefined values." },
+          { q: "Can I convert a JSON array?", a: "No, not at the top level: a TOML document is a table of keys, so the tool asks you to wrap the array in an object, for example under an items key. Arrays inside the object are converted normally." },
+          { q: "Are ISO date strings turned into TOML dates?", a: "No. JSON has no date type, so 2024-01-15 arrives as a string and is written in quotes, as the example shows. Remove the quotes by hand if you want a TOML date." },
+          { q: "Are very large numbers kept?", a: "Yes, digit for digit. An integer above 9,223,372,036,854,775,807, or a float beyond the range of a double, cannot be a TOML number, so it is written as quoted text and a notice names the key." },
+        ]}
+        related={SEO.related}
       />
     </div>
   );

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "AI Translator — Translate AI Online Free" },
-  description: "AI Translator is a free online translation tool powered by OpenAI's GPT-4o mini model.",
+  title: { absolute: "AI Translator — Translate Text into 10 Languages" },
+  description: "Translate pasted text into one of ten languages, from English and Spanish to Arabic, Chinese and Japanese. No need to pick the source language.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/ai-translator" },
   openGraph: {
-    title: "AI Translator — Translate AI Online Free",
-    description: "AI Translator is a free online translation tool powered by OpenAI's GPT-4o mini model.",
+    title: "AI Translator — Translate Text into 10 Languages",
+    description: "Translate pasted text into one of ten languages, from English and Spanish to Arabic, Chinese and Japanese. No need to pick the source language.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/ai-translator",
   },
 };

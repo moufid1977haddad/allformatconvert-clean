@@ -96,22 +96,31 @@ export default function DuplicateImageFinderPage() {
       </div>
       <SeoContent
         title={"Duplicate Image Finder"}
-        description={"Duplicate Image Finder compares a batch of images entirely in your browser — nothing is uploaded. It finds identical files (same SHA-256 fingerprint) and also the same picture saved differently — resized, re-compressed, converted from PNG to JPG — using a perceptual difference hash (dHash, the method of the imagehash library): two images are reported as the same picture when at most 6 of their 64 hash bits differ (Normal), or 3 (Strict) or 10 (Loose), as you choose. Results appear only after you click Find Duplicates."}
+        description={"Duplicate Image Finder compares a set of pictures you select and lists the pairs that are the same. Identical files are found by their SHA-256 fingerprint. The same picture saved differently, resized, re-compressed or converted from PNG to JPG, is found with a difference hash (dHash, the method of the imagehash library): each image is shrunk to a tiny gray thumbnail and turned into 64 bits, and two images count as the same picture when only a few bits differ. The tool only lists pairs; it never deletes or moves your files. The fingerprints and hashes are computed in your browser."}
+        howToTitle={"How to find duplicate images"}
         howTo={[
-          "Click the upload area and select several images at once.",
-          "Click 'Find Duplicates'.",
-          "Red lines are identical files; amber lines are the same picture in another size, quality or format, with how many of the 64 hash bits match.",
-          "Delete the copies you don't need from your device."
+          "Click the upload box and select several images at once; a new selection replaces the previous one.",
+          "Pick a level in \"Same picture when\": Strict, Normal (the default) or Loose.",
+          "Click \"Find Duplicates\".",
+          "Read the list: red \"Identical files\" lines are byte-for-byte copies, amber \"Same picture\" lines show how many of the 64 hash bits match; delete the extras yourself.",
         ]}
+        specs={[
+          { label: "Input", value: "Two or more pictures the browser can open (JPG, PNG, WebP, GIF, BMP, AVIF); others are compared for exact copies only" },
+          { label: "Levels", value: "Strict: up to 3 differing bits; Normal: up to 6; Loose: up to 10, out of 64 bits" },
+          { label: "Very large pictures", value: "Above 268 megapixels a picture is not decoded and is compared for exact copies only" },
+          { label: "Empty files", value: "Left out of the comparison, with a message naming them" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The SHA-256 fingerprints and the perceptual hashes are computed by this page in your browser; the pictures are not uploaded and nothing on your device is deleted or moved. The list vanishes when you close the tab. If a message is displayed, its text, stripped of file names, is reported to us along with the tool's name and the browser's name and version."}
         faqs={[
-          { q: "Is Duplicate Image Finder free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it find resized or re-saved copies?", a: "Yes — besides byte-identical files, it compares a perceptual hash, so the same photo resized, re-compressed or converted to another format is reported as the same picture." },
-          { q: "Can it be fooled?", a: "Heavily edited copies (cropped, rotated, filtered) may not be matched, and two very plain images (for example two blank pages) can look alike to the hash; check the thumbnails before deleting anything." },
-          { q: "Are my images uploaded?", a: "No — everything is computed in your browser." }
+          { q: "Does it find resized or re-saved copies?", a: "Yes. Besides byte-identical files, it compares a perceptual hash of each picture, so the same photo resized, saved at another JPG quality or converted to another format is listed as \"Same picture\" with its count of matching bits." },
+          { q: "Which level should I choose?", a: "6 differing bits is the Normal level, the default, and it suits resized or re-compressed copies. Strict accepts three and lists only near-identical pictures; Loose accepts ten and also catches lightly edited copies, with more false matches." },
+          { q: "Can it be fooled?", a: "Yes. A cropped, rotated or heavily filtered copy may be missed, and two very plain images, such as two blank pages, can look alike to the hash. Transparent areas count as white. Look at the thumbnails before deleting anything." },
+          { q: "Does it delete the duplicates?", a: "No. It lists the pairs by file name only. Delete or move the extra copies yourself in your file manager or photo app; the page cannot touch the files on your device." },
         ]}
         tips={[
-          "Compare one folder at a time for the clearest results.",
-          "An amber match between two files of different sizes usually means one is a smaller copy of the other: keep the larger one."
+          "The page shows names, not file sizes: compare the sizes in your file manager to keep the larger copy.",
+          "Open a \"Same picture\" pair in Image Comparison to see which pixels differ.",
         ]}
       />
     </div>

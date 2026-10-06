@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF to HTML — Extract Each Page's Plain Text Online Free" },
-  description: "PDF to HTML extracts each page's plain text and wraps it in a simple generic HTML page, entirely in your browser.",
+  title: { absolute: "PDF to HTML — Extract PDF Text into a Simple HTML Page" },
+  description: "Pull the text of every PDF page into a plain HTML file with one section per page. PDF.js reads it in your browser; layout and images are not kept.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-html" },
   openGraph: {
-    title: "PDF to HTML — Extract Each Page's Plain Text Online Free",
-    description: "PDF to HTML extracts each page's plain text and wraps it in a simple generic HTML page, entirely in your browser.",
+    title: "PDF to HTML — Extract PDF Text into a Simple HTML Page",
+    description: "Pull the text of every PDF page into a plain HTML file with one section per page. PDF.js reads it in your browser; layout and images are not kept.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-html",
   },
 };

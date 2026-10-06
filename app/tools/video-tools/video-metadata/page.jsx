@@ -30,7 +30,7 @@ export default function VideoMetadataPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Video Metadata</h1>
-        <p className="text-neutral-500 text-center mb-8">Codecs, bitrate, frame rate, resolution, audio tracks and tags of any video — read in your browser, nothing uploaded</p>
+        <p className="text-neutral-500 text-center mb-8">Codecs, bitrate, frame rate, resolution, audio tracks and tags of a video file — read in your browser, nothing uploaded</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputEl && inputEl.click()}>
@@ -44,26 +44,32 @@ export default function VideoMetadataPage() {
       </div>
       <SeoContent
         title="Video Metadata"
-        description="Video Metadata shows the full technical report of a video file — container, duration, overall bitrate, and for each stream the codec and profile, resolution, display aspect, frame rate, pixel format, color, rotation, bitrate, audio sample rate and channels, subtitle and audio languages — plus tags and chapters, read by ffprobe running in your browser. Nothing is uploaded, and the file is read from your disk in pieces, so its size does not matter. The report can be copied or downloaded as JSON."
+        description={`Video Metadata reads the full technical report of one video file with ffprobe running in your browser: container, duration and overall bitrate; for each video stream the codec and profile, resolution, display aspect, frame rate, pixel format, color and rotation; for each audio track the codec, sample rate, channels and language; subtitle tracks, tags such as the creation date, and chapters. It reads MP4, MOV, MKV, WebM, AVI, WMV, FLV, MPEG, TS and more, even when the browser cannot play them. "Remove the metadata (no re-encoding)" saves a copy without location, dates, device tags, chapters, subtitle or data tracks.`}
+        howToTitle="How to check a video file's metadata"
         howTo={[
-          "Click the upload area and select a video file (MP4, MOV, MKV, WebM, AVI, WMV, FLV, MPEG, TS and more).",
-          "The report appears in a few seconds (the first time also loads the ~10 MB reading engine).",
-          "Read the general information, then each stream: video, audio tracks, subtitles.",
-          "Copy or download the full report as JSON if you need every field."
+          `Pick or drop a video file; on an iPhone, pick it from Files to read the original.`,
+          `Wait for ffprobe to finish; the engine it runs on, about 10 MB, loads on the first visit only.`,
+          `Read "General", each "Stream", and "Tags" and "Chapters" when the file has them.`,
+          `Copy every field with "Copy full report (JSON)", or press "Download" for the same data as a file.`,
+          `To strip location and other tags, click "Remove the metadata (no re-encoding)", then "Download" the copy.`,
         ]}
+        specs={[
+          { label: `Input formats`, value: `MP4, M4V, MOV, QT, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS` },
+          { label: `Report`, value: `Video, audio and subtitle streams listed one by one; full ffprobe JSON on request` },
+          { label: `Clean copy output`, value: `Same container; video and audio copied unchanged; tags, chapters, subtitle and data tracks removed` },
+          { label: `Maximum file size`, value: `Report: none set by the page, as the file is read from disk in pieces. Clean copy: 2 GB.` },
+          { label: `On iPhone and iPad`, value: `A video chosen from Photos arrives already re-encoded by iOS; choose it from Files to read the original.` },
+        ]}
+        privacy={`ffprobe reads the video and ffmpeg writes the clean copy inside your browser tab, both compiled to WebAssembly and downloaded from unpkg.com on first use; no frame or sound of the video leaves the device. If making the clean copy fails, its error text, cleaned of your file name, is logged by us with your browser's name and version.`}
+        privacyTitle="Where your video is processed"
         faqs={[
-          { q: "What information does it show?", a: "Container, duration and overall bitrate; for each video stream the codec, profile, resolution, display aspect, frame rate, pixel format, color and rotation; for each audio track the codec, sample rate, channels and language; subtitle tracks; tags (title, creation date, encoder…) and chapters." },
-          { q: "What video formats are supported?", a: "Everything ffmpeg can read, including formats your browser cannot play (AVI, WMV, FLV…): for those there is no preview player, but the report is complete." },
-          { q: "Can I download a metadata report?", a: "Yes: copy it or download it as a JSON file — ffprobe's complete output, every field included." },
-          { q: "Is there a size limit?", a: "No: the file is read from your disk in pieces, never copied whole into memory." },
-          { q: "Can I remove the location and other metadata from a video?", a: "Yes: 'Remove the metadata' writes a copy without its location (the GPS position an iPhone or Android phone records), dates, device, title and comment tags and chapters. The picture and sound are copied as they are — no re-encoding, no quality lost — and the copy is made in your browser. Subtitle and data tracks are left out (a drone or dashcam can write its position there). A Motion JPEG or AVCHD (.mts) video can also keep data inside each picture: the page says so, and only re-encoding removes it." },
-          { q: "Is my file uploaded anywhere?", a: "No. ffprobe (part of ffmpeg, compiled to WebAssembly) runs in your browser; your file never leaves your device." }
+          { q: `Can I remove the GPS location from a phone video?`, a: `Yes. "Remove the metadata (no re-encoding)" writes a copy without location, dates, device, title and comment tags or chapters, and leaves out subtitle and data tracks where drones and dashcams store positions. Motion JPEG and AVCHD (.mts) files can keep data inside each picture; the page warns you, since only re-encoding removes it.` },
+          { q: `Does it show a phone video's rotation?`, a: `Yes, when the file carries a rotation flag: the "Rotation" row then shows the angle, which explains why a video stored in landscape can play sideways in some players. The row is left out when there is no rotation.` },
+          { q: `How large a video can it read?`, a: `2 GB for the clean copy, which the browser tab has to write in full; the report itself is not capped, because ffprobe reads only the parts it needs from disk.` },
+          { q: `Does it read the original file on an iPhone?`, a: `No, not when you pick from Photos: iOS hands the page a re-encoded copy, so size, bitrate and tags differ. Save the video to Files first and choose it there; the page shows this note on iPhone and iPad.` },
         ]}
         tips={[
-          "“Rotation” explains why a phone video plays sideways in some players: the picture is stored landscape with a rotation flag.",
-          "Compare the overall bitrate of two versions of a video to see which one kept more quality.",
-          "The frame rate and pixel format tell you whether a video will play smoothly on older devices (e.g. 60 fps or 10-bit HDR).",
-          "Download the JSON report to keep a record of a file's exact technical details."
+          `If the bitrate shown is far higher than you need for sharing, shrink the file with Video Compressor.`,
         ]}
       />
     </div>

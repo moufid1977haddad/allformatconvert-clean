@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Text Sorter — Organize Lines of Text Alphabetically (a-z" },
-  description: "Text Sorter organizes lines of text alphabetically (A-Z or Z-A), by line length, or in random order, entirely in your browser.",
+  title: { absolute: "Text Sorter — Sort Lines A-Z, by Length, Number or Random" },
+  description: "Sort lines in dictionary order, by length or by leading number, or shuffle them. Item 2 comes before item 10, and capitals sort with lower case.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/text-sorter" },
   openGraph: {
-    title: "Text Sorter — Organize Lines of Text Alphabetically (a-z",
-    description: "Text Sorter organizes lines of text alphabetically (A-Z or Z-A), by line length, or in random order, entirely in your browser.",
+    title: "Text Sorter — Sort Lines A-Z, by Length, Number or Random",
+    description: "Sort lines in dictionary order, by length or by leading number, or shuffle them. Item 2 comes before item 10, and capitals sort with lower case.",
     url: "https://www.onlineconvertools.com/tools/text-tools/text-sorter",
   },
 };

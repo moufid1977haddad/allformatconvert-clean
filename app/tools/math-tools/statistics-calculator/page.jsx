@@ -72,24 +72,39 @@ export default function StatisticsCalculatorPage() {
       </div>
       <SeoContent
         title={"Statistics Calculator"}
-        description={"Statistics Calculator computes count, sum, mean (arithmetic, geometric, harmonic), median, mode, range, quartiles (inclusive or exclusive) and IQR, sample and population standard deviation and variance, standard error, coefficient of variation, skewness, kurtosis and outliers for a list of numbers, entirely in your browser. Values can be separated by commas, spaces, tabs or new lines (paste a spreadsheet column directly); any entry that isn't a number is listed instead of being silently skipped or partly read. Results are shown to 12 significant digits, so small values are never rounded to 0."}
+        description={`Statistics Calculator describes a list of numbers with 23 values: count, sum, the arithmetic, geometric and harmonic means, median, mode, range, sample and population standard deviation and variance, Q1, Q3 and the interquartile range by the inclusive or exclusive method, standard error, coefficient of variation, Excel-style skewness and excess kurtosis, sum of squares, outliers by the 1.5 × IQR rule, minimum and maximum. Separate the numbers with commas, spaces, tabs, semicolons or new lines. Results show 12 significant digits, and an entry that is not a number stops the calculation with a message naming it.`}
+        example={{
+          caption: 'A list of eight numbers and part of the grid the page shows (the page\'s own statistics code, run in Node on October 6, 2026).',
+          inputLabel: 'Numbers (Quartile method: Inclusive)',
+          input: '2, 4, 4, 4, 5, 5, 7, 9',
+          outputLabel: 'Some of the results',
+          output: 'Mean 5 · Median 4.5 · Mode 4 (×3)\nSample std dev (s) 2.1380899353\nPopulation std dev (σ) 2\nQ1 4 · Q3 5.5 · IQR 1.5 (Exclusive: Q1 4, Q3 6.5)\nCoefficient of variation 42.761798706 %\nSkewness 0.818487553357 · Excess kurtosis 0.940625\nOutliers 9',
+        }}
+        howToTitle="How to calculate mean, median and standard deviation"
         howTo={[
-          "Paste or type your numbers, separated by commas, spaces or new lines.",
-          "Click 'Calculate'.",
-          "Read every statistic in the grid; use the sample standard deviation for a sample of a larger population, the population one when you have every value.",
-          "Fix any value reported as 'Not a number' and calculate again."
+          'Paste or type the numbers, separated by commas, spaces, tabs, semicolons or new lines, with a dot for decimals.',
+          `Leave "Quartile method" on the inclusive option, as in Excel QUARTILE.INC, or pick the exclusive one used by Minitab and SPSS.`,
+          `Click "Calculate" and read the grid; changing the quartile method afterwards recalculates at once.`,
+          `If the page lists entries after "Not a number", correct them and click "Calculate" again.`,
         ]}
+        specs={[
+          { label: 'Separators', value: 'Commas, spaces, tabs, semicolons and new lines; a dot for decimals' },
+          { label: 'Statistics', value: '23 values, from count and sum to skewness, kurtosis and outliers' },
+          { label: 'Quartiles', value: 'Inclusive (Excel QUARTILE.INC) or Exclusive (Excel QUARTILE.EXC, Minitab, SPSS); exclusive quartiles need enough values' },
+          { label: 'Undefined values', value: 'Shown as —; the reason is written for the geometric and harmonic means, the quartiles, skewness and kurtosis' },
+          { label: 'Entries that are not numbers', value: 'The list is refused and the first five such entries are named' },
+        ]}
+        privacyTitle="Where your numbers are processed"
+        privacy="Every statistic is computed in your browser, and your numbers are not uploaded. If some entries are not numbers, the error message that names up to five of them is sent, cleaned, to our error log with the tool's name and your browser's name and major version; the valid numbers are never part of it."
         faqs={[
-          { q: "Is Statistics Calculator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Sample or population standard deviation?", a: "Both are shown. The sample SD (divides by n − 1) estimates the spread of a larger population from a sample; the population SD (divides by n) describes exactly the values you entered." },
-          { q: "What if no value repeats?", a: "The mode is reported as 'None' instead of listing every value." },
-          { q: "How are quartiles calculated?", a: "By default with the inclusive method of Excel's QUARTILE.INC (calculator.net's default). Choose Exclusive for Excel's QUARTILE.EXC, the method of Minitab and SPSS; with very few values it is undefined, and the page says so." },
-          { q: "Does it give skewness, kurtosis and outliers?", a: "Yes: skewness and excess kurtosis as Excel's SKEW and KURT compute them, the geometric and harmonic means (for positive values), the standard error, the coefficient of variation, the interquartile range, and the outliers by the 1.5 × IQR rule. A measure that is not defined for your data shows — with the reason." },
-          { q: "Is my data uploaded?", a: "No — all calculations happen in your browser." }
+          { q: 'Does it give both sample and population standard deviation?', a: 'Yes. The sample value s divides by n − 1 and estimates a larger population from your sample; the population value σ divides by n and describes exactly the numbers you entered. With a single number, s and the sample variance show —.' },
+          { q: 'Can I match the quartiles of Excel?', a: 'Yes. Inclusive, the default, follows QUARTILE.INC and calculator.net; Exclusive follows QUARTILE.EXC, Minitab and SPSS. For 2, 4, 4, 4, 5, 5, 7, 9, Q3 is 5.5 with the inclusive method and 6.5 with the exclusive one. With too few values the exclusive quartiles are undefined, and the page says so.' },
+          { q: 'How are outliers found?', a: '1.5 × IQR beyond the quartiles: a value below Q1 − 1.5 × IQR or above Q3 + 1.5 × IQR is listed. In 2, 4, 4, 4, 5, 5, 7, 9 that flags 9. Because the IQR comes from the quartiles, the list can change with the quartile method.' },
+          { q: 'What if no value repeats?', a: 'No mode is given: the Mode cell reads None (no value repeats). When several values tie for the most repeats, all of them are listed, followed by how many times each one appears in your list.' },
+          { q: 'Can I paste numbers with thousands separators?', a: 'No. A comma separates values, so 1,000 is read as two numbers, 1 and 0, and 2,5 as 2 and 5. Remove thousands separators and write decimals with a dot before you calculate.' },
         ]}
         tips={[
-          "Numbers with a comma as thousands separator (1,000) are read as two values — remove the separator first.",
-          "Use a dot for decimals: 2.5, not 2,5."
+          'Paste a spreadsheet column as it is: the line breaks between cells already separate the values.',
         ]}
       />
     </div>

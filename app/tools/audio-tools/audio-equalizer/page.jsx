@@ -192,25 +192,30 @@ export default function AudioEqualizerPage() {
       </div>
       <SeoContent
         title="Audio Equalizer"
-        description="Audio Equalizer lets you shape an audio file's bass, mid, and treble in real time as it plays, then export the equalized result as a downloadable WAV file — using the Web Audio API entirely in your browser. Export renders the file offline through the same filter settings, so you don't need to play it back in real time to get the processed file."
+        description={`Audio Equalizer has three bands: a low shelf at 200 Hz (Bass), a peak at 1 kHz (Mid) and a high shelf at 3 kHz (Treble), each adjustable from -12 to +12 dB. Press play and the sliders act on the sound live; "Export as WAV" then renders the whole file through the same settings, without real-time playback. If your settings push the sound past full scale, the export lowers the whole file just enough and says by how many dB. WMA, AC3 and AMR files, which browsers cannot decode, are first read by ffmpeg.wasm. The export is always a 16-bit WAV.`}
+        howToTitle="How to equalize an audio file"
         howTo={[
-          "Click the upload area and select an audio file.",
-          "Press play on the audio player to preview changes live.",
-          "Adjust the Bass, Mid, and Treble sliders (-12dB to +12dB) while it plays.",
-          "Click \"Export as WAV\" to render the equalized audio at your current slider settings and download it."
+          `Pick or drop an audio file; a player appears above the three sliders.`,
+          `Press play, then move the "Bass", "Mid" and "Treble" sliders while you listen.`,
+          `Click "Export as WAV" to render the file with the current settings.`,
+          `Listen to the result, then click "Download" to save equalized_ followed by your file name, as WAV.`,
         ]}
+        specs={[
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Output format`, value: `WAV, 16-bit PCM, at the sample rate your browser decodes at` },
+          { label: `Bands`, value: `Bass: low shelf at 200 Hz · Mid: peak at 1 kHz · Treble: high shelf at 3 kHz · each from -12 to +12 dB` },
+          { label: `File size`, value: `Set by your device's memory: the whole file is decoded before export.` },
+        ]}
+        privacy={`The Web Audio API applies the three filters on your device, both for the live preview and for the exported WAV, which is assembled in this tab; ffmpeg.wasm, downloaded from unpkg.com, steps in only when your browser cannot decode the file itself (WMA, AC3 or AMR, for example). The audio itself is not uploaded. When the page shows an error, that message, cleaned, goes to our error log with the tool name and your browser's name and version.`}
         faqs={[
-          { q: "Can I download the equalized audio file?", a: "Yes — click \"Export as WAV\" to render the audio through your current Bass/Mid/Treble settings and get a downloadable WAV file, independent of what's currently playing." },
-          { q: "Can I save my EQ settings as a preset?", a: "Not currently — each adjustment only applies to the current session; there's no saved-preset feature." },
-          { q: "What format is the exported file?", a: "Always WAV, regardless of the format you uploaded." },
-          { q: "What audio formats can I upload?", a: "Any common audio format: MP3, WAV, OGG, FLAC, M4A, and also WMA, AC3 or AMR — those cannot be previewed live in a browser, but \"Export as WAV\" decodes them with ffmpeg.wasm and applies the equalizer." },
-          { q: "Is my file uploaded anywhere?", a: "No. Everything happens locally in your browser via the Web Audio API — your file is never uploaded to a server." }
+          { q: `Can I hear the changes before exporting?`, a: `Yes. Start the player above the sliders: every move of Bass, Mid or Treble changes the sound at once. Formats your browser cannot play, such as WMA or AMR, have no live preview, but "Export as WAV" still applies the settings to the whole file.` },
+          { q: `Will a big bass boost make the export distort?`, a: `No. If the rendered sound goes past full scale, the whole file is lowered just enough before saving, and the page tells you by how many dB. The live preview has no such protection, so it may crackle at high settings while the export stays clean.` },
+          { q: `Can I save the result as MP3?`, a: `No, the export is always a 16-bit WAV, at the sample rate your browser decodes at. Convert it afterwards with Audio Converter if you need MP3, FLAC or another format.` },
+          { q: `Can I save my settings as a preset?`, a: `No. The three sliders start at 0 dB on every visit and nothing is stored. Note the values if you want to apply the same curve to another file.` },
         ]}
         tips={[
-          "Make small adjustments and listen carefully — extreme boosts near ±12dB can introduce distortion audible in the exported file too.",
-          "Boost the bass shelf for warmth, cut the mid range to reduce muddiness, and boost treble for clarity and presence.",
-          "The exported WAV reflects whatever the sliders are set to at the moment you click \"Export as WAV\" — no need to have the track playing first.",
-          "WAV files are uncompressed and can be large — convert the download afterward with the Audio Converter if you need a smaller MP3."
+          `If the export note says the file was lowered, reduce the boosts a little to keep the original level.`,
+          `Open the exported WAV in Audio Waveform to see where the loudest peaks are.`,
         ]}
       />
     </div>

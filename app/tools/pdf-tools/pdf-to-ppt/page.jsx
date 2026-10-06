@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
-import { MAX_PDF_TO_WORD_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_PDF_TO_WORD_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
@@ -73,22 +73,27 @@ export default function PdfToPptPage() {
       </div>
       <SeoContent
         title="PDF to PowerPoint"
-        description="PDF to PowerPoint converts every page of your PDF into a slide of an editable .pptx presentation, with text and images you can move and change. In our tests on two presentation PDFs (bullets, an image, a chart, a gradient shape), every page became a slide with the same editable text boxes and images as the leading online PDF converter's result. The conversion is done by ConvertAPI, the same provider as our PDF to Word tool; your file is sent over HTTPS and deleted after conversion."
+        description={`PDF to PowerPoint rebuilds each page of a PDF as a slide in a .pptx presentation, with text boxes and images you can move and edit. The conversion is done by ConvertAPI, our provider. In our test of 23 September 2026 against iLovePDF on two presentation PDFs with bullets, an image, a chart and a gradient shape, both gave the same number of slides, of editable text boxes and of images. Text is editable only where the PDF contains real text.`}
+        howToTitle="How to convert PDF to PowerPoint"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Click 'Convert to .pptx'. Your file is uploaded securely for conversion; once the PowerPoint file is ready, click 'Download'.",
-          "Open the .pptx file in PowerPoint or a compatible app and check the result."
+          `Click or drop the PDF whose pages should become slides.`,
+          `Click "Convert to .pptx".`,
+          `When "PowerPoint file ready" appears, click "Download" to save the .pptx presentation.`,
         ]}
+        specs={[
+          { label: 'Input format', value: `PDF` },
+          { label: 'Output format', value: `PPTX, one slide per page` },
+          { label: 'Maximum file size', value: `${officeMaxLabel(MAX_PDF_TO_WORD_STAGED_BYTES)} per file` },
+          { label: 'Usage limits', value: `An allowance per network for each hour and each day, common to the site's paid tools, and a monthly budget for the site` },
+        ]}
+        privacy={`Your PDF is passed over HTTPS from our server to ConvertAPI, where it is converted with file storage disabled. A file larger than ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB is first sent in parts to our media service; that service removes the PDF when the conversion is over and the presentation once this page has received it, or after a time limit.`}
         faqs={[
-          { q: "Is PDF to PowerPoint free to use?", a: "Yes, it's free with no signup required." },
-          { q: "Will my PDF be uploaded to a server?", a: "Yes. Your file is sent over HTTPS to our conversion provider (ConvertAPI) to create the PowerPoint file, and deleted afterwards — it isn't stored." },
-          { q: "What does the output contain?", a: "A .pptx presentation with one slide per PDF page; text stays editable where the PDF contains real text." },
-          { q: "What is the file-size limit?", a: "Up to 99 MB per PDF." }
+          { q: `Will each PDF page become a slide?`, a: `Yes. The presentation has one slide per page, in page order. In our comparison with iLovePDF on 23 September 2026, both tools gave the same slide count on the two test files.` },
+          { q: `Can I edit the text in PowerPoint?`, a: `Yes, where the PDF holds real text: it comes back in text boxes you can change, move or restyle. Pictures come back as images that you can move, resize or replace.` },
+          { q: `Does a big PDF count against a limit?`, a: `Yes, every PDF does, whatever its size: each conversion is a paid call to ConvertAPI, counted in your network's hourly and daily allowance and in the site's monthly budget. A message tells you when the next conversion is possible.` },
         ]}
         tips={[
-          "Works best on PDFs exported from a presentation (PowerPoint, Keynote, Google Slides).",
-          "Check fonts after converting — a font missing on your computer is replaced by a similar one.",
-          "Keep the tab open until the Download button appears — large files take longer."
+          `Want pictures of the pages rather than editable slides? Use PDF to JPG instead.`,
         ]}
       />
     </div>

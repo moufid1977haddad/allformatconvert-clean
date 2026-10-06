@@ -53,7 +53,7 @@ export default function PdfRotatePage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Rotate PDF Pages</h1>
-        <p className="text-neutral-500 text-center mb-8">Rotate all pages of a PDF in your browser</p>
+        <p className="text-neutral-500 text-center mb-8">Rotate all or some pages of a PDF in your browser</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PDF" />}</p>
@@ -84,23 +84,29 @@ export default function PdfRotatePage() {
       </div>
       <SeoContent
         title="PDF Rotate"
-        description="PDF Rotate rotates the pages you choose (or all of them) by 90° clockwise, 180° or 90° counter-clockwise, using the pdf-lib library entirely in your browser. Your file is never uploaded to a server. The angle is added to each page's current orientation, so a page that was already turned keeps turning the way you asked."
+        description={`PDF Rotate turns pages of a PDF by 90° clockwise, 180° or 90° counter-clockwise. Leave the page field empty to turn the whole document, or list pages and ranges such as 2, 5-7 or 8- to turn only those. The angle is added to each page's current orientation, so a page that was already turned keeps turning the way you ask. Only the page's rotation setting changes; text and pictures are not redrawn. One angle applies per run. pdf-lib applies the turn in your browser.`}
+        howToTitle="How to rotate pages in a PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Choose a rotation: 90° clockwise, 180° or 90° counter-clockwise.",
-          "Leave 'Pages' empty to rotate every page, or type pages like 1-3, 5.",
-          "Click 'Rotate PDF'.",
-          "Click 'Download' to save the rotated file."
+          `Choose the PDF.`,
+          `Click "90° clockwise", "180°" or "90° counter-clockwise".`,
+          `Leave "Pages" empty for every page, or list the pages to turn.`,
+          `Click "Rotate PDF": the pages you listed come out turned in the -rotated.pdf file under "Download".`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF` },
+          { label: 'Angles', value: `90° clockwise, 180°, 90° counter-clockwise` },
+          { label: 'Pages', value: `All, or a list such as 2, 5-7, 8-` },
+          { label: 'Content', value: `Not redrawn: only the page's rotation value changes` },
+          { label: 'Result', value: `Your file name followed by -rotated.pdf` },
+        ]}
+        privacy={`The rotation is written by pdf-lib in your browser and your PDF is not sent to our servers. Only the rotation value of each chosen page changes; a PDF with print or copy restrictions is decrypted in your browser first, so the rotated copy carries none, and a PDF that asks for a password to open is refused.`}
         faqs={[
-          { q: "Is PDF Rotate free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I rotate only some pages?", a: "Yes — type them in 'Pages' (for example 2, 5-7). Run the tool again on the result to turn other pages another way." },
-          { q: "What rotation angles are available?", a: "90° clockwise, 180° and 90° counter-clockwise, added to each page's current orientation." },
-          { q: "Is my file uploaded to a server?", a: "No, rotation happens entirely in your browser using the pdf-lib library." }
+          { q: "Can I rotate only one page?", a: `Yes. Type its number in Pages, for example 4, and only that page turns. To turn other pages a different way, run the tool again on the downloaded file with another angle and page list.` },
+          { q: "Does the angle replace a page's current rotation?", a: `No. The angle you choose is added to its current orientation. A page displayed at 90° and turned 90° clockwise again ends up at 180°, upside down from where it started; choose 90° counter-clockwise to bring it back instead.` },
+          { q: "Does rotating reduce quality?", a: `No. The tool only changes each page's rotation setting; the text, vector drawings and pictures inside are not redrawn or recompressed, so nothing is lost at any of the three angles.` },
         ]}
         tips={[
-          "There's no preview, so download and check a page or two before using the result for something important.",
-          "Rotation changes the page's orientation setting rather than redrawing content, so text and images stay sharp at any angle."
+          `To turn several pages in different directions in one pass, PDF Organize rotates each page with its own button.`,
         ]}
       />
     </div>

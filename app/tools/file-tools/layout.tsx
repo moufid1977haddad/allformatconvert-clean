@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: { absolute: "File Tools — ZIP Compression, File Conversion, Base64 Online" },
-  description: "File Tools is a free online platform to convert, compress, and manage various file formats without any software installation.",
+  title: { absolute: "File Tools: Open Archives, Create ZIPs, Encrypt, Split Files" },
+  description: "Open ZIP, RAR, 7Z and TAR archives, create password-protected ZIPs, encrypt, split and compare files, and read a file's real format, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools" },
   openGraph: {
-    title: "File Tools — ZIP Compression, File Conversion, Base64 Online",
-    description: "File Tools is a free online platform to convert, compress, and manage various file formats without any software installation.",
+    title: "File Tools: Open Archives, Create ZIPs, Encrypt, Split Files",
+    description: "Open ZIP, RAR, 7Z and TAR archives, create password-protected ZIPs, encrypt, split and compare files, and read a file's real format, in your browser.",
     url: "https://www.onlineconvertools.com/tools/file-tools",
   },
 };

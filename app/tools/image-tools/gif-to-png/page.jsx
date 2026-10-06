@@ -7,6 +7,7 @@ import { checkedDataURL } from '../../../lib/mediaSupport';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { IOS_CANVAS_MAX_PIXELS } from '../../../lib/canvasLimit';
 export default function GIFtoPNGPage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -73,24 +74,29 @@ export default function GIFtoPNGPage() {
       </div>
       <SeoContent
         title="GIF to PNG"
-        description="GIF to PNG converts a GIF image to PNG format entirely in your browser using the HTML canvas — your file is never uploaded to a server. For an animated GIF, 'Convert' gives the first frame as a PNG, and 'Extract all frames' gives every frame, fully composited (transparency and disposal methods applied as a GIF player does), as numbered PNGs in a ZIP."
+        description={`GIF to PNG saves a GIF image as a PNG. A still GIF simply becomes a PNG. For an animated GIF there are two buttons: "Convert" keeps the first frame as one PNG, and "Extract all frames" gives every frame as its own PNG, numbered in playback order, in a single ZIP. Each extracted frame is the whole picture as a GIF player shows it at that moment, with transparency and disposal applied, not just the pixels that changed. The PNG files are still images: the animation itself is not kept. The frames are decoded and zipped on this page.`}
+        howToTitle="How to convert a GIF to PNG"
         howTo={[
-          "Click the upload area and select a GIF file from your device.",
-          "Click 'Convert' to render it to PNG.",
-          "Preview the converted image.",
-          "Click the download button to save your PNG file."
+          `Pick a .gif in the upload area; an animated GIF plays there as a preview.`,
+          `Click "Convert" to get the first frame as a PNG, then "Download".`,
+          `For an animation, click "Extract all frames" instead.`,
+          `Click "Download" next to gif-frames.zip; the PNG frames inside are numbered from the first frame to the last.`
         ]}
+        specs={[
+          { label: 'Input format', value: `GIF (.gif), still or animated, one file at a time` },
+          { label: 'Output', value: `One PNG (first frame), or a ZIP of PNG frames` },
+          { label: 'On iPhone and iPad', value: `Frame extraction stops with a message for a GIF larger than ${Math.floor(IOS_CANVAS_MAX_PIXELS / 1e5) / 10} megapixels` },
+          { label: 'On a computer', value: `Frame extraction up to 268 megapixels per frame; every frame is held in memory until the ZIP is made, so a long or large animation can run out of memory first` }
+        ]}
+        privacy={`Your GIF never leaves your device. The first frame is drawn by the browser itself; for frame extraction the gifuct-js decoder reads the animation on this page and fflate packs the PNG frames into the ZIP in memory. When a conversion fails, we receive the cleaned wording of the message, the tool's name and your browser's name and version.`}
         faqs={[
-          { q: "Is GIF to PNG completely free to use?", a: "Yes, it's 100% free with no registration required." },
-          { q: "Can it extract every frame from an animated GIF?", a: "Yes — click 'Extract all frames' to get every frame as a PNG, numbered in order, in one ZIP. Each frame is the full image as it appears in the animation, not just the changed pixels." },
-          { q: "Can I convert multiple GIFs at once?", a: "No, only one file can be converted at a time — there's no batch upload." },
-          { q: "Will my uploaded files be stored or shared?", a: "No. Conversion happens entirely in your browser — your file is never uploaded to a server." }
+          { q: "Can I get every frame of an animated GIF as a PNG?", a: `Yes. Click "Extract all frames" and download gif-frames.zip: it holds one PNG per frame, numbered in order. Each one is the full image at that point of the animation, so you can use any frame on its own.` },
+          { q: "Does \"Convert\" keep the animation?", a: `No. A PNG made here holds a single picture, so "Convert" saves the first frame only. To keep a moving image, keep the GIF, or make an animated PNG with GIF to APNG.` },
+          { q: "Do the PNG frames keep the GIF's transparent background?", a: `Yes. Pixels that are transparent in the GIF stay transparent in the PNG, both in the single frame and in every extracted frame.` },
+          { q: "Can I extract the frames on an iPhone?", a: `Yes, for GIFs up to ${Math.floor(IOS_CANVAS_MAX_PIXELS / 1e5) / 10} megapixels, the most an iPhone or iPad draws on one canvas. A bigger GIF gets a message asking you to use a computer.` }
         ]}
         tips={[
-          "To keep one particular frame of an animation, extract all frames and pick it from the ZIP.",
-          "PNG preserves transparency, so it's a good target format if your GIF uses a transparent background.",
-          "Convert one GIF at a time and download each result before starting the next.",
-          "Keep the original GIF as a backup in case you need the animation again later."
+          `To make an animated GIF lighter rather than split it, use GIF Compressor.`
         ]}
       />
     </div>

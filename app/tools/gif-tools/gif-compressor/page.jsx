@@ -90,26 +90,33 @@ export default function GifCompressorPage() {
       </div>
       <SeoContent
         title="GIF Compressor"
-        description="GIF Compressor shrinks your animated GIF's file size while keeping the animation intact, using gifsicle compiled to WebAssembly (gifsicle-wasm-browser) entirely in your browser — nothing is uploaded to a server. The quality slider controls gifsicle's lossy compression level: higher quality applies less lossy compression (relying mainly on lossless optimization), while lower quality allows more aggressive lossy compression for a smaller file."
+        description="GIF Compressor makes an animated GIF lighter with gifsicle, compiled to WebAssembly and run on this page. Three settings combine: the quality slider sets the lossy level of gifsicle, Colours reduces the palette, and Size scales every frame down. The animation, its frames and its timing are kept. The result shows the size before and after; when it is not smaller, the page says so and suggests keeping your original. Only GIF files are accepted: for PNG, JPG or WebP pictures, use Image Compressor."
+        howToTitle="How to compress a GIF"
         howTo={[
-          "Click the upload area and select a GIF file.",
-          "Adjust the quality slider — lower values compress more aggressively but can introduce visible noise — and optionally fewer colours or a smaller size.",
-          "Click \"Compress\" to process the file locally.",
-          "Review the before/after size comparison, preview the animated result, and download it."
+          "Choose the .gif to shrink; it plays above the settings.",
+          "Move the \"Quality\" slider: 100 keeps only the lossless optimization of gifsicle, lower values allow more lossy compression.",
+          "If needed, pick fewer \"Colours\" (128 down to 16) or a smaller \"Size\".",
+          "Click \"Compress\" and compare \"Before\" and \"After\".",
+          "Click \"Download\" to save compressed.gif."
         ]}
+        specs={[
+          { label: "Input", value: "GIF only (.gif)" },
+          { label: "Output", value: "GIF, saved as compressed.gif" },
+          { label: "Quality", value: "A slider from 10 to 100: at 100, lossless optimization only; at 10, the strongest lossy level" },
+          { label: "Colours", value: "Keep (up to 256), 128, 64, 32 or 16" },
+          { label: "Size", value: "Keep, 75%, 50%, 33% or 25% of the width and height" },
+          { label: "Picture size", value: `Up to ${OPENABLE_PIXELS / 1e6} megapixels (width × height of the GIF)` }
+        ]}
+        privacy="gifsicle runs as WebAssembly inside this page: the GIF is read from your device and the compressed copy stays in this page until you download it; nothing is uploaded. The gifsicle code is part of the site's own files. If something fails, the report sent to our error log holds the cleaned message, the tool name and your browser and its version, not the GIF."
         faqs={[
-          { q: "Does this reduce my GIF's file size while keeping it animated?", a: "Yes — it uses gifsicle's real GIF optimization and lossy compression, and the output stays a fully animated GIF." },
-          { q: "Can I reduce the colours or the size too?", a: "Yes: 'Colours' keeps 128, 64, 32 or 16 instead of up to 256 (flat graphics often look the same with far fewer), and 'Size' scales every frame to 75, 50, 33 or 25% — the two strongest ways to shrink a GIF after lossy compression." },
-          { q: "How much can I expect to save?", a: "It depends heavily on the source GIF and the quality setting — simple, few-color animations may shrink only modestly since they're already efficient, while complex or noisy ones can shrink substantially at lower quality settings." },
-          { q: "Will lower quality settings look noticeably worse?", a: "Yes, at more aggressive settings — gifsicle's lossy compression can introduce visible speckled noise, especially on flat-color areas. If that's noticeable, raise the quality slider and re-compress." },
-          { q: "Is GIF Compressor free to use?", a: "Yes, it's completely free with no signup and no limit on how many files you can process." },
-          { q: "Is my file uploaded anywhere?", a: "No. Processing happens entirely in your browser via WebAssembly — your file is never uploaded to a server." }
+          { q: "Will my GIF stay animated?", a: "Yes. gifsicle rewrites every frame with its delay; only the pixel data is optimized, simplified by the lossy setting, reduced in colors or scaled. The preview under the button plays the compressed version before you download it." },
+          { q: "Is lowering the quality the only way to shrink a GIF?", a: "No. \"Colours\" keeps 128, 64, 32 or 16 colors instead of up to 256, and \"Size\" scales every frame down. Flat graphics often look the same with far fewer colors. You can combine all three settings and compress again." },
+          { q: "Can the result be larger than my GIF?", a: "Yes, for a GIF that is already well optimized. The page then shows \"Larger by\" with a percentage and says so, so you can keep your original or lower the quality and try again." },
+          { q: "Will a low quality setting show noise?", a: "Yes, at low values: the lossy mode of gifsicle changes pixels so the data compresses better, which can look like speckles, mostly on flat color areas. Raise \"Quality\" and compress again if you see it." },
+          { q: "Is there a size limit?", a: `Yes: the picture of the GIF may be up to ${OPENABLE_PIXELS / 1e6} megapixels, read from its header before compression starts. The file size has no fixed limit; a large GIF needs more memory and time on your device.` }
         ]}
         tips={[
-          "Start around 70-80% quality and lower it only if you need a smaller file — gifsicle's lossy noise becomes more visible below that.",
-          "GIFs with fewer colors and simpler animation compress more predictably than photographic or noisy content.",
-          "The first compression after loading the page takes longer since the gifsicle WebAssembly module needs to download.",
-          "If the saved percentage is low, your source GIF may already be well-optimized — try a lower quality value to see the trade-off."
+          "The first compression on the page loads gifsicle, so it takes longer than the next ones."
         ]}
       />
     </div>

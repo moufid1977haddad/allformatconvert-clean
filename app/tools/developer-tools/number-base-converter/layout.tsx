@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Number Base Converter — Convert Number Bases Online Free" },
-  description: "Number Base Converter shows a number in binary, octal, decimal, and hexadecimal simultaneously, live as you type, in your browser.",
+  title: { absolute: "Hex, Binary & Octal Converter — Prefixes and BigInt Values" },
+  description: "Convert hex, binary, octal and decimal as you type. Paste 0xFF, 0b1010 or 0o17 with _ separators and get exact results beyond 2^64.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/number-base-converter" },
   openGraph: {
-    title: "Number Base Converter — Convert Number Bases Online Free",
-    description: "Number Base Converter shows a number in binary, octal, decimal, and hexadecimal simultaneously, live as you type, in your browser.",
+    title: "Hex, Binary & Octal Converter — Prefixes and BigInt Values",
+    description: "Convert hex, binary, octal and decimal as you type. Paste 0xFF, 0b1010 or 0o17 with _ separators and get exact results beyond 2^64.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/number-base-converter",
   },
 };

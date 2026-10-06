@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "URL Parser — Break a URL Into Its Components Online Free" },
-  description: "URL Parser breaks a URL into its components using the browser's native URL API, entirely in your browser.",
+  title: { absolute: "URL Parser — Split a URL into Host, Path and Query Params" },
+  description: "Break a URL into protocol, hostname, port, pathname, search and hash, with each query parameter decoded and repeated keys kept together.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/url-parser" },
   openGraph: {
-    title: "URL Parser — Break a URL Into Its Components Online Free",
-    description: "URL Parser breaks a URL into its components using the browser's native URL API, entirely in your browser.",
+    title: "URL Parser — Split a URL into Host, Path and Query Params",
+    description: "Break a URL into protocol, hostname, port, pathname, search and hash, with each query parameter decoded and repeated keys kept together.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/url-parser",
   },
 };

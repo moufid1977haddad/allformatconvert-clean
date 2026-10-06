@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Comparison — Show Two Images Stacked Online Free" },
-  description: "Image Comparison shows two images stacked with a draggable vertical divider, letting you slide between a 'before' and 'after' view to spot differences.",
+  title: { absolute: "Compare Two Images — Before/After Slider and Pixel Diff" },
+  description: "Compare two images with a before/after slider, or paint every changed pixel red with the share that differs. Up to 100 MP each, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-comparison" },
   openGraph: {
-    title: "Image Comparison — Show Two Images Stacked Online Free",
-    description: "Image Comparison shows two images stacked with a draggable vertical divider, letting you slide between a 'before' and 'after' view to spot differences.",
+    title: "Compare Two Images — Before/After Slider and Pixel Diff",
+    description: "Compare two images with a before/after slider, or paint every changed pixel red with the share that differs. Up to 100 MP each, in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-comparison",
   },
 };

@@ -158,14 +158,14 @@ export default function ExcelToJsonPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800 dark:text-white">Excel to JSON</h1>
         <p className="text-neutral-500 dark:text-neutral-400 text-center mb-2">Convert Excel files to JSON</p>
-        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports workbooks up to {maxRowsLabel} rows across all sheets{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). Conversion runs in the background — this tab stays responsive.</p>
+        <p className="text-neutral-500 dark:text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Supports workbooks up to {maxRowsLabel} rows across all sheets{isMobile ? ' on this device' : ''} (files up to {maxFileLabel}). The conversion runs in a background worker; the Cancel button stops it.</p>
         <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-600 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500 dark:text-neutral-400 text-sm">{fileName || <UploadPrompt what="an Excel, ODS, or CSV file" />}</p>
             <input ref={inputRef} type="file" accept=".xlsx,.xls,.csv,.ods" className="hidden" onChange={handleFile} />
           </div>
           {timeEstimate && !converting && !error && fileName && (
-            <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimated conversion time: {timeEstimate}</p>
+            <p className="text-center text-xs text-neutral-400 dark:text-neutral-500">Estimate from our tests on a desktop computer: {timeEstimate}</p>
           )}
           {sheetNames && sheetNames.length > 1 && (
             <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-sm rounded-lg px-4 py-3">
@@ -187,25 +187,30 @@ export default function ExcelToJsonPage() {
       </div>
       <SeoContent
         title="Excel to JSON"
-        description="Excel to JSON reads an uploaded .xlsx, .xls, .ods, or .csv file using the xlsx library and converts every sheet to an array of row objects, entirely in your browser — your file is never uploaded to a server. Reading and parsing run off the main thread in a Web Worker, so the page stays responsive even on large files, and the result is offered as a .json file to download. The result is a single JSON object keyed by sheet name, with each sheet's first row used as the property names for that sheet's rows. Date cells are written as ISO 8601 text (2024-01-15, or 2024-02-29T13:45:00 with a time) rather than Excel serial numbers, an empty cell keeps its property with the value null so every row has the same keys, and emoji written by Python tools such as pandas are preserved."
+        description={"Excel to JSON reads an .xlsx, .xls or .ods workbook, or a .csv file, and writes one JSON object whose keys are the sheet names. Each sheet becomes an array of row objects whose keys come from the sheet's first row, and every row has the same keys: an empty cell gives null. Date cells become ISO 8601 text, formulas give their saved result, and emoji saved by pandas or openpyxl are kept. A .csv file is read as plain text, so every value stays a string and its sheet is called Sheet1. Conversion starts when you choose the file, in your browser."}
+        example={{"caption":"A workbook with two sheets, Prices (date cells and formulas) and Notes (one empty cell), and the JSON the tool returns:","inputLabel":"Workbook","input":"Sheet Prices:\nItem | Price | Sold on | Total\nTea | 12.5 | 2024-01-15 (date cell) | =B2*2 → 25\nCoffee, ground | 1234.5 | 2024-02-15 (date cell) | =B3*2 → 2469\n\nSheet Notes:\nName | Note\nAnn | (empty)\nBob | call back","outputLabel":"JSON","output":"{\n  \"Prices\": [\n    {\n      \"Item\": \"Tea\",\n      \"Price\": 12.5,\n      \"Sold on\": \"2024-01-15\",\n      \"Total\": 25\n    },\n    {\n      \"Item\": \"Coffee, ground\",\n      \"Price\": 1234.5,\n      \"Sold on\": \"2024-02-15\",\n      \"Total\": 2469\n    }\n  ],\n  \"Notes\": [\n    {\n      \"Name\": \"Ann\",\n      \"Note\": null\n    },\n    {\n      \"Name\": \"Bob\",\n      \"Note\": \"call back\"\n    }\n  ]\n}"}}
+        howToTitle="How to convert Excel to JSON"
         howTo={[
-          "Click the upload area and select an .xlsx, .xls, .ods, or .csv file.",
-          "Conversion runs automatically in the background — no button click needed.",
-          "Once it's ready, click 'Download' to save converted.json.",
-          "Open it in a code editor or your target application."
+          "Choose an .xlsx, .xls, .ods or .csv file in the upload area; the conversion starts on its own.",
+          "If the workbook has several sheets, their names appear while it is read, and \"Cancel\" stops the work.",
+          "Click \"Download\" to save converted.json, indented with two spaces.",
         ]}
+        specs={[
+          { label: "Input", value: "XLSX, XLS, ODS or CSV file" },
+          { label: "Output", value: "JSON object with one array of row objects per sheet" },
+          { label: "On a computer", value: `up to ${MAX_FILE_SIZE_LABEL} and ${MAX_ROWS.toLocaleString('en-US')} rows across all sheets` },
+          { label: "On phones, iPhone and iPad", value: `up to ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows across all sheets` },
+        ]}
+        privacy={"Your spreadsheet is read by a background worker in your browser with the SheetJS library and is not uploaded. What can reach us is an error report: the error text after file names and quoted text are removed, the tool name, and the name and version of your browser."}
         faqs={[
-          { q: "What file formats does it support?", a: ".xlsx, .xls, .ods (OpenDocument Spreadsheet), and .csv." },
-          { q: "Is my file uploaded to a server?", a: "No, conversion happens entirely in your browser using the xlsx library, in a background Web Worker so the page never freezes." },
-          { q: "Can I convert multiple sheets at once?", a: "Yes — every sheet in the workbook is converted automatically, each becoming its own array under a key named after the sheet. There's no option to merge sheets or select specific ones." },
-          { q: "Why is there a row and file-size limit?", a: `Excel files can't be parsed incrementally the way plain text can, so converting a very large workbook risks the tab running out of memory or taking too long. Uploaded files are capped at ${maxRowsLabel} rows across all sheets combined and ${maxFileLabel}${isMobile ? ' on this device' : ' on desktop'}, measured to convert reliably.` },
-          { q: "Can I download the JSON as a file, or is it only shown on the page?", a: "As a file — click 'Download' to save converted.json once it's ready. There's no inline preview, since a large workbook's JSON output can be too big to safely render on the page." }
+          { q: "Are empty cells included?", a: "Yes, as null. Every row of a sheet has the same keys, so code that reads a Note property finds null instead of a missing key. Rows that are completely empty are skipped." },
+          { q: "Are dates converted to text?", a: "Yes, to ISO 8601: 2024-01-15, or 2024-02-29T13:45:00 when the cell has a time, with no time zone added. Without this step an Excel date would come out as a serial number such as 45306." },
+          { q: "Can I choose which sheets to convert?", a: "No. Every sheet is converted, hidden ones included, each under its own name in the JSON. Delete the arrays you do not need afterwards, or save the sheets you want as a separate workbook first." },
+          { q: "Are duplicate column headers kept?", a: "Yes. When two columns share a header such as name, the second one becomes name_1 in each row object, so no value is overwritten." },
+          { q: "How big can the file be?", a: `${MAX_FILE_SIZE_LABEL} and ${MAX_ROWS.toLocaleString('en-US')} rows, counting all sheets, on a computer; ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows on phones, iPhone and iPad. Split a larger workbook into several files and convert them one by one.` },
         ]}
         tips={[
-          "Each sheet's first row becomes the property names for that sheet's row objects, so make sure your headers are in row 1.",
-          "Empty cells are simply omitted from that row's object rather than appearing as null — account for that if your code expects every key present.",
-          "For workbooks with many sheets, split it into smaller files first if it exceeds the row or size limit.",
-          "Since it uses a proper spreadsheet-parsing library, formulas convert to their calculated values, not the formula text."
+          "For CSV files instead of JSON, one per sheet, use Excel to CSV.",
         ]}
       />
     </div>

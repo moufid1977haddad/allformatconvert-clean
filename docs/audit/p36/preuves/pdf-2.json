@@ -1,0 +1,121 @@
+{
+  "/tools/pdf-tools/pdf-compress": [
+    {
+      "claim": "150 dpi",
+      "file": "services/pdf-tools/py/compress.py",
+      "pattern": "'recommended': \\{'dpi': 150"
+    },
+    {
+      "claim": "72 dpi",
+      "file": "services/pdf-tools/py/compress.py",
+      "pattern": "'extreme': \\{'dpi': 72"
+    },
+    {
+      "claim": "15-page",
+      "file": "docs/audit/RAPPORT-ecarts-marche.md",
+      "pattern": "\\| arXiv 15 p\\. \\|"
+    },
+    {
+      "claim": "35.4%",
+      "file": "docs/audit/RAPPORT-ecarts-marche.md",
+      "pattern": "−35,4 % · 99 dB"
+    },
+    {
+      "claim": "40.6%",
+      "file": "docs/audit/RAPPORT-ecarts-marche.md",
+      "pattern": "\\*\\*−40,6 %\\*\\* · p\\.3 31,8 dB"
+    },
+    {
+      "claim": "43.0%",
+      "file": "docs/audit/RAPPORT-ecarts-marche.md",
+      "pattern": "\\*\\*−43,0 %\\*\\* · 28,2 dB"
+    },
+    {
+      "claim": "15.2%",
+      "file": "docs/audit/RAPPORT-ecarts-marche.md",
+      "pattern": "\\*\\*−15,2 % · 45,1 dB\\*\\*"
+    },
+    {
+      "claim": "78.8%",
+      "file": "docs/audit/RAPPORT-ecarts-marche.md",
+      "pattern": "−78,8 % · 34,3 dB"
+    },
+    {
+      "claim": "0.1%",
+      "file": "docs/audit/RAPPORT-ecarts-marche.md",
+      "pattern": "\\| −0,1 % \\| \\*\\*−15,2 %"
+    }
+  ],
+  "/tools/pdf-tools/pdf-extract-text": [
+    {
+      "claim": "25 MB",
+      "file": "app/lib/pdfActualText.js",
+      "pattern": "MAX_BYTES = 25 \\* 1024 \\* 1024"
+    }
+  ],
+  "/tools/pdf-tools/pdf-ocr": [
+    {
+      "claim": "0.8%",
+      "file": "docs/audit/RAPPORT-qualite-2-29-09.md",
+      "pattern": "0,8 % CER à 7 pt"
+    },
+    {
+      "claim": "300 pages",
+      "file": "lib/quota/config.js",
+      "pattern": "PDF_OCR_PAGES_PER_HOUR = 300;"
+    },
+    {
+      "claim": "1,000 pages",
+      "file": "lib/quota/config.js",
+      "pattern": "PDF_OCR_PAGES_PER_DAY = 1000;"
+    },
+    {
+      "claim": "90 seconds",
+      "file": "app/tools/pdf-tools/pdf-ocr/page.jsx",
+      "pattern": "DESKTOP_STALL_MS = 90000"
+    }
+  ],
+  "/tools/pdf-tools/pdf-redact": [
+    {
+      "claim": "300 pages",
+      "file": "lib/quota/config.js",
+      "pattern": "PDF_RENDER_PAGES_PER_HOUR = 300;"
+    },
+    {
+      "claim": "1,000 pages",
+      "file": "lib/quota/config.js",
+      "pattern": "PDF_RENDER_PAGES_PER_DAY = 1000;"
+    }
+  ],
+  "/tools/pdf-tools/pdf-repair": [
+    {
+      "claim": "248 damaged test files",
+      "file": "docs/audit/RAPPORT-p28-gotenberg-04-10.md",
+      "pattern": "Corpus permanent : 248 copies abîmées"
+    }
+  ],
+  "/tools/pdf-tools/pdf-watermark": [
+    {
+      "claim": "25%",
+      "file": "app/tools/pdf-tools/pdf-watermark/page.jsx",
+      "pattern": "Math\\.min\\(imageScale, 25\\)"
+    },
+    {
+      "claim": "10%",
+      "file": "app/tools/pdf-tools/pdf-watermark/page.jsx",
+      "pattern": "min=\"0\\.1\" max=\"1\""
+    },
+    {
+      "claim": "30%",
+      "file": "app/tools/pdf-tools/pdf-watermark/page.jsx",
+      "pattern": "useState\\(0\\.3\\)"
+    }
+  ],
+  "/tools/pdf-tools/pdf-protect": [
+    {
+      "claim": "128-bit",
+      "file": "app/tools/pdf-tools/pdf-protect/page.jsx",
+      "pattern": "Encrypted with AES-128"
+    }
+  ]
+}

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "AI PDF Summary — Send Your File Online Free" },
-  description: "AI PDF Summary sends your file to our server, which passes it to OpenAI's gpt-4o-mini model for a text summary.",
+  title: { absolute: "AI PDF Summary — Summarize a PDF's Text with GPT-4o mini" },
+  description: "Summarize a PDF: its text is extracted in your browser and up to 8,000 characters go to OpenAI. The page says how many pages the summary covers.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-ai-summary" },
   openGraph: {
-    title: "AI PDF Summary — Send Your File Online Free",
-    description: "AI PDF Summary sends your file to our server, which passes it to OpenAI's gpt-4o-mini model for a text summary.",
+    title: "AI PDF Summary — Summarize a PDF's Text with GPT-4o mini",
+    description: "Summarize a PDF: its text is extracted in your browser and up to 8,000 characters go to OpenAI. The page says how many pages the summary covers.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-ai-summary",
   },
 };

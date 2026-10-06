@@ -96,7 +96,7 @@ export default function VideoRotatorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Video Rotator</h1>
-        <p className="text-neutral-500 text-center mb-8">Rotate a video 90°, 180° or 270°, or mirror it — upright in every player, or instant and lossless for MP4 and MOV</p>
+        <p className="text-neutral-500 text-center mb-8">Rotate a video 90°, 180° or 270°, or mirror it — upright in every player, or without re-encoding for MP4 and MOV</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !stage && inputRef.current.click()}>
@@ -135,7 +135,7 @@ export default function VideoRotatorPage() {
           {result && (
             <div className="space-y-2">
               <p className="text-sm text-center text-green-700" data-result>{result.lossless
-                ? `Rotated instantly, without re-encoding: same quality and same size (${formatBytes(result.bytes)}), still ${result.ext.toUpperCase()}. Nothing was uploaded. (The old Windows Media Player ignores the rotation setting: choose "Compatible everywhere" for it.)`
+                ? `Rotated without re-encoding: same quality and same size (${formatBytes(result.bytes)}), still ${result.ext.toUpperCase()}. Nothing was uploaded. (The old Windows Media Player ignores the rotation setting: choose "Compatible everywhere" for it.)`
                 : `Done on our video service: the picture itself is ${angle ? 'turned' : ''}${angle && flip ? ' and ' : ''}${flip ? 'mirrored' : ''}, MP4, ${formatBytes(result.bytes)} — the same in every player.`}</p>
               <PlayablePreview src={result.url} name={result.name} kind="video" className="w-full rounded-xl max-h-72" />
               <FileDownload href={result.url} name={result.name} />
@@ -145,27 +145,32 @@ export default function VideoRotatorPage() {
       </div>
       <SeoContent
         title="Video Rotator"
-        description={"Video Rotator turns a video by 90°, 180° or 270°, and can mirror it (left-right, or top to bottom), alone or with a rotation, on our video service. Rotation works two ways. \"Compatible everywhere\" turns the picture itself, at full resolution and in high quality, on our video service, and gives an MP4 that plays upright in every player — including the old Windows Media Player, which ignores rotation settings. For MP4, MOV (iPhone), M4V and 3GP, \"Instant, lossless\" does what a phone does: it rewrites the video's rotation setting in your browser, without re-encoding, so nothing is uploaded and the file keeps its size, quality and format. WebM, MKV and AVI have no rotation setting and are always turned on our service."}
+        description={`Video Rotator turns a video a quarter, half or three-quarter turn, and can mirror it left-right or top-bottom, with or without a rotation. It works two ways. "Compatible everywhere", the default, turns the picture itself on our video service and returns an MP4 that plays upright in any player. For MP4, MOV, M4V, 3GP and 3G2 files, "Instant, lossless" only rewrites the rotation setting stored in the file, in your browser, so its size, quality and format stay the same. A mirror always goes through the video service.`}
+        howToTitle="How to rotate or flip a video"
         howTo={[
-          "Click the upload area and select a video file.",
-          "Click 90° (clockwise), 180° or 270° (counter-clockwise), and/or a mirror: the preview turns and flips with it.",
-          "For an MP4 or MOV, choose \"Compatible everywhere\" (the picture is turned, for every player) or \"Instant, lossless\" (the rotation setting only), then click \"Rotate Video\".",
-          "Play the result and download it."
+          `Choose or drop a video file; a preview appears.`,
+          `Click an angle button (90°, 180° or 270°) or "No rotation", and "Mirror ⇆ (left-right)" or "Flip ⇅ (top-bottom)" if needed: the preview turns with your choice.`,
+          `For an MP4, MOV, M4V, 3GP or 3G2 file, choose "Compatible everywhere" or "Instant, lossless" under "How to rotate".`,
+          `Click "Rotate Video"; with "Compatible everywhere" the page shows the upload and processing progress.`,
+          `Play the result and click "Download": an MP4, or your file's own format with "Instant, lossless".`,
         ]}
+        specs={[
+          { label: 'Input formats', value: `MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS` },
+          { label: 'Output', value: `Compatible everywhere: MP4 with H.264 picture and AAC sound at 160 kbps. Instant, lossless: the same file type as yours` },
+          { label: 'Turns', value: `90° clockwise, 180°, 270° (90° counter-clockwise); mirror left-right or top-bottom, alone or with a turn` },
+          { label: 'Maximum file size', value: `1 GB with Compatible everywhere; none set by the page with Instant, lossless` },
+          { label: 'Usage limits', value: `Compatible everywhere counts toward the hourly and daily limit of your internet connection on our video service; Instant, lossless does not` },
+        ]}
+        privacy={`With "Instant, lossless", nothing is uploaded: the page rewrites a few bytes of the file's header in your browser and gives the file back. With "Compatible everywhere", any mirror, or a format other than MP4, MOV, M4V, 3GP or 3G2, the video is sent to our video service on Railway, which turns it with ffmpeg, deletes the original at the end and deletes the result once this page has downloaded it. If the rotation fails, its cleaned message, the error type, the tool name, the file type, a size range, your browser and its version are reported to us, never the video.`}
         faqs={[
-          { q: "Can I mirror (flip) a video?", a: "Yes: choose \"Mirror ⇆\" to swap left and right (a selfie video, a text that reads backwards) or \"Flip ⇅\" to swap top and bottom, alone (\"No rotation\") or with a rotation. The picture itself is mirrored on our video service, so it looks the same in every player; the result is an MP4." },
-          { q: "Does rotating reduce quality?", a: "With \"Instant, lossless\" (MP4, MOV, M4V, 3GP), no: the picture is not re-encoded at all, only the rotation setting is changed (the way phones store portrait videos) — same quality, same file size. \"Compatible everywhere\" re-encodes the turned picture in high quality at its full resolution; WebM, MKV and AVI are always re-encoded, their format having no rotation setting." },
-          { q: "Which option should I choose?", a: "\"Compatible everywhere\" if the video will be played on a computer you don't know, sent to someone, or opened in the old Windows Media Player, which ignores rotation settings and would show it unturned. \"Instant, lossless\" for your own viewing in Photos, QuickTime, Safari, Chrome, Firefox, VLC, Android or the Windows 11 Media Player, which all apply the setting — it is instant, keeps the exact quality and has no size limit." },
-          { q: "Will the rotated video play on my iPhone and in Photos?", a: "Yes, with either option: Photos applies the rotation setting (it is the one the iPhone itself writes), and the \"Compatible everywhere\" MP4 is upright by itself." },
-          { q: "Does the rotated video have audio?", a: "Yes — for MP4 and MOV the sound is not touched at all; re-encoded videos keep their sound too." },
-          { q: "Can I rotate by a custom angle?", a: "Not currently — only 90°, 180° and 270°, the angles a video player can apply without cropping." },
-          { q: "Is my file uploaded anywhere?", a: "Not with \"Instant, lossless\": the video is rotated in your browser. \"Compatible everywhere\" (and WebM, MKV, AVI) sends it to our video service, which deletes the original as soon as the rotation ends and the result right after your download (or after 15 minutes)." }
+          { q: "Which option should I choose?", a: `"Compatible everywhere" when the video will be sent to others or played in the old Windows Media Player, which ignores rotation settings. "Instant, lossless" for your own viewing in Photos, QuickTime, Safari, Chrome, Firefox, VLC, Android or the Windows 11 Media Player, which apply the setting; it keeps the exact quality and size.` },
+          { q: "Does rotating reduce quality?", a: `No with "Instant, lossless": the picture is not re-encoded. Yes, slightly, with "Compatible everywhere" or a mirror: the turned picture is encoded again in H.264 at full resolution, at the service's high-quality setting or, if that would make it larger than the original, with stronger compression.` },
+          { q: "Is the sound changed?", a: `No with "Instant, lossless": the sound is left as it is. With "Compatible everywhere", the first audio track is encoded again as AAC at 160 kbps and other audio tracks are dropped.` },
+          { q: "Can I rotate a WebM, MKV or AVI video?", a: `Yes, with "Compatible everywhere" only: these formats store no rotation setting, so the picture is turned on our video service and comes back as an MP4.` },
+          { q: "Can I rotate by 45° or another angle?", a: `No. Only quarter turns are offered: 90°, 180° and 270°, alone or with a mirror. A slightly tilted picture cannot be straightened with this tool.` },
         ]}
         tips={[
-          "Use 90° to fix a video recorded holding your phone sideways.",
-          "With \"Instant, lossless\", rotating an MP4 or MOV twice is harmless: nothing is re-encoded, so no quality is lost.",
-          "A WebM, MKV or AVI video comes back as an MP4, which also makes it playable on an iPhone.",
-          "The preview shows the result before you download anything."
+          `For a video filmed with the phone held sideways, try 90° and check the preview before you click "Rotate Video".`,
         ]}
       />
     </div>

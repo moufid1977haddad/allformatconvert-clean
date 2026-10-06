@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Background Remover — Remove Backgrounds Online Free" },
-  description: "Background Remover instantly removes an image's background using an AI segmentation model running on our own infrastructure, giving you a transparent PNG in one click.",
+  title: { absolute: "Background Remover — Transparent PNG at Full Resolution" },
+  description: "Remove the background from a photo and download a transparent PNG at its original size. Only a JPEG copy of 1,024 px at most goes to our own AI service.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/ai-tools/background-remover" },
   openGraph: {
-    title: "Background Remover — Remove Backgrounds Online Free",
-    description: "Background Remover instantly removes an image's background using an AI segmentation model running on our own infrastructure, giving you a transparent PNG in one click.",
+    title: "Background Remover — Transparent PNG at Full Resolution",
+    description: "Remove the background from a photo and download a transparent PNG at its original size. Only a JPEG copy of 1,024 px at most goes to our own AI service.",
     url: "https://www.onlineconvertools.com/tools/ai-tools/background-remover",
   },
 };

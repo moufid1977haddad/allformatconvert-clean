@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
-import { MAX_SPREADSHEET_STAGED_BYTES } from '@/lib/quota/limits';
+import { MAX_SPREADSHEET_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
@@ -99,26 +99,28 @@ export default function ExcelToPdfPage() {
       </div>
       <SeoContent
         title="Excel to PDF"
-        description="Excel to PDF converts your .xlsx, .xls, .csv, or .ods file into a PDF using LibreOffice. Your file is uploaded securely over HTTPS to our conversion service for processing, then deleted immediately afterward — it isn't stored, logged, or kept around. We tested .xlsx workbooks with currency, percentage and date formats, merged cells, cell borders, color-scale conditional formatting, a bar chart, a wrapped-text column and formulas (multiplication, IF and cross-sheet lookups): the formulas were recalculated to the right values, and a sheet set to fit on one page stayed on one page. A sheet wider than the page, with no print area or scaling, is split across several PDF pages by groups of columns (another converter shrank the same sheet onto fewer pages). The chart was drawn, but its styling differs from what other converters produce, so check it in your PDF. One disclosed exception: Wingdings and Webdings icon fonts can't legally be embedded in our conversion service (a font-licensing restriction, not a bug), so those specific characters come through as blank boxes if your file uses them."
+        description={`Excel to PDF prints a spreadsheet to PDF with LibreOffice on our own conversion service. It reads .xlsx, .xls, macro-enabled .xlsm, binary .xlsb, the templates .xltx, .xltm and .xlt, .csv, and OpenDocument .ods and .ots files. Formula results are printed as they are stored in the workbook; in our test files, formulas saved without a result were calculated. A sheet wider than the paper, with no print area or scaling set, is split across pages by groups of columns unless you tick the option that puts each sheet on one page. Charts are drawn, but their styling can differ from Excel's own.`}
+        howToTitle="How to convert an Excel spreadsheet to PDF"
         howTo={[
-          "Click the upload area and select a spreadsheet: .xlsx, .xls, macro-enabled .xlsm, binary .xlsb, templates .xltx / .xltm / .xlt, .csv, or OpenDocument .ods / .ots.",
-          "Click 'Convert to PDF'. Your file is uploaded securely for conversion; once the PDF is ready, click 'Download'.",
-          "Save the resulting PDF file to your device."
+          `Click or drop the workbook whose sheets you want in a PDF.`,
+          `Tick "Fit each sheet on one page" if a sheet is wider than the paper and you want it on a single page.`,
+          `Click "Convert to PDF", and "Download" saves the sheets as one PDF once "PDF ready" appears.`,
         ]}
+        specs={[
+          { label: 'Input formats', value: `.xlsx, .xls, .xlsm, .xlsb, .xltx, .xltm, .xlt, .csv, .ods, .ots` },
+          { label: 'Output', value: `One PDF file` },
+          { label: 'Maximum file size', value: `${officeMaxLabel(MAX_SPREADSHEET_STAGED_BYTES)} per file, a limit set by LibreOffice's conversion time` },
+          { label: 'Usage limits', value: `Files up to ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB: none. Larger files: a limit per network per hour and per day.` },
+        ]}
+        privacy={`The spreadsheet is sent over HTTPS to our server, which hands it to our own LibreOffice service (Gotenberg, hosted on Railway); no outside provider receives it. A workbook larger than ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB travels first, in parts, to our media service: the original is removed when the PDF is made, and the PDF is erased once this page has fetched it, right after the conversion, or after a time limit.`}
         faqs={[
-          { q: "Is Excel to PDF completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What file formats does the tool support?", a: ".xlsx, .xls, macro-enabled .xlsm (macros are not run), binary .xlsb, templates .xltx / .xltm / .xlt, .csv, and OpenDocument .ods / .ots. We checked that each converts; the fidelity measurement quoted on this page was made on .xlsx files." },
-          { q: "Will my files be uploaded to a server?", a: "Yes. Your file is uploaded securely over HTTPS to our conversion service, which uses LibreOffice to generate the PDF, and is deleted immediately after conversion — it isn't stored or kept." },
-          { q: "Can I convert multiple Excel files at once?", a: "No, only one file can be converted at a time." },
-          { q: "Will formulas and formatting carry over?", a: "In our tests on .xlsx files, formula results (including cross-sheet lookups), number formats, merged cells, cell borders and color-scale conditional formatting carried over. We did not test macros or very complex conditional formatting, and we measured .xlsx only, not .xls, .csv or .ods." },
-          { q: "Why is my wide spreadsheet split across several pages?", a: "A sheet wider than one page, with no print area or scaling set, is split into pages by groups of columns. Tick \"Fit each sheet on one page\" to get each sheet on a single page instead, or set the sheet to fit on one page in Excel (Page Layout > Scale to Fit) before uploading." },
-          { q: "What about a very long sheet on one page?", a: "It is shrunk to fit one tall page, never cut: tested up to 30,000 rows, every row is in the PDF — but the text gets very small, so for long lists the normal page-by-page layout reads better." },
+          { q: `Can I fit a wide sheet on one page?`, a: `Yes. Tick "Fit each sheet on one page" before converting. Without it, a sheet wider than the paper and with no print area or scaling is cut into pages by groups of columns, which is LibreOffice's normal behavior. You can also set Scale to Fit in Excel before uploading.` },
+          { q: `Does the one-page option lose rows on a very long sheet?`, a: `No. In our test of 3 October 2026, sheets of up to 30,000 rows each came out as one tall page with every row present. The text becomes very small, so for long lists the normal page-by-page layout is easier to read.` },
+          { q: `Are formulas and number formats kept?`, a: `Yes in our tests of 18 and 19 September 2026 on .xlsx files: formulas, including cross-sheet lookups, showed the right values, and currency, percentage and date formats, merged cells, borders and color scales carried over. The other formats, except .xlt and .csv, were checked to convert, not measured.` },
+          { q: `Can I convert several workbooks at once?`, a: `No. The upload area takes one file per conversion. Download the PDF, then choose the next workbook; each one is converted on its own.` },
         ]}
         tips={[
-          "Every sheet in your workbook is converted in its original order, each starting on its own page(s).",
-          "Wide sheets are split by groups of columns unless you set them to fit on one page wide in Excel first (Page Layout > Scale to Fit).",
-          "Formulas are recalculated during conversion, so the PDF shows current values.",
-          "We tested standard formatting (number formats, color scales, merged cells); macros and very complex conditional formatting were not tested."
+          `Wingdings and Webdings symbols come out blank; for an .xlsx file, the result names the font when the workbook uses one, so you can replace it and convert again.`,
         ]}
       />
     </div>

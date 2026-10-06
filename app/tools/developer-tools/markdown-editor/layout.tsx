@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Markdown Editor — Edit Markdowns Online Free" },
-  description: "Markdown Editor gives you a split-screen view that renders a small subset of Markdown live as you type, entirely in your browser.",
+  title: { absolute: "Markdown Editor — Write, Preview, Save as .md or .html" },
+  description: "Write Markdown beside a live preview, then download your text as document.md, the generated HTML as document.html, or both in document.zip.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/markdown-editor" },
   openGraph: {
-    title: "Markdown Editor — Edit Markdowns Online Free",
-    description: "Markdown Editor gives you a split-screen view that renders a small subset of Markdown live as you type, entirely in your browser.",
+    title: "Markdown Editor — Write, Preview, Save as .md or .html",
+    description: "Write Markdown beside a live preview, then download your text as document.md, the generated HTML as document.html, or both in document.zip.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/markdown-editor",
   },
 };

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "File Converter — Convert Plain-text-based Files Online Free" },
-  description: "File Converter converts plain-text-based files between TXT, JSON, CSV, and HTML formats, entirely in your browser.",
+  title: { absolute: "Text File Converter — TXT to UTF-8, JSON, CSV or HTML" },
+  description: "Re-save a text file as UTF-8 TXT, wrap it in JSON, turn tab-separated lines into CSV, or escape it into an HTML page, all in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/file-tools/file-converter" },
   openGraph: {
-    title: "File Converter — Convert Plain-text-based Files Online Free",
-    description: "File Converter converts plain-text-based files between TXT, JSON, CSV, and HTML formats, entirely in your browser.",
+    title: "Text File Converter — TXT to UTF-8, JSON, CSV or HTML",
+    description: "Re-save a text file as UTF-8 TXT, wrap it in JSON, turn tab-separated lines into CSV, or escape it into an HTML page, all in your browser.",
     url: "https://www.onlineconvertools.com/tools/file-tools/file-converter",
   },
 };

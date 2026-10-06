@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Blur — Apply a Uniform Blur Effect Across Your Online" },
-  description: "Blur an image online, free: a uniform Gaussian blur at full resolution, from 1 to 20 px, computed on your device (even 48 MP iPhone photos). Nothing is uploaded.",
+  title: { absolute: "Blur Image Online — Gaussian Blur 1 to 20 px, Full Size" },
+  description: "Blur a whole photo with a Gaussian blur from 1 to 20 px at full resolution, computed on your graphics chip or processor cores, in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-blur" },
   openGraph: {
-    title: "Image Blur — Apply a Uniform Blur Effect Across Your Online",
-    description: "Blur an image online, free: a uniform Gaussian blur at full resolution, from 1 to 20 px, computed on your device (even 48 MP iPhone photos). Nothing is uploaded.",
+    title: "Blur Image Online — Gaussian Blur 1 to 20 px, Full Size",
+    description: "Blur a whole photo with a Gaussian blur from 1 to 20 px at full resolution, computed on your graphics chip or processor cores, in your browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-blur",
   },
 };

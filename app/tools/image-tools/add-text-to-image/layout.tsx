@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Add Text to Image — Overlay a Single Line Online Free" },
-  description: "Add Text to Image overlays a single line of text onto your photo, entirely in your browser.",
+  title: { absolute: "Add Text to Image — Fonts, Outline, Shadow, Rotation" },
+  description: "Write one or more lines on a photo: six fonts, color, outline, shadow, opacity and rotation, placed with X and Y sliders, drawn by your own browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/add-text-to-image" },
   openGraph: {
-    title: "Add Text to Image — Overlay a Single Line Online Free",
-    description: "Add Text to Image overlays a single line of text onto your photo, entirely in your browser.",
+    title: "Add Text to Image — Fonts, Outline, Shadow, Rotation",
+    description: "Write one or more lines on a photo: six fonts, color, outline, shadow, opacity and rotation, placed with X and Y sliders, drawn by your own browser.",
     url: "https://www.onlineconvertools.com/tools/image-tools/add-text-to-image",
   },
 };

@@ -99,24 +99,30 @@ export default function PdfProtectPage() {
       </div>
       <SeoContent
         title="PDF Protect"
-        description="PDF Protect encrypts your PDF with the password you enter, using the @cantoo/pdf-lib library's standard PDF security handler entirely in your browser — your file is never uploaded to a server. Every file is encrypted with AES-128. The password you enter is needed to open the file; under Permissions you choose whether people who open it may print, copy, edit, comment, fill in forms or rearrange pages, and you can set a separate permissions password (otherwise a random one nobody knows)."
+        description={`PDF Protect encrypts your PDF with AES-128 so that it asks for the password you set before it opens. Under Permissions you decide what people who open it may do: print (normally, at low resolution only, or not at all), copy text and images, edit, add comments, fill in form fields, and insert, rotate or delete pages. Unless you change them, printing and form filling are allowed and the other four are blocked. A separate permissions password protects these settings; left empty, a random one nobody knows is used. The file is encrypted inside your browser before you download it.`}
+        howToTitle="How to password-protect a PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Type a password into the field.",
-          "Click 'Protect PDF' to encrypt the file with that password.",
-          "Click 'Download' to save the password-protected PDF."
+          `Choose the PDF to protect.`,
+          `Type the open password in "Password".`,
+          `Open "Permissions (what people who open the file may do)" to change what is allowed and, if you wish, set a permissions password.`,
+          `Click "Protect PDF", then "Download" to save the -protected.pdf file.`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF` },
+          { label: 'Encryption', value: `AES-128 for every file` },
+          { label: 'Default permissions', value: `Printing and form filling allowed; copying, editing, comments and page changes blocked` },
+          { label: 'Permissions password', value: `Yours or a random one; it must differ from the open password` },
+          { label: 'Result', value: `Your file name followed by -protected.pdf` },
+        ]}
+        privacy={`The password and the PDF stay in your browser: @cantoo/pdf-lib encrypts the file locally and nothing about it is uploaded. The site keeps no copy of your password, so it cannot help you recover a forgotten one. When you leave the permissions password empty, its random replacement is also created in the browser, with the browser's cryptographic random generator.`}
         faqs={[
-          { q: "Is PDF Protect free to use?", a: "Yes, it's free with no signup required." },
-          { q: "How secure is the encryption?", a: "AES-128, the PDF standard's AES cipher, for every file (older PDFs are no longer given the weak RC4 cipher). Anyone opening the file must enter the password you set; a long password matters more than anything else." },
-          { q: "Will my file be uploaded to a server?", a: "No, encryption happens entirely in your browser." },
-          { q: "Can I set separate owner and user passwords or custom permissions?", a: "Yes. Open 'Permissions' to allow or block printing, copying, editing, comments, form filling and page changes, and to set a permissions (owner) password. Without one, a random owner password is used, so nobody can lift the restrictions." }
+          { q: "How strong is the encryption?", a: `128-bit AES for every file. The file header is raised to PDF 1.7 first so older files do not fall back to the weak RC4 cipher, and the deprecated AES-256 revision 5 is not used. A long, unusual password matters more than the cipher.` },
+          { q: "Can people copy text from my protected PDF?", a: `No, not by default: copying is blocked, like editing, comments and page changes. Open Permissions before you click Protect PDF and tick Copy text and images, or any other right you want to allow.` },
+          { q: "Can someone remove the restrictions?", a: `Yes, anyone who knows the open password can. Permissions are rules that PDF readers follow, not a lock: tools such as our PDF Unlock remove them once the file can be opened. Only the open password keeps the content unreadable.` },
+          { q: "Can I use the same password for opening and for permissions?", a: `No. The tool refuses it, because anyone who can open the file could then change the permissions. Leave the permissions password empty to get a random one that nobody knows.` },
         ]}
         tips={[
-          "Remember your password — there's no recovery option, and losing it means losing access to the protected file.",
-          "Use the PDF Unlock tool with the same password if you need to remove protection later.",
-          "Since editing, copying, and printing restrictions are enforced via the PDF standard, a determined user with specialized software may still be able to bypass permission restrictions (though not the password itself) — don't treat this as airtight DRM.",
-          "Test opening the downloaded file with your password in a PDF reader before sharing it, to confirm it was protected as expected."
+          `To remove the protection later, open the file in PDF Unlock with the same open password.`,
         ]}
       />
     </div>

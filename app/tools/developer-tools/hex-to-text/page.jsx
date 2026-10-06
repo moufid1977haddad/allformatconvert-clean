@@ -29,23 +29,36 @@ export default function HexToTextPage() {
       </div>
       <SeoContent
         title={"Hex to Text"}
-        description={"Hex to Text converts between plain text and hexadecimal bytes entirely in your browser — nothing is uploaded to a server. Text is encoded as UTF-8, like every hex editor and programming language, so é becomes c3 a9 and emoji or non-Latin scripts round-trip exactly. Hex input may use spaces, commas, colons, 0x prefixes or \\x escapes between bytes; an odd number of digits, a non-hex character, or bytes that aren't valid UTF-8 text are reported instead of producing garbled output."}
+        description={"Hex to Text converts between text and its UTF-8 bytes written in hexadecimal, using your browser's own text encoder. Text to Hex writes each byte as two lowercase digits separated by spaces, so é gives c3 a9, ☕ three bytes and 😀 four. Hex to Text reads digit pairs with or without separators (spaces, commas, colons, semicolons, hyphens) and accepts the 0x48 and \\x48 notations. It refuses an odd number of digits, characters that are not hex, and bytes that are not valid UTF-8, instead of printing garbage. Latin-1, UTF-16 and other encodings are not decoded."}
+        example={{
+          caption: "A short text with an accent and an emoji turned into bytes, then C-style hex bytes turned back into text:",
+          inputLabel: "Input",
+          input: "Hi é😀\n\n0x48,0x69,0x20,0xc3,0xa9",
+          outputLabel: "Result",
+          output: "Text to Hex: 48 69 20 c3 a9 f0 9f 98 80\n\nHex to Text: Hi é",
+        }}
+        howToTitle={"How to convert hex to text"}
         howTo={[
-          "Paste or type text or hex into the input box.",
-          "Click 'Text to Hex' to get the UTF-8 bytes as space-separated hex pairs, or 'Hex to Text' to decode hex back into text.",
-          "Read the result in the output box.",
-          "Click 'Copy' to copy it to your clipboard."
+          "Paste hex bytes, or the text you want to see as hex.",
+          "Click \"Hex to Text\" to decode the bytes as UTF-8, or \"Text to Hex\" to get space-separated byte pairs.",
+          "If the result box shows a message instead, it names the problem: an odd number of digits, a character that is not hex, or bytes that are not UTF-8.",
+          "Take the bytes or the text with \"Copy\", or save them in converted.txt through \"Download\"."
         ]}
+        specs={[
+          { label: "Hex input", value: "Pairs of 0-9 and a-f in either case; spaces, commas, colons, semicolons and hyphens ignored; 0x48 and \\x48 forms accepted" },
+          { label: "Hex output", value: "Lowercase byte pairs separated by single spaces" },
+          { label: "Text encoding", value: "UTF-8 only, in both directions" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Both directions use your browser's TextEncoder and TextDecoder inside this page, so neither the hex nor the text leaves your computer. When the tool shows an error, such as an odd number of digits, we receive that message, the tool's name and your browser's name and version, without what you pasted."}
         faqs={[
-          { q: "Is Hex to Text free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "What hex format does it expect?", a: "Two hex digits per byte, upper- or lowercase, with or without separators: 48656c6c6f, 48 65 6c 6c 6f, 0x48,0x65 and \\x48\\x65 all work." },
-          { q: "Does it work with any Unicode text, like emoji?", a: "Yes — text is converted to UTF-8 bytes (é is c3 a9, 😀 is f0 9f 98 80), and hex is decoded as UTF-8, so any text round-trips exactly." },
-          { q: "What if the hex isn't text?", a: "If the bytes aren't valid UTF-8 (binary data, or text in another encoding), the tool says so instead of showing garbled characters." }
+          { q: "Is é written as two bytes?", a: "Yes: c3 a9, because the tool writes UTF-8 bytes. e9 is the Latin-1 code for é; pasting e9 alone into Hex to Text gives an error, since that single byte is not valid UTF-8." },
+          { q: "What hex formats can I paste?", a: "Any pairs of hex digits: 48656c6c6f, 48 65 6c 6c 6f, 48:65:6c, 0x48,0x65 or \\x48\\x65. Upper and lower case both work, and separators are removed before decoding, so mixing them is fine." },
+          { q: "Can it decode Latin-1 or Windows-1252 bytes?", a: "No. The tool decodes UTF-8 only. Bytes saved in another encoding, or binary data, get the message that they are not valid UTF-8 text, rather than wrong characters." },
+          { q: "How many bytes does one character take?", a: "One to four in UTF-8: plain Latin letters one, most accented Latin letters two, ☕ and most Chinese and Japanese characters three, and emoji such as 😀 four (f0 9f 98 80)." }
         ]}
         tips={[
-          "Hex output is the UTF-8 encoding, the same bytes Python's text.encode().hex() or a hex editor shows.",
-          "An odd number of hex digits means a byte is incomplete — the tool points it out.",
-          "Copy your result right away, since it isn't saved after you leave the page."
+          "To see the \\uXXXX escapes a JavaScript string uses instead of bytes, try Unicode Converter."
         ]}
       />
     </div>

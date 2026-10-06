@@ -32,24 +32,33 @@ export default function JsonMinifierPage() {
       </div>
       <SeoContent
         title="JSON Minifier"
-        description="JSON Minifier validates your JSON with the browser's built-in JSON.parse, then removes every space and line break outside strings from your original text, entirely in your browser — nothing is uploaded to a server. Because it works on the text you pasted rather than re-serializing it, nothing else changes: a 20-digit id, 1.10 or 1e21 stay exactly as written (re-serializing through JSON.stringify would round them). Invalid JSON is reported with the parser's own message instead of silently producing broken output."
+        description={"JSON Minifier removes every space, tab and line break outside strings and puts your JSON on one line. It validates the text with the browser's JSON.parse first, then copies your original characters, so values are never re-serialized: a 20-digit id, 1.10, 1e21 and escapes stay exactly as written, and spaces inside strings are kept. A byte order mark at the start is removed. The line under the result gives the characters saved and the percentage. The page has no option to sort keys or change values, and it does its work in your browser."}
+        example={{
+          caption: "Formatted JSON on five lines becomes one; the two spaces inside the string stay.",
+          inputLabel: "Input",
+          input: "{\n  \"id\": 12345678901234567890,\n  \"total\": 1e21,\n  \"name\": \"a  b\"\n}",
+          outputLabel: "Minified Output",
+          output: "{\"id\":12345678901234567890,\"total\":1e21,\"name\":\"a  b\"}",
+        }}
+        howToTitle={"How to minify JSON"}
         howTo={[
-          "Paste your JSON into the input box.",
-          "Click 'Minify' to compress it to a single line.",
-          "Review the result and the size-reduction percentage shown below.",
-          "Click 'Copy' to copy the minified JSON to your clipboard."
+          "Paste formatted JSON into \"Input\".",
+          "Click \"Minify\".",
+          "Take the single line from \"Minified Output\"; the line below it says how many characters were saved.",
+          "Click \"Copy\", or \"Download\" to save \"minified.json\".",
         ]}
+        specs={[
+          { label: "Input", value: "JSON text; a leading byte order mark is removed" },
+          { label: "Output", value: "One-line JSON, saved as minified.json" },
+          { label: "Kept as written", value: "Every key, value, number and escape, and the spaces inside strings" },
+          { label: "Saving shown", value: "Characters saved and the percentage, counted in characters rather than bytes" },
+        ]}
+        privacyTitle={"Where your JSON is processed"}
+        privacy={"Minification is a few lines of JavaScript in this page: your JSON is read and rewritten in the browser and never uploaded. When the page displays an error, Invalid JSON followed by the browser's reason, that message is reported to our error log with the tool name and your browser's name and version, cleaned of quoted passages, long numbers and addresses."}
         faqs={[
-          { q: "Is JSON Minifier free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Will minifying change my data?", a: "No — only whitespace and indentation outside strings are removed; every key, value, number and escape stays exactly as you wrote it (large ids and numbers like 1.10 are not rounded)." },
-          { q: "What happens if my JSON is invalid?", a: "You'll see 'Invalid JSON' with the parser's own explanation instead of output, since the tool relies on the browser's real JSON parser rather than a best-effort text strip." },
-          { q: "Is my data uploaded to a server?", a: "No, minifying happens entirely in your browser." }
-        ]}
-        tips={[
-          "The percentage shown reflects real character-count savings for your specific JSON — heavily indented JSON with long key names shrinks the most.",
-          "Keep your original formatted JSON for debugging; use the minified version for production or network transfer.",
-          "If minifying fails with 'Invalid JSON,' check for trailing commas or unquoted keys, which JSON doesn't allow.",
-          "There's no file upload or download — paste JSON in and copy the minified result out."
+          { q: "Will minifying change my data?", a: "No. Only whitespace outside strings is removed. Keys, values, numbers and escapes are copied character for character, so large ids are not rounded, and two spaces inside a string value stay two spaces." },
+          { q: "Does it tell me when the JSON is invalid?", a: "Yes. A red Invalid JSON message with the browser's explanation appears and nothing new is produced. A result from an earlier run stays in the output box, so read the message before copying." },
+          { q: "Does it also sort or clean my JSON?", a: "No. It keeps key order, duplicate keys and values as they are. To sort keys or pick an indentation, use JSON Formatter, which offers sorting and three indent choices." },
         ]}
       />
     </div>

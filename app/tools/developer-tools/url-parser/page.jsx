@@ -29,25 +29,39 @@ export default function UrlParserPage() {
         </div>
       </div>
       <SeoContent
-        title="URL Parser"
-        description="URL Parser breaks a URL into its components — protocol, hostname, port, path, search string, hash, and query parameters — using the browser's native URL API, entirely in your browser. It parses the full hostname as a single field; it doesn't separately break out the subdomain or top-level domain the way a dedicated domain-parsing tool would."
+        title={"URL Parser"}
+        description={"URL Parser splits an address with the URL class built into your browser, the parser browsers use to follow links. It shows protocol, hostname, port, pathname, search and hash, then lists every query parameter with its value decoded (%C3%A9 becomes é and + becomes a space); a key that appears twice keeps both values, separated by a comma. The address is shown as the browser normalizes it: lower-case host, ../ segments resolved, punycode for international domain names. Username, password and origin are not displayed, and the hostname is not split into subdomain and domain."}
+        example={{
+          caption: "An address with a mixed-case host, a ../ segment, a repeated key and an encoded value:",
+          inputLabel: "URL",
+          input: "https://Shop.Example.com:8443/a/../docs/list?tag=red&tag=blue&q=caf%C3%A9+au+lait#reviews",
+          outputLabel: "Parse URL",
+          output: "protocol   https:\nhostname   shop.example.com\nport       8443\npathname   /docs/list\nsearch     ?tag=red&tag=blue&q=caf%C3%A9+au+lait\nhash       #reviews\n\nQuery Params\ntag = red, blue\nq = café au lait",
+        }}
+        howToTitle={"How to parse a URL"}
         howTo={[
-          "Paste a full URL, including its protocol (e.g. https://), into the input field.",
-          "Click 'Parse URL'.",
-          "Review the breakdown: protocol, hostname, port, path, search, and hash.",
-          "If the URL has query parameters, review them individually in the Query Params section."
+          "Paste the full address, starting with its scheme, such as https://.",
+          "Click \"Parse URL\"; an address the browser cannot read gives Invalid URL.",
+          "Read the protocol, hostname, port, pathname, search and hash rows; an empty one shows a dash.",
+          "Check each parameter under \"Query Params\", where values are already decoded."
         ]}
+        specs={[
+          { label: "Parser", value: "The browser's URL class (WHATWG URL Standard)" },
+          { label: "Rows shown", value: "protocol, hostname, port, pathname, search, hash, then Query Params" },
+          { label: "Query values", value: "Decoded; a repeated key keeps all its values, joined with a comma" },
+          { label: "Not shown", value: "Username, password and origin; subdomain and registered domain are not separated" }
+        ]}
+        privacyTitle={"Where your URL is processed"}
+        privacy={"The address is parsed by your browser in this page and is not sent to our servers. The rows appear as page text, so if you turn on a translation in the language menu, Google receives them: turn translation off before parsing links that carry tokens or keys. When an address cannot be parsed, we receive the message Invalid URL, the tool's name and your browser's name and version."}
         faqs={[
-          { q: "Why do I need to parse a URL?", a: "It extracts the individual components of a URL, useful for debugging, understanding link structure, or inspecting query parameters." },
-          { q: "Is it free to use?", a: "Yes, completely free with no registration required." },
-          { q: "Does it split the hostname into subdomain and top-level domain?", a: "No — the full hostname is shown as one field; it's not further broken down into subdomain, domain, and TLD." },
-          { q: "Is my URL sent to a server?", a: "No, parsing uses the browser's native URL API and happens entirely locally." }
+          { q: "Why is my URL invalid?", a: "A missing scheme is the most common cause: example.com/page is refused, while https://example.com/page works. A space inside the host name or a port above 65535 also makes the browser refuse the address." },
+          { q: "Why does localhost:3000 show localhost: as the protocol?", a: "The URL parser reads a word followed by a colon at the start of an address as a scheme. Write http://localhost:3000 to get the hostname localhost and the port 3000." },
+          { q: "Why is the port empty for https://example.com:443?", a: "The parser drops a port that matches the scheme's default, and 443 is the default port of https. The same happens with :80 on an http address." },
+          { q: "Are query values shown decoded?", a: "Yes. In Query Params, %XX sequences are decoded as UTF-8 and + becomes a space, the way form data is read. The search row keeps the raw query string exactly as it appears in the address." }
         ]}
         tips={[
-          "Always include the protocol (https:// or http://) — without one, the URL is treated as invalid.",
-          "Use the Query Params section to quickly check individual parameter values without manually splitting the query string.",
-          "This is a genuine URL parser (the browser's built-in URL class), so it correctly rejects malformed URLs rather than guessing.",
-          "For domain-only analysis (subdomain vs. root domain), a dedicated domain-parsing tool will give a more detailed breakdown."
+          "To encode a value before adding it to a query string, use URL Encoder.",
+          "Paste a link from an e-mail here to see its real host before you open it."
         ]}
       />
     </div>

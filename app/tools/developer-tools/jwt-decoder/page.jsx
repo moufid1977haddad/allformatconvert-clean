@@ -84,26 +84,41 @@ export default function JwtDecoderPage() {
         </div>
       </div>
       <SeoContent
-        title="JWT Decoder"
-        description="JWT Decoder splits a JWT into its header and payload, base64url-decodes each, and pretty-prints the resulting JSON, entirely in your browser — nothing is uploaded to a server. It also verifies the signature, like jwt.io, with a shared secret (HS256/384/512) or a public key in PEM or JWK form (RS, PS, ES and EdDSA), locally with your browser's WebCrypto."
+        title={"JWT Decoder"}
+        description={"JWT Decoder shows the header and payload of a signed JSON Web Token as indented JSON, keeping large numbers exactly as written, and turns the exp, iat and nbf claims into UTC dates with an expired or not-yet-valid note. It also verifies the signature locally with WebCrypto: a shared secret for HS256, HS384 and HS512, or a public key in PEM or JWK form for RS, PS, ES and EdDSA (Ed25519) tokens. Unsigned tokens (alg none) and a public key offered for an HS token are refused. Encrypted tokens with five parts are not supported."}
+        example={{
+          caption: "An HS256 token decoded, then verified with the secret my-secret (the exp note depends on today's date; this token expired on 1 January 2026):",
+          inputLabel: "Token",
+          input: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MiIsIm5hbWUiOiJBZGEiLCJpYXQiOjE3NjcyMjU2MDAsImV4cCI6MTc2NzIyOTIwMH0.tSbItJNpja-KxR9Sew4UseTRkf2DxToP11X65NZgLJw",
+          outputLabel: "Decode and Verify signature",
+          output: "HEADER\n{\n  \"alg\": \"HS256\",\n  \"typ\": \"JWT\"\n}\n\nPAYLOAD\n{\n  \"sub\": \"42\",\n  \"name\": \"Ada\",\n  \"iat\": 1767225600,\n  \"exp\": 1767229200\n}\nexp: 2026-01-01T01:00:00Z (UTC) — expired\niat: 2026-01-01T00:00:00Z (UTC)\n\nSignature verified (HS256): this token was signed with this key and has not been changed. Check exp / nbf in the decoded payload as well.",
+        }}
+        howToTitle={"How to decode and verify a JWT"}
         howTo={[
-          "Paste a JWT into the input box (three base64url segments separated by dots).",
-          "Click 'Decode' to view the header and payload as formatted JSON.",
-          "Read the claims — common ones include exp (expiration), iat (issued at), and sub (subject).",
-          "To check the signature, paste the shared secret or the public key under 'Verify the signature' and click 'Verify signature'.",
-          "If the format is invalid, you'll see an 'Invalid JWT token' error."
+          "Paste the token, three base64url parts separated by dots, and click \"Decode\".",
+          "Read the header, the payload and, under it, the exp, iat and nbf dates in UTC.",
+          "To check the signature, paste the secret or the public key under \"Verify the signature\"; for an HS token, set \"Secret is\" to text or base64 / base64url.",
+          "Click \"Verify signature\" to get \"Signature verified\" or \"Invalid signature\" with the reason."
         ]}
+        specs={[
+          { label: "Token format", value: "Signed JWT in compact form (three parts); encrypted tokens and unencoded payloads are not handled" },
+          { label: "Algorithms", value: "HS256/384/512, RS256/384/512, PS256/384/512, ES256/384/512 and EdDSA (Ed25519, in browsers whose WebCrypto supports it)" },
+          { label: "Keys accepted", value: "A secret as text or base64/base64url, an oct JWK, a PEM public key, or an RSA, EC or OKP JWK" },
+          { label: "Keys refused, with a reason", value: "JWK Sets, X.509 certificates, PKCS#1 RSA keys and PEM private keys; a private JWK is reduced to its public part" },
+          { label: "Not checked for you", value: "exp, nbf, iss and aud: the dates are shown, the decision stays with your application" }
+        ]}
+        privacyTitle={"Where your token is processed"}
+        privacy={"Decoding and signature checks run in this page with your browser's atob and WebCrypto; the token and the key are not sent to our servers. If you turn on a translation in the language menu, Google receives the text shown on the page, including the decoded header and payload, so keep translation off for real tokens. A failed decode sends us the message Invalid JWT token, the tool's name and your browser's name and version."}
         faqs={[
-          { q: "What is a JWT?", a: "A compact, URL-safe token format with three dot-separated parts — header, payload, and signature — commonly used to carry authentication claims." },
-          { q: "Does this tool verify the signature?", a: "Yes. Paste the shared secret (HS256, HS384, HS512) or the issuer's public key as PEM or JWK (RS*, PS*, ES*, EdDSA) and click 'Verify signature'. The algorithm is read from the token header; unsigned tokens (alg none) are refused, and a public key offered for an HS* token is refused too (the algorithm-confusion attack)." },
-          { q: "Is my token uploaded to a server?", a: "No, decoding happens entirely in your browser." },
-          { q: "Can I use this to confirm a token is valid or trustworthy?", a: "A verified signature proves the token was signed with that key and not changed since. Whether the token is still acceptable also depends on its claims — exp, nbf, the issuer (iss) and audience (aud) your application expects — which you should read below and check in your application." }
+          { q: "Does this tool verify the JWT signature?", a: "Yes. Paste the shared secret for HS256, HS384 or HS512, or the issuer's public key as PEM or JWK for RS, PS, ES or EdDSA, then click \"Verify signature\". The algorithm is read from the token header, and alg none is refused." },
+          { q: "Is a verified token safe to accept?", a: "Not by itself. A verified signature proves the token was signed with that key and has not changed since. Your application must still check exp, nbf, the issuer (iss) and the audience (aud); this page only shows them." },
+          { q: "Why is my public key refused for an HS256 token?", a: "Accepting it would allow the algorithm-confusion attack, where a public key is used as an HMAC secret. An HS token must be checked with its shared secret, so a PEM key or a non-oct JWK is refused for HS256, HS384 and HS512." },
+          { q: "Why is my JWK Set or certificate refused?", a: "The check needs one public key. From a JWK Set, paste the single key whose kid matches the token header. From an X.509 certificate, extract the key with openssl x509 -pubkey -noout, and convert a PKCS#1 RSA PUBLIC KEY to the PUBLIC KEY form." },
+          { q: "Why does Decode say Invalid JWT token?", a: "The text does not have three dot-separated parts, or a part is not base64url-encoded JSON. Encrypted tokens with five parts are not supported. Decode never looks at the signature, so a wrong signature cannot cause this message." }
         ]}
         tips={[
-          "Decoding always succeeds, whatever the signature: only 'Signature verified' says a token is authentic.",
-          "Check the exp claim to see when a token expires — a valid signature does not make an expired token acceptable.",
-          "Useful for quickly inspecting claims during development, not for making trust decisions about a token's origin.",
-          "Be cautious pasting real production tokens here or anywhere — anyone who has the token text can read its (unencrypted) payload."
+          "A secret copied from a .env file can end with a line break; with \"Secret is\" set to text, the verdict says so when the secret matches without it.",
+          "If a PS256 token was signed with another salt length, the verdict names that length and explains why conforming libraries reject it."
         ]}
       />
     </div>

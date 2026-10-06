@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Audio Waveform — Draw an Interactive Visual Waveform Online" },
-  description: "Audio Waveform draws an interactive visual waveform of your audio file directly in your browser — nothing is uploaded to a server.",
+  title: { absolute: "Audio Waveform Image — Zoom, Pan, Save as PNG" },
+  description: "Draw the waveform of an audio file, zoom up to 200x and pan, then save the visible part as a PNG up to 3000 px wide, in your colours or transparent.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/audio-tools/audio-waveform" },
   openGraph: {
-    title: "Audio Waveform — Draw an Interactive Visual Waveform Online",
-    description: "Audio Waveform draws an interactive visual waveform of your audio file directly in your browser — nothing is uploaded to a server.",
+    title: "Audio Waveform Image — Zoom, Pan, Save as PNG",
+    description: "Draw the waveform of an audio file, zoom up to 200x and pan, then save the visible part as a PNG up to 3000 px wide, in your colours or transparent.",
     url: "https://www.onlineconvertools.com/tools/audio-tools/audio-waveform",
   },
 };

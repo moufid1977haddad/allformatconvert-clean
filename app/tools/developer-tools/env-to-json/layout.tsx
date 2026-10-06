@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: ".env to JSON — Parse Key=value Lines Online Free" },
-  description: ".env to JSON parses KEY=VALUE lines into a JSON object, and can convert a flat JSON object back into .env lines, in your browser.",
+  title: { absolute: ".env to JSON Converter — dotenv Rules, Both Directions" },
+  description: "Paste a .env file to get a JSON object, or a JSON object to get .env lines. Parsed like dotenv, with optional types and variable expansion.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/env-to-json" },
   openGraph: {
-    title: ".env to JSON — Parse Key=value Lines Online Free",
-    description: ".env to JSON parses KEY=VALUE lines into a JSON object, and can convert a flat JSON object back into .env lines, in your browser.",
+    title: ".env to JSON Converter — dotenv Rules, Both Directions",
+    description: "Paste a .env file to get a JSON object, or a JSON object to get .env lines. Parsed like dotenv, with optional types and variable expansion.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/env-to-json",
   },
 };

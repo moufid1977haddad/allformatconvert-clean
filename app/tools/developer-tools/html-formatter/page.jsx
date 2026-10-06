@@ -31,22 +31,36 @@ export default function HtmlFormatterPage() {
       </div>
       <SeoContent
         title={"HTML Formatter"}
-        description={"HTML Formatter re-indents HTML with js-beautify, the engine of beautifier.io, entirely in your browser. It understands HTML structure: void elements such as <br>, <img> and <input> don't increase the indentation, attributes containing > are handled, and the contents of <pre> and <textarea> are left exactly as written (whitespace there is visible on the page). Inline <script> and <style> blocks are formatted as JavaScript and CSS."}
+        description={"HTML Formatter re-indents a page or a fragment with js-beautify, the engine behind beautifier.io, in your browser. Nested elements get 2 spaces per level, and the content of <head> and <body> is indented too. Inline <script> and <style> blocks are formatted as JavaScript and CSS. Void elements such as <br> and <img> do not open a level, attributes are kept as written, and the content of <pre> and <textarea> is left exactly as typed, because whitespace there is visible. Long lines are not wrapped. It does not validate HTML: unclosed tags are formatted without a warning."}
+        example={{
+          caption: "A one-line snippet: the <pre> content keeps its spaces, the script is formatted.",
+          inputLabel: "Input",
+          input: "<div><p>Hello <b>world</b></p><pre>  a\n   b</pre><script>if(x){go()}</script></div>",
+          outputLabel: "Output",
+          output: "<div>\n  <p>Hello <b>world</b></p>\n  <pre>  a\n   b</pre>\n  <script>\n    if (x) {\n      go()\n    }\n  </script>\n</div>",
+        }}
+        howToTitle={"How to format HTML code"}
         howTo={[
-          "Paste your HTML into the input box.",
-          "Click 'Format'.",
-          "Review the indented result.",
-          "Click 'Copy' to copy it."
+          "Paste HTML, a full document or a snippet, into \"Input\".",
+          "Click \"Format\".",
+          "Review the indented markup in \"Output\".",
+          "Click \"Copy\" or \"Download\" (\"formatted.html\").",
         ]}
+        specs={[
+          { label: "Input", value: "HTML document or fragment, as text" },
+          { label: "Output", value: "Indented HTML, saved as formatted.html" },
+          { label: "Indentation", value: "2 spaces per level; blank lines kept, at most one in a row; no line wrapping" },
+          { label: "Left untouched", value: "Content of <pre> and <textarea>, attribute values" },
+        ]}
+        privacyTitle={"Where your HTML is processed"}
+        privacy={"js-beautify is loaded into the page when you first click \"Format\" and works on your device, so your markup is not uploaded. If the page displays an error message, our error log receives that message, after quoted passages, long numbers and addresses have been stripped from it, plus the tool's name and your browser's name and version."}
         faqs={[
-          { q: "Is HTML Formatter free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can formatting change how my page looks?", a: "Only where whitespace between inline elements matters; <pre> and <textarea> contents, where it always matters, are never touched." },
-          { q: "Does it format embedded CSS and JavaScript?", a: "Yes — <style> and <script> blocks are formatted with the CSS and JavaScript rules." },
-          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; the engine is downloaded once when you first click." }
+          { q: "Can formatting change how my page looks?", a: "No, in most pages. Inline elements such as <b> stay on their line, and text in <pre> and <textarea>, where every space shows, is copied as typed. Line breaks are added between block elements like <div> and <p>, where they are not rendered." },
+          { q: "Does it format embedded CSS and JavaScript?", a: "Yes. Code inside <style> is formatted with the CSS rules and code inside <script> with the JavaScript rules, both indented one level deeper than their tag, as in the example above." },
+          { q: "Does it fix broken HTML?", a: "No. It indents what you give it without checking it: a missing closing tag is not added and no error is shown, so the indentation after it may look off. That shift can help you spot the problem." },
         ]}
         tips={[
-          "Paste minified HTML from a site to make it readable.",
-          "For a full document or a fragment, the result keeps your tags and attributes exactly."
+          "To shrink HTML instead of expanding it, use Code Minifier in HTML mode.",
         ]}
       />
     </div>

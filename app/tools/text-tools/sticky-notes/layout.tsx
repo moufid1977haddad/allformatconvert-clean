@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Sticky Notes — Let You Jot Down Quick Colored Notes Online" },
-  description: "Sticky Notes lets you jot down quick colored notes right in your browser — no downloads or registration.",
+  title: { absolute: "Sticky Notes — Colored Notes Saved in Your Browser" },
+  description: "Write quick notes in six colors and keep them on a board stored in this browser's local storage, with no account. Notes stay on this device only.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/sticky-notes" },
   openGraph: {
-    title: "Sticky Notes — Let You Jot Down Quick Colored Notes Online",
-    description: "Sticky Notes lets you jot down quick colored notes right in your browser — no downloads or registration.",
+    title: "Sticky Notes — Colored Notes Saved in Your Browser",
+    description: "Write quick notes in six colors and keep them on a board stored in this browser's local storage, with no account. Notes stay on this device only.",
     url: "https://www.onlineconvertools.com/tools/text-tools/sticky-notes",
   },
 };

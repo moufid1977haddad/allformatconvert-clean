@@ -37,7 +37,7 @@ export default function AspectRatioPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Aspect Ratio Calculator</h1>
-        <p className="text-neutral-500 text-center mb-8">Calculate aspect ratios for any dimensions</p>
+        <p className="text-neutral-500 text-center mb-8">Simplify a width and height, or find a missing side</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm text-neutral-500 mb-1">Width</label><input aria-label="Width" type="number" value={w} onChange={e => setW(e.target.value)} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-3" /></div>
@@ -64,24 +64,37 @@ export default function AspectRatioPage() {
       </div>
       <SeoContent
         title="Aspect Ratio Calculator"
-        description="Aspect Ratio Calculator computes the simplified ratio and decimal value for any width and height you enter, live in your browser as you type. It shows both the ratio and the decimal value together, and gives the missing height for a new width (or the width for a new height) at the same ratio."
+        description={"Aspect Ratio Calculator reduces a width and a height to the smallest whole-number ratio and gives the decimal value (width divided by height, up to four decimals). Decimals are accepted and scaled first, so 2.39 and 1 give 239:100. Two extra fields answer the usual resizing question: type a new width to get the matching height, or a new height to get the width; when the answer is not a whole pixel, the exact value is shown next to the rounded one. Five presets load common sizes. Values must be positive numbers; anything else shows a dash instead of a ratio."}
+        example={{
+          caption: "A laptop screen size resized to a width of 1280, computed with the page’s own code.",
+          inputLabel: "Typed in the fields",
+          input: "Width: 1366\nHeight: 768\nNew width → height: 1280",
+          outputLabel: "Shown by the calculator",
+          output: "683:384\nDecimal: 1.7786\nHeight: 720 (≈ 719.648609, rounded)",
+        }}
+        howToTitle={"How to calculate an aspect ratio and a missing side"}
         howTo={[
-          "Type a width and height into the two fields.",
-          "Read the simplified ratio (e.g. 16:9) and decimal value shown below.",
-          "Click a preset button (16:9, 4:3, 1:1, 21:9, or 9:16) to instantly load common dimensions.",
-          "Adjust width or height at any time — the ratio updates instantly."
+          "Type the original size in \"Width\" and \"Height\", or pick one of the \"Common Presets\" such as 16:9 (1920x1080).",
+          "Read the simplified ratio and the \"Decimal\" value; both change as you type.",
+          "To resize, type the new width in \"New width → height\", or the new height in \"New height → width\".",
+          "Read the result under that field: the value rounded to a whole pixel, followed by the exact value when it is not whole.",
         ]}
+        specs={[
+          { label: "Accepted values", value: "Positive numbers, including decimals (2.35) and exponent form (1e3); zero, negative or empty values give no ratio" },
+          { label: "Results", value: "Simplified ratio, decimal ratio to four decimal places, and the missing side rounded to a whole pixel" },
+          { label: "Presets", value: "16:9 (1920x1080), 4:3 (1024x768), 1:1 (1080x1080), 21:9 (2560x1080), 9:16 (1080x1920)" },
+        ]}
+        privacyTitle={"Where your numbers are processed"}
+        privacy={"The ratio and the missing side are computed by the page itself each time you type a digit. Your numbers are not sent to our servers or to anyone else, and nothing is saved: after a reload the fields go back to 1920 and 1080 and the resize fields are empty."}
         faqs={[
-          { q: "What is an aspect ratio?", a: "The proportional relationship between an image's width and height, expressed as two numbers separated by a colon (e.g., 16:9)." },
-          { q: "Is Aspect Ratio Calculator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I choose between decimal, fractional, or ratio output?", a: "No — both the simplified ratio and the decimal value are always shown together; there's no separate output-format selector." },
-          { q: "Does it calculate a missing width or height?", a: "Yes. Type a new width to get the height at the same ratio, or a new height to get the width. When the exact value is not a whole number of pixels, it is shown next to the rounded one." }
+          { q: "Can it keep the aspect ratio when I resize an image?", a: "Yes. Enter the original width and height, then type the new width in \"New width → height\": the height shown keeps the same proportions. For example, 1366 by 768 resized to a width of 1280 needs a height of 720, rounded from about 719.65 (the page shows ≈ 719.648609)." },
+          { q: "Is 1366 by 768 exactly 16:9?", a: "No. 1366 divided by 768 is 1.7786, while 16:9 is 1.7778, so the calculator shows 683:384. It reduces the exact numbers you type and never rounds them to the nearest common ratio." },
+          { q: "Can I enter decimal values such as 2.39 and 1?", a: "Yes. Both values are scaled to whole numbers before they are reduced, so 2.39 and 1 give 239:100 with a decimal of 2.39. Exponent form such as 1e3 is read too; zero, negative or empty values show a dash." },
+          { q: "Can I use the decimal value in CSS?", a: "Yes. It is the width divided by the height, rounded to four decimal places, and the CSS aspect-ratio property accepts a single number, for example aspect-ratio: 1.7778. CSS also accepts the ratio itself written as 16 / 9." },
         ]}
         tips={[
-          "Click a preset to quickly load common ratios like 16:9 or 1:1 instead of typing dimensions by hand.",
-          "The decimal value (width ÷ height) is handy for CSS aspect-ratio properties.",
-          "Both fields must be positive numbers; if one is empty or invalid, no ratio is shown rather than a wrong one. Decimals are accepted (2.35 and 1 give 47:20).",
-          "To find a height that matches a target ratio at a given width, try different height values until the ratio shown matches what you need."
+          "Picking a preset replaces both \"Width\" and \"Height\", so type your own size again before resizing.",
+          "Once you know the target size, Image Resizer or Image Cropper can produce the image itself.",
         ]}
       />
     </div>

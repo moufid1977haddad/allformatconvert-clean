@@ -247,7 +247,7 @@ export default function VideoTrimmerPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Video Trimmer</h1>
-        <p className="text-neutral-500 text-center mb-2">Trim and cut video files — instantly and losslessly by default, or to the exact frame</p>
+        <p className="text-neutral-500 text-center mb-2">Trim and cut video files — without re-encoding by default, or to the exact frame</p>
         <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Files up to {maxMB} MB{isMobile ? ' on this device' : ''} · MP4, MOV, WebM, MKV and more · the fast cut never uploads your video</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote />
@@ -266,7 +266,7 @@ export default function VideoTrimmerPage() {
           {duration > 0 && (
             <label className="flex items-start gap-2 text-sm text-neutral-700">
               <input type="checkbox" checked={precise} disabled={!!status} onChange={(e) => { setPrecise(e.target.checked); setResult((r) => { if (r) URL.revokeObjectURL(r.url); return null; }); }} className="mt-1" />
-              <span><b>Precise cut</b> — starts on the exact frame; the clip is re-encoded to MP4 (H.264). Short clips are re-encoded in your browser (about 4× the clip's length for 1080p in Chrome); when that would be long — in Firefox and Safari, or for longer clips — only the part you cut is sent to our own video service, which re-encodes it in seconds and then deletes it. Unchecked: an instant lossless copy that starts on the nearest keyframe before your start (often 1–3 s earlier on phone videos).</span>
+              <span><b>Precise cut</b> — starts on the exact frame; the clip is re-encoded to MP4 (H.264). It is re-encoded in your browser when the page estimates that takes under about 45 seconds (in Chrome, about 4× the clip's length for 1080p) or when the video has an odd width or height; otherwise the part you cut, from the keyframe before your start, is sent to our own video service (the whole file if no keyframe is found), which re-encodes it and deletes it after you get the result. Unchecked: a lossless copy, without re-encoding, that starts on the keyframe at or before your start (it can be a few seconds earlier on phone videos).</span>
             </label>
           )}
           {status && <p className="text-yellow-500 text-center text-sm">{status}</p>}
@@ -289,26 +289,32 @@ export default function VideoTrimmerPage() {
       </div>
       <SeoContent
         title="Video Trimmer"
-        description="Video Trimmer cuts a section out of your video with ffmpeg.wasm's stream copy, entirely in your browser — for that fast cut nothing is uploaded. Because the video is not re-encoded, the cut takes seconds instead of the length of the clip, and the result keeps your original codec, container and quality. By default, cut points snap to the nearest keyframe, so the clip can start slightly before the point you picked; tick “Precise cut” to start on the exact frame (the clip is then re-encoded to MP4, which takes longer). The page shows the real length of the result."
+        description={`Video Trimmer keeps the part of a video between a start point and an end point. In default mode it copies that part without re-encoding, with ffmpeg.wasm in your browser: the format, codecs and quality stay those of your file, and the clip begins on the keyframe at or before your start, which can be a little early on phone videos. Tick "Precise cut" to begin on the exact frame: the clip is then re-encoded to an MP4 with H.264 and AAC, in your browser when the page estimates that takes under about 45 seconds or when the video has an odd width or height, otherwise on our video service.`}
+        howToTitle="How to trim a video"
         howTo={[
-          "Click the upload area and select a video file.",
-          "Use the Start and End sliders to set the section you want to keep.",
-          "Click \"Trim Video\" — the first use downloads the video engine (about 10 MB, cached afterwards).",
-          "Preview the result, check its real length, and download it (in your original format by default; MP4 with Precise cut)."
+          `Choose or drop a video file of up to ${MAX_MB_DESKTOP} MB on a computer, or ${MAX_MB_MOBILE} MB on phones, iPhone and iPad.`,
+          "Move the \"Start\" and \"End\" sliders to the part you want to keep.",
+          "Leave \"Precise cut\" unticked for a lossless copy, or tick it to begin on the exact frame.",
+          "Click \"Trim Video\"; the first run also loads the ffmpeg.wasm engine, about 10 MB.",
+          "Check the real length shown under the player, then click \"Download\": your file's own format, or MP4 with \"Precise cut\"."
         ]}
+        specs={[
+          { label: 'Input formats', value: "MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS" },
+          { label: 'Output', value: "Default cut: the source's own format (MP4, MOV, WebM, MKV and others), every audio track kept. Precise cut: MP4 with H.264 and AAC" },
+          { label: 'Maximum file size', value: `${MAX_MB_DESKTOP} MB on a computer; ${MAX_MB_MOBILE} MB on phones, iPhone and iPad` },
+          { label: 'Cut points', value: "Set in steps of 0.1 seconds; the default cut starts on the keyframe at or before the start, a Precise cut on the exact frame" },
+          { label: 'Usage limits', value: "Only a Precise cut sent to our video service counts toward the hourly and daily limit of your internet connection" }
+        ]}
+        privacy="For the fast cut, nothing is uploaded: ffmpeg.wasm, loaded from unpkg.com, makes it in your browser. A Precise cut stays in your browser when the page estimates under about 45 seconds of work or the video has an odd width or height. Otherwise the piece from the keyframe before your start goes to our video service (the whole file if no keyframe is found), which deletes it after the cut and the result once downloaded. A shown error sends us its cleaned message, error type, the tool name, your browser and version, the file type and a size range."
         faqs={[
-          { q: "Is the video re-encoded?", a: "Not by default: the selected section is copied as it is (stream copy), so there is no quality loss and the cut takes seconds. Tick \"Precise cut\" to start on the exact frame: the clip is then re-encoded to MP4 (H.264, high quality), which takes longer." },
-          { q: "What output format do I get?", a: "With the default fast cut, the same format as your source: an MP4 gives an MP4, a MOV a MOV, a WebM a WebM. With \"Precise cut\", an MP4 (H.264 + AAC). The file extension always matches the real content." },
-          { q: "Is the cut frame-accurate?", a: "With \"Precise cut\", yes. With the default fast cut, no: without re-encoding a cut can only start on a keyframe, so the clip may begin a little before the start you chose (often 1–3 s on phone videos). The page shows the real length of the result." },
-          { q: "Does it work on iPhone videos?", a: "Yes, iPhone .mov and .mp4 files are accepted. On phones the file size limit is lower (" + MAX_MB_MOBILE + " MB) because a browser tab has much less memory." },
-          { q: "What is the file size limit?", a: MAX_MB_DESKTOP + " MB on a computer and " + MAX_MB_MOBILE + " MB on a phone, shown before you pick a file, because the video is held in your browser's memory while it is cut." },
-          { q: "Is my file uploaded anywhere?", a: "Not for the default fast cut, which happens entirely in your browser. For a Precise cut that would take long in your browser (Firefox, Safari, longer clips), only the part you cut — not the whole video — is sent to our own video service, re-encoded, and deleted after you download it." }
+          { q: "Why does my clip start earlier than I chose?", a: "The default cut copies the video without re-encoding, and a copy can only begin on a keyframe: the clip starts at the keyframe at or before your start point. The page shows the real length of the result. Tick \"Precise cut\" to begin on the exact frame." },
+          { q: "Is the video re-encoded?", a: "No, not by default: the selected part is copied as it is, so quality and format do not change. With \"Precise cut\", yes: the clip is encoded again to MP4 with H.264 picture and AAC sound." },
+          { q: "What format do I get?", a: "The same as your file with the default cut: an MP4 stays MP4, a MOV stays MOV, a WebM stays WebM, an MKV stays MKV. All audio tracks are kept, and subtitles in MKV and WebM. With \"Precise cut\", always an MP4." },
+          { q: "What is the file size limit?", a: `${MAX_MB_DESKTOP} MB on a computer and ${MAX_MB_MOBILE} MB on phones, iPhone and iPad. The whole video is held in the browser tab's memory while it is cut, so the limit is checked as soon as you pick the file.` },
+          { q: "Is my video uploaded for a Precise cut?", a: "No, unless the page estimates that re-encoding in your browser would take over about 45 seconds, which is common in Firefox and Safari and for longer clips; videos with an odd width or height always stay on your device. Then the piece from the keyframe before your start to just after your end goes to our video service, or the whole file when no keyframe can be found." }
         ]}
         tips={[
-          "The first trim downloads the video engine (about 10 MB, 32 MB once unpacked); later trims reuse it from the browser cache.",
-          "With the default fast cut there is no re-encoding, so the clip can start a second or two earlier than your start point; tick Precise cut when the exact frame matters.",
-          "If a file can't be cut without re-encoding, the tool says so instead of returning a broken file; try an MP4 (H.264), MOV or WebM.",
-          "You can cancel at any time while it is working."
+          "If the page says a file cannot be cut without re-encoding, tick \"Precise cut\" and click \"Trim Video\" again."
         ]}
       />
     </div>

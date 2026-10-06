@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Roman Numeral Converter — Convert Between Arabic Numbers" },
-  description: "Roman Numeral Converter converts between Arabic numbers (1–3999) and Roman numerals instantly and bidirectionally as you type, entirely in your browser.",
+  title: { absolute: "Roman Numeral Converter — 1 to 3999, Standard Form Only" },
+  description: "Turn a number from 1 to 3999 into a Roman numeral, or read a numeral back as a number. Non-standard forms such as IIII or IM are flagged, not guessed.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/math-tools/roman-numeral-converter" },
   openGraph: {
-    title: "Roman Numeral Converter — Convert Between Arabic Numbers",
-    description: "Roman Numeral Converter converts between Arabic numbers (1–3999) and Roman numerals instantly and bidirectionally as you type, entirely in your browser.",
+    title: "Roman Numeral Converter — 1 to 3999, Standard Form Only",
+    description: "Turn a number from 1 to 3999 into a Roman numeral, or read a numeral back as a number. Non-standard forms such as IIII or IM are flagged, not guessed.",
     url: "https://www.onlineconvertools.com/tools/math-tools/roman-numeral-converter",
   },
 };

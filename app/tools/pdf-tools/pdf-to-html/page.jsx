@@ -102,24 +102,27 @@ export default function PdfToHtmlPage() {
       </div>
       <SeoContent
         title="PDF to HTML"
-        description="PDF to HTML extracts each page's plain text using the PDF.js library and wraps it in a simple generic HTML page — a bordered box with a page-number heading for each page, the text's line breaks and paragraphs kept, special characters such as < and & escaped so they display as written — entirely in your browser. Your file is never uploaded to a server. It does not preserve your original PDF's fonts, colors, layout, images, or tables; only the raw text is carried over."
+        description={`PDF to HTML takes the text layer of a PDF and writes it into a basic .html file: one bordered section per page with a page-number heading, line breaks and paragraphs kept, and characters such as < and & escaped so they show as written. It does not copy fonts, colors, images, tables or columns; tables and multi-column text become lines in the order the PDF stores them. Scanned pages have no text and stay empty.`}
+        howToTitle="How to convert PDF to HTML"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Click 'Convert to HTML' to extract text from every page.",
-          "Click 'Download' to save the generated .html file.",
-          "Open the file in a browser or code editor to view or edit it."
+          `Pick or drop the PDF whose text you want as HTML.`,
+          `Click "Convert to HTML" to extract the text of every page.`,
+          `When "Done!" appears, "Download" gives you the text as one .html page.`,
         ]}
+        specs={[
+          { label: 'Input format', value: `PDF with a text layer` },
+          { label: 'Output format', value: `HTML file, one section per page` },
+          { label: 'Kept', value: `Text, line breaks and paragraphs` },
+          { label: 'Not kept', value: `Fonts, colors, images, tables and columns` },
+        ]}
+        privacy={`The PDF is read by PDF.js inside this browser tab, and the HTML is written there too; the file is not uploaded. If an error message appears, the cleaned message, the tool's name and your browser's name and version may be sent to us, never your file.`}
         faqs={[
-          { q: "Is PDF to HTML completely free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Will the converted HTML preserve my PDF's fonts, colors, and layout?", a: "No — only the raw text is extracted. The HTML uses a simple generic style; your original fonts, colors, images, and layout aren't carried over." },
-          { q: "Can I preview or copy the HTML code before downloading?", a: "No, there's no in-page preview. The file downloads directly, and you'd open it in a text editor or browser to view the code." },
-          { q: "Is my PDF uploaded to a server?", a: "No, extraction happens entirely in your browser using the PDF.js library." }
+          { q: `Does it keep the layout and images?`, a: `No. Only the text is extracted, and the HTML uses one simple style: Arial-type text in bordered page sections. Fonts, colors, images and the original positions are not carried over.` },
+          { q: `Can it read scanned pages?`, a: `No. A scan has no text layer, so its section stays empty, and the page lists those page numbers after the conversion. Run PDF OCR on the file first, then convert the result.` },
+          { q: `Can I see the HTML before downloading?`, a: `No. There is no preview on the page: open the downloaded .html file in a browser to view it, or in a code editor to change it.` },
         ]}
         tips={[
-          "Works best on text-based PDFs; scanned or image-only pages have no text layer: the tool lists them after conversion, and PDF OCR can add the missing text first.",
-          "Treat the output as a plain-text starting point, not a visual copy — you'll need to add your own CSS for anything beyond the default styling.",
-          "Tables and multi-column layouts are flattened into lines of text in the order the PDF stores them; columns are not rebuilt.",
-          "Open the downloaded .html file in a code editor if you plan to restyle or restructure it further."
+          `To get the text without any HTML tags, use PDF Extract Text.`,
         ]}
       />
     </div>

@@ -26,23 +26,36 @@ export default function HtmlEncoderPage() {
       </div>
       <SeoContent
         title={"HTML Encoder"}
-        description={"HTML Encoder converts the five characters that matter for safe HTML output — &, <, >, quote, and apostrophe — into their HTML entities, entirely in your browser. Decoding turns every HTML entity back into its character in a single pass — the five above, all named entities such as &nbsp; or &copy; (resolved by the browser's own HTML parser) and numeric ones such as &#8364; or &#x1F600; — so already-escaped text like &amp;lt; correctly decodes to &lt;, not <."}
+        description={"HTML Encoder escapes the five characters that HTML reads as markup: & becomes &amp;, < becomes &lt;, > becomes &gt;, the double quote becomes &quot; and the apostrophe becomes &#39;. Use it before you put user text, a code sample or an attribute value into a page, so that it shows as text instead of being read as tags. All other characters, accents and emoji included, are left as they are. The Decode button does the reverse for named and numeric entities, in a single pass. Both buttons are handled by this page's own script."}
+        example={{
+          caption: "A link with a quoted title and a comparison, escaped with Encode:",
+          inputLabel: "Text",
+          input: "<a title=\"Tom's\">5 > 3 & 2 < 4</a>",
+          outputLabel: "Encode",
+          output: "&lt;a title=&quot;Tom&#39;s&quot;&gt;5 &gt; 3 &amp; 2 &lt; 4&lt;/a&gt;",
+        }}
+        howToTitle={"How to escape text for HTML"}
         howTo={[
-          "Paste or type text into the input box.",
-          "Click 'Encode' to convert & < > \" ' into HTML entities, or 'Decode' to convert entities back into characters.",
-          "Review the result in the output box.",
-          "Click 'Copy' to copy it to your clipboard."
+          "Paste the text or code sample you want to show on a web page.",
+          "Click \"Encode\" to replace the ampersand, the angle brackets and both kinds of quotes with entities.",
+          "To undo it, paste escaped text and click \"Decode\".",
+          "Paste the escaped result into your HTML with \"Copy\", or keep it with \"Download\" (the file is encoded.txt, even after a decode)."
         ]}
+        specs={[
+          { label: "Escaped by Encode", value: "& < > and both quote marks, written &amp; &lt; &gt; &quot; &#39;" },
+          { label: "Read by Decode", value: "Every named entity your browser knows, plus decimal and hex numeric entities" },
+          { label: "Passes", value: "One: &amp;lt; becomes &lt;, never <" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"Escaping is a plain text replacement done by this page's script, and named entities are looked up with your browser's own HTML parser, which runs no script and loads nothing. Nothing you paste leaves the page or is stored; if the page itself crashed, we would receive the error, the tool's name and your browser's name and version, not your text."}
         faqs={[
-          { q: "Is HTML Encoder free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Which characters does it encode?", a: "Ampersand, less-than, greater-than, double quote, and apostrophe — the characters that matter for safely embedding text in HTML." },
-          { q: "Does Decode handle entities like &nbsp; or &copy;?", a: "Yes — every named HTML entity and every numeric entity (decimal or hex) is decoded; tags and other text are left exactly as they are." },
-          { q: "Does it decode twice?", a: "No — each entity is decoded once, so &amp;lt; becomes &lt; (the text of an entity), exactly as a browser would display it." }
+          { q: "Is escaping these five characters enough to make text safe in HTML?", a: "Yes for text between tags and for attribute values inside quotes. No for an unquoted attribute, a link address (a javascript: address stays harmful once escaped), or code placed inside script or style elements: those need other escaping or validation." },
+          { q: "Does Decode read both &#39; and &apos;?", a: "Yes. Encode writes the apostrophe as &#39;, and Decode turns both &#39; and &apos; back into an apostrophe, so text escaped either way reads the same after decoding." },
+          { q: "Does it encode accented letters or emoji?", a: "No. Only the five markup characters are replaced; é, ü or 😀 stay as they are, which suits any page saved as UTF-8. Decode still reads entities such as &eacute; or &#x1F600; if you paste them." },
+          { q: "Will Encode then Decode give my text back?", a: "Yes. Decode reads each entity once, so the &amp; written by Encode turns back into & without touching what follows it, and text that already contained entities comes back unchanged." }
         ]}
         tips={[
-          "Encoding these five characters is exactly what's needed to safely place untrusted text inside HTML markup, preventing it from being interpreted as tags or breaking out of an attribute.",
-          "Encode text before inserting it into an HTML attribute value to avoid breaking the surrounding quotes.",
-          "Encode then Decode always gives back your original text."
+          "Escape a code sample once only: encoding it twice makes the page show &amp;lt; instead of <."
         ]}
       />
     </div>

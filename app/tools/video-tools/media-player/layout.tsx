@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Media Player — Play a Single Audio or Video File Online Free" },
-  description: "Media Player plays a single audio or video file directly in your browser using native HTML5 playback — nothing is uploaded.",
+  title: { absolute: "Media Player — Speed, Loop, Subtitles and Frame Capture" },
+  description: "Play a local audio or video file in your browser at 0.5x to 2x speed, on loop, with SRT or VTT subtitles, picture-in-picture and a PNG of any frame.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/media-player" },
   openGraph: {
-    title: "Media Player — Play a Single Audio or Video File Online Free",
-    description: "Media Player plays a single audio or video file directly in your browser using native HTML5 playback — nothing is uploaded.",
+    title: "Media Player — Speed, Loop, Subtitles and Frame Capture",
+    description: "Play a local audio or video file in your browser at 0.5x to 2x speed, on loop, with SRT or VTT subtitles, picture-in-picture and a PNG of any frame.",
     url: "https://www.onlineconvertools.com/tools/video-tools/media-player",
   },
 };

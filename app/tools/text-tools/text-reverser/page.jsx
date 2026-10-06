@@ -38,24 +38,35 @@ export default function TextReverserPage() {
       </div>
       <SeoContent
         title="Text Reverser"
-        description="Text Reverser flips your text three ways — character order, word order, or line order — entirely in your browser."
+        description={"Text Reverser has three buttons. Reverse Text writes the whole text backwards, character by character, keeping emoji, flags and accented letters whole. Reverse Words reverses the order of the words on each line, with punctuation staying attached to its word and line breaks staying in place. Reverse Lines reverses the order of the lines and leaves each line unchanged. Use it for word games, backwards messages or flipping a list from oldest to newest. It does not turn letters upside down, and it runs in your browser."}
+        example={{
+          caption: "Reverse Words: each line is reversed on its own, punctuation stays with its word, and the double space keeps its place.",
+          inputLabel: "Text",
+          input: "Hello, big world!\nOne two  three",
+          outputLabel: "After \"Reverse Words\"",
+          output: "world! big Hello,\nthree two  One",
+        }}
+        howToTitle={"How to reverse text"}
         howTo={[
-          "Type or paste the text you want to reverse.",
-          "Click \"Reverse Text\" to flip character order, \"Reverse Words\" to flip word order, or \"Reverse Lines\" to flip line order.",
-          "Review the result in the output box below.",
-          "Click \"Copy\" to copy the reversed text to your clipboard."
+          "Type or paste your text.",
+          "Click \"Reverse Text\", \"Reverse Words\" or \"Reverse Lines\".",
+          "Copy the reversed text with \"Copy\", or save it with \"Download\" as reversed.txt."
         ]}
+        specs={[
+          { label: "Reverse Text", value: "Characters as displayed: 👍🏽, 👨‍👩‍👧, 🇫🇷 and é typed as e plus an accent stay whole" },
+          { label: "Reverse Words", value: "Word order on each line; spacing pattern and punctuation kept" },
+          { label: "Reverse Lines", value: "Line order only; empty lines move like the others" },
+          { label: "Output", value: "The flipped text in a result box below the buttons, plus a reversed.txt download" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"All three reversals are array operations done by your browser on the text of this page; none of it is uploaded, and closing the tab discards it. A failed copy to the clipboard is reported to our error log as \"Copy to the clipboard failed.\" with the tool name and your browser name and version, and none of your text."}
         faqs={[
-          { q: "Is Text Reverser free to use?", a: "Yes, it's completely free with no signup and no limits." },
-          { q: "Does it work with numbers and punctuation?", a: "Yes, all characters are reversed exactly as they appear, whichever of the three modes you choose." },
-          { q: "Is my data private?", a: "Yes, your text is processed locally and never sent to a server." },
-          { q: "Does it work with any language?", a: "It reverses character order for any language's text, and it reverses characters as you see them: emoji with skin tones, family emoji, flags and accented letters stay whole instead of being split into broken pieces. \"Reverse Words\" works line by line, so your line breaks stay where they were." }
+          { q: "Does Reverse Words move punctuation?", a: "No. Words are the runs of characters between spaces, so a comma or an exclamation mark stays glued to the word it follows: Hello, big world! becomes world! big Hello,. Each line is processed on its own." },
+          { q: "Can I check a palindrome with it?", a: "Yes, for single words typed in one case, such as level. For phrases every character counts, so capitals, spaces and punctuation must mirror too: A man, a plan becomes nalp a ,nam A. Remove spaces and use lower case first." },
+          { q: "Do emoji and accented letters survive Reverse Text?", a: "Yes, in current browsers: emoji with skin tones, family emoji, flags and accents typed as separate marks are kept whole. Firefox before version 125 has no Intl.Segmenter, so such emoji and accents can come apart there." }
         ]}
         tips={[
-          "Use \"Reverse Text\" to check whether a word or phrase is a palindrome.",
-          "\"Reverse Lines\" is handy for flipping the order of a pasted list without touching each line's content.",
-          "\"Reverse Words\" keeps each word intact but flips their order in the sentence — useful for quick word-order experiments.",
-          "Copy large blocks of text in to reverse whole paragraphs at once instead of doing it manually."
+          "Reverse Lines turns a log or a list written oldest-first into newest-first without sorting anything."
         ]}
       />
     </div>

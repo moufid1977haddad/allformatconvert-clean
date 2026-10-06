@@ -83,26 +83,31 @@ export default function GrayscaleConverterPage() {
       </div>
       <SeoContent
         title="Grayscale Converter"
-        description="Grayscale Converter turns a color image into black and white using each pixel's luminance (the weights of the CSS grayscale filter, Rec. 709), so blues stay dark and greens light as the eye sees them, entirely in your browser. Other methods (Rec. 601, average, lightness, a single channel) and a pure black and white with an adjustable threshold are available. A JPEG stays a JPEG, a PNG keeps its transparency. Your image is never uploaded to a server."
+        description={"Grayscale Converter removes the color from a picture. The default method weights red, green and blue the way the eye perceives brightness (Rec. 709, the weights of the CSS grayscale filter), so a blue sky stays darker than green grass. You can also use the older Rec. 601 weights, a plain average, the lightness (brightest plus darkest, halved) or a single channel. A threshold option gives pure black and white, for scans, stamps and signatures. A PNG or WebP keeps its transparency. The gray values are computed in your browser."}
+        howToTitle={"How to convert an image to grayscale"}
         howTo={[
-          "Click the upload area and select a color image from your device.",
-          "Optionally choose the method (luminance, average, lightness, one channel) or tick pure black and white and set the threshold.",
-          "Click 'Convert to Grayscale' to process the image.",
-          "Preview the result.",
-          "Click the download button to save the grayscale image."
+          "Click the upload box and choose a color picture.",
+          "Pick a \"Method\", or tick \"Pure black and white (threshold)\" and move \"Threshold\".",
+          "Click \"Convert to Grayscale\".",
+          "Check the preview and click \"Download\"; JPG, PNG and WebP keep their format, and every other format becomes PNG.",
         ]}
+        specs={[
+          { label: "Methods", value: "Rec. 709 luminance (default), Rec. 601 luminance, average, lightness, red, green or blue channel only" },
+          { label: "Threshold", value: "From 1 to 254, default 128: pixels at or above it turn white, the others black" },
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF or another picture your browser reads" },
+          { label: "Output format", value: "JPG (quality 92), PNG or WebP like the original, other formats as PNG; saved with three equal color channels" },
+          { label: "Picture size", value: "Refused above 268 megapixels" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The gray values are worked out by this page in your browser and the picture is not uploaded to anyone. The converted file is held in the tab until you download it. The text of a displayed error, cleaned, is reported to us with the tool and your browser's name and version, without your image."}
         faqs={[
-          { q: "What image formats does Grayscale Converter support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
-          { q: "Is there a file size limit for uploading images?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
-          { q: "Will the tool reduce the quality of my image?", a: "No, the original resolution is preserved — only the color information is changed." },
-          { q: "Can I make a pure black and white image (no greys)?", a: "Yes — tick 'Pure black and white (threshold)' and move the threshold: lighter pixels become white, darker ones black. Useful for scans, stencils and signatures." },
-          { q: "Can I convert multiple images at once?", a: "No, the tool converts one image at a time — there's no batch upload." }
+          { q: "Which method should I use?", a: "Use Rec. 709 luminance, the default, for most photos: it applies the weights of the CSS grayscale() filter and keeps blues dark and greens light. Rec. 601 follows older TV and JPEG weights. Average and lightness treat the three colors equally, so blues come out lighter." },
+          { q: "Can I make pure black and white with no gray?", a: "Yes. Tick \"Pure black and white (threshold)\" and set \"Threshold\" between 1 and 254: pixels whose gray value reaches it become white, the others black. It suits signatures, stamps and scanned text." },
+          { q: "Is the result a one-channel grayscale file?", a: "No. The pixels become gray, but the file is saved as an ordinary JPG, PNG or WebP with three equal color channels, which every viewer opens. The transparency of a PNG or WebP is kept." },
         ]}
         tips={[
-          "Well-lit portraits with clear contrast tend to convert to grayscale most effectively.",
-          "A photo stays in its own format (JPG in, JPG out), so the file does not balloon; PNG and transparent images stay PNG.",
-          "Try converting a few different photos to see which ones look best in black and white.",
-          "Grayscale images work well for formal documents, resumes, and prints where color isn't needed."
+          "Try \"Red channel only\" and \"Blue channel only\" on the same photo: each click starts from the original, so comparing methods is quick.",
+          "To see the color and gray versions side by side, open both in Image Comparison.",
         ]}
       />
     </div>

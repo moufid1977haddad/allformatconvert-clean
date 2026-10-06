@@ -67,24 +67,31 @@ export default function BrightnessContrastPage() {
       </div>
       <SeoContent
         title="Brightness and Contrast"
-        description="Brightness and Contrast lets you adjust an image's brightness and contrast with two sliders, applied via the browser's canvas filter, entirely on your device. Your image is never uploaded to a server."
+        description={"Brightness and Contrast corrects a picture with three sliders: Brightness to lighten or darken it, Contrast to widen or narrow the gap between light and dark, and Saturation to make colors richer or move them toward gray. Each goes from 0 to 200%, and 100 leaves the picture as it is. The formulas are those of the CSS brightness(), contrast() and saturate() filters; where the browser has no canvas filter (Safari), the page applies the same formulas pixel by pixel. There is no curves, levels or auto-fix control. The three sliders are applied in your browser."}
+        howToTitle={"How to adjust brightness and contrast"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Use the brightness slider to lighten or darken the image.",
-          "Use the contrast slider to increase or decrease the difference between light and dark areas.",
-          "Click 'Apply' to render the result, then download it."
+          "Click the upload box and choose the photo to correct.",
+          "Set \"Brightness\", \"Contrast\" and \"Saturation\"; 100 means unchanged, lower values darken or flatten, higher ones brighten or strengthen.",
+          "Click \"Apply\" to see the result under the sliders.",
+          "If it looks right, click \"Download\"; if not, move a slider and click \"Apply\" again.",
         ]}
+        specs={[
+          { label: "Sliders", value: "Brightness, Contrast and Saturation, each from 0 to 200%, starting at 100" },
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF, and other pictures the browser decodes" },
+          { label: "Output format", value: "A JPG is saved as JPG (quality 92), PNG and WebP keep theirs, the rest becomes PNG" },
+          { label: "Biggest photo", value: "268 megapixels" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The corrections are calculated by this page on your own device, through the browser's canvas, and the photo is never sent to us. The corrected copy disappears with the tab unless you download it. If an error message is displayed, its cleaned text is reported to us with the tool's name and your browser's name and version."}
         faqs={[
-          { q: "Is Brightness and Contrast free to use?", a: "Yes, it's completely free with no registration required." },
-          { q: "What image formats does this tool support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
-          { q: "Will my images be saved or shared?", a: "No, all image processing happens in your browser. Your images are never uploaded to a server." },
-          { q: "Can I preview changes before applying them?", a: "No, there's no live preview — move the sliders to your desired values, then click Apply to see and download the result." }
+          { q: "Is there a live preview?", a: "No. The preview updates when you click \"Apply\". Every click starts again from your original file, so you can try other values as often as you like without loading the photo again." },
+          { q: "Does it work in Safari?", a: "Yes. Safari has no canvas filter, so there the page computes brightness, contrast and saturation on the pixels with the CSS formulas. Chrome and Firefox use the browser's own filter; both paths follow the same formulas." },
+          { q: "What does 0 do on each slider?", a: "0 removes the quantity entirely: Brightness at 0 gives a black picture, Contrast at 0 a flat mid-gray, and Saturation at 0 a gray picture. Values above 100 go the other way, up to 200." },
+          { q: "Can strong settings lose detail?", a: "Yes. Pushing brightness or contrast far turns the lightest or darkest tones into pure white or pure black, and that detail cannot be brought back from the saved file. The size in pixels never changes." },
         ]}
         tips={[
-          "Start with small adjustments and fine-tune gradually rather than large jumps.",
-          "Increase contrast to make a flat, dull photo pop and bring out shadow and highlight detail.",
-          "Use the brightness slider to fix underexposed or overexposed photos.",
-          "If a result isn't quite right, re-upload the original and try again with different values."
+          "For black and white with a choice of method, use Grayscale Converter rather than setting \"Saturation\" to 0.",
+          "Compare the corrected file with the original in Image Comparison to check the change.",
         ]}
       />
     </div>

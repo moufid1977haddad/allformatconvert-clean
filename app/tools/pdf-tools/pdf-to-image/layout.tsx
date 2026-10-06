@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF to Image — PNG, JPG, WebP, TIFF, BMP, Online Free" },
-  description: "PDF to Image: pages as PNG, JPG, WebP, TIFF or BMP at 72, 150 or 300 dpi, or extract the pictures inside. Choose pages; in your browser on a computer (on iPhone or iPad, a page the device cannot draw is drawn by our PDF service, then deleted).",
+  title: { absolute: "PDF to Image — Pages as PNG, JPG, WebP, TIFF or BMP Free" },
+  description: "Turn PDF pages into PNG, JPG, WebP, TIFF or BMP pictures at Normal, High or Screen resolution, or pull out the pictures inside. ZIP for many files.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-image" },
   openGraph: {
-    title: "PDF to Image — PNG, JPG, WebP, TIFF, BMP, Online Free",
-    description: "PDF to Image: pages as PNG, JPG, WebP, TIFF or BMP at 72, 150 or 300 dpi, or extract the pictures inside. Choose pages; in your browser on a computer (on iPhone or iPad, a page the device cannot draw is drawn by our PDF service, then deleted).",
+    title: "PDF to Image — Pages as PNG, JPG, WebP, TIFF or BMP Free",
+    description: "Turn PDF pages into PNG, JPG, WebP, TIFF or BMP pictures at Normal, High or Screen resolution, or pull out the pictures inside. ZIP for many files.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-to-image",
   },
 };

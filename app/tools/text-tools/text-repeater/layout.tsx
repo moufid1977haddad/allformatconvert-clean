@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Text Repeater — Duplicate Any Text a Set Number Online Free" },
-  description: "Text Repeater duplicates any text a set number of times with your choice of separator, entirely in your browser.",
+  title: { absolute: "Text Repeater — Repeat a Word or Line up to 100 Times" },
+  description: "Repeat any text from 1 to 100 times, joined by a new line, a space, a comma or nothing, then copy it or save it as a .txt file.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/text-repeater" },
   openGraph: {
-    title: "Text Repeater — Duplicate Any Text a Set Number Online Free",
-    description: "Text Repeater duplicates any text a set number of times with your choice of separator, entirely in your browser.",
+    title: "Text Repeater — Repeat a Word or Line up to 100 Times",
+    description: "Repeat any text from 1 to 100 times, joined by a new line, a space, a comma or nothing, then copy it or save it as a .txt file.",
     url: "https://www.onlineconvertools.com/tools/text-tools/text-repeater",
   },
 };

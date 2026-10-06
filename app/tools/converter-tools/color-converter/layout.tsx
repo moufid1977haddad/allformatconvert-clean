@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Color Converter — Convert Between Hex, RGB Online Free" },
-  description: "Color Converter converts between HEX, RGB, and HSL color values live, entirely in your browser.",
+  title: { absolute: "Color Converter — HEX, RGB, HSL, HSV & CMYK with Alpha" },
+  description: "Convert one color between HEX, RGB, HSL, HSV and CMYK, opacity included, and see its WCAG grade as text on white and black, with a Copy button per format.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/converter-tools/color-converter" },
   openGraph: {
-    title: "Color Converter — Convert Between Hex, RGB Online Free",
-    description: "Color Converter converts between HEX, RGB, and HSL color values live, entirely in your browser.",
+    title: "Color Converter — HEX, RGB, HSL, HSV & CMYK with Alpha",
+    description: "Convert one color between HEX, RGB, HSL, HSV and CMYK, opacity included, and see its WCAG grade as text on white and black, with a Copy button per format.",
     url: "https://www.onlineconvertools.com/tools/converter-tools/color-converter",
   },
 };

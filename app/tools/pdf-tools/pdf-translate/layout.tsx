@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Translate — Extract Text From the First 5 Pages Online" },
-  description: "PDF Translate extracts text from the first 5 pages of your PDF in your browser, then sends it to OpenAI's API for translation.",
+  title: { absolute: "PDF Translate — Translate a PDF's Text or the Whole File" },
+  description: "Translate the text of a PDF's first pages with OpenAI, or, when offered, the whole PDF into a new PDF with its layout through Google Cloud Translation.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-translate" },
   openGraph: {
-    title: "PDF Translate — Extract Text From the First 5 Pages Online",
-    description: "PDF Translate extracts text from the first 5 pages of your PDF in your browser, then sends it to OpenAI's API for translation.",
+    title: "PDF Translate — Translate a PDF's Text or the Whole File",
+    description: "Translate the text of a PDF's first pages with OpenAI, or, when offered, the whole PDF into a new PDF with its layout through Google Cloud Translation.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-translate",
   },
 };

@@ -56,24 +56,29 @@ export default function ImageInverterPage() {
       </div>
       <SeoContent
         title="Image Inverter"
-        description="Image Inverter creates a photo-negative effect by subtracting each pixel's red, green, and blue values from 255, entirely in your browser. Your image is never uploaded to a server."
+        description={"Image Inverter makes the color negative of a picture. Every red, green and blue value is subtracted from 255, so black becomes white, blue becomes yellow and a dark screenshot turns light. Transparency is not touched, so a logo keeps its see-through background. There is one button and no settings. The pixel size never changes. Inverting the result again gives the original colors back, exactly for an opaque PNG. The inversion is done in your browser."}
+        howToTitle={"How to invert the colors of an image"}
         howTo={[
-          "Click the upload area and select an image from your device.",
-          "Click 'Invert Colors' to process the image.",
-          "Preview the inverted result.",
-          "Click the download button to save your inverted PNG image."
+          "Click the upload box and choose the picture to turn into a negative.",
+          "Click \"Invert Colors\"; there is nothing to set.",
+          "Look at the negative in the preview.",
+          "Click \"Download\"; the negative keeps the format of a JPG, PNG or WebP original and is a PNG for any other format.",
         ]}
+        specs={[
+          { label: "Formula", value: "New value = 255 − old value for red, green and blue; alpha unchanged" },
+          { label: "Input formats", value: "JPG, PNG, WebP, GIF, BMP, AVIF and others the browser decodes" },
+          { label: "Output format", value: "Unchanged for JPG (re-saved at quality 92), PNG and WebP; PNG for the other formats" },
+          { label: "Maximum image", value: "No more than 268 megapixels" },
+        ]}
+        privacyTitle="Where your image is processed"
+        privacy={"The negative is calculated by this page in your browser, pixel by pixel, and the picture is not uploaded. The inverted file stays in the tab until you save it. The cleaned words of an error message, should one appear, are reported to us with the tool and the browser's name and version."}
         faqs={[
-          { q: "What file formats does Image Inverter support?", a: "It accepts common formats your browser can open, such as JPG, PNG, and WebP. The result keeps your image's format: a JPG stays a JPG, a PNG stays a PNG (transparency included), a WebP stays a WebP." },
-          { q: "Is there a file size limit for uploading images?", a: "There's no fixed size limit — processing happens locally in your browser, so it's limited only by your device's available memory." },
-          { q: "Do I need to create an account to use Image Inverter?", a: "No, it's completely free and requires no account or login." },
-          { q: "Can I invert multiple images at once?", a: "No, the tool processes one image at a time — there's no batch upload." }
+          { q: "Can I undo the inversion?", a: "Yes. Inverting the result again gives back the original colors; with an opaque PNG the pixels come back exactly. A JPG goes through lossy compression at each save, so after a round trip it is very close to the original but not identical." },
+          { q: "Does a transparent logo stay transparent after inverting?", a: "Yes. Only red, green and blue are inverted; the alpha channel is left as it is. A transparent PNG logo keeps its see-through background and stays a PNG, and a WebP stays a WebP." },
+          { q: "Can I invert only some colors or one area?", a: "No. All three color channels of every pixel are inverted. For a gray negative, convert the picture with Grayscale Converter first, then invert the result here." },
         ]}
         tips={[
-          "Inverted images can make for striking, high-contrast visuals for social posts or graphics.",
-          "Try inverting black-and-white photos for unusual, artistic results.",
-          "Download both the original and inverted versions if you want to compare them side by side.",
-          "Invert one image at a time and download each before starting the next."
+          "Open the original and the negative in Image Comparison to sweep from one to the other.",
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Delete Pages — Remove the Page Numbers You Specify" },
-  description: "PDF Delete Pages removes the page numbers you specify from a PDF entirely in your browser using the pdf-lib library — your file is never uploaded to a server.",
+  title: { absolute: "Delete Pages from PDF — Type Pages or Ranges" },
+  description: "Remove unwanted pages from a PDF by typing their numbers or ranges, such as 1, 3, 5-7 or 10-. The file is edited in your browser and saved as a copy.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-delete-pages" },
   openGraph: {
-    title: "PDF Delete Pages — Remove the Page Numbers You Specify",
-    description: "PDF Delete Pages removes the page numbers you specify from a PDF entirely in your browser using the pdf-lib library — your file is never uploaded to a server.",
+    title: "Delete Pages from PDF — Type Pages or Ranges",
+    description: "Remove unwanted pages from a PDF by typing their numbers or ranges, such as 1, 3, 5-7 or 10-. The file is edited in your browser and saved as a copy.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-delete-pages",
   },
 };

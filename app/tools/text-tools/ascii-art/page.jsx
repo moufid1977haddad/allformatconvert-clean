@@ -55,22 +55,37 @@ export default function AsciiArtPage() {
       </div>
       <SeoContent
         title={"ASCII Art Generator"}
-        description={"ASCII Art Generator turns text into large ASCII-art letters with FIGlet, the classic banner engine (the one behind patorjk.com's generator), entirely in your browser. Letters, digits, punctuation and accented Latin letters are supported, in ten fonts (Standard, Big, Slant, Small, Banner, Block, Doom, Shadow, ANSI Shadow and 3-D). If a character isn't in the chosen font, the tool says which one instead of silently dropping it. This tool converts text, not images."}
+        description={"ASCII Art Generator draws a word or a short phrase as a large text banner in the FIGlet format, using the figlet library by Patrick Gillespie, the author of patorjk.com. You type up to 60 characters on one line, choose one of ten fonts, and get plain text to paste into a README, a code comment or a terminal greeting. When the chosen font lacks a character, a note names it instead of dropping it silently. It draws text only, not pictures, and it all happens in your browser."}
+        example={{
+          caption: "The text Hi! in the Standard font, exactly as the tool returns it. It lines up only in a monospaced font.",
+          inputLabel: "Text (Font: Standard)",
+          input: "Hi!",
+          outputLabel: "Result",
+          output: "  _   _ _ _ \n | | | (_) |\n | |_| | | |\n |  _  | |_|\n |_| |_|_(_)\n            ",
+        }}
+        howToTitle={"How to make ASCII art from text"}
         howTo={[
-          "Type your text (up to 60 characters).",
-          "Choose a font.",
-          "Click 'Generate'.",
-          "Copy the result and paste it where a monospaced font is used (code, terminal, README)."
+          "Type your text in the box; it takes up to 60 characters on one line.",
+          "Pick a font in the \"Font\" dropdown: Standard, Big, Slant, Small, Banner, Block, Doom, Shadow, ANSI Shadow or 3-D.",
+          "Click \"Generate\"; if the font lacks a character, a note above the button starts with \"Not in this font, left out\".",
+          "Click \"Copy\" to paste the banner where a monospaced font is used, or \"Download\" to save it as ascii-art.txt."
         ]}
+        specs={[
+          { label: "Input", value: "Text typed on one line, up to 60 characters" },
+          { label: "Fonts", value: "Standard, Big, Slant, Small, Banner, Block, Doom, Shadow, ANSI Shadow, 3-D" },
+          { label: "Accented letters", value: "Standard: the French, German, Spanish, Portuguese and Scandinavian accented letters we tried, Ÿ and œ included; Big, Slant, Small, Block, Shadow: the same except œ, Œ and Ÿ; Banner, Doom: only Ä Ö Ü ä ö ü ß; ANSI Shadow, 3-D: none" },
+          { label: "ANSI Shadow", value: "Capitals only, drawn with Unicode block characters such as █ and ╗, and it lacks nine punctuation signs, among them + = { } and ~" },
+          { label: "Output", value: "A multi-line text banner; Copy, or Download as ascii-art.txt" }
+        ]}
+        privacyTitle={"Where your text is processed"}
+        privacy={"The banner is drawn by JavaScript running in this page. Each of the ten fonts is a file of this site, fetched the first time you generate with it; your text is not part of that request and is never sent anywhere. If copying to the clipboard fails, our error log receives the message \"Copy to the clipboard failed.\" with the tool name and your browser's name and version, never your text."}
         faqs={[
-          { q: "Is ASCII Art Generator free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Which characters are supported?", a: "All printable ASCII — letters, digits and punctuation — and, in most fonts, accented Latin letters. Anything a font lacks is listed under the result." },
-          { q: "Why does it look wrong in my document?", a: "ASCII art needs a monospaced font such as Courier or Consolas; paste it into a code block." },
-          { q: "Is my text uploaded to a server?", a: "No — everything happens in your browser." }
+          { q: "Does every font support accented letters?", a: "No. Standard draws every French, German, Spanish, Portuguese and Scandinavian accented letter we tried; Big, Slant, Small, Block and Shadow lack œ, Œ and Ÿ; Banner and Doom have just the German Ä, Ö, Ü, ä, ö, ü and ß; ANSI Shadow and 3-D have none. Any character the font lacks is named above the Generate button." },
+          { q: "Will the banner line up in an email or a Word document?", a: "No, not in a proportional font such as Arial or Calibri, where letters have different widths. Paste it into a code block, a terminal, or text set in Courier, Consolas or Menlo. ANSI Shadow also needs a font that has Unicode block characters." },
+          { q: "Can I make the banner narrower?", a: "Yes. Pick a narrower font or shorten the text, since every character widens each line. In our test on the words HELLO WORLD, Small gave the narrowest banner of the ten fonts, and Block and 3-D the widest." }
         ]}
         tips={[
-          "Short words look best; wide fonts such as Big or Banner can exceed a terminal's 80 columns.",
-          "Try several fonts: Slant and ANSI Shadow suit headers, Small suits narrow spaces."
+          "In a Markdown README, put the banner between two lines of three backticks so it keeps its spacing."
         ]}
       />
     </div>

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Video Merger — Join Videos Into One MP4 Online Free" },
-  description: "Video Merger joins two or more videos into one MP4 in the order you choose: alike clips are joined in your browser without re-encoding; different ones are first matched on our own video service, then deleted.",
+  title: { absolute: "Video Merger — Join Clips Into One MP4 in Your Order" },
+  description: "Join two or more videos into one MP4 in the order you set. Alike H.264 or HEVC clips are copied in your browser; others are matched on our video service.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/video-tools/video-merger" },
   openGraph: {
-    title: "Video Merger — Join Videos Into One MP4 Online Free",
-    description: "Video Merger joins two or more videos into one MP4 in the order you choose: alike clips are joined in your browser without re-encoding; different ones are first matched on our own video service, then deleted.",
+    title: "Video Merger — Join Clips Into One MP4 in Your Order",
+    description: "Join two or more videos into one MP4 in the order you set. Alike H.264 or HEVC clips are copied in your browser; others are matched on our video service.",
     url: "https://www.onlineconvertools.com/tools/video-tools/video-merger",
   },
 };

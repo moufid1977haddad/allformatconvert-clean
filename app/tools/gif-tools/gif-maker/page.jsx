@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { gifFrames } from '../../../lib/gifFrames';
+import { IOS_CANVAS_MAX_PIXELS } from '../../../lib/canvasLimit';
 import { useToolError } from '../../../lib/useToolError';
 
 // Frames of different sizes used to be stretched to the first image's size (a portrait photo after a landscape one
@@ -177,27 +178,33 @@ export default function GifMakerPage() {
       </div>
       <SeoContent
         title="GIF Maker"
-        description="GIF Maker turns a sequence of photos or graphics into a real, downloadable animated GIF, entirely in your browser with the gifenc library — nothing is uploaded anywhere. Images of different sizes keep their proportions: each frame is fitted inside the GIF with a background colour, or cropped to fill it (stretching is still available). Choose the output size, the order of the frames, the delay and how many times it repeats."
+        description="GIF Maker builds an animated GIF from two or more pictures: JPG, PNG, WebP, GIF or any image your browser opens. An animated GIF you add is split into its frames, up to 300 per GIF, each keeping its own duration (one under 20 ms uses 'Frame Delay' instead). You can change the order, give any frame its own duration, decide how pictures of another shape are placed (fit on a background color, crop to fill, or stretch), and choose the output size and how often the GIF repeats. It is encoded with gifenc on this page. The GIF has no transparency: transparent areas of your pictures take the background color."
+        howToTitle="How to make a GIF from images"
         howTo={[
-          "Click the upload area and add two or more images to use as frames.",
-          "Reorder frames with the ◀ ▶ arrows, or remove one with its \"x\" button.",
-          "Choose how frames of another shape are handled (fit with a background, crop to fill, or stretch), the output size and how many times the GIF repeats.",
-          "Set your frame delay, click \"Create GIF\", then preview and download the animated GIF."
+          "Click the box \"Click to add images for GIF frames\" and pick two or more pictures.",
+          "Move a frame earlier or later with ◀ or ▶, remove one with its x, and type a duration in ms under any frame that needs its own.",
+          "Choose \"Frames of another shape\", the \"Output size\" and \"Repeat\".",
+          "Set \"Frame Delay\" for the frames without their own duration, then click \"Create GIF\".",
+          "Click \"Download\" to save animated.gif."
         ]}
+        specs={[
+          { label: "Input", value: "JPG, PNG, WebP, GIF and other images your browser opens; animated GIFs are split into frames" },
+          { label: "Output", value: "Animated GIF, saved as animated.gif" },
+          { label: "Largest side", value: `${MAX_SIDE} px at most; a larger output is scaled down` },
+          { label: "Frames", value: "Two images at least; up to 300 frames taken from each animated GIF" },
+          { label: "Timing", value: "Common delay 50 to 1000 ms, or 20 to 10000 ms for a single frame" },
+          { label: "On iPhone and iPad", value: `An animated GIF over ${(IOS_CANVAS_MAX_PIXELS / 1e6).toFixed(1)} megapixels cannot be split and is added as one still picture` }
+        ]}
+        privacy="Your pictures are read and the GIF is encoded with gifenc on this page; nothing you add is uploaded. A failure shown on the page reaches our error log as a cleaned message with the tool and browser names; your pictures and their names are not included."
         faqs={[
-          { q: "Can each frame have its own duration, or use an animated GIF?", a: "Yes. Type a duration in milliseconds under a frame to keep it on screen longer or shorter than the common delay (empty: the common delay). An animated GIF added to the list is split into its frames, each placed in order." },
-          { q: "Can I download a finished GIF file directly?", a: "Yes — click \"Create GIF\" and a \"Download\" button appears with the finished, real animated GIF file." },
-          { q: "What if my images are not all the same size?", a: "By default each image is fitted inside the GIF without changing its proportions, and the space around it is filled with the background colour you choose. You can instead crop each image to fill the frame, or stretch it (which distorts it)." },
-          { q: "What image formats can I use as frames?", a: "Any image format your browser supports, such as JPG, PNG, WebP, or GIF." },
-          { q: "Will photos look as good as flat graphics or icons?", a: "Simple, flat-color images tend to look best. The underlying encoder doesn't apply dithering, so photos or gradients with fine color detail may show some visible color banding after being reduced to a 256-color palette." },
-          { q: "Is GIF Maker free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is my data private?", a: "Yes. Everything happens locally in your browser — your images are never uploaded to a server." }
+          { q: "Can each frame have its own duration?", a: "Yes. Type a number of milliseconds, from 20 to 10000, under a frame; leave it empty to use \"Frame Delay\". Frames taken from an animated GIF arrive with their original durations filled in; one under 20 ms is replaced by \"Frame Delay\"." },
+          { q: "Can I mix portrait and landscape pictures?", a: "Yes. \"Fit (keep proportions, add background)\" places each one inside the GIF on the background color, \"Crop to fill (keep proportions)\" fills the frame and cuts the edges, and \"Stretch (old behaviour)\" distorts the picture to fit." },
+          { q: "Will transparent PNGs stay transparent?", a: "No. Every frame is painted on the background color first, white unless you change it, so transparent areas take that color. Image to GIF keeps 1-bit transparency if you need it." },
+          { q: "Can I choose the size of the GIF?", a: `Yes. \"Largest width and height (no frame shrunk)\" is the default, \"Same as the first image\" uses the size of the first picture, and \"Custom…\" lets you type both sides. A side above ${MAX_SIDE} px is scaled down.` },
+          { q: "Can I add an animated GIF?", a: "Yes. Its frames are added in order, up to 300 per GIF, each with its own duration (under 20 ms, \"Frame Delay\" applies), and a note under the button says how many were added." }
         ]}
         tips={[
-          "The default size, \"Largest width and height\", never shrinks a frame; \"Same as the first image\" gives a smaller GIF.",
-          "\"Crop to fill\" avoids borders but cuts the edges of images whose shape differs from the GIF's.",
-          "Flat-color graphics, icons, and logos encode cleanly — photos and smooth gradients can show visible banding since the encoder doesn't dither.",
-          "Short delays (50–150ms) read as fluid motion; longer delays (300ms+) suit slideshow-style GIFs where each frame should linger."
+          "\"Same as the first image\" makes a smaller GIF only when the first picture is smaller than the others."
         ]}
       />
     </div>

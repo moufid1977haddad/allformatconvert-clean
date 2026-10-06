@@ -34,22 +34,36 @@ export default function MarkdownToHtmlPage() {
       </div>
       <SeoContent
         title={"Markdown to HTML"}
-        description={"Markdown to HTML converts Markdown into a complete HTML document with marked, a CommonMark and GitHub Flavored Markdown parser, entirely in your browser. Headings, paragraphs, emphasis, links, images, block quotes, ordered and nested lists, fenced code blocks (with their language class), inline code, tables, strikethrough and horizontal rules are all converted, and < > & in code are escaped."}
+        description={"Markdown to HTML turns Markdown into a ready-to-save HTML5 file. The text is parsed by marked with GitHub Flavored Markdown on, and the result is placed inside a doctype, an html element, a head that declares UTF-8 and a body. Code blocks keep their language as a class (language-js) and characters such as < inside code are escaped. Raw HTML in your Markdown is copied through unchanged, scripts included, because nothing is sanitized here. The document has no title, styles or lang attribute; add them if you publish it. This page shows the code, not a rendered preview."}
+        example={{
+          caption: "Output of the page’s own conversion code for a heading, inline code and a fenced JavaScript block.",
+          inputLabel: "Markdown",
+          input: "# Notes\n\nUse `a < b` in **code**.\n\n```js\nif (a < b) run();\n```",
+          outputLabel: "HTML Output",
+          output: "<!DOCTYPE html>\n<html>\n<head><meta charset=\"utf-8\"></head>\n<body>\n<h1>Notes</h1>\n<p>Use <code>a &lt; b</code> in <strong>code</strong>.</p>\n<pre><code class=\"language-js\">if (a &lt; b) run();\n</code></pre>\n</body>\n</html>",
+        }}
+        howToTitle={"How to convert Markdown to an HTML file"}
         howTo={[
-          "Paste your Markdown into the input box.",
-          "Click 'Convert'.",
-          "Review the HTML output.",
-          "Click 'Copy' to copy it."
+          "Paste your Markdown in the \"Markdown\" box.",
+          "Click \"Convert\", which becomes available once the box is not empty.",
+          "Check the code in \"HTML Output\", then click \"Copy\" or use \"Download\" to save it as document.html.",
         ]}
+        specs={[
+          { label: "Input", value: "Markdown text, read with CommonMark and GitHub Flavored Markdown rules" },
+          { label: "Output", value: "One HTML document: doctype, a head declaring UTF-8 encoding, and body; no title, styles or lang attribute" },
+          { label: "Raw HTML", value: "Passed through as written, not sanitized" },
+          { label: "Download", value: "document.html" },
+        ]}
+        privacyTitle={"Where your Markdown is converted"}
+        privacy={"Conversion runs in your browser: the marked library is downloaded the first time you click Convert, and your Markdown and the resulting HTML are never sent to our servers. If an error is shown in the output box, its cleaned message is sent to our error log with the tool’s name and your browser’s name and version, quoted text and URLs removed, so that we can fix the problem."}
         faqs={[
-          { q: "Is Markdown to HTML free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Which Markdown syntax is supported?", a: "CommonMark plus GitHub Flavored Markdown: tables, fenced code blocks, strikethrough, autolinks and task lists." },
-          { q: "Does it produce a full HTML page?", a: "Yes — the output is wrapped in a minimal HTML5 document with UTF-8 encoding, ready to save as .html." },
-          { q: "Is my code uploaded to a server?", a: "No — everything runs in your browser; the engine is downloaded once when you first click." }
+          { q: "Does the output include a full HTML page?", a: "Yes. The HTML is wrapped in a doctype, an html element, a head declaring the UTF-8 encoding and a body, so accented letters display correctly when the file is opened. A title and styles are not added." },
+          { q: "Is raw HTML in my Markdown kept?", a: "Yes, exactly as written: this converter does not sanitize, so a script element or an onclick attribute in your Markdown ends up in the file. Remove anything you do not trust before publishing; Markdown Previewer shows a cleaned version." },
+          { q: "Are code blocks syntax-highlighted?", a: "No. A fenced block marked js becomes a pre and code element with the class language-js, ready for a highlighter such as Prism or highlight.js, but no colors are added here." },
+          { q: "Can I convert a .md file directly?", a: "No, there is no file upload. Open the .md file in a text editor, copy its content and paste it in the Markdown box; the result can then be saved with the Download button." },
         ]}
         tips={[
-          "To preview the rendered result instead of the code, use the Markdown Previewer.",
-          "Raw HTML written inside your Markdown is passed through as is."
+          "To read the result as a page rather than as code, paste the same Markdown into Markdown Previewer.",
         ]}
       />
     </div>

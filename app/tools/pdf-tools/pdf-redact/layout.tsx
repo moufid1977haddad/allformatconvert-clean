@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Redact — Search Your Pdf's Text for a Keyword Online" },
-  description: "PDF Redact searches your PDF's text for a keyword, then permanently destroys the matched text rather than just covering it up.",
+  title: { absolute: "Redact PDF — Black Out Words, Emails, Phones, Cards" },
+  description: "Permanently black out chosen words, e-mail addresses, phone and card numbers in a PDF; matched pages become images, the rest keep their text.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-redact" },
   openGraph: {
-    title: "PDF Redact — Search Your Pdf's Text for a Keyword Online",
-    description: "PDF Redact searches your PDF's text for a keyword, then permanently destroys the matched text rather than just covering it up.",
+    title: "Redact PDF — Black Out Words, Emails, Phones, Cards",
+    description: "Permanently black out chosen words, e-mail addresses, phone and card numbers in a PDF; matched pages become images, the rest keep their text.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-redact",
   },
 };

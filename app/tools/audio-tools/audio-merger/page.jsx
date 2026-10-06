@@ -411,30 +411,29 @@ export default function AudioMergerPage() {
       </div>
       <SeoContent
         title="Audio Merger"
-        description="Audio Merger joins two or more audio files into one, in your browser via ffmpeg.wasm (except for Opus output, as said below). Each file is decoded on its own and the samples are joined end to end, so there is no gap, click or lost fraction of a second at the joins — the length of the result is exactly the sum of your files. Put the files in any order (drag them or use the arrows), and, if you want, add a crossfade between them — 0.1 to 10 seconds, equal power or linear, join by join, with or without overlap — or a fade-in at the start and a fade-out at the end; all of it is off by default. You choose the output format: 6 lossless formats (FLAC, WAV, AIFF, ALAC, CAF, W64) and 8 compressed ones (MP3, M4A, AAC, M4R ringtone, OGG Vorbis, Opus, WMA, AC3) with a choice of bitrate. When all your files are lossless, the result is lossless by default, with their bit depth and sample rate kept. Your files are not uploaded, except for Opus output: it is encoded on our own server with libopus and deleted after download."
+        description={`Audio Merger joins two or more audio files into one. Each file is decoded on its own and the samples are joined, so no gap or click is added at the joins. Set the order by dragging or with the arrows, and, if you want, add a crossfade of ${FADE_MIN} to ${FADE_MAX} seconds, equal power or linear, join by join, plus a fade-in at the start and a fade-out at the end. Output: 6 lossless formats (FLAC, WAV, AIFF, ALAC, CAF, W64) and 8 compressed ones (MP3, M4A, raw AAC, M4R, OGG Vorbis, Opus, WMA, AC3). The joining always happens in the page with ffmpeg.wasm; only the final Opus encoding uses our media service.`}
+        howToTitle="How to merge audio files into one"
         howTo={[
-          "Click the upload area (or drop files on it) to add two or more audio files; you can add more at any time.",
-          "Put them in order: drag a file up or down, or use its arrows. Files are merged from top to bottom.",
-          "Check the list: each file's format, sample rate and length is shown.",
-          "Optionally, under Transitions, tick \"Crossfade between files\" and choose its length and curve, or add a fade-in at the start and a fade-out at the end. Leave them off for an exact join.",
-          "Choose the output format (and the bitrate for a compressed format). The default keeps your files' quality: lossless stays lossless.",
-          "Click \"Merge Audio Files\", then preview and download the result."
+          `Add two or more audio files by clicking or dropping them on the upload area; you can add more later.`,
+          `Drag files up or down, or use the ↑ and ↓ arrows; they are merged from top to bottom.`,
+          `Under "Transitions", tick "Crossfade between files", "Fade in at the start" or "Fade out at the end" if you want them, and set "Length (seconds)" and "Curve".`,
+          `Choose the "Output format" and, for a compressed one, the "Bitrate".`,
+          `Click "Merge Audio Files", then "Download" to save merged_audio in the chosen format.`,
         ]}
+        specs={[
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Output formats`, value: `Lossless: FLAC, WAV, AIFF, ALAC, CAF, W64. Compressed: MP3, M4A, AAC, M4R, OGG, Opus, WMA, AC3.` },
+          { label: `Bitrate`, value: `MP3, M4A, AAC, M4R and OGG: 64 to 320 kbps. Opus: 64 to 256. WMA: 64 to 256 requested, shown with the rate really written. AC3: 192 to 640.` },
+          { label: `Files`, value: `Two or more, with no maximum count; all are held in browser memory` },
+          { label: `Usage limits`, value: `Opus output: a set number of encodings per connection per hour and per day, and the joined FLAC sent to our media service must stay under its maximum size and length.` },
+        ]}
+        privacy={`Your files are decoded and joined by ffmpeg.wasm on this page, whatever the output. For Opus output, the joined audio is then rendered as FLAC and sent to our media service for libopus encoding; the service erases that FLAC as soon as it is encoded and the Opus file once your browser has it, or after a set time. If a merge fails, the cleaned error message, the tool name and your browser's name and version are reported to us.`}
         faqs={[
-          { q: "Which output format is picked by default?", a: "If all your files are lossless (FLAC, WAV, AIFF, ALAC…), the result is lossless too: the same format when they share one, otherwise FLAC (or WAV for 32-bit and floating-point audio, which FLAC can't hold exactly). If all your files share a compressed format (all MP3, all Opus…), that format is kept. Any other mix gives MP3 at 320 kbit/s. You can always pick another format before merging." },
-          { q: "Why not just join MP3 (or AAC, Opus) files without re-encoding?", a: "We measured it: joining compressed files by copying their data leaves a silence of about 18 to 40 ms at each join for MP3, 26 to 30 ms for AAC, and garbled audio for the first milliseconds after each join for Opus, because every file carries its own encoder delay and padding. This tool decodes each file on its own, which removes that delay and padding exactly, then encodes once. To add no further quality loss at all, choose FLAC or WAV." },
-          { q: "Is the result really lossless when I merge FLAC or WAV files?", a: "Yes, as long as you keep a lossless output format: the merged file contains every sample of your files unchanged, at their bit depth (16-bit, 24-bit or floating point for WAV). The only exception is files recorded at different sample rates, which have to be converted to a common rate (the highest one) to be joined — the page tells you when that happens." },
-          { q: "Can I reorder files before merging?", a: "Yes. Drag a file up or down the list, or use its arrow buttons; the files are merged from top to bottom. You can also remove a file or add more at any time before merging." },
-          { q: "How does the crossfade work, and does it change the length?", a: "It is off by default: the files are then joined end to end, with nothing cut or added. When you tick \"Crossfade between files\", the end of each file overlaps the start of the next for the length you choose (0.1 to 10 seconds), so every crossfaded join makes the result shorter by that length — the page shows the new length before you merge. \"Fade out, then in\" fades each file out and the next one in without overlapping, and keeps the full length. You can untick the crossfade at any join. A file never gives more than its own length to its fades." },
-          { q: "Equal power or linear crossfade?", a: "Equal power keeps the loudness steady through the crossfade when the two files are different songs: we measured 0.0 dB of change halfway through, against a 3 dB dip for a linear crossfade, which is what most online joiners use. Linear is offered too; it can suit two recordings of the same sound, which add up in phase." },
-          { q: "Is there a limit on file count or size?", a: "No limit is set by the tool; your browser's available memory is the limit, since the files are processed on your device." },
-          { q: "Is my data private?", a: "Yes. Everything is done in your browser with ffmpeg.wasm, and your files never leave your device — except when you choose Opus: the joined audio is then sent to our own server (not a third party), encoded with libopus and deleted as soon as you have downloaded the result." }
-        ]}
-        tips={[
-          "Merging lossless files? Keep the lossless default: the result is exact and plays in full everywhere.",
-          "For a smaller file from lossless sources, MP3 at 320 kbit/s or Opus at 192 kbit/s are both high quality; Opus is smaller at the same quality.",
-          "An iPhone ringtone (M4R) must last 40 seconds or less.",
-          "The first merge after loading the page takes longer since your browser downloads the ffmpeg.wasm engine."
+          { q: `Does the merger keep my files' format?`, a: `Yes, by default, when they share one: lossless files stay in their lossless format (FLAC if they differ, WAV for 32-bit or floating-point audio), and all-MP3 or all-Opus sets stay MP3 or Opus; raw AAC becomes M4A. Any other mix defaults to MP3 at 320 kbit/s.` },
+          { q: `Can MP3 files be joined without re-encoding?`, a: `No, not without gaps. Our test of 26/09/2026 found that copying the data left 18 to 40 ms of silence at each MP3 join, 26 to 30 ms for AAC, and garbled sound after Opus joins, from each file's encoder delay. This tool decodes each file and encodes once; pick FLAC or WAV to add no further loss.` },
+          { q: `Is the result lossless when I merge FLAC or WAV files?`, a: `Yes, with a lossless output: every sample of your files is kept unchanged, at their bit depth. Files at different sample rates are first converted to the highest one, and FLAC or ALAC store 32-bit or floating-point audio at 24 bits; the page says when either happens. Compressed outputs may end a few milliseconds longer than the sum.` },
+          { q: `Does a crossfade make the merged file shorter?`, a: `Yes, with "Overlap (shorter result)": each crossfaded join shortens the result by the fade length, shown before you merge. "Fade out, then in (same length)" keeps the full length. You can untick the crossfade at any single join.` },
+          { q: `Is equal power better than linear?`, a: `Yes, for two unrelated sounds: in our test of 26/09/2026 on two independent pink noises, equal power kept the level steady (-0.01 dB halfway through) while linear dipped by about 3 dB. Linear stays available for two recordings of the same sound, which add up in phase.` },
         ]}
       />
     </div>

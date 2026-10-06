@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Find and Replace — Find and Replace Text Online Free" },
-  description: "Find Replace is a free online tool. No sign-up, no watermarks, no limits.",
+  title: { absolute: "Find and Replace Text — Plain Text or Regex, Whole Words" },
+  description: "Replace every match in a text at once, as plain text or a JavaScript regular expression, with ignore-case and whole-word options.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/text-tools/find-replace" },
   openGraph: {
-    title: "Find and Replace — Find and Replace Text Online Free",
-    description: "Find Replace is a free online tool. No sign-up, no watermarks, no limits.",
+    title: "Find and Replace Text — Plain Text or Regex, Whole Words",
+    description: "Replace every match in a text at once, as plain text or a JavaScript regular expression, with ignore-case and whole-word options.",
     url: "https://www.onlineconvertools.com/tools/text-tools/find-replace",
   },
 };

@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image Inverter — Create a Photo-negative Effect Online Free" },
-  description: "Image Inverter creates a photo-negative effect by subtracting each pixel's red, green, and blue values from 255, entirely in your browser.",
+  title: { absolute: "Invert Image Colors — Photo Negative in One Click" },
+  description: "Turn a picture into its color negative: each red, green and blue value is subtracted from 255. Transparency is kept; JPG, PNG and WebP keep their format.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-inverter" },
   openGraph: {
-    title: "Image Inverter — Create a Photo-negative Effect Online Free",
-    description: "Image Inverter creates a photo-negative effect by subtracting each pixel's red, green, and blue values from 255, entirely in your browser.",
+    title: "Invert Image Colors — Photo Negative in One Click",
+    description: "Turn a picture into its color negative: each red, green and blue value is subtracted from 255. Transparency is kept; JPG, PNG and WebP keep their format.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-inverter",
   },
 };

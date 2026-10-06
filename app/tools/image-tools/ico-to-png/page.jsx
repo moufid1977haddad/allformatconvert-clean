@@ -82,25 +82,27 @@ export default function ICOtoPNGPage() {
       </div>
       <SeoContent
         title="ICO to PNG"
-        description="ICO to PNG converts an ICO icon file to PNG format entirely in your browser using the HTML canvas — your file is never uploaded to a server. If the ICO contains multiple embedded sizes, the browser renders the one it picks as the source image; there's no per-size selector."
+        description={`ICO to PNG opens a Windows icon file and saves its images as PNG. An .ico file usually holds the same icon drawn at several sizes. "Convert" gives the largest one, which is the image browsers display. "Every size in this icon" lists each image inside with its width, height and bit depth, so you can download any of them as a PNG, or all of them in a ZIP named after the icon. Images already stored as PNG inside the icon are handed over byte for byte; older bitmap entries are decoded by your browser and saved as new PNG files.`}
+        howToTitle="How to convert ICO to PNG"
         howTo={[
-          "Click the upload area and select an ICO file from your device.",
-          "Click 'Convert' to render it to PNG.",
-          "Preview the converted image.",
-          "Click the download button to save your PNG file."
+          `Pick an .ico file in the upload area; the icon is shown there.`,
+          `Click "Convert" to get the largest image as a PNG, then "Download".`,
+          `Or click "Every size in this icon" to see each image the icon holds.`,
+          `Click "Download" next to the size you want, or "Download all" for a ZIP of every size.`
         ]}
+        specs={[
+          { label: 'Input format', value: `ICO (.ico), one icon at a time` },
+          { label: 'Output', value: `PNG, one file per icon size, or a ZIP of them` },
+          { label: 'File names', value: `Icon name, then width x height and bit depth, for example icon-32x32-32bit.png` }
+        ]}
+        privacy={`The icon file is read on this page: its directory is parsed by our script in your browser and each image is decoded by the browser. No copy of the icon is uploaded. An icon that cannot be read leaves a trace in our error log: the cleaned message shown, the tool's name and your browser's name and version.`}
         faqs={[
-          { q: "Is ICO to PNG completely free to use?", a: "Yes, it's 100% free with no registration required." },
-          { q: "What is the maximum file size I can upload?", a: "There's no fixed size limit — processing happens locally, and ICO files are typically small anyway." },
-          { q: "Will the conversion affect image quality?", a: "No, the pixels are copied as-is. PNG also supports transparency, so any transparent areas in your ICO are preserved." },
-          { q: "My icon holds several sizes: which one do I get?", a: "Convert gives the largest one, the image a browser shows. Every size in this icon gives each image it holds (16 × 16, 32 × 32, 48 × 48, 256 × 256…) as its own PNG, or all of them in one ZIP; PNG images stored inside the icon are given byte for byte." },
-          { q: "Do I need to install any software?", a: "No, it works entirely in your browser with no downloads, and your file never leaves your device." }
+          { q: "Does \"Convert\" give the largest size?", a: `Yes. "Convert" gives the largest image in the icon, which is the one browsers show. To pick another size, such as the small taskbar version, use "Every size in this icon" and download that line.` },
+          { q: "Are PNG images inside the icon re-encoded?", a: `No. Modern icons often store their large sizes as PNG; those are given exactly as they are inside the .ico. Only bitmap entries are decoded and saved as new PNG files.` },
+          { q: "Are the other sizes still offered if one image is damaged?", a: `Yes. A damaged image is left out and the page says how many could not be read. When you use "Every size in this icon" on a file that is not an icon at all, the message says its header is not an icon directory.` }
         ]}
         tips={[
-          "PNG files are ideal for web use since they support transparent backgrounds, which works well for logos and icons.",
-          "Convert files one at a time — there's no batch upload option.",
-          "Download your PNG right away, since nothing is stored after you leave the page.",
-          "If your ICO has multiple resolutions embedded, check which one the browser used as the source before relying on the output for a specific size."
+          `To build an icon file from a PNG instead, with the sizes you choose, use PNG to ICO.`
         ]}
       />
     </div>

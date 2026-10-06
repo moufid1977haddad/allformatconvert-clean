@@ -22,24 +22,34 @@ export default function ColorPickerPage() {
       </div>
       <SeoContent
         title="Color Picker"
-        description="Color Picker lets you pick a color with your browser's native color picker or type a hex code directly, and shows the matching HEX and RGB values, entirely client-side. It converts any standard 6-digit hex code (with or without a leading #, either case) to RGB; it doesn't accept 3-digit shorthand hex or named CSS colors like 'red' for the RGB conversion, and there's no image upload, URL input, or HSL/CMYK display."
+        description={"Color Picker shows a large preview of one color with its HEX and RGB values. You choose the color with your browser’s built-in color picker (the small swatch under the preview) or by typing a code in the Input box. Only 6-digit HEX codes are converted to RGB, with or without the # sign; 3-digit codes, codes with an alpha channel and names such as red leave the RGB card empty. The HEX card shows exactly what was picked or typed. For HSL, HSV or CMYK values, use Color Converter."}
+        example={{
+          caption: "A typed code and the values the page shows, from its own HEX-to-RGB function.",
+          inputLabel: "Typed in Input",
+          input: "#ff8800",
+          outputLabel: "Cards and clipboard",
+          output: "HEX: #ff8800\nRGB: 255,136,0\nCopy under RGB puts on the clipboard: rgb(255,136,0)",
+        }}
+        howToTitle={"How to pick a color and get its RGB value"}
         howTo={[
-          "Click the color swatch to open your browser's native color picker, or type a hex code directly into the Input box.",
-          "The large preview box updates instantly to show the selected color.",
-          "Read the matching HEX and RGB values in the cards below.",
-          "Click 'Copy' under HEX or RGB to copy that value to your clipboard."
+          "Click the small color swatch under the large preview to open your browser’s color picker, then choose a color.",
+          "Or type a code with its # in \"Input\", for example #ff8800: the preview and the HEX card follow what you type.",
+          "Read the \"RGB\" card, which shows the red, green and blue values separated by commas.",
+          "Click \"Copy\" under \"HEX\" or \"RGB\": the HEX card copies the code as shown, the RGB card copies it as rgb(r,g,b).",
         ]}
+        specs={[
+          { label: "Input", value: "The browser’s color picker, or a HEX code typed in the Input box" },
+          { label: "RGB conversion", value: "6-digit HEX codes only, # optional, upper or lower case" },
+          { label: "Output", value: "HEX as picked or typed; RGB shown as r,g,b and copied as rgb(r,g,b)" },
+          { label: "Not included", value: "HSL, CMYK, alpha, saved palettes, sampling from an image (Color Converter covers HSL and CMYK)" },
+        ]}
+        privacyTitle={"Where your color is processed"}
+        privacy={"The color you pick or type stays on this page: the conversion to RGB is done by the page’s own code and the color is never sent to our servers. The Copy buttons use your browser’s clipboard. The color picker window belongs to your browser, so what it offers, an eyedropper in some browsers for example, depends on the browser and not on this site."}
         faqs={[
-          { q: "What color formats does Color Picker support?", a: "HEX and RGB. There's no HSL, HSLA, or CMYK conversion, and no RGBA/alpha channel." },
-          { q: "Can I extract colors from an image?", a: "No — there's no image upload, URL input, or eyedropper for sampling colors from a picture or webpage." },
-          { q: "Is Color Picker free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I type a color name or 3-digit hex code?", a: "You can type it, and the preview swatch will still render it correctly since browsers understand those formats — but the RGB conversion only recognizes full 6-digit hex codes, so it will show blank for shorthand hex or named colors like 'red'." }
-        ]}
-        tips={[
-          "Use the native color picker (click the swatch) for the easiest way to browse and select a color visually.",
-          "Type a full 6-digit hex code (e.g. 3b82f6 or #3B82F6) in the Input box if you already know the exact color you want — the leading # is optional and case doesn't matter.",
-          "If the RGB card looks empty, check that you entered a full 6-digit hex value rather than a 3-digit shorthand or color name.",
-          "There's no save or palette feature, so copy each value you need before navigating away."
+          { q: "Does the RGB card read short codes such as #f80?", a: "No. Only six hexadecimal digits are converted, so the card stays empty for them: shorthand such as #f80, eight-digit codes with alpha and color names such as red are not converted. Type the full code instead, for example #ff8800, which gives 255,136,0." },
+          { q: "Do I need to type the # sign?", a: "Yes, for the preview: without it, the large preview keeps the previous color and the browser’s swatch turns black, because both need a valid CSS color. The RGB conversion alone accepts the code with or without #." },
+          { q: "Can I get HSL or CMYK values here?", a: "No. This page gives HEX and RGB only. Color Converter, in the converter tools, converts between HEX, RGB, HSL, HSV and CMYK and has the same browser color picker." },
+          { q: "Does Copy add rgb() around the RGB value?", a: "Yes. The RGB card shows 255,136,0 but copies rgb(255,136,0), ready to paste into a stylesheet. The HEX card copies the code exactly as shown, including a typed name such as red." },
         ]}
       />
     </div>

@@ -95,7 +95,7 @@ export default function AudioBoosterPage() {
             <input aria-label="Volume Boost" type="range" min={0.25} max={5} step={0.25} value={volume} disabled={normalize} onChange={e => setVolume(Number(e.target.value))} className="w-full" />
             <div className="flex justify-between text-xs text-neutral-400 mt-1"><span>0.25x (quieter)</span><span>1x (normal)</span><span>5x (max)</span></div>
           </div>
-          <label className="flex items-center gap-2 text-sm text-neutral-700"><input id="ab-normalize" type="checkbox" checked={normalize} onChange={e => { setNormalize(e.target.checked); setResult(null); }} />Normalize instead (even loudness at -16 LUFS, the podcast and streaming standard)</label>
+          <label className="flex items-center gap-2 text-sm text-neutral-700"><input id="ab-normalize" type="checkbox" checked={normalize} onChange={e => { setNormalize(e.target.checked); setResult(null); }} />Normalize instead (even loudness at -16 LUFS)</label>
           <label className="flex items-center gap-2 text-sm text-neutral-700"><input type="checkbox" checked={limiter} onChange={e => { setLimiter(e.target.checked); setResult(null); }} />Prevent distortion (limiter: loud peaks are held just under full scale instead of being cut flat)</label>
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Output Format</label>
@@ -117,25 +117,33 @@ export default function AudioBoosterPage() {
       </div>
       <SeoContent
         title="Audio Booster"
-        description="Audio Booster changes an audio file's volume by a gain multiplier (0.25x to make it quieter, up to 5x louder), or normalizes its loudness to -16 LUFS (the podcast and streaming standard), followed by a limiter that keeps the loudest peaks just under full scale instead of cutting them flat (it can be turned off), processed in your browser via ffmpeg.wasm (WebAssembly) — nothing is uploaded, except for Opus, which our own server encodes with libopus and then deletes. Choose the output format that matches your source (or any other supported format) instead of always getting MP3 back."
+        description={`Audio Booster changes the volume of one audio file. Move the slider from 0.25x (quieter) to 5x (louder), or tick "Normalize instead" to bring the whole file to an even loudness of -16 LUFS with true peaks at -1.5 dB. When you boost above 1x with "Prevent distortion" ticked, as it is by default, a limiter holds the peaks just under full scale instead of cutting them flat. You choose among 18 output formats, from MP3 to FLAC and M4R. The gain is applied by ffmpeg.wasm on this page; an Opus result is the one case encoded on our media service.`}
+        howToTitle="How to boost or normalize the volume of an audio file"
         howTo={[
-          "Click the upload area and select an audio file.",
-          "Set your desired boost level using the slider (1x–5x).",
-          "Choose an output format — pick the same format as your source to avoid an unnecessary quality-losing re-encode.",
-          "Click \"Boost Audio\" — the first use downloads the ffmpeg processing engine, so it may take a moment.",
-          "Preview the result, then download the boosted file."
+          `Pick or drop the recording that sounds too quiet or too loud.`,
+          `Set "Volume Boost" with the slider, or tick "Normalize instead" to aim at -16 LUFS.`,
+          `Leave "Prevent distortion" ticked to keep loud peaks under full scale, or untick it for the raw gain.`,
+          `Choose the "Output Format", then click "Boost Audio".`,
+          `Listen to the result and click "Download" to save it as boosted_ followed by your file name.`,
         ]}
+        specs={[
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Output formats`, value: `MP3, WAV, AAC, FLAC, OGG (Vorbis), M4A, Opus, WMA, AIFF, ALAC, AC3, M4R, M4B, MP2, WV (WavPack), CAF, AU, MKA` },
+          { label: `Volume`, value: `0.25x to 5x in steps of 0.25x, or loudness normalization to -16 LUFS (true peak -1.5 dB)` },
+          { label: `Maximum file size`, value: `Not set by the tool for the formats made on the page; the whole file is held in memory. For Opus, the lossless FLAC sent to our media service must fit its maximum size and length.` },
+          { label: `Usage limits`, value: `Opus output counts toward an hourly and a daily number of jobs per connection on our media service.` },
+        ]}
+        privacy={`ffmpeg.wasm, downloaded from unpkg.com the first time, applies the gain to your file in your browser, except when you choose Opus. Then the boosted audio is rendered here as lossless FLAC, sent to our media service and encoded with libopus; the service erases that FLAC when encoding ends and the Opus file once your browser has fetched it, or after a set time. A failed boost is reported to us with its cleaned message, the file extension and size range, and your browser's name and version.`}
         faqs={[
-          { q: "What does the boost actually do?", a: "It multiplies the volume of the whole file, then a limiter (ffmpeg's alimiter) turns down only the peaks that would go past full scale, so they are not cut flat. It is not loudness normalization: quiet passages get the full boost, loud ones are held back. Turn the limiter off to get the raw gain, clipping included." },
-          { q: "What output format do I get?", a: "Your choice — MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, or AC3, picked from a dropdown before boosting." },
-          { q: "Is Audio Booster free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Is my file uploaded anywhere?", a: "For every format except Opus, no: processing happens in your browser via ffmpeg.wasm. For Opus, the processed audio is sent to our own server (not a third party), encoded with the reference libopus encoder (the in-browser one is not as good), and deleted as soon as you have downloaded the result." }
+          { q: `Will boosting make the audio distort?`, a: `No, not with the default settings. With "Prevent distortion" ticked and a boost above 1x, the limiter turns down only the peaks that would pass full scale, so they are not cut flat; strong boosts then sound more compressed. Untick it to get the raw gain, clipping included.` },
+          { q: `Does "Normalize instead" make every file equally loud?`, a: `Yes, it aims at the same target: the loudnorm filter brings the file to -16 LUFS with true peaks at -1.5 dB, at the source sample rate (an Opus result takes a rate the Opus encoder supports, which can differ from the source). The slider is then disabled and the limiter box is ignored. A plain boost multiplies every sample by one factor instead.` },
+          { q: `Can I make a file quieter?`, a: `Yes. Move the slider below 1x, down to 0.25x. The limiter is not used there, since lowering the volume cannot push peaks past full scale. The file is still re-encoded into the output format you pick.` },
+          { q: `Will I lose quality if I keep the same format?`, a: `Yes, if that format is lossy. Changing the volume always means encoding again, so an MP3 saved as MP3 is compressed a second time. FLAC or ALAC add no further loss; WAV and AIFF are written in 16 bits, so a higher-resolution source loses depth.` },
+          { q: `Does boosting to Opus use a server?`, a: `Yes, Opus is the only output that does: the boosted audio goes to our media service as FLAC and is encoded there with libopus. That service limits jobs per connection per hour and per day. Every other format is boosted and saved in this tab by ffmpeg.wasm.` },
         ]}
         tips={[
-          "Start around 1.5x–2x; with the limiter on, higher boosts stay free of clipping but sound more compressed.",
-          "Pick a lossless output (WAV, FLAC, AIFF, or ALAC) if your source was already lossless, to avoid stacking a lossy re-encode on top of the boost.",
-          "The first boost after loading the page can take longer since your browser needs to download the ffmpeg.wasm engine.",
-          "Keep your original file — a boost (and the limiter's peak reduction) can't be undone."
+          `For voice memos recorded at different levels, try "Normalize instead" before the slider.`,
+          `To boost only one passage, cut it out first with Audio Trimmer.`,
         ]}
       />
     </div>

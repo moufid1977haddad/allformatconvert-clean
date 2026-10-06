@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Extract Text — Pull the Text Layer Out Online Free" },
-  description: "PDF Extract Text pulls the text layer out of your PDF page by page, entirely in your browser using the PDF.js library — your file is never uploaded to a server.",
+  title: { absolute: "Extract Text from PDF — Copy It or Save as TXT" },
+  description: "Pull the selectable text out of a PDF, for every page or chosen pages, then copy it or download a .txt file. Read locally with PDF.js, without OCR.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-extract-text" },
   openGraph: {
-    title: "PDF Extract Text — Pull the Text Layer Out Online Free",
-    description: "PDF Extract Text pulls the text layer out of your PDF page by page, entirely in your browser using the PDF.js library — your file is never uploaded to a server.",
+    title: "Extract Text from PDF — Copy It or Save as TXT",
+    description: "Pull the selectable text out of a PDF, for every page or chosen pages, then copy it or download a .txt file. Read locally with PDF.js, without OCR.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-extract-text",
   },
 };

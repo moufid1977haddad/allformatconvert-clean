@@ -219,26 +219,30 @@ export default function PdfWatermarkPage() {
       </div>
       <SeoContent
         title="PDF Watermark"
-        description="PDF Watermark stamps a text or image watermark on your PDF using the pdf-lib library entirely in your browser — your file is never uploaded to a server. Choose the text (any language), its size, colour and weight, or a PNG/JPG logo and its width; one of nine positions or a mosaic across the page; no rotation, 45°, 90°, 180° or 270°; the opacity; over or below the page content; and which pages get it. The watermark is centred on its position and placed as you see the page, also on pages displayed rotated."
+        description={`PDF Watermark stamps text in most scripts, or a PNG or JPG picture such as a logo, on the pages you choose. Place it in one of nine positions or repeat it in a staggered mosaic, turn it by 45°, 90°, 180° or 270°, set its opacity, and draw it over the page or below the page content. Text the standard font cannot write, such as Chinese or Arabic, is drawn with your device's own fonts as a transparent image, so a script with no installed font shows as boxes. pdf-lib draws the mark into the pages in your browser.`}
+        howToTitle="How to add a watermark to a PDF"
         howTo={[
-          "Click the upload area and select a PDF file from your device.",
-          "Choose 'Text' and type the watermark text (defaults to \"CONFIDENTIAL\"), or choose 'Image' and pick a PNG or JPG.",
-          "Pick a position or tick 'Mosaic', then set the rotation, the layer, the pages and the opacity slider.",
-          "Click 'Add Watermark', then 'Download' to save the result."
+          `Choose the PDF.`,
+          `Click "Text" and type in "Watermark text", or click "Image" and use "Choose image (PNG or JPG)".`,
+          `Pick a position or tick "Mosaic (repeat across the whole page)", then set "Rotation", "Layer", the pages and the opacity slider.`,
+          `Click "Add Watermark": each page in the range carries the mark in the -watermarked.pdf file under "Download".`,
         ]}
+        specs={[
+          { label: 'Input', value: `PDF; watermark picture: PNG or JPG` },
+          { label: 'Text', value: `Most scripts (non-Latin text uses your device's fonts); automatic or chosen size; color; bold` },
+          { label: 'Placement', value: `Nine positions or a mosaic; rotation none, 45°, 90°, 180° or 270°` },
+          { label: 'Opacity', value: `From 10% to fully opaque, 30% by default` },
+          { label: 'Pages', value: `From page / To page; empty To page means the last page` },
+          { label: 'Result', value: `Your file name followed by -watermarked.pdf` },
+        ]}
+        privacy={`The watermark is drawn into the PDF by pdf-lib in this browser tab; neither your PDF nor your logo is uploaded. Text outside the standard font is rendered by the browser itself into a picture before it is placed. A PDF with print or copy restrictions is decrypted in the browser first, and the watermarked copy carries none.`}
         faqs={[
-          { q: "Is PDF Watermark free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Can I add an image watermark, like a logo?", a: "Yes — choose 'Image' and pick a PNG (transparency is kept) or a JPG, then set its width as a share of the page." },
-          { q: "Can I change the watermark's color, angle, or position?", a: "Yes: nine positions or a mosaic, no rotation or 45°, 90°, 180°, 270°, any colour, and the opacity." },
-          { q: "What does 'Below the content' do?", a: "The watermark is drawn first and the page's text and images over it, so it never hides them. On a scanned page (one big picture) it is then hidden by the picture: use 'Over the content' there." },
-          { q: "Does it work with non-Latin text?", a: "Yes. Text the standard PDF font cannot write (Chinese, Arabic, Cyrillic, emoji…) is drawn by your browser as a transparent image at print resolution." },
-          { q: "Can I watermark multiple PDFs at once?", a: "No, only one file at a time — upload and process additional files separately." }
+          { q: "Can I use my logo as a watermark?", a: `Yes. Click Image and choose a PNG or JPG; a PNG keeps its transparency. Set its width as a share of the page width; in a mosaic the width is capped at 25% so the copies fit on the page.` },
+          { q: "Can the watermark go under the text?", a: `Yes. Choose Below the content: the mark is drawn first and the page's text and pictures sit on top of it. On a scanned page or one with a full background the page then hides it, so keep Over the content there; the result message reminds you.` },
+          { q: "Does it work with Chinese, Arabic or Cyrillic text?", a: `Yes. Text the standard PDF font cannot write is drawn by your browser with your device's fonts as a transparent picture, then placed like normal text with the same position, rotation and opacity.` },
+          { q: "Can I watermark only some pages?", a: `Yes. Set From page and To page; leave To page empty to go on to the last page. Pages outside that range are left untouched.` },
         ]}
-        tips={[
-          "Lower opacity values (around 20-30%) keep the underlying content easy to read while still visibly marking the page.",
-          "A mosaic is harder to crop out than a single stamp.",
-          "Leave the font size on automatic: it scales to each page, so the watermark looks proportionate across different page sizes."
-        ]}
+        tips={[]}
       />
     </div>
   );

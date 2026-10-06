@@ -7,7 +7,7 @@ export const GROUPS = [
   {
     name: 'Linear',
     items: [
-      { bcid: 'code128', label: 'Code 128', sample: 'ABC-12345', hint: 'Any text (ASCII). The most widely used general-purpose barcode.', zxing: 'Code128' },
+      { bcid: 'code128', label: 'Code 128', sample: 'ABC-12345', hint: 'Any text (ASCII), with letters, digits and symbols.', zxing: 'Code128' },
       { bcid: 'gs1-128', label: 'GS1-128 (UCC/EAN-128)', sample: '(01)09501101530003(17)261231(10)ABC123', hint: 'GS1 Application Identifiers in brackets, e.g. (01)GTIN(17)expiry(10)batch. Check digits are verified.', zxing: 'Code128', gs1: true },
       { bcid: 'code39', label: 'Code 39', sample: 'CODE-39 TEST', hint: 'Upper-case letters, digits, space and - . $ / + %', zxing: 'Code39', checkOption: 'includecheck' },
       { bcid: 'code39ext', label: 'Code 39 Extended (Full ASCII)', sample: 'Code 39 ext', hint: 'Any ASCII text, encoded with Code 39 pairs.', zxing: 'Code39' },

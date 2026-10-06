@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "Image to Base64 — Read an Image File Online Free" },
-  description: "Image to Base64 reads an image file and encodes it as a Base64 data URI, entirely in your browser using the FileReader API.",
+  title: { absolute: "Image to Base64 Encoder — Data URI, img Tag, CSS or JSON" },
+  description: "Encode an image file as Base64 text: a data URI, plain Base64, an HTML img tag, a CSS background rule or JSON. Copy it or download name.base64.txt.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/image-to-base64" },
   openGraph: {
-    title: "Image to Base64 — Read an Image File Online Free",
-    description: "Image to Base64 reads an image file and encodes it as a Base64 data URI, entirely in your browser using the FileReader API.",
+    title: "Image to Base64 Encoder — Data URI, img Tag, CSS or JSON",
+    description: "Encode an image file as Base64 text: a data URI, plain Base64, an HTML img tag, a CSS background rule or JSON. Copy it or download name.base64.txt.",
     url: "https://www.onlineconvertools.com/tools/image-tools/image-to-base64",
   },
 };

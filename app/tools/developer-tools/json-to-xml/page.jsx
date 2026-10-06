@@ -73,24 +73,29 @@ export default function JsonToXmlPage() {
       </div>
       <SeoContent
         title="JSON to XML"
-        description="JSON to XML recursively converts JSON into nested XML tags using the fast-xml-parser library, entirely in your browser. Each key becomes a tag name, objects nest naturally, text is escaped automatically (so an ampersand or a less-than sign in a value doesn't break the output), and array items become repeated sibling tags with the same name — the standard, valid way to represent a list in XML."
+        description={"JSON to XML writes pasted JSON as an indented XML document that starts with an XML declaration and wraps everything in a root element. Each key becomes a tag; an array becomes the same tag repeated, and a top-level array becomes item elements. Keys that start with @_ become attributes and a #text key becomes the text of its element, following the fast-xml-parser conventions. Text is escaped, numbers are kept as written, and a key that cannot be an XML name is reported instead of producing broken XML."}
+        example={{"caption":"A book object with an @_id key, an array and an ampersand, and the XML the tool returns:","inputLabel":"JSON","input":"{\n  \"book\": {\n    \"@_id\": \"7\",\n    \"title\": \"Tom & Jerry\",\n    \"tags\": [\"kids\", \"cartoon\"],\n    \"price\": 12.50\n  }\n}","outputLabel":"XML","output":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n  <book id=\"7\">\n    <title>Tom &amp; Jerry</title>\n    <tags>kids</tags>\n    <tags>cartoon</tags>\n    <price>12.50</price>\n  </book>\n</root>\n"}}
+        howToTitle="How to convert JSON to XML"
         howTo={[
-          "Paste your JSON into the input box.",
-          "Click 'Convert' to generate nested XML tags.",
-          "Arrays and special characters are handled automatically — no manual cleanup needed.",
-          "Click 'Copy' to copy the result to your clipboard."
+          "Paste JSON into \"JSON Input\"; put @_ before any key you want as an attribute.",
+          "Click \"Convert\".",
+          "Read the XML in \"XML Output\", or the message naming a key that is not a valid XML name.",
+          "Use \"Copy\", or \"Download\" for a data.xml file.",
         ]}
+        specs={[
+          { label: "Input", value: "JSON text" },
+          { label: "Output", value: "XML with a declaration, a root element and two-space indentation; file data.xml" },
+          { label: "Element names", value: "a letter or _ first, then letters, digits, _ . - or :" },
+        ]}
+        privacy={"The XML is built in your browser by the fast-xml-parser library, loaded when you first click \"Convert\"; your JSON is not uploaded. When a conversion fails, a report reaches us with the error text, quoted parts masked, the tool name and your browser name and version."}
         faqs={[
-          { q: "Is JSON to XML free to use?", a: "Yes, it's completely free with no signup required." },
-          { q: "Does it handle nested JSON objects?", a: "Yes — nested objects convert into properly nested XML tags at any depth." },
-          { q: "Does it escape special characters like & and <?", a: "Yes — text values are escaped automatically (& becomes &amp;, < becomes &lt;, and so on), so the output is well-formed XML." },
-          { q: "Does it convert JSON arrays correctly?", a: "Yes — array items become repeated sibling tags under the same name (e.g. three tags named tag for a 3-item array), which is valid XML and the conventional way array-like data is represented." }
+          { q: "Can I create XML attributes?", a: "Yes. Prefix the key with @_: a book object holding @_id with the value 7 gives <book id=\"7\">. A #text key next to it becomes the element's text, so one element can carry both attributes and content." },
+          { q: "Does the output have a single root element?", a: "Yes. An XML document needs exactly one, so the result is always wrapped in <root>; a JSON array at the top level gives one <item> per entry inside it. Rename root afterwards if your system expects another name." },
+          { q: "Are special characters escaped?", a: "Yes. & becomes &amp; and < becomes &lt; in text, as the example shows, so the document stays well-formed. A key with a space, or one that starts with a digit, is refused with a message, because no escaping can turn it into a valid tag name." },
+          { q: "Are numbers written exactly as in the JSON?", a: "Yes. The JSON is read without turning numbers into floating point, so a price of 12.50 gives <price>12.50</price> and a 20-digit ID keeps every digit in its element. A null value becomes an empty element." },
         ]}
         tips={[
-          "A top-level JSON array is wrapped in a generic <item> element per entry, since XML documents need exactly one root element.",
-          "Nested objects convert cleanly at any depth.",
-          "Special characters in text values no longer need manual escaping — the converter handles it.",
-          "Validate the output with an XML parser before using it in a real system, especially for very unusual key names (XML tag names have their own rules, e.g. they can't start with a digit)."
+          "To read XML back into JSON, with attributes as @_ keys, use XML to JSON.",
         ]}
       />
     </div>

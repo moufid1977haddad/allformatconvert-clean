@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF Editor — Add Text, Images & Annotations Online Free" },
-  description: "PDF Editor lets you reorder, rotate, delete, and extract pages, and add text, images, and annotations to any PDF for free, right in your browser.",
+  title: { absolute: "PDF Editor — Add Text, Images, Pen and Highlights" },
+  description: "Add text, PNG or JPEG pictures, pen strokes and highlights to PDF pages, reorder, rotate or delete pages, and extract a selection in your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-editor" },
   openGraph: {
-    title: "PDF Editor — Add Text, Images & Annotations Online Free",
-    description: "PDF Editor lets you reorder, rotate, delete, and extract pages, and add text, images, and annotations to any PDF for free, right in your browser.",
+    title: "PDF Editor — Add Text, Images, Pen and Highlights",
+    description: "Add text, PNG or JPEG pictures, pen strokes and highlights to PDF pages, reorder, rotate or delete pages, and extract a selection in your browser.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-editor",
   },
 };

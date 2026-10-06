@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "TIFF to JPG — Convert a TIFF Image Online Free" },
-  description: "TIFF to JPG converts a TIFF image to JPG format entirely in your browser using the open-source UTIF.js decoder — your file is never uploaded to a server.",
+  title: { absolute: "TIFF to JPG Converter — Any Page of a Multi-Page TIFF" },
+  description: "Convert a TIF or TIFF scan or photo to JPG, with a quality slider and a choice of page for multi-page files. Decoded in a background worker.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/image-tools/tiff-to-jpg" },
   openGraph: {
-    title: "TIFF to JPG — Convert a TIFF Image Online Free",
-    description: "TIFF to JPG converts a TIFF image to JPG format entirely in your browser using the open-source UTIF.js decoder — your file is never uploaded to a server.",
+    title: "TIFF to JPG Converter — Any Page of a Multi-Page TIFF",
+    description: "Convert a TIF or TIFF scan or photo to JPG, with a quality slider and a choice of page for multi-page files. Decoded in a background worker.",
     url: "https://www.onlineconvertools.com/tools/image-tools/tiff-to-jpg",
   },
 };

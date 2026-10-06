@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
-  title: { absolute: "PDF OCR — Extract Text from Scanned PDFs Online" },
-  description: "Runs real OCR (Tesseract) on scanned PDFs and photographed pages of text in 100+ languages, up to three at once, and gives the text plus a searchable PDF. In your browser on a computer; on iPhone or iPad, a page the device cannot read goes to our own OCR service, then is deleted.",
+  title: { absolute: "PDF OCR — Searchable PDF from Scans, 100+ Languages" },
+  description: "Recognize the text of scanned or photographed PDF pages with Tesseract in up to three languages, then copy it or download a searchable PDF.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-ocr" },
   openGraph: {
-    title: "PDF OCR — Extract Text from Scanned PDFs Online",
-    description: "Runs real OCR (Tesseract) on scanned PDFs and photographed pages of text in 100+ languages, up to three at once, and gives the text plus a searchable PDF. In your browser on a computer; on iPhone or iPad, a page the device cannot read goes to our own OCR service, then is deleted.",
+    title: "PDF OCR — Searchable PDF from Scans, 100+ Languages",
+    description: "Recognize the text of scanned or photographed PDF pages with Tesseract in up to three languages, then copy it or download a searchable PDF.",
     url: "https://www.onlineconvertools.com/tools/pdf-tools/pdf-ocr",
   },
 };
