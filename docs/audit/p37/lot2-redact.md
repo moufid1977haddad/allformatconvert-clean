@@ -243,3 +243,44 @@ Les PDF arabes faits par Chrome sont maintenant noircis : la recherche par glyph
   - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar3\mixed2.pdf "السلام 2025" --browser=chromium` (puis webkit)
   - Attendu : fichier livré sans le terme (pdftotext) ; jamais « No match found ».
 - Puis les commandes des §6, §8, §9 et §10.
+
+## 12. Relecture n° 5 (e839c5b9 : GO avec conditions, F1 vérifié) — fuites préexistantes L1 à L4
+
+Les quatre cas se testent avec « مارس » en page 1 et le terme en page 2. Avant (copie de e839c5b9), les 6 cas de `redact-review2.test.mjs` donnaient « ok » avec le terme encore lu par pdftotext : 6 fuites silencieuses. Après : aucune.
+
+| Défaut | Correction | Fixture, terme | Avant → après |
+|---|---|---|---|
+| L1 lettres persanes et ourdoues (Chrome : « ﯾ » lu « ی », « ﮫ » lu « ھ ») | `norm` (exporté, et la même fonction dans les bancs) replie ی ى → ي, ک → ك, ھ ہ ە ۀ → ه, des deux côtés (« على » trouve aussi « علي » : sur-noircissement, côté sûr) | ar5\c-harakat.pdf « المدير العام » ; ar5\c-wrap.pdf « الرياض » | fuite → **noirci** |
+| L3 tatweel (kashida U+0640) | `norm` le supprime, ainsi que les marques de direction U+200E, U+200F, U+202A-U+202E, U+2066-U+2069 | ar3\tatweel.pdf « المدير العام » | fuite → **noirci** |
+| L2 mot latin dans une ligne arabe | Contrôle final : `readingOrderText` reconstruit l'ordre de lecture de chaque page à partir des glyphes. Lignes de haut en bas, coupées aux grands blancs, morceaux arabes remis en ordre de lecture par `bidiReorder`. Tous les termes y sont cherchés (`readingOrderHit`) ; s'il en reste un, le fichier est **refusé**. | ar5\c-latin.pdf et ar3\lo-latin-wrap.pdf « شركة Microsoft » | fuite → **refusé** |
+| L4 phrase coupée en fin de ligne | Même reconstruction (lignes jointes) | ar5\c-wrap.pdf « شهر أبريل » | fuite → **refusé** |
+
+- L2 et L4 sont faits dans leur version minimale demandée : le fichier est refusé, jamais livré. Ces termes ne sont pas encore noircis : il faudrait la même reconstruction en passe 1, avec un placement des boîtes.
+- Texte de la page : l'arabe n'est annoncé que pour la couche invisible (« Arabic included » / « Arabic words included, as the PDF's own text gives them »). Aucune promesse sur la recherche arabe. Contrôles : content-verify 0, instructions 0, privacy-claims 0.
+
+### Angle mort des bancs, trouvé en passant (important)
+- `scripts/p35/redact-bench.mjs` (banc vraie page) et `scripts/p37/redact-traps-node.mjs` appelaient `pdftotext` sans `-enc UTF-8`. Le pdftotext de Git (xpdf) sort alors du Latin-1 : **le texte arabe n'atteignait jamais leur contrôle pdftotext.** Corrigé (`-enc UTF-8`). Leur `norm` replie aussi maintenant les lettres et retire tatweel et marques de direction.
+- Conséquence : les résultats arabes « 0 fuite » de ces deux bancs dans les rounds précédents ne valaient que pour leurs contrôles PDF.js et flux bruts. Les tests arabes dédiés (`redact-review2`, `redact-arabic-layer`, `arabic-terms.mjs`) utilisaient bien `-enc UTF-8` : ils restent valables.
+- `redact-traps-node.mjs` ne contrôle plus qu'un fichier livré (statut ok), comme le banc vraie page : un fichier refusé n'est jamais donné.
+
+### Relances (code et bancs corrigés), toutes sans fuite
+- `redact-review2` tout PASS (6 FAIL sur e839c5b9). `redact-review-fixes` tout PASS. box-fit 15/15 ; fit-adversarial 19/19 ; ocr-scan 4/4 et ocr-variants 2/2 à 100 % ; arabe 4/4.
+- 31 pièges avec OCR : 31 ok (seul signal : r2/g5, connu).
+- Avec le pdftotext UTF-8, 0 fuite partout :
+  - review-traps 5/5 ; traps-r2 3/3 ; traps-r3 2 ok + 1 nomatch ; traps-r4 4 ok + 1 nomatch ;
+  - nouvelle liste `scripts/p37/traps-r5.txt` : 3 ok + 3 REFUSED ;
+  - les 10 PDF arabes de `%TEMP%\p37-arabic` avec « مارس » : 9 ok + 1 nomatch (juste).
+- Faux refus nouveaux : aucun sur ces suites, ni sur le kit iPhone, le PDF « difficile » de P33, la fixture de géométrie, `lo-Arial-names`, les PDF Chrome et Text to PDF.
+- Navigateur : `redact-canvas-check --review` tout PASS en Chromium et en WebKit. ESLint 0 erreur.
+
+### Risque restant
+- La reconstruction en ordre de lecture peut joindre deux colonnes d'une même ligne, ou deux lignes voisines. Un terme formé à cheval sur elles peut alors faire refuser un fichier à tort. C'est le côté sûr, mais l'utilisateur ne reçoit pas de fichier. Aucun cas trouvé dans les suites.
+- L2/L4 complets (noircir au lieu de refuser) : reconstruction en passe 1, puis correspondance des positions vers les glyphes pour placer les boîtes. Estimation : 1 à 1,5 jour, avec les tests et une relecture.
+
+### Commandes pour le contrôleur (après rebuild)
+- Relancer le banc vraie page arabe, maintenant que pdftotext lit l'arabe : les commandes des §8 à §11, et pour L1-L4 :
+  - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar5\c-harakat.pdf "مارس|المدير العام"` (attendu : livré, terme absent)
+  - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar3\tatweel.pdf "مارس|المدير العام"` (attendu : livré, terme absent)
+  - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar5\c-latin.pdf "مارس|شركة Microsoft"` (attendu : refusé, « could not be redacted safely »)
+  - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar5\c-wrap.pdf "مارس|شهر أبريل"` (attendu : refusé)
+  - chacune avec `--browser=chromium` puis `--browser=webkit`.

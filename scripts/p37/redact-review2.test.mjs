@@ -13,7 +13,13 @@
 //      own — never delivered with « رب » in its text (accepted: page 2 of rab.pdf is blacked out, over-redaction);
 //   fourth review F1: a lam-alef term mixed with digits (« السلام 2025 », mixed.pdf with « مارس », mixed2.pdf alone) or
 //      wrapped onto the next line (« السلام عليكم », wrap15.pdf with « مارس ») is found and gone from the file (pdftotext),
-//      or the file refused — never delivered with it, never "no match".
+//      or the file refused — never delivered with it, never "no match";
+//   fifth review, with « مارس » on page 1 each time — never delivered with the term (redacted, or refused):
+//      L1 Persian / Urdu letter forms (Chrome: « ﯾ » reads « ی ») — ar5\c-harakat.pdf « المدير العام », ar5\c-wrap.pdf « الرياض »;
+//      L3 tatweel — ar3\tatweel.pdf « المدير العام »; L2/L4 a Latin word inside Arabic or a phrase wrapped onto the next
+//      line (the final check rebuilds the reading order from the glyphs) — ar5\c-latin.pdf « شركة Microsoft »,
+//      ar3\lo-latin-wrap.pdf « شركة Microsoft », ar5\c-wrap.pdf « شهر أبريل » (fixtures: scripts/p37/review/make-chrome-arabic.mjs,
+//      make-arabic-pages.mjs).
 // Fixtures: node scripts/p37/review/make-arabic-two-pages.mjs (%TEMP%\p37-review-redact\ar2) and
 // node scripts/p37/make-arabic-fixtures.mjs (%TEMP%\p37-arabic\lo-Arial-names.pdf).
 //   node scripts/p37/redact-review2.test.mjs [--harness=<harness.mjs>] [--impl=<pdfRedact.js>]
@@ -109,6 +115,15 @@ if (fs.existsSync(path.join(AR3, 'one.pdf'))) {
     const r = await redact(fp, terms);
     const out = r.bytes ? N(text(r.bytes)) : '';
     check(`F1 ${file} [${terms.join(' + ')}]: never delivered with « ${term} », never "no match"`, r.status === 'REFUSED' || (r.status === 'ok' && !out.includes(N(term))), `status ${r.status}${r.reason ? ` (${r.reason})` : ''}, pdftotext ${r.bytes ? (out.includes(N(term)) ? 'STILL HOLDS IT' : 'clean') : '-'}`);
+  }
+  // fifth review
+  const RV = path.join(os.tmpdir(), 'p37-review-redact');
+  for (const [file, term, id] of [['ar5/c-harakat.pdf', 'المدير العام', 'L1'], ['ar5/c-wrap.pdf', 'الرياض', 'L1'], ['ar3/tatweel.pdf', 'المدير العام', 'L3'], ['ar5/c-latin.pdf', 'شركة Microsoft', 'L2'], ['ar3/lo-latin-wrap.pdf', 'شركة Microsoft', 'L2'], ['ar5/c-wrap.pdf', 'شهر أبريل', 'L4']]) {
+    const fp = path.join(RV, file);
+    if (!fs.existsSync(fp)) { check(`${id} ${file}`, false, 'missing'); continue; }
+    const r = await redact(fp, ['مارس', term]);
+    const out = r.status === 'ok' && r.bytes ? N(text(r.bytes)) : '';
+    check(`${id} ${file} [مارس + ${term}]: never delivered with it`, r.status === 'REFUSED' || (r.status === 'ok' && !out.includes(N(term)) && !out.includes(N('مارس'))), `status ${r.status}${r.reason ? ` (${r.reason})` : ''}${r.status === 'ok' ? `, pdftotext ${out.includes(N(term)) ? 'STILL HOLDS IT' : 'clean'}` : ''}`);
   }
 } else check('R1/R2 fixtures', false, `missing ${AR3}: run scripts/p37/review/make-arabic-pages.mjs`);
 console.log(`\n${fails ? `${fails} FAIL` : 'all PASS'}`);

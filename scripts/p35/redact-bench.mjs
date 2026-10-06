@@ -22,13 +22,14 @@ const ocr = process.argv.includes('--ocr');
 const TESS = process.env.TESSERACT_BIN || 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe';
 const OUT = path.join(os.tmpdir(), 'p35-redact-bench');
 fs.mkdirSync(OUT, { recursive: true });
-const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´]/gu, '').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
+// P37 fifth review: Arabic letters folded as app/lib/pdfRedact.js norm does (ی ى → ي, ک → ك, ھ ہ ە ۀ → ه, no tatweel)
+const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´]/gu, '').replace(/[\u0640\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '').replace(/[\u06CC\u0649]/g, '\u064A').replace(/\u06A9/g, '\u0643').replace(/[\u06BE\u06C1\u06D5\u06C0]/g, '\u0647').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
 
 let jobs;
 if (arg('list')) jobs = fs.readFileSync(arg('list'), 'utf8').split(/\r?\n/).filter((l) => l.trim() && !l.startsWith('#')).map((l) => { const [pdf, term] = l.split('\t'); return { pdf: path.resolve(arg('root', '.'), pdf), term }; });
 else jobs = fs.readFileSync(arg('corpus'), 'utf8').split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((pdf) => ({ pdf: path.resolve(arg('root', '.'), pdf), term: arg('term', 'the') }));
 
-const pdftotext = (f, extra = []) => { try { return execFileSync('pdftotext', [...extra, f, '-'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString(); } catch { return ''; } };
+const pdftotext = (f, extra = []) => { try { return execFileSync('pdftotext', ['-enc', 'UTF-8', ...extra, f, '-'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString(); } catch { return ''; } };
 // --term=auto: the file's most frequent word of 4 letters or more (a common word of its own language)
 for (const j of jobs) if (j.term === 'auto') {
   const count = new Map();

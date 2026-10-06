@@ -26,3 +26,12 @@ for b in chromium "webkit --device=iphone"; do
   node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar3\wrap15.pdf" "مارس|السلام عليكم" --browser=$b 2>&1 | tail -2
   node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar3\mixed2.pdf" "السلام 2025" --browser=$b 2>&1 | tail -2
 done
+# L1-L4 (relecture n° 5): Chromium presentation forms, tatweel -> redacted; Latin inside / wrapped -> refused
+for b in chromium "webkit --device=iphone"; do
+  echo "== L1-L4 $b"
+  node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar5\c-harakat.pdf" "مارس|المدير العام" --browser=$b 2>&1 | tail -2
+  node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar3\tatweel.pdf" "مارس|المدير العام" --browser=$b 2>&1 | tail -2
+  node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar5\c-latin.pdf" "مارس|شركة Microsoft" --browser=$b 2>&1 | tail -2
+  node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar5\c-wrap.pdf" "مارس|شهر أبريل" --browser=$b 2>&1 | tail -2
+done
+for b in chromium webkit; do for l in scripts/p37/traps-r4.txt scripts/p37/traps-r5.txt; do echo "== $l $b"; node scripts/p35/redact-bench.mjs "$O" --list=$l --root="$T\p37-review-redact" --browser=$b --ocr 2>&1 | grep -vE "^\s*$"; done; done

@@ -24,9 +24,10 @@ const TESS = process.env.TESSERACT_BIN || 'C:\\Program Files\\Tesseract-OCR\\tes
 const OUT = path.join(os.tmpdir(), 'p37-traps-node');
 fs.mkdirSync(OUT, { recursive: true });
 const ocr = process.argv.includes('--ocr');
-const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´]/gu, '').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
+// P37 fifth review: Arabic letters folded as app/lib/pdfRedact.js norm does (ی ى → ي, ک → ك, ھ ہ ە ۀ → ه, no tatweel)
+const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´]/gu, '').replace(/[\u0640\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '').replace(/[\u06CC\u0649]/g, '\u064A').replace(/\u06A9/g, '\u0643').replace(/[\u06BE\u06C1\u06D5\u06C0]/g, '\u0647').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
 const jobs = fs.readFileSync(arg('list'), 'utf8').split(/\r?\n/).filter((l) => l.trim() && !l.startsWith('#')).map((l) => { const [pdf, term] = l.split('\t'); return { pdf: path.resolve(arg('root', '.'), pdf), term }; });
-const pdftotext = (f) => { try { return execFileSync('pdftotext', [f, '-'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString(); } catch { return ''; } };
+const pdftotext = (f) => { try { return execFileSync('pdftotext', ['-enc', 'UTF-8', f, '-'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString(); } catch { return ''; } };
 
 function rawHit(bytes, term) {
   const raw = Buffer.from(bytes);
@@ -59,7 +60,8 @@ for (const { pdf, term } of jobs) {
   try { r = await redact(pdf, terms); } catch (e) { tally.ERROR = (tally.ERROR || 0) + 1; console.log(`${name} [${term}] ERROR ${e.message}`); continue; }
   tally[r.status] = (tally[r.status] || 0) + 1;
   const L = [], notes = [];
-  if (r.bytes) {
+  // only a file the page would hand over is checked (a refused file is never given)
+  if (r.bytes && r.status === 'ok') {
     const out = path.join(OUT, name.replace(/[\\/]/g, '_'));
     fs.writeFileSync(out, r.bytes);
     if (has(pdftotext(out))) L.push('pdftotext');

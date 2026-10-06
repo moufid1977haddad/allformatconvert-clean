@@ -8,7 +8,11 @@
 // P33 (independent review 05/10): accents are dropped (NFKD, combining marks and the spacing accents TeX draws as their
 // own glyph: "u" + "¨" is "u"), and so are hyphens and dashes ("ZORG-" at a line end + "LUB-77" was not found as
 // "ZORGLUB-77"). Both sides are folded the same way: "Muller" also finds "Müller" — over-redaction is the safe side.
-const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´ˆ-˝`¯¸]/gu, '').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
+// P37 fifth review (L1, L3): Arabic letters a PDF writes with their Persian / Urdu forms (Chrome's fonts map the shared
+// glyphs to them: "ﯾ" reads "ی", "ﮫ" reads "ھ") fold to the Arabic ones — ی ى → ي, ک → ك, ھ ہ ە ۀ → ه — and the tatweel
+// (kashida, U+0640, a stretching stroke) and the direction marks (U+200E, U+200F, U+202A-U+202E, U+2066-U+2069) are dropped,
+// on both sides ("على" also finds "علي": over-redaction, the safe side).
+export const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´ˆ-˝`¯¸]/gu, '').replace(/[\u0640\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '').replace(/[\u06CC\u0649]/g, '\u064A').replace(/\u06A9/g, '\u0643').replace(/[\u06BE\u06C1\u06D5\u06C0]/g, '\u0647').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
 
 // P37 review (D4): the forms a term can take in PDF.js's text. PDF.js reverses a right-to-left run character by
 // character, so a glyph that carries several characters comes out reversed: LibreOffice's lam-alef "لا" is read "ال"
@@ -533,6 +537,44 @@ export function confirmedTermSpans(items, terms, glyphs = null) {
     return [...exact, ...permuted];
   });
 }
+
+/**
+ * P37 fifth review (L2, L4), for the FINAL CHECK only: a page's text rebuilt in reading order from the glyphs it draws —
+ * lines (same direction, baselines within 0.4 of the font size) from top to bottom, each line cut where a gap is wider
+ * than 1.5 × the font size; a piece holding right-to-left letters put in reading order with bidiReorder (digits and
+ * Latin keep their order) and the pieces of such a line read right to left. PDF.js reads a right-to-left line with a
+ * Latin word in it ("شركة Microsoft"), or a phrase wrapped onto the next line, in pieces out of order: rebuilt here, a
+ * term still drawn is found, and the file is refused (never delivered). Every glyph counts, invisible ones included
+ * (their text can be copied). Returns the text, lines separated by "\n".
+ */
+export function readingOrderText(glyphs) {
+  const gs = [];
+  for (const g of glyphs) {
+    if (!g.M || !g.u || !/\S/.test(g.u)) continue;
+    const d = Math.hypot(g.M[0], g.M[1]) || 1;
+    const ux = [g.M[0] / d, g.M[1] / d];
+    const p = apply(g.M, g.x0, 0), pe = apply(g.M, g.x1, 0);
+    gs.push({ g, ang: Math.atan2(ux[1], ux[0]), u: p[0] * ux[0] + p[1] * ux[1], v: -p[0] * ux[1] + p[1] * ux[0], w: Math.abs((pe[0] - p[0]) * ux[0] + (pe[1] - p[1]) * ux[1]), size: (g.size || 1) * (Math.hypot(g.M[2], g.M[3]) || 1) });
+  }
+  gs.sort((a, b) => a.ang - b.ang || b.v - a.v);
+  const lines = [];
+  for (const x of gs) {
+    const line = lines.find((l) => Math.abs(l.ang - x.ang) < 0.035 && Math.abs(l.v - x.v) <= 0.4 * Math.max(l.size, x.size));
+    if (line) line.gs.push(x); else lines.push({ ang: x.ang, v: x.v, size: x.size, gs: [x] });
+  }
+  lines.sort((a, b) => a.ang - b.ang || b.v - a.v);
+  return lines.map((line) => {
+    const row = line.gs.sort((a, b) => a.u - b.u);
+    const pieces = [];
+    row.forEach((x, n) => { const prev = row[n - 1]; if (!n || x.u - (prev.u + prev.w) > 1.5 * Math.max(x.size, prev.size)) pieces.push([]); pieces[pieces.length - 1].push(x.g); });
+    const rtl = row.some((x) => isRtlText(x.g.u));
+    const texts = pieces.map((pc) => (pc.some((g) => isRtlText(g.u)) ? bidiReorder(pc, (g) => g.u) : pc).map((g) => g.u).join(''));
+    return (rtl ? texts.reverse() : texts).join(' ');
+  }).join('\n');
+}
+
+/** Fifth review: is a term (as typed, folded by norm) in the page's reading-order text rebuilt from its glyphs? */
+export const readingOrderHit = (glyphs, terms) => { const text = norm(readingOrderText(glyphs)); return terms.some((term) => { const n = norm(term); return !!n && text.includes(n); }); };
 
 export function glyphTermQuads(glyphs, terms, inkOf = () => null, px = 0.5) {
   const quads = [];

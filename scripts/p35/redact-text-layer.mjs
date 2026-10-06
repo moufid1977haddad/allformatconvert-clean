@@ -28,7 +28,8 @@ const tag = `${engine} [${device}] ${path.basename(PDF)}`;
 let fails = 0, passes = 0;
 const check = (n, ok, info = '') => { if (ok) passes++; else fails++; console.log(ok ? 'PASS' : 'FAIL', `${tag} ${n}`, ok ? '' : info); };
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1';
-const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´]/gu, '').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
+// P37 fifth review: Arabic letters folded as app/lib/pdfRedact.js norm does (ی ى → ي, ک → ك, ھ ہ ە ۀ → ه, no tatweel)
+const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´]/gu, '').replace(/[\u0640\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '').replace(/[\u06CC\u0649]/g, '\u064A').replace(/\u06A9/g, '\u0643').replace(/[\u06BE\u06C1\u06D5\u06C0]/g, '\u0647').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
 
 // ---- run the page ----
 const b = await { chromium, webkit }[engine].launch();

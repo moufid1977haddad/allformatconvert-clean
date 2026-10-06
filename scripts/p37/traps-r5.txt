@@ -1,0 +1,7 @@
+# P37 fifth review (L1-L4), several terms per line ("|"), with « مارس » on page 1 — root %TEMP%\p37-review-redact
+ar5/c-harakat.pdf	مارس|المدير العام
+ar5/c-wrap.pdf	مارس|الرياض
+ar3/tatweel.pdf	مارس|المدير العام
+ar5/c-latin.pdf	مارس|شركة Microsoft
+ar3/lo-latin-wrap.pdf	مارس|شركة Microsoft
+ar5/c-wrap.pdf	مارس|شهر أبريل
