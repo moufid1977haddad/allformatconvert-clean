@@ -100,20 +100,39 @@ if (only.includes('pdfq')) {
   const photo = path.join(dir, 'photo.png');
   fs.writeFileSync(photo, await sharp(raw, { raw: { width: w, height: h, channels: 3 } }).png().toBuffer());
   const sizes = {};
+  let envSkip = '';
   for (const q of [20, 50]) {
     const { ctx, p } = await page('image-tools/image-converter');
+    // The converter works in a worker that needs OffscreenCanvas (Safari 16.4+, Chrome, Firefox). Playwright's WebKit
+    // build for Windows has none, in the page or in a worker: there the worker refuses every file with a message
+    // (docs/audit/p37/webkit-diagnostic.md). Probed in a worker, like the converter.
+    const workerOffscreen = await p.evaluate(() => new Promise((res) => {
+      try {
+        const w = new Worker(URL.createObjectURL(new Blob(['postMessage(typeof OffscreenCanvas)'], { type: 'text/javascript' })));
+        w.onmessage = (e) => { res(e.data); w.terminate(); }; w.onerror = () => res('probe-failed');
+      } catch { res('probe-failed'); }
+    }));
     await p.locator('input[type=file]').first().setInputFiles(photo);
     await p.getByLabel('Output format').selectOption('pdf');
     await setRange(p, 'Quality (%)', q);
     await p.waitForFunction((v) => document.querySelector('[data-quality-control] label')?.textContent.includes(`Quality: ${v}%`), q, { timeout: 5000 });
     await p.getByRole('button', { name: /Convert 1 file to PDF/ }).click();
     const link = p.locator('a[download]').filter({ hasText: /Download/ }).first();
-    await link.waitFor({ timeout: 60000 });
+    const refused = p.getByText(/cannot process images in the background/);
+    await Promise.race([link.waitFor({ timeout: 60000 }), refused.waitFor({ timeout: 60000 })]);
+    if (!(await link.count())) {
+      const msg = (await refused.first().innerText().catch(() => '')).trim();
+      await ctx.close();
+      if (workerOffscreen === 'undefined' && msg) { envSkip = `no OffscreenCanvas in a worker of this browser build; the page says "${msg}"`; break; }
+      check('image-converter PDF: a result at quality ' + q + ' %', false, `OffscreenCanvas in a worker: ${workerOffscreen}; ${msg}`);
+      break;
+    }
     const out = await download(p, link);
     sizes[q] = fs.statSync(out).size;
     await ctx.close();
   }
-  check('image-converter PDF: quality 20 % gives a smaller file than 50 %', sizes[20] < sizes[50], JSON.stringify(sizes));
+  if (envSkip) console.log('SKIP image-converter PDF quality (environment, not the site):', envSkip);
+  else if (sizes[20] && sizes[50]) check('image-converter PDF: quality 20 % gives a smaller file than 50 %', sizes[20] < sizes[50], JSON.stringify(sizes));
 }
 
 if (only.includes('epub')) {
@@ -126,14 +145,24 @@ if (only.includes('epub')) {
   const epub = path.join(dir, 'book.epub');
   fs.writeFileSync(epub, await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
   const { ctx, p } = await page('pdf-tools/epub-to-pdf');
+  // The body is read in the page, from the FormData given to fetch: Playwright's WebKit leaves the bytes of a File
+  // part out of request.postDataBuffer() (182 bytes, part headers only, where Chromium gives the whole 804).
+  await p.evaluate(() => {
+    const f = window.fetch;
+    window.fetch = function (u, o) {
+      if (String(u?.url || u).includes('convert-html-to-pdf') && o?.body) window.__sentBody = new Response(o.body).text();
+      return f.apply(this, arguments);
+    };
+  });
   let sent = null;
   await p.route('**/api/convert-html-to-pdf', async (route) => {
-    sent = route.request().postDataBuffer()?.toString('utf8') || '';
     await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj 3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n') });
   });
   await p.locator('input[type=file]').first().setInputFiles(epub);
   await p.getByRole('button', { name: 'Convert to PDF' }).click();
-  await p.getByText('PDF ready').waitFor({ timeout: 60000 });
+  // exact: the "How to" steps already contain 'When "PDF ready" appears', which made this wait return at once
+  await p.getByText('PDF ready', { exact: true }).waitFor({ timeout: 60000 });
+  sent = await p.evaluate(() => window.__sentBody || null);
   const note = await p.locator('[data-skipped]').innerText().catch(() => '');
   const chapters = (sent?.match(/<div class="chapter">/g) || []).length;
   const empty = /<div class="chapter">\s*<\/div>/.test(sent || '');
