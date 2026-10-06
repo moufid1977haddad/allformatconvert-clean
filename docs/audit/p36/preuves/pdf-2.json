@@ -94,7 +94,7 @@
     {
       "claim": "15%",
       "file": "app/lib/pdfRedact.js",
-      "pattern": "b\\.a0 - 0\\.15 \\* fs, b\\.a1 \\+ 0\\.15 \\* fs"
+      "pattern": "b\\.a0 - 0\\.15 \\* fs - k, b\\.a1 \\+ 0\\.15 \\* fs \\+ k"
     }
   ],
   "/tools/pdf-tools/pdf-repair": [

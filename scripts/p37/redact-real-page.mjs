@@ -68,7 +68,7 @@ function picture(file, color) {
 const META = fs.existsSync(path.join(BOX, 'variants.json')) ? JSON.parse(fs.readFileSync(path.join(BOX, 'variants.json'), 'utf8')) : {};
 const VARIANTS = Object.keys(META);
 if (!VARIANTS.length) check(false, `no box-fit fixtures in ${BOX}: run node scripts/p37/redact-box-fit.test.mjs --keep first`);
-for (const id of VARIANTS) {
+for (const id of VARIANTS.filter((v) => !arg('only') || arg('only').split(',').includes(v))) {
   const { term, fontSize } = META[id];
   const out = path.join(OUT, `${id}-redacted.pdf`);
   const r = await runPage(path.join(BOX, `${id}-full.pdf`), term, out);
@@ -76,7 +76,7 @@ for (const id of VARIANTS) {
   const res = picture(out, true), m = picture(path.join(BOX, `${id}-match.pdf`), false), o = picture(path.join(BOX, `${id}-others.pdf`), false);
   if (res.w !== m.w || res.h !== m.h) { check(false, `${engine} ${id}: picture sizes differ (${res.w}×${res.h} vs ${m.w}×${m.h})`); continue; }
   const black = (i) => res.px[3 * i] < 90 && res.px[3 * i + 1] < 90 && res.px[3 * i + 2] < 90;
-  let ink = 0, uncovered = 0, nb = 0, deep = 0;
+  let ink = 0, uncovered = 0, nb = 0, deep = 0, where = null;
   for (let i = 0; i < m.w * m.h; i++) {
     if (m.px[i] < 128) { ink++; if (!black(i)) uncovered++; }
     if (o.px[i] < 128 && black(i)) {
@@ -85,11 +85,11 @@ for (const id of VARIANTS) {
       const x = i % m.w, y = (i / m.w) | 0;
       let d = 40;
       for (let rr = 1; rr < d; rr++) { let hit = false; for (let dx = -rr; dx <= rr && !hit; dx++) for (const dy of [-rr, rr]) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < m.w && Y < m.h && !black(Y * m.w + X)) { hit = true; break; } } for (let dy = -rr; dy <= rr && !hit; dy++) for (const dx of [-rr, rr]) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < m.w && Y < m.h && !black(Y * m.w + X)) { hit = true; break; } } if (hit) { d = rr; break; } }
-      deep = Math.max(deep, d / 4);
+      if (d / 4 > deep) { deep = d / 4; where = [x / 4, y / 4]; }
     }
   }
   const allowed = Math.max(0.02 * fontSize, 0.5) + 0.5;
-  check(uncovered === 0 && deep <= allowed, `${engine} ${id}: match ink ${ink} px, not black ${uncovered}; neighbour ink blackened ${nb} px, deepest ${deep.toFixed(2)} pt (allowed ${allowed.toFixed(2)})`);
+  check(uncovered === 0 && deep <= allowed, `${engine} ${id}: match ink ${ink} px, not black ${uncovered}; neighbour ink blackened ${nb} px, deepest ${deep.toFixed(2)} pt (allowed ${allowed.toFixed(2)})${where ? ` at ${where.map((v) => v.toFixed(1)).join(',')} pt from the top left` : ''}`);
 }
 
 // ---- Arabic layer ----

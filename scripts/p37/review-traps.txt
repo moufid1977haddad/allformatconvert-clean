@@ -1,0 +1,6 @@
+# P37 review fixtures (scripts/p37/review/, %TEMP%\p37-review-redact): pdf TAB term — D1 OCR layer, D2 stroke, D3 Type 3, D4 lam-alef
+ocr/times12-ocr.pdf	photography
+ocr/times12-sub-ocr.pdf	graph
+fit/stroke-tr1-w3-36-full.pdf	photo-2
+fit/type3-overhang-full.pdf	photo-2
+ar2/two-pages.pdf	السلام

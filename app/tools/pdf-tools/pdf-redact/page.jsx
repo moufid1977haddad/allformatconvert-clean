@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
-import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf, glyphsOfOperatorList, itemGeometry, glyphTermQuads, invisibleTextFont, hasArabic } from '../../../lib/pdfRedact';
+import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf, glyphTermQuads, invisibleTextFont, hasArabic, pageGlyphGeometry, canvasInk } from '../../../lib/pdfRedact';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -42,18 +42,6 @@ async function loadArabicFont(doc, lib) {
   const r = await fetch(ARABIC_FONT_URL);
   if (!r.ok) throw new Error(`the Arabic font could not be downloaded (HTTP ${r.status})`);
   return invisibleTextFont(doc, fontkit.create(new Uint8Array(await r.arrayBuffer())), lib);
-}
-
-// P37: where each glyph of a page is drawn (PDF.js's operator list, placed as its canvas places it) and each text run's
-// characters tied to their glyphs (app/lib/pdfRedact.js itemGeometry); fonts read once PDF.js has them.
-async function pageGeometry(page, pdfjsLib, items, styles, inkOf) {
-  const ops = await page.getOperatorList({ annotationMode: pdfjsLib.AnnotationMode.DISABLE });
-  const names = new Set();
-  ops.fnArray.forEach((fn, n) => { if (fn === pdfjsLib.OPS.setFont) names.add(ops.argsArray[n][0]); });
-  const fonts = new Map();
-  for (const name of names) fonts.set(name, await new Promise((resolve) => { try { page.commonObjs.get(name, resolve); } catch { resolve(null); } }));
-  const glyphs = glyphsOfOperatorList(ops, pdfjsLib.OPS, (name) => fonts.get(name) || null);
-  return { glyphs, geometry: itemGeometry(items, styles, glyphs, inkOf) };
 }
 
 function drawUnrotated(ctx, img, W, H, rot) {
@@ -121,6 +109,7 @@ export default function Page() {
       const spansOf = (strs) => [...terms.flatMap((t) => matchSpans(strs, t)), ...patternSpans(strs, kinds)];
       let helvetica = null;
       let arabicFont = null, arabicFontProblem = '';
+      let inkCanvas = null, drawnInk = null;
 
       // Pass 1 (P33): every page is searched BEFORE anything is copied — the pages without a match are then copied from
       // a source in which the redacted pages are empty shells (app/lib/redactSanitize.js, independent review 05/10).
@@ -238,26 +227,18 @@ export default function Page() {
           const font = `${f && f.italic ? 'italic ' : ''}${f && (f.bold || f.black) ? 'bold ' : ''}100px ${real ? `"${it.fontName}", ` : ''}${style.fontFamily || 'sans-serif'}`;
           return { real, width: (s) => { measure.font = font; return measure.measureText(s).width; } };
         };
-        // P37: each glyph's ink, measured in the face PDF.js drew it with (not known for a page our PDF service drew, a
-        // Type 3 font, a font PDF.js re-measures and shifts or squeezes, or a font the browser did not load: that glyph is
-        // padded by 15 % of the font size as before)
-        const inkCache = new Map();
-        const inkOf = (font, ch) => {
-          if (!drawn || !font || font.isType3Font || font.remeasure || font.systemFontInfo || !font.loadedName || !loadedFaces.has(font.loadedName)) return null;
-          const key = `${font.loadedName}|${ch}`;
-          if (!inkCache.has(key)) {
-            measure.font = `${font.italic ? 'italic' : 'normal'} ${font.black ? '900' : font.bold ? 'bold' : 'normal'} 100px "${font.loadedName}", ${font.fallbackName || 'sans-serif'}`;
-            const mt = measure.measureText(ch);
-            inkCache.set(key, [-mt.actualBoundingBoxLeft / 100, -mt.actualBoundingBoxDescent / 100, mt.actualBoundingBoxRight / 100, mt.actualBoundingBoxAscent / 100]);
-          }
-          return inkCache.get(key);
-        };
+        // P37: each glyph's ink, drawn with PDF.js's own font string on a small canvas and read from its pixels, and its
+        // drawn advance (app/lib/pdfRedact.js canvasInk, glyphRects). Not known for a page our PDF service drew (its
+        // glyphs come from Poppler's fonts): that glyph is padded by 15 % of the font size as before, or its whole line
+        // covered when PDF.js re-measures that font.
+        if (!inkCanvas) { inkCanvas = document.createElement('canvas'); inkCanvas.width = 400; inkCanvas.height = 400; drawnInk = canvasInk(inkCanvas.getContext('2d', { willReadFrequently: true })); }
+        const inkOf = (font, ch) => (drawn ? drawnInk(font, ch) : null);
         // P37: the black boxes fit the matched characters (their glyphs' advance and ink, plus one pixel or 2 % of the
         // font size); a run whose glyphs cannot be tied to its text keeps the padded estimate. The terms are also
         // searched in the glyphs drawn, and those glyphs covered. Without the glyphs (no answer in 20 s), the padded
         // estimate is used for every match, as before.
         let geo = null;
-        try { geo = await withTimeout(pageGeometry(page, pdfjsLib, items, content.styles, inkOf), 20000, 'timeout'); } catch (e) { console.warn(`[pdf-redact] page ${i + 1}: glyph positions not read (${e?.message}); padded boxes used`); }
+        try { geo = await withTimeout(pageGlyphGeometry(page, pdfjsLib, items, content.styles, inkOf), 20000, 'timeout'); } catch (e) { console.warn(`[pdf-redact] page ${i + 1}: glyph positions not read (${e?.message}); padded boxes used`); }
         const px = 1 / viewport.scale;
         const quads = [...redactionQuads(items, content.styles, spans, boxes.map((an) => an.rect), measureOf, geo && geo.geometry, px), ...(geo ? glyphTermQuads(geo.glyphs, terms, inkOf, px) : [])];
         for (const q of quads) poly(q);
@@ -357,7 +338,7 @@ export default function Page() {
           { label: 'Input', value: `PDF with a text layer` },
           { label: 'Automatic patterns', value: `E-mail addresses; phone numbers of 9 to 15 digits; card numbers of 13 to 19 digits that pass the Luhn check` },
           { label: 'Pages with a match', value: `Replaced by a picture with black boxes and invisible text for the remaining words, Arabic included` },
-          { label: 'Black boxes', value: `The matched letters' glyphs plus 2% of the font size or one pixel, whichever is larger; where a line's glyphs cannot be tied to its text, 15% of the font size on each side, or the whole line` },
+          { label: 'Black boxes', value: `The matched letters' glyphs plus 2% of the font size or one pixel, whichever is larger, and half the outline width for outlined text; 15% of the font size on each side for invisible text over a scan (an OCR layer) or where a line's glyphs cannot be tied to its text, or the whole line` },
           { label: 'Pages without a match', value: `Copied, minus stamps, attachments, media and links to redacted pages, scripts or other files; the redacted file keeps no bookmarks, document properties or fillable form fields` },
           { label: 'On iPhone and iPad', value: `A matched page that fails or is not drawn within ${LOCAL_PAGE_LIMIT_LABEL} is drawn by our PDF service, for PDFs up to ${Math.floor(STAGED_MAX_BYTES / 1048576)} MB, up to 300 pages per hour and 1,000 pages per day per network` },
           { label: 'Result', value: `redacted.pdf` },

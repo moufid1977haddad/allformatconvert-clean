@@ -101,3 +101,39 @@ Date : 06/10/2026. Branche p37. Rien n'est commité, construit ni déployé par 
 Modifiés : `app/lib/pdfRedact.js`, `app/tools/pdf-tools/pdf-redact/page.jsx`, `scripts/p35/harness.mjs`, `docs/audit/p36/preuves/pdf-2.json`, `scripts/p37/redact-box-fit.test.mjs` (créé avant l'interruption), `scripts/p37/redact-traps-node.mjs` (idem).
 Créés : `scripts/p37/make-arabic-fixtures.mjs`, `scripts/p37/redact-arabic-layer.test.mjs`, `scripts/p37/redact-real-page.mjs`, `docs/audit/p37/lot2-redact.md`.
 Non modifiés : `app/lib/redactSanitize.js`, `app/tools/pdf-tools/pdf-redact/layout.tsx`, aucune police ajoutée sous public/.
+
+## 8. Corrections après relecture (relecture indépendante de dbf86202 : NO-GO, docs/audit/p37/relecture-redact.md)
+
+Tous dans `app/lib/pdfRedact.js` (et l'appel dans la page). Chaque point a un test qui échoue avant et passe après.
+
+| Défaut | Correction | Test : avant (dbf86202) → après |
+|---|---|---|
+| D1 couche OCR invisible (mode 3) : jambages du scan visibles | Le mode de rendu est suivi. Un glyphe en mode 3 ou 7 n'a pas d'encre propre : marge d'avant (15 % de chaque côté, -0,3 à 1,05 em). | `review/ocr-scan.mjs` : « photography » 94,31 % → **100 %**, « graph » 93,31 % → **100 %**. `redact-review-fixes.test.mjs` D1 : FAIL → PASS |
+| D2 texte en contour (modes 1, 2, 5, 6) | La moitié de l'épaisseur du trait (× échelle de la matrice) est ajoutée à la marge, dans les boîtes de texte et dans le filet. | `review/fit-adversarial.mjs` : stroke-tr2-w2-24 17 px → 0, stroke-tr1-w3-36 48 px → 0 ; test D2 FAIL → PASS |
+| D3 Type 3, encre hors de l'avance | Encre = /FontBBox × /FontMatrix ; boîte vide ou démesurée → ligne entière. | type3-overhang 300 px (97,2 %) → 0 (100 %) |
+| D4 lam-alef (préexistant P33) : « السلام » jamais trouvé → fuite page 2 | `termVariants` : chaque « لا » cherché aussi en « ال », « الله » aussi en « هللا », et le terme arabe aussi à l'envers (≤ 64 formes). Utilisé par `matchSpans` (donc la recherche, la couche et `verifyRedacted`), `matchesText` (annotations, données) et le filet par glyphes. Le filet cherche aussi un texte où chaque glyphe à plusieurs caractères est inversé. | `review/arabic-terms.mjs two-pages.pdf "مارس\|السلام"` : pdftotext lisait « السلام » → **absent** ; test D4 (3 cas) FAIL → PASS ; un terme latin n'a qu'une forme |
+| D5 police re-mesurée par PDF.js (glyphe centré ou serré) | L'encre suit le dessin de PDF.js (décalage de la moitié de l'écart, et la version serrée). Si le glyphe dessiné n'est pas connu, la ligne entière est noircie. | test D5 (2 cas) FAIL → PASS |
+| D6 run RTL palindrome relié en miroir | Un run `dir: rtl` essaie d'abord les ordres inversés. | test D6 FAIL → PASS |
+
+### Défaut trouvé sur la vraie page (build dbf86202 sur localhost:3137, signalé par le contrôleur)
+- `redact-real-page.mjs` : 3 FAIL en Chromium (times-italic-12, wordspacing-tw-4, hscale-tz-70 : voisins noircis à 1,25 pt, limite 1,00). Couverture du mot : 100 % partout.
+- Cause, vue dans Chromium et WebKit : PDF.js dessine les polices standard (Helvetica, Times…) comme **polices système** (`systemFontInfo`, « 100px Helvetica, g_d0_sf2, sans-serif »). La page les excluait de la mesure d'encre, donc retour aux 15 % de marge. Cela touchait aussi le cas iPhone d'origine (Helvetica).
+- Second problème trouvé en mesurant : dans WebKit, `measureText` renvoie la boîte d'avance comme « encre » (« 2 » Helvetica : 0 à 55,6 = avance). Un dépassement italique aurait été manqué sur iPhone.
+- Correction : `canvasInk` dessine le glyphe sur un petit canvas (400 × 400) avec exactement la chaîne de police de PDF.js (face propre ou police système), puis lit les pixels (+1 px à 100 px de chaque côté). Même résultat quel que soit le moteur. `pageGlyphGeometry` est maintenant partagé par la page et le banc Node.
+- Vérification sans build : `scripts/p37/redact-canvas-check.mjs` sert PDF.js et `app/lib/pdfRedact.js` à une page vide, rejoue la passe 2 de la page dans le navigateur, puis contrôle comme `redact-real-page.mjs`. Résultat : **Chromium 15/15, WebKit 15/15**, voisins noircis 0 pt (Noto Serif Italic : 0,50 pt). Sur la vraie page dbf86202 : 1,00 à 1,25 pt.
+- Texte de la page : la ligne « Black boxes » dit maintenant « half the outline width for outlined text » et « 15% … for invisible text over a scan (an OCR layer) ». Preuve « 15% » mise à jour dans pdf-2.json.
+
+### Relances (code final)
+- `redact-review-fixes.test.mjs` : tout PASS (avant, sur dbf86202 : 8 FAIL sur 10).
+- `redact-box-fit.test.mjs` 15/15. `review/fit-adversarial.mjs` **16/16**. `review/ocr-scan.mjs` 4/4 à 100 %.
+- `redact-arabic-layer.test.mjs` 4/4.
+- 31 pièges avec OCR : 31 ok, 0 fuite (seul signal : r2/g5, le faux positif connu). Fixtures de la relecture (`scripts/p37/review-traps.txt`) : 5/5 ok, 0 fuite.
+- content-verify (pdf-redact) 0 ; instructions 0 ; privacy-claims 0 ; ESLint 0.
+
+### Limite toujours ouverte
+PDF arabes de Chrome : PDF.js mélange l'ordre du dessin et l'ordre de lecture dans des runs d'un ou deux glyphes. Même avec les formes inversées, « مارس » n'est pas trouvé (« No match found » ; l'outil le dit, pas de fuite silencieuse).
+
+### Commandes à ajouter pour le contrôleur (après rebuild)
+- `node scripts/p37/redact-real-page.mjs <origin> --browser=chromium` et `--browser=webkit --device=iphone` : attendu 15 + 4 PASS.
+- `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p37/review-traps.txt --root=%TEMP%\p37-review-redact --browser=chromium --ocr` (puis `--browser=webkit`) : attendu 5 ok, 0 fuite.
+- Sans build : `node scripts/p37/redact-canvas-check.mjs --browser=chromium` puis `--browser=webkit`.

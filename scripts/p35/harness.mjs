@@ -20,7 +20,7 @@ const lib = await import(from('node_modules/pdf-lib/cjs/index.js')).then((m) => 
 const pdfjsLib = await import(from('node_modules/pdfjs-dist/legacy/build/pdf.mjs'));
 if (typeof globalThis.regeneratorRuntime === 'undefined') globalThis.regeneratorRuntime = (await import(from('node_modules/regenerator-runtime/runtime.js'))).default || globalThis.regeneratorRuntime;
 const fontkit = await import(from('node_modules/@pdf-lib/fontkit/dist/fontkit.umd.js')).then((m) => m.default || m);
-const { matchSpans, annotationText, patternSpans, annotationMatches, redactionQuads, textLayerWords, drawInvisibleWords, glyphsOfOperatorList, itemGeometry, glyphTermQuads, invisibleTextFont, hasArabic } = await import(from('app/lib/pdfRedact.js'));
+const { matchSpans, annotationText, patternSpans, annotationMatches, redactionQuads, textLayerWords, drawInvisibleWords, pageGlyphGeometry, glyphTermQuads, invisibleTextFont, hasArabic } = await import(from('app/lib/pdfRedact.js'));
 const { sanitizeForCopy, verifyRedacted, UNREADABLE_ANNOTATIONS } = await import(from('app/lib/redactSanitize.js'));
 const { withActualTextUnicode } = await import(from('app/lib/pdfActualText.js'));
 const SFD = path.join(ROOT, 'node_modules/pdfjs-dist/standard_fonts/').replace(/\\/g, '/');
@@ -36,25 +36,20 @@ async function textOf(page) {
 
 /** The glyph geometry of a page, as the page computes it (ink from fontkit here, canvas there). */
 export async function pageGeometry(page, items, styles, { ink = true } = {}) {
-  const ops = await page.getOperatorList({ annotationMode: pdfjsLib.AnnotationMode.DISABLE });
-  const names = new Set();
-  ops.fnArray.forEach((fn, i) => { if (fn === pdfjsLib.OPS.setFont) names.add(ops.argsArray[i][0]); });
-  const fonts = new Map();
-  for (const n of names) fonts.set(n, await new Promise((resolve) => { try { page.commonObjs.get(n, resolve); } catch { resolve(null); } }));
-  const glyphs = glyphsOfOperatorList(ops, pdfjsLib.OPS, (n) => fonts.get(n) || null);
   const parsed = new Map();
   const inkOf = (font, ch) => {
-    if (!ink || !font || !font.data || font.isType3Font || font.remeasure) return null;
+    if (!ink || !font || !font.data || font.isType3Font) return null;
     if (!parsed.has(font)) { try { parsed.set(font, fontkit.create(Buffer.from(font.data))); } catch { parsed.set(font, null); } }
     const fk = parsed.get(font);
     if (!fk) return null;
     try {
       const g = fk.glyphForCodePoint(ch.codePointAt(0));
       const b = g.bbox, u = fk.unitsPerEm;
-      return [b.minX / u, b.minY / u, b.maxX / u, b.maxY / u].map((v) => (Number.isFinite(v) ? v : 0));
+      return [b.minX / u, b.minY / u, b.maxX / u, b.maxY / u, g.advanceWidth / u].map((v) => (Number.isFinite(v) ? v : 0));
     } catch { return null; }
   };
-  return { glyphs, inkOf, geometry: itemGeometry(items, styles, glyphs, inkOf) };
+  const { glyphs, geometry } = await pageGlyphGeometry(page, pdfjsLib, items, styles, inkOf);
+  return { glyphs, inkOf, geometry };
 }
 
 export async function redact(file, terms, kinds = [], { arabic = true } = {}) {

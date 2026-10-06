@@ -10,25 +10,56 @@
 // "ZORGLUB-77"). Both sides are folded the same way: "Muller" also finds "Müller" — over-redaction is the safe side.
 const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´ˆ-˝`¯¸]/gu, '').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
 
-// strs: the items' strings, in order. Returns [{ k: item index, c0, c1 (exclusive), m: match id }], one entry per
-// item per match.
-export function matchSpans(strs, keyword) {
+// P37 review (D4): the forms a term can take in PDF.js's text. PDF.js reverses a right-to-left run character by
+// character, so a glyph that carries several characters comes out reversed: LibreOffice's lam-alef "لا" is read "ال"
+// ("السلام" read "السالم"), its "الله" ligature "هللا"; and a run drawn one glyph at a time (Chrome) is read in drawing
+// order, the term reversed. Every combination is searched (at most 64): over-redaction is the safe side. A term with no
+// right-to-left letter has only itself.
+const RTL_SWAPS = [['الله', 'هللا'], ['لا', 'ال']];
+export function termVariants(keyword) {
   const needle = norm(keyword);
   if (!needle) return [];
+  if (!isRtlText(needle)) return [needle];
+  let forms = new Set([needle]);
+  for (const [from, to] of RTL_SWAPS) {
+    const next = new Set();
+    for (const f of forms) {
+      const parts = f.split(from);
+      if (parts.length > 7) { next.add(f); next.add(parts.join(to)); continue; }
+      for (let mask = 0; mask < 1 << (parts.length - 1); mask++) next.add(parts.reduce((s, p, i) => (i ? s + ((mask >> (i - 1)) & 1 ? to : from) : '') + p, ''));
+    }
+    forms = next;
+    if (forms.size > 32) break;
+  }
+  const out = new Set();
+  for (const f of forms) { out.add(f); out.add(Array.from(f).reverse().join('')); }
+  return [...out].slice(0, 64);
+}
+
+// strs: the items' strings, in order. Returns [{ k: item index, c0, c1 (exclusive), m: match id }], one entry per
+// item per match (each form of termVariants, P37).
+export function matchSpans(strs, keyword) {
+  const needles = termVariants(keyword);
+  if (!needles.length) return [];
   let hay = '';
   const at = []; // at[j] = [item, char] of hay[j]
   strs.forEach((str, k) => {
     for (let c = 0; c < str.length; c++) for (const ch of norm(str[c])) { hay += ch; at.push([k, c]); }
   });
   const spans = [];
-  for (let j = hay.indexOf(needle); j >= 0; j = hay.indexOf(needle, j + 1)) {
-    const byItem = new Map();
-    for (let q = j; q < j + needle.length; q++) {
-      const [k, c] = at[q];
-      const s = byItem.get(k);
-      if (s) { s.c0 = Math.min(s.c0, c); s.c1 = Math.max(s.c1, c + 1); } else byItem.set(k, { k, c0: c, c1: c + 1 });
+  const seen = new Set();
+  for (const needle of needles) {
+    for (let j = hay.indexOf(needle); j >= 0; j = hay.indexOf(needle, j + 1)) {
+      if (seen.has(`${j}:${needle.length}`)) continue;
+      seen.add(`${j}:${needle.length}`);
+      const byItem = new Map();
+      for (let q = j; q < j + needle.length; q++) {
+        const [k, c] = at[q];
+        const s = byItem.get(k);
+        if (s) { s.c0 = Math.min(s.c0, c); s.c1 = Math.max(s.c1, c + 1); } else byItem.set(k, { k, c0: c, c1: c + 1 });
+      }
+      for (const v of byItem.values()) spans.push({ ...v, m: j });
     }
-    for (const v of byItem.values()) spans.push({ ...v, m: j });
   }
   return spans;
 }
@@ -45,7 +76,7 @@ export function annotationText(a) {
   return parts.flat().filter((v) => typeof v === 'string').join(' ');
 }
 
-export const matchesText = (text, keyword) => !!norm(keyword) && norm(text).includes(norm(keyword));
+export const matchesText = (text, keyword) => { const t = norm(text); return termVariants(keyword).some((n) => t.includes(n)); };
 
 // ---- P24 (03/10): several terms and automatic patterns, as iLovePDF's redaction offers (text search plus automatic
 // e-mail, phone and card numbers; read 02/10). Patterns run on the page's text with the items joined as they follow
@@ -221,7 +252,7 @@ const six = (m) => { const r = [0, 1, 2, 3, 4, 5].map((i) => Number(m && m[i]));
  */
 export function glyphsOfOperatorList(opList, OPS, fontOf) {
   const out = [];
-  let st = { ctm: IDENTITY, font: null, size: 0, dir: 1, Tc: 0, Tw: 0, Th: 1, TL: 0, rise: 0, Tm: IDENTITY, x: 0, y: 0, lx: 0, ly: 0, bad: false };
+  let st = { ctm: IDENTITY, font: null, size: 0, dir: 1, Tc: 0, Tw: 0, Th: 1, TL: 0, rise: 0, Tm: IDENTITY, x: 0, y: 0, lx: 0, ly: 0, bad: false, Tr: 0, lw: 1 };
   const stack = [];
   const push = () => stack.push({ ...st });
   const pop = () => { if (stack.length) st = stack.pop(); };
@@ -247,8 +278,11 @@ export function glyphsOfOperatorList(opList, OPS, fontOf) {
       case OPS.setWordSpacing: st.Tw = a[0]; break;
       case OPS.setHScale: st.Th = a[0] / 100; break;
       case OPS.setTextRise: st.rise = a[0]; break;
+      // P37 review (D1, D2): the rendering mode (3 and 7: invisible) and the line width (stroked modes 1, 2, 5, 6)
+      case OPS.setTextRenderingMode: st.Tr = a[0]; break;
+      case OPS.setLineWidth: st.lw = a[0]; break;
       case OPS.setFont: { const f = fontOf(a[0]); st.font = f || null; st.dir = a[1] < 0 ? -1 : 1; st.size = Math.abs(a[1]); break; }
-      case OPS.setGState: { for (const [k, v] of a[0] || []) if (k === 'Font') { st.font = fontOf(v[0]) || null; st.dir = v[1] < 0 ? -1 : 1; st.size = Math.abs(v[1]); } break; }
+      case OPS.setGState: { for (const [k, v] of a[0] || []) { if (k === 'Font') { st.font = fontOf(v[0]) || null; st.dir = v[1] < 0 ? -1 : 1; st.size = Math.abs(v[1]); } if (k === 'LW') st.lw = v; } break; }
       case OPS.showText: showText(a[0]); break;
       default: break;
     }
@@ -262,6 +296,11 @@ export function glyphsOfOperatorList(opList, OPS, fontOf) {
     const fm = six(f.fontMatrix || FONT_IDENTITY_MATRIX) || FONT_IDENTITY_MATRIX;
     const type3 = !!f.isType3Font;
     const Th = st.Th * st.dir;
+    // invisible text (an OCR layer over a scan): what is seen is the picture under it, not these glyphs; stroked text:
+    // the ink goes half the line width (user space, as the current matrix scales it) beyond the outline
+    const mode = Number(st.Tr) & 3;
+    const invisible = mode === 3;
+    const stroke = mode === 1 || mode === 2 ? (Number(st.lw) > 0 ? Number(st.lw) : 1) * Math.sqrt(Math.abs(st.ctm[0] * st.ctm[3] - st.ctm[1] * st.ctm[2])) / 2 : 0;
     let x = 0;
     if (f.vertical) {
       for (const g of glyphs) {
@@ -279,7 +318,7 @@ export function glyphsOfOperatorList(opList, OPS, fontOf) {
       let total = 0;
       for (const g of glyphs) if (typeof g !== 'number') total += g.width;
       total *= st.size * fm[0];
-      for (const g of glyphs) if (typeof g !== 'number') out.push({ u: g.unicode || '', M, x0: 0, x1: total, x2: total, size: st.size, font: f, ch: null, accent: null, rough: true });
+      for (const g of glyphs) if (typeof g !== 'number') out.push({ u: g.unicode || '', M, x0: 0, x1: total, x2: total, size: st.size, font: f, ch: null, accent: null, rough: true, invisible, stroke });
       st.x += total * Th;
       return;
     }
@@ -288,7 +327,7 @@ export function glyphsOfOperatorList(opList, OPS, fontOf) {
       const spacing = (g.isSpace ? st.Tw : 0) + st.Tc;
       const adv = type3 ? (g.width * fm[0] + fm[4]) * st.size : g.width * st.size * fm[0];
       const step = type3 ? adv + spacing : adv + spacing * st.dir;
-      out.push({ u: g.unicode || '', M, x0: x, x1: x + adv, x2: x + step, size: st.size, font: f, ch: type3 ? null : g.fontChar, accent: g.accent || null, rough: false });
+      out.push({ u: g.unicode || '', M, x0: x, x1: x + adv, x2: x + step, size: st.size, font: f, ch: type3 ? null : g.fontChar, accent: g.accent || null, rough: false, type3, fm, invisible, stroke });
       x += step;
     }
     st.x += x * Th;
@@ -317,7 +356,13 @@ export function bidiReorder(arr, keyOf = (x) => x) {
 
 // A glyph's rectangles in its run space (x along the run, y up, the font size included): adv, its advance × the font's
 // height (ascent, descent); ink, its ink boxes (the glyph, and its accent when PDF.js draws one) or null when the ink is
-// not known.
+// not known; unbounded: its ink may lie anywhere (its whole run is then covered); stroke: half the width of the outline
+// drawn around it, user space (P37 review, D2).
+// P37 review: D1, an invisible glyph (rendering mode 3 or 7, an OCR layer) has no ink of its own: the picture under it
+// is what shows, so it is padded as before; D3, a Type 3 glyph's ink is its font's /FontBBox (through its /FontMatrix),
+// or unbounded when that box is empty; D5, a glyph PDF.js re-measures (its font's width differs from the drawn glyph's:
+// PDF.js then squeezes or centres it) gets the ink of both drawings, or is unbounded when the drawn glyph is not known.
+// inkOf(font, ch) → [left, bottom, right, top] in em, and optionally the drawn glyph's own advance in em.
 function glyphRects(gl, style, inkOf) {
   const f = gl.font || {}, s = gl.size;
   let asc = Number(f.ascent ?? style.ascent), desc = Number(f.descent ?? style.descent);
@@ -325,56 +370,146 @@ function glyphRects(gl, style, inkOf) {
   desc = Number.isFinite(desc) && desc < 0 ? Math.max(Math.min(desc, -0.1), -0.8) : -0.25;
   const rect = (x0, x1, y0, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
   const adv = rect(gl.x0, gl.x1, desc * s, asc * s);
-  const okInk = (i) => i && i.length === 4 && i.every(Number.isFinite) && i[2] - i[0] < 4 && i[3] - i[1] < 4;
+  const stroke = gl.stroke || 0;
+  if (gl.invisible) return { adv, ink: null, stroke };
+  const okInk = (i) => i && i.length >= 4 && i.slice(0, 4).every(Number.isFinite) && i[2] - i[0] < 4 && i[3] - i[1] < 4;
+  if (gl.type3) {
+    const b = f.bbox, fm = gl.fm || FONT_IDENTITY_MATRIX;
+    if (!b || b.length !== 4 || !b.every(Number.isFinite) || !(b[2] > b[0]) || !(b[3] > b[1])) return { adv, ink: null, unbounded: true, stroke };
+    const pts = [[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]].map(([x, y]) => apply(fm, x, y));
+    const box = [Math.min(...pts.map((p) => p[0])), Math.min(...pts.map((p) => p[1])), Math.max(...pts.map((p) => p[0])), Math.max(...pts.map((p) => p[1]))];
+    if (!(box[2] - box[0] < 8) || !(box[3] - box[1] < 8)) return { adv, ink: null, unbounded: true, stroke };
+    return { adv, ink: [rect(gl.x0 + box[0] * s, gl.x0 + box[2] * s, box[1] * s, box[3] * s)], stroke };
+  }
+  const advEm = (gl.x1 - gl.x0) / (s || 1);
+  // the ink of one glyph as drawn: shifted / squeezed when PDF.js re-measures it (pdfjs-dist 5.7 canvas.js showText)
+  const drawn = (i, x0, y0) => {
+    const base = [x0 + i[0] * s, x0 + i[2] * s, y0 + i[1] * s, y0 + i[3] * s];
+    if (!f.remeasure || !(advEm > 0)) return [base];
+    const meas = Number(i[4]);
+    if (!(meas > 0)) return null;
+    if (Math.abs(meas - advEm) < 1e-3) return [base];
+    const d = ((advEm - meas) / 2) * s, k = advEm / meas;
+    const out = [[base[0] + d, base[1] + d, base[2], base[3]]];
+    if (advEm < meas) out.push([x0 + i[0] * k * s, x0 + i[2] * k * s, base[2], base[3]]);
+    return out;
+  };
   const ink = gl.ch ? inkOf(gl.font, gl.ch) : null;
-  if (!okInk(ink)) return { adv, ink: null };
-  const out = [rect(gl.x0 + ink[0] * s, gl.x0 + ink[2] * s, ink[1] * s, ink[3] * s)];
+  if (!okInk(ink)) return { adv, ink: null, unbounded: !!f.remeasure, stroke };
+  const parts = drawn(ink, gl.x0, 0);
+  if (!parts) return { adv, ink: null, unbounded: true, stroke };
+  const out = parts.map(([x0, x1, y0, y1]) => rect(x0, x1, y0, y1));
   if (gl.accent) {
     const ai = gl.accent.fontChar ? inkOf(gl.font, gl.accent.fontChar) : null;
-    if (!okInk(ai)) return { adv, ink: null };
+    if (!okInk(ai)) return { adv, ink: null, unbounded: !!f.remeasure, stroke };
     const ox = gl.x0 + (gl.accent.offset?.x || 0) * s, oy = (gl.accent.offset?.y || 0) * s;
-    out.push(rect(ox + ai[0] * s, ox + ai[2] * s, oy + ai[1] * s, oy + ai[3] * s));
+    const ap = drawn(ai, ox, oy);
+    if (!ap) return { adv, ink: null, unbounded: true, stroke };
+    out.push(...ap.map(([x0, x1, y0, y1]) => rect(x0, x1, y0, y1)));
   }
-  return { adv, ink: out };
+  return { adv, ink: out, stroke };
 }
 
 /**
  * P37: the black boxes of the terms found in the GLYPHS drawn, independently of PDF.js's text runs (a safety net: the
  * f4b trap of the P33 review draws "Mu", a combining diaeresis moved back over the "u", then "ller", and PDF.js placed
  * the run "ller" 6 pt left of where it is drawn, so the padded estimate left the tail of the "r" visible). The glyphs'
- * text in drawing order (accents, case, spaces and hyphens ignored, as the search does) is searched for each term,
- * and for a right-to-left term its reverse too; every glyph from the first to the last of a match is covered: its
- * advance × font height and ink box, plus the margin, or padded as before when its ink is not known. glyphs:
- * glyphsOfOperatorList(…); styles: the page's text styles (unused keys are fine). Returns quadrilaterals.
+ * text in drawing order (accents, case, spaces and hyphens ignored, as the search does) is searched for each term and
+ * its variants (termVariants: a right-to-left term reversed, lam-alef read reversed). P37 review (D4): a second text is
+ * searched too, where a glyph that carries several characters gives them reversed (PDF.js and right-to-left drawing).
+ * Every glyph from the first to the last of a match is covered: its advance × font height and ink box, plus the margin
+ * and half its outline's width; padded as before when its ink is not known; its whole run (the glyphs of the same text
+ * operation) when its ink may lie anywhere. Returns quadrilaterals.
  */
 export function glyphTermQuads(glyphs, terms, inkOf = () => null, px = 0.5) {
-  let hay = '';
-  const at = [];
-  glyphs.forEach((gl, n) => { if (!gl.M) return; for (const ch of norm(gl.u)) { hay += ch; at.push(n); } });
+  const hays = [false, true].map((rev) => {
+    let hay = '';
+    const at = [];
+    glyphs.forEach((gl, n) => { if (!gl.M) return; let t = norm(gl.u); if (rev) t = Array.from(t).reverse().join(''); for (const ch of t) { hay += ch; at.push(n); } });
+    return { hay, at };
+  });
   const quads = [];
+  const done = new Set();
+  const cover = (gl) => {
+    const { adv, ink, unbounded, stroke } = glyphRects(gl, {}, inkOf);
+    const sx = Math.hypot(gl.M[0], gl.M[1]) || 1, sy = Math.hypot(gl.M[2], gl.M[3]) || 1;
+    let pts = [adv, ...(ink || [])].flat();
+    if (unbounded) pts = glyphs.filter((g2) => g2.M === gl.M).flatMap((g2) => [[g2.x0, 0], [g2.x1, 0]]).concat(adv);
+    let x0 = Math.min(...pts.map((p) => p[0])), x1 = Math.max(...pts.map((p) => p[0])), y0 = Math.min(...pts.map((p) => p[1])), y1 = Math.max(...pts.map((p) => p[1]));
+    const fs = gl.size * sy;
+    if (ink && !unbounded) { const m = Math.max(0.02 * fs, px) + stroke; x0 -= m / sx; x1 += m / sx; y0 -= m / sy; y1 += m / sy; }
+    else { x0 -= (0.15 * fs + stroke) / sx; x1 += (0.15 * fs + stroke) / sx; y0 = Math.min(y0, -0.3 * gl.size) - stroke / sy; y1 = Math.max(y1, 1.05 * gl.size) + stroke / sy; }
+    quads.push([[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(([x, y]) => apply(gl.M, x, y)));
+  };
   for (const term of terms) {
-    const needle = norm(term);
-    if (!needle) continue;
-    const needles = isRtlText(needle) ? [needle, Array.from(needle).reverse().join('')] : [needle];
-    for (const nd of new Set(needles)) {
-      for (let j = hay.indexOf(nd); j >= 0; j = hay.indexOf(nd, j + 1)) {
-        const first = at[j], last = at[j + nd.length - 1];
-        for (let n = Math.min(first, last); n <= Math.max(first, last); n++) {
-          const gl = glyphs[n];
-          if (!gl.M) continue;
-          const { adv, ink } = glyphRects(gl, {}, inkOf);
-          const sx = Math.hypot(gl.M[0], gl.M[1]) || 1, sy = Math.hypot(gl.M[2], gl.M[3]) || 1;
-          const pts = [adv, ...(ink || [])].flat();
-          let x0 = Math.min(...pts.map((p) => p[0])), x1 = Math.max(...pts.map((p) => p[0])), y0 = Math.min(...pts.map((p) => p[1])), y1 = Math.max(...pts.map((p) => p[1]));
-          const fs = gl.size * sy;
-          if (ink) { const m = Math.max(0.02 * fs, px); x0 -= m / sx; x1 += m / sx; y0 -= m / sy; y1 += m / sy; }
-          else { x0 -= (0.15 * fs) / sx; x1 += (0.15 * fs) / sx; y0 = Math.min(y0, -0.3 * gl.size); y1 = Math.max(y1, 1.05 * gl.size); }
-          quads.push([[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(([x, y]) => apply(gl.M, x, y)));
+    for (const nd of termVariants(term)) {
+      for (const { hay, at } of hays) {
+        for (let j = hay.indexOf(nd); j >= 0; j = hay.indexOf(nd, j + 1)) {
+          const first = at[j], last = at[j + nd.length - 1];
+          for (let n = Math.min(first, last); n <= Math.max(first, last); n++) {
+            if (!glyphs[n].M || done.has(n)) continue;
+            done.add(n);
+            cover(glyphs[n]);
+          }
         }
       }
     }
   }
   return quads;
+}
+
+/**
+ * P37: the glyph geometry of a PDF.js page, as the page and the benches compute it: the operator list (annotations
+ * left out), the fonts once PDF.js has them, glyphsOfOperatorList, then itemGeometry. Returns { glyphs, geometry }.
+ */
+export async function pageGlyphGeometry(page, pdfjsLib, items, styles, inkOf) {
+  const ops = await page.getOperatorList({ annotationMode: pdfjsLib.AnnotationMode.DISABLE });
+  const names = new Set();
+  ops.fnArray.forEach((fn, n) => { if (fn === pdfjsLib.OPS.setFont) names.add(ops.argsArray[n][0]); });
+  const fonts = new Map();
+  for (const name of names) fonts.set(name, await new Promise((resolve) => { try { page.commonObjs.get(name, resolve); } catch { resolve(null); } }));
+  const glyphs = glyphsOfOperatorList(ops, pdfjsLib.OPS, (name) => fonts.get(name) || null);
+  return { glyphs, geometry: itemGeometry(items, styles, glyphs, inkOf) };
+}
+
+/**
+ * P37 (real-page pass, 06/10): a glyph's ink measured in the browser by DRAWING it, with the very font string PDF.js's
+ * canvas draws it with (its own face, or the system font it chose for a standard font: Helvetica, Times… are drawn as
+ * system fonts, which the first version left out, so their boxes were padded by 15 % again), and reading the pixels.
+ * measureText's actualBoundingBox is not used: WebKit gives the advance box there, not the ink (an italic overhang
+ * would be missed). ctx: the 2D context of a canvas of 400 × 400 px (willReadFrequently). Returns inkOf(font, ch) →
+ * [left, bottom, right, top, drawn advance] in em (one pixel at 100 px added on each side), or null when not known.
+ */
+export function canvasInk(ctx) {
+  const cache = new Map();
+  const S = 400, OX = 150, OY = 250;
+  return (font, ch) => {
+    if (!font || font.isType3Font || !ch) return null;
+    const typeface = (font.systemFontInfo && font.systemFontInfo.css) || `"${font.loadedName}", ${font.fallbackName || 'sans-serif'}`;
+    const css = `${font.italic ? 'italic' : 'normal'} ${font.black ? '900' : font.bold ? 'bold' : 'normal'} 100px ${typeface}`;
+    const key = `${css}|${ch}`;
+    if (cache.has(key)) return cache.get(key);
+    let ink = null;
+    try {
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, S, S);
+      ctx.font = css;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#000';
+      ctx.fillText(ch, OX, OY);
+      const w = ctx.measureText(ch).width;
+      const d = ctx.getImageData(0, 0, S, S).data;
+      ctx.restore();
+      let x0 = S, y0 = S, x1 = -1, y1 = -1;
+      for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) if (d[(y * S + x) * 4 + 3] > 0) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      if (x1 < 0) ink = [0, 0, 0, 0, w / 100];
+      else if (x0 > 0 && y0 > 0 && x1 < S - 1 && y1 < S - 1) ink = [(x0 - OX - 1) / 100, (OY - y1 - 2) / 100, (x1 - OX + 2) / 100, (OY - y0 + 1) / 100, w / 100];
+    } catch { ink = null; }
+    cache.set(key, ink);
+    return ink;
+  };
 }
 
 /**
@@ -427,10 +562,13 @@ function itemChars(it, style, placed, inkOf) {
   // right to left: the glyphs reversed, or reversed by runs (digits and Latin keep their order); a glyph that carries
   // several characters (lam-alef) in its own order, or reversed with the rest — PDF.js reverses the whole run character
   // by character, so it reads such a glyph's "لا" as "ال" (docs/audit/ETUDE-EDITEUR-PDF-ARABE.md §4)
+  // P37 review (D6): a right-to-left run tries the reversed orders FIRST (a run whose text reads the same both ways
+  // would otherwise be tied in mirror)
   const orders = [[withText, false]];
   if (it.dir === 'rtl' || isRtlText(it.str)) {
     const rev = [...withText].reverse(), runs = bidiReorder(withText, (m) => m.gl.u);
-    orders.push([rev, false], [rev, true], [runs, false], [runs, true]);
+    const rtl = [[rev, false], [rev, true], [runs, false], [runs, true]];
+    if (it.dir === 'rtl') orders.unshift(...rtl); else orders.push(...rtl);
   }
   let owner = null, flipped = false;
   for (const [order, inner] of orders) {
@@ -456,10 +594,10 @@ function itemChars(it, style, placed, inkOf) {
   const boxCache = new Map();
   const boxOf = (m) => {
     if (boxCache.has(m)) return boxCache.get(m);
-    const { adv, ink } = glyphRects(m.gl, style, inkOf);
+    const { adv, ink, unbounded, stroke } = glyphRects(m.gl, style, inkOf);
     const span = (r) => { const pts = r.map(([x, y]) => toUV(apply(m.gl.M, x, y))); return { lo: Math.min(...pts.map((p) => p[0])), hi: Math.max(...pts.map((p) => p[0])), dn: Math.min(...pts.map((p) => p[1])), up: Math.max(...pts.map((p) => p[1])) }; };
     const a = span(adv);
-    const box = { a0: a.lo, a1: a.hi, ...a, pad: !ink };
+    const box = { a0: a.lo, a1: a.hi, ...a, pad: !ink, unbounded: !!unbounded, stroke: stroke || 0 };
     if (ink) { const parts = [a, ...ink.map(span)]; Object.assign(box, { lo: Math.min(...parts.map((p) => p.lo)), hi: Math.max(...parts.map((p) => p.hi)), dn: Math.min(...parts.map((p) => p.dn)), up: Math.max(...parts.map((p) => p.up)) }); }
     boxCache.set(m, box);
     return box;
@@ -467,7 +605,7 @@ function itemChars(it, style, placed, inkOf) {
   const chars = new Array(it.str.length).fill(null);
   for (const [c, ms] of owner) {
     const boxes = [...ms, ...(extra.get(c) || [])].map(boxOf);
-    chars[c] = { a0: Math.min(...boxes.map((b) => b.a0)), a1: Math.max(...boxes.map((b) => b.a1)), lo: Math.min(...boxes.map((b) => b.lo)), hi: Math.max(...boxes.map((b) => b.hi)), dn: Math.min(...boxes.map((b) => b.dn)), up: Math.max(...boxes.map((b) => b.up)), pad: boxes.some((b) => b.pad) };
+    chars[c] = { a0: Math.min(...boxes.map((b) => b.a0)), a1: Math.max(...boxes.map((b) => b.a1)), lo: Math.min(...boxes.map((b) => b.lo)), hi: Math.max(...boxes.map((b) => b.hi)), dn: Math.min(...boxes.map((b) => b.dn)), up: Math.max(...boxes.map((b) => b.up)), pad: boxes.some((b) => b.pad), unbounded: boxes.some((b) => b.unbounded), stroke: Math.max(...boxes.map((b) => b.stroke)) };
   }
   // the run's text with each multi-character glyph read in its own order again (for the invisible layer), when PDF.js
   // reversed it
@@ -495,8 +633,13 @@ function exactBox(it, geo, c0, c1, px) {
   for (let c = c0; c < c1; c++) {
     const b = geo.chars[c];
     if (!b) { if (unitsOf(it.str[c]).length) return null; continue; }
-    // a glyph whose ink is not known (a Type 3 font, a font the browser did not load) is padded as before
-    const [l, h, d, u] = b.pad ? [b.a0 - 0.15 * fs, b.a1 + 0.15 * fs, Math.min(b.dn, -0.3 * fs), Math.max(b.up, 1.05 * fs)] : [b.lo - m, b.hi + m, b.dn - m, b.up + m];
+    // P37 review: a glyph whose ink may lie anywhere (D3 Type 3 without a box, D5 re-measured and not known): the whole
+    // run, padded as before
+    if (b.unbounded) return { lo: -0.15 * fs - b.stroke, hi: it.width + 0.15 * fs + b.stroke, dn: -0.3 * fs - b.stroke, up: 1.05 * fs + b.stroke };
+    // a glyph whose ink is not known (invisible text over a scan, a font the browser did not load) is padded as before;
+    // a stroked glyph also gets half its outline's width (D1, D2)
+    const k = b.stroke || 0;
+    const [l, h, d, u] = b.pad ? [b.a0 - 0.15 * fs - k, b.a1 + 0.15 * fs + k, Math.min(b.dn, -0.3 * fs) - k, Math.max(b.up, 1.05 * fs) + k] : [b.lo - m - k, b.hi + m + k, b.dn - m - k, b.up + m + k];
     lo = Math.min(lo, l); hi = Math.max(hi, h); dn = Math.min(dn, d); up = Math.max(up, u);
   }
   return lo < hi ? { lo, hi, dn, up } : null;
