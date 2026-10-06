@@ -23,7 +23,7 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
-## 📝 P36 — 06/10 : certificat HTTPS, contenu exact des 225 pages, pages légales, À propos (`docs/audit/RAPPORT-p36-contenu-pages-06-10.md`, repère `restauration-avant-p36-06-10` = `f7f0601e`) — **PRÊT, PAS EN PRODUCTION : branche `p36` = `2abe4e87`, préversion `onlineconvertools-4jv2udv6j` vérifiée (225 pages = construction locale, JSON-LD ALL PASS, www-light 29/29) ; mise en production refusée par le filtre de permissions → geste du propriétaire ci-dessous**
+## 📝 P36 — 06/10 : certificat HTTPS, contenu exact des 225 pages, pages légales, À propos (`docs/audit/RAPPORT-p36-contenu-pages-06-10.md`, repère `restauration-avant-p36-06-10` = `f7f0601e`) — **EN PRODUCTION le 06/10 : Vercel `onlineconvertools-90t9u2hxi` = `d854b0f0`, www-light 29/29, JSON-LD des 225 pages ALL PASS sur www ; retour arrière : `onlineconvertools-gbnnrjftd`**
 
 | Lot | État |
 |---|---|
@@ -39,7 +39,7 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 
 | # | Geste | Détail |
 |---|---|---|
-| P36-1 | **Mettre P36 en production** | dans le terminal du dépôt : `git push origin p36:master` (avance rapide vérifiée : `master` = `f7f0601e` est l'ancêtre de `p36`) ; puis `node scripts/p24/www-light.mjs` ; retour arrière : promouvoir `onlineconvertools-gbnnrjftd` (= `206684a1`) |
+| P36-1 | ✅ **fait le 06/10** (propriétaire : `git push origin p36:master`, deux fois à cause de l'ignoreCommand) — Mettre P36 en production | dans le terminal du dépôt : `git push origin p36:master` (avance rapide vérifiée : `master` = `f7f0601e` est l'ancêtre de `p36`) ; puis `node scripts/p24/www-light.mjs` ; retour arrière : promouvoir `onlineconvertools-gbnnrjftd` (= `206684a1`) |
 | P36-2 | Vérifier Analytics depuis l'Europe (= P35-3) | VPN ou proche en Europe, 5 min |
 | P36-3 | Éditeur PDF arabe : décider de tester le prototype sur ~30 vrais PDF arabes | `docs/audit/ETUDE-EDITEUR-PDF-ARABE.md` §8 ; 20-30 jours si construit |
 | P36-4 | Harmoniser l'orthographe des libellés d'interface (une vingtaine en anglais britannique : « Colour »…) avant les traductions de P37 | ≈ 1 h, technique |

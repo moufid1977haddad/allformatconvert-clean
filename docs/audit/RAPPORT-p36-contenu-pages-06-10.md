@@ -4,6 +4,13 @@ Branche `p36`, repère de restauration `restauration-avant-p36-06-10` = `f7f0601
 
 ## État final (06/10) — à lire d'abord
 
+- **EN PRODUCTION (06/10, 17 h 30 UTC)** : le propriétaire a poussé `master` ; la première construction (`d3113100`) a
+  échoué avant de compiler (`ignoreCommand` : dernier commit déployé absent du clone de profondeur 10 de Vercel,
+  « fatal: bad object ») ; corrigé dans `vercel.json` (`d854b0f0` : si ce commit est absent, Vercel construit) ; le
+  propriétaire a repoussé : Vercel **`onlineconvertools-90t9u2hxi` = `d854b0f0`** sert www. **Sur www : contrôle léger
+  29/29, données structurées des 225 pages ALL PASS** (FAQ visible = FAQPage, 0 JSON invalide). Aucun retour arrière.
+  Retour arrière prêt : promouvoir `onlineconvertools-gbnnrjftd` (= `206684a1`, P35).
+
 - **Tout P36 est prêt, vérifié et poussé sur la branche `p36` (`2abe4e87`), mais N'EST PAS EN PRODUCTION.** La
   préversion `onlineconvertools-4jv2udv6j` (= `2abe4e87`) a été contrôlée : 225 pages identiques à la construction
   locale vérifiée, données structurées ALL PASS, contrôle léger 29/29. Le passage en production (avance rapide de
