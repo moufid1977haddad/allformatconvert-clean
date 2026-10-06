@@ -330,3 +330,48 @@ Méthode : chaque mot pdftotext d'une page, trouvé sur sa page, est cherché su
 - 31 pièges avec `--ocr` : 31 ok (r2/g5 connu). `traps-r4` et `traps-r5` de l'auteur : ok ou REFUSED attendus.
 - fit-adversarial 19/19 ; ocr-scan et ocr-variants à 100 % ; box-fit 15/15 ; arabe 4/4 ; `redact-review2` tout PASS.
 - Accents (p27-lo-cambria-accents) : trouvés par la page grâce à `withActualTextUnicode` (mon scan brut, sans ActualText, les donnait manqués : faux signal de mon script, pas de l'outil).
+
+
+---
+
+# Relecture n° 7 — commit b3b44dcb (C1, ں, pages illisibles, jonctions, couche retirée)
+
+Date : 06/10/2026. Même rôle, mêmes règles. Vraie page : build de production de b3b44dcb sur http://localhost:3137.
+Fixtures nouvelles :
+- `%TEMP%\p37-review-redact\ar5\s-wrap.pdf` et `s-latin.pdf` (Chromium) ;
+- `ar3\s-lowrap.pdf` et `s-lolatin.pdf` (LibreOffice).
+Ces quatre fixtures ont « مارس » et le terme visé sur la MÊME page.
+`paint-boxes.mjs` est corrigé (état graphique du PDF isolé par q/Q) et accepte plusieurs termes (« a|b »).
+
+## Verdict : GO avec conditions
+
+Les corrections du round 6 tiennent, en Node et sur la vraie page.
+
+Condition de mise en ligne (S1) : une fuite **visible** et silencieuse reste possible quand le terme manqué par la passe 1 est sur une page **déjà noircie** pour un autre terme. Le contrôle final ne regarde pas les pixels d'une page noircie, seulement sa couche invisible. Le nouveau retrait de couche ne crée pas ce trou, mais il peut supprimer le dernier signal (§3).
+
+## 1. Vérifié
+- C1 : emro-rc67 « 2020 » → 64 occurrences, fichier livré (vraie page). Piège `r6/smask-none.pdf` : 32 pièges `--ocr` : 32 ok (r2/g5 connu).
+- ں → ن : `redact-review6` PASS.
+- Pages illisibles : wb-ok-content « zzqq » → « No match found … Pages 1, 4, 5, … : part of the text cannot be read … » (vraie page).
+- Jonctions : wiki-ar-oman « ريال » → livré, 34 occurrences, le terme absent de pdftotext (vraie page ; avant : refusé).
+- **Pas de régression L2/L4** (vraie page, terme en page 2) : c-latin, c-wrap, lo-latin-wrap → toujours REFUSED (« still drawn on page 2 »).
+- Suites Node : `redact-review2`, `redact-review6`, `redact-review-fixes` tout PASS ; box-fit 15/15 ; arabe 4/4 ; fit-adversarial 19/19 ; ocr-variants 100 %.
+- Retrait de couche (`removeInvisibleWords`) :
+  - Une page noircie ne contient que l'image et la couche. Un terme lu dans son TEXTE ne peut donc venir que de la couche : l'attribution est juste.
+  - Si le retrait échoue (référence non trouvée), la vérification relancée retrouve le terme, la page est déjà dans `layerless`, la boucle s'arrête, et le fichier est refusé : côté sûr.
+  - La vérification relancée n'est jamais sautée : chaque retrait est suivi de `save` puis `verify`.
+
+## 2. Défaut S1 — ÉLEVÉE (préexistant dans son principe, révélé maintenant) : terme manqué sur une page déjà noircie
+- Repro, **vraie page Chromium ET WebKit** : `ar5\s-wrap.pdf`, une seule page (« تقرير شهر مارس الماضي » puis « وصل الوفد في شهر » / « أبريل إلى الرياض » avec retour à la ligne), termes « مارس » et « شهر أبريل ».
+  - Résultat : « Blacked out 1 occurrence (page 1: 1) », fichier livré. Sur l'image, **« شهر / أبريل » reste lisible, sans boîte** (`%TEMP%\p37-review-redact\s-wrap-real.png`, et en Node `s-wrap-painted.png`).
+  - Le même terme sur une page non noircie est refusé (c-wrap) : le contrôle par ordre de lecture ne protège donc que les pages copiées.
+- Cause : la passe 1 ne trouve pas ce terme (Chromium, phrase coupée en fin de ligne : ni le texte de PDF.js ni les glyphes dans l'ordre du dessin). La page est noircie pour « مارس » seulement. `textLayerWords` retire ensuite de la couche les mots qui formeraient le terme (côté sûr pour le texte). Le contrôle final ne lit alors plus que cette couche filtrée : il ne voit rien, et l'image garde le terme.
+- Lien avec le nouveau mécanisme : quand la couche, relue par PDF.js, forme le terme alors que la passe 1 l'avait manqué (même famille L2/L4), `removeInvisibleWords` retire la couche, la re-vérification passe, et le fichier est livré avec le terme visible. Avant b3b44dcb, ce cas était refusé. Je n'ai pas construit de fixture qui passe par là : `lineOrders` retire en général ces mots avant. Mais rien ne l'exclut.
+- Correctif proposé (couvre les deux) : pour chaque page noircie, au contrôle final (ou dès la passe 2), lancer `readingOrderHit` et `glyphTermMatches` sur les glyphs ORIGINAUX de la page (`hit.glyphs`, déjà gardés), après avoir retiré ceux dont le centre est sous une boîte noire (`quads`).
+  - S'il reste un terme, refuser (ou mieux, ajouter ses boîtes).
+  - Faire ce contrôle AVANT de retirer une couche : un terme encore lisible dans les glyphes non couverts n'est pas une fausse jonction de la couche.
+
+## 3. Points annexes
+- s-latin (Chromium, même page, « شركة Microsoft ») : refusé, pas de fuite. Le contrôle a vu le terme par les glyphes invisibles de la couche (« drawn »), ce qui est fragile : si la couche n'avait pas gardé ces mots, ce cas fuirait comme S1.
+- s-lowrap et s-lolatin (LibreOffice, même page) : le terme est trouvé par le texte et noirci. Pas de fuite.
+- Pages illisibles : le signal attrape wb-ok-content, pas les Bulletins marocains (lettres perdues sans caractère illisible, déjà noté au round 6).
