@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
-import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf, glyphTermQuads, glyphTermMatches, confirmedTermSpans, readingOrderHit, unreadableShare, UNREADABLE_SHARE, removeInvisibleWords, invisibleTextFont, hasArabic, pageGlyphGeometry, pageGlyphs, itemGeometry, canvasInk } from '../../../lib/pdfRedact';
+import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf, glyphTermQuads, glyphTermMatches, confirmedTermSpans, readingOrderHit, unreadableShare, UNREADABLE_SHARE, removeInvisibleWords, visibleTermLeft, invisibleTextFont, hasArabic, pageGlyphGeometry, pageGlyphs, itemGeometry, canvasInk } from '../../../lib/pdfRedact';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -121,6 +121,7 @@ export default function Page() {
       // encoding, common in some Arabic PDFs) — said in the summary and in "No match found", never silently
       const unreadablePages = [];
       const layered = new Map(); // page number → the rebuilt page (with its invisible words)
+      const stillVisible = []; // P37 S1: blacked-out pages where a term can still be read outside the boxes
       const unreadableNote = () => (unreadablePages.length ? ` ${unreadablePages.length > 1 ? 'Pages' : 'Page'} ${listPages(unreadablePages)}: part of the text cannot be read (the PDF does not say which letters some of its characters are), so a term there may not be found. Check ${unreadablePages.length > 1 ? 'these pages' : 'this page'}, or run PDF OCR first.` : '');
 
       // Pass 1 (P33): every page is searched BEFORE anything is copied — the pages without a match are then copied from
@@ -268,6 +269,13 @@ export default function Page() {
         try { geo = glyphs ? { glyphs, geometry: itemGeometry(items, content.styles, glyphs, inkOf) } : await withTimeout(pageGlyphGeometry(page, pdfjsLib, items, content.styles, inkOf), 20000, 'timeout'); } catch (e) { console.warn(`[pdf-redact] page ${i + 1}: glyph positions not read (${e?.message}); padded boxes used`); }
         const px = 1 / viewport.scale;
         const quads = [...redactionQuads(items, content.styles, spans, boxes.map((an) => an.rect), measureOf, geo && geo.geometry, px), ...(geo ? glyphTermQuads(geo.glyphs, terms, inkOf, px) : [])];
+        // P37 seventh review (S1): a term still visible on this page outside the black boxes (missed by pass 1, while the
+        // page is blacked out for another term) — the file is refused; checked before any invisible layer is taken off
+        if (terms.length) {
+          let srcGlyphs = geo && geo.glyphs;
+          if (!srcGlyphs) { try { srcGlyphs = await step(pageGlyphs(page, pdfjsLib), `${where}: checking what stays visible`); } catch (e) { if (e instanceof StepTimeout) throw e; srcGlyphs = null; } }
+          if (!srcGlyphs || visibleTermLeft(srcGlyphs, quads, terms)) stillVisible.push(i + 1);
+        }
         for (const q of quads) poly(q);
 
         const blob = await step(new Promise((resolve) => canvas.toBlob(resolve, 'image/png')), `${where}: making the blacked-out image`);
@@ -292,6 +300,12 @@ export default function Page() {
       }
 
       relinkDestinations(outDoc, lib);
+      if (stillVisible.length) {
+        setError(`This PDF could not be redacted safely: after blacking out, a term can still be read on ${stillVisible.length > 1 ? 'pages' : 'page'} ${listPages(stillVisible)} (written in a way the search could not place, for example a phrase split across two lines, or a Latin word inside Arabic text). No file is given. Redact ${stillVisible.length > 1 ? 'these pages' : 'this page'} in a desktop tool, or try a shorter term.${sentToServer ? ' Your PDF was sent to our own PDF service for this attempt, then deleted.' : ''}`);
+        setLoading(false);
+        setProgress('');
+        return;
+      }
       if (arabicFont) await step(arabicFont.finalize(), 'Saving the redacted PDF');
       setProgress('Saving the redacted PDF...');
       let pdfBytes = await step(outDoc.save(), 'Saving the redacted PDF');

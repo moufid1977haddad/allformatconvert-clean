@@ -43,3 +43,11 @@ for b in chromium "webkit --device=iphone"; do
   node scripts/p37/review/real-page-terms.mjs "$O" "$C/wb-ok-content.pdf" "zzqq" --browser=$b 2>&1 | tail -2
   node scripts/p37/review/real-page-terms.mjs "$O" "$C/emro-rc67.pdf" "2020" --browser=$b 2>&1 | tail -2
 done
+# relecture n° 7 (S1): term missed on a page that is redacted for another term -> refused
+for b in chromium "webkit --device=iphone"; do
+  echo "== S1 $b"
+  node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar5\s-wrap.pdf" "مارس|شهر أبريل" --browser=$b 2>&1 | tail -2
+  node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar5\s-latin.pdf" "مارس|شركة Microsoft" --browser=$b 2>&1 | tail -2
+  node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar3\s-lowrap.pdf" "مارس|شركة Microsoft" --browser=$b 2>&1 | tail -2
+  node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar3\s-lolatin.pdf" "مارس|شركة Microsoft" --browser=$b 2>&1 | tail -2
+done

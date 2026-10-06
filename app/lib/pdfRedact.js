@@ -627,6 +627,21 @@ export function unreadableShare(glyphs) {
   return { share: all ? bad / all : 0, bad, all };
 }
 
+/**
+ * P37 seventh review (S1): is a term still VISIBLE on a page that is blacked out? The page's ORIGINAL glyphs whose
+ * centre is not under a black box (quads, PDF user space) are searched as the final check does — in drawing order
+ * (glyphTermMatches) and in the reading order rebuilt from the glyphs (readingOrderHit). A term pass 1 missed on a page
+ * redacted for another term ("شهر / أبريل" wrapped onto the next line, with "مارس" on the same page) stayed readable on
+ * the picture, and the final check, which only reads the page's filtered invisible layer, did not see it. Such a page
+ * makes the file refused (no box is added blindly). glyphs: pageGlyphs(…) of the source page.
+ */
+export function visibleTermLeft(glyphs, quads, terms) {
+  if (!terms.length) return false;
+  const inQuad = (q, [x, y]) => { let s = 0; for (let i = 0; i < 4; i++) { const [x1, y1] = q[i], [x2, y2] = q[(i + 1) % 4]; const c = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1); if (c !== 0) { if (s && Math.sign(c) !== s) return false; s = Math.sign(c); } } return true; };
+  const left = glyphs.filter((g) => !g.M || !quads.some((q) => inQuad(q, apply(g.M, (g.x0 + g.x1) / 2, 0.35 * (g.size || 1)))));
+  return glyphTermMatches(left, terms).length > 0 || readingOrderHit(left, terms);
+}
+
 export function glyphTermQuads(glyphs, terms, inkOf = () => null, px = 0.5) {
   const quads = [];
   const done = new Set();

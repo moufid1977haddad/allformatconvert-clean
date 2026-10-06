@@ -333,3 +333,44 @@ Les mots manqués restants :
 - `node scripts/p37/review/real-page-terms.mjs <origin> scripts\audit\results\arabe-corpus\pdfs\wb-ok-content.pdf "zzqq"` : « No match found » avec la phrase « part of the text cannot be read » et la liste des pages.
 - `node scripts/p37/review/real-page-terms.mjs <origin> scripts\audit\results\arabe-corpus\pdfs\emro-rc67.pdf "2020"` : plus d'erreur « Expected instance… ».
 - Puis les commandes des §8 à §12.
+
+## 14. Relecture n° 7 (b3b44dcb : GO avec conditions) — S1, terme encore visible sur une page noircie
+
+### Défaut
+Un terme manqué par la passe 1, sur une page noircie pour un AUTRE terme, restait lisible sur l'image. Exemple : ar5\s-wrap.pdf, « مارس » et « شهر / أبريل » coupé en fin de ligne, sur la même page. Le contrôle final ne lisait plus que la couche invisible filtrée de cette page : il ne voyait rien, et le fichier était livré.
+
+### Correction (comme proposé)
+- `visibleTermLeft(glyphs, quads, terms)` (`app/lib/pdfRedact.js`) part des glyphes ORIGINAUX de chaque page noircie (ceux de la passe 1, sinon relus). Il retire ceux dont le centre est sous une boîte noire, puis cherche les termes dans le reste, dans l'ordre du dessin (`glyphTermMatches`) et dans l'ordre de lecture reconstruit (`readingOrderHit`).
+- S'il reste un terme, le fichier est **refusé**, et aucune boîte n'est ajoutée à l'aveugle. Message : « a term can still be read on page N (written in a way the search could not place, for example a phrase split across two lines, or a Latin word inside Arabic text). No file is given. »
+- Si les glyphes d'une page noircie ne peuvent pas être lus, refus aussi (côté sûr).
+- Ce contrôle se fait page par page en passe 2, donc avant l'enregistrement, avant le contrôle final et avant tout retrait de couche invisible. La page et le banc Node font la même chose.
+
+### Tests (`scripts/p37/redact-review7.test.mjs`)
+| Fixture (« مارس » + le terme, même page) | Avant (copie de b3b44dcb) | Après |
+|---|---|---|
+| ar5\s-wrap.pdf « شهر أبريل » (Chromium, coupé) | **ok, terme visible** (fuite) | REFUSED « can still be read on page 1 » |
+| ar5\s-latin.pdf « شركة Microsoft » (Chromium) | REFUSED, mais par la couche invisible (« still drawn », fragile) | REFUSED par le contrôle des glyphes visibles |
+| ar3\s-lowrap.pdf, ar3\s-lolatin.pdf (LibreOffice) | ok, terme absent | ok, terme absent |
+
+### Faux refus
+- `review/corpus-words.mjs` (le compte du relecteur, pages copiées) : **0** sur les 37 PDF arabes et **0** sur les 24 PDF p27.
+- Nouveau `scripts/p37/corpus-visible.mjs`. Il compte les refus du nouveau contrôle sur les pages noircies : chaque mot lu par pdftotext et trouvé par la passe 1 est noirci, puis on regarde ce qui reste visible.
+  - 37 PDF arabes : 1 205 mots, 3 refus. 24 PDF p27 : 424 mots, 0 refus.
+  - Les 3 refus sont de **vraies** fuites évitées, pas de faux refus : emro-rc67 p3 « لمنظمة », who-a65div4 p1 « الصحة » et « العمل » (avec tatweel). Dans chaque cas, le mot entier est encore lisible, dans une ligne où la passe 1 n'a mis aucune boîte (« المكتب الإقليمي لمنظمة الصحة العالمية », « جمعية الصحة العالمية »). Le texte de PDF.js ne le trouvait pas à cet endroit. Avant, ces fichiers étaient livrés avec le mot visible.
+- Autres PDF ordinaires (kit iPhone, PDF difficile de P33, fixture de géométrie, wiki-ar-oman « ريال », emro-rc67 « 2020 ») : toujours ok.
+
+### Relances, toutes sans fuite
+- `redact-review-fixes`, `redact-review2`, `redact-review6`, `redact-review7` : tout PASS. box-fit 15/15 ; fit-adversarial 19/19 ; ocr-scan 4/4 et ocr-variants 2/2 à 100 % ; arabe 4/4.
+- 32 pièges avec OCR : 32 ok (seul signal : r2/g5, connu).
+- review-traps 5/5 ; traps-r2 3/3 ; traps-r3 2 ok + 1 nomatch ; traps-r4 4 ok + 1 nomatch ; traps-r5 3 ok + 3 refusés ; 10 PDF arabes : 9 ok + 1 nomatch.
+- Navigateur (code de la page) : Chromium et WebKit tout PASS. content-verify 0, instructions 0, privacy-claims 0, ESLint 0 erreur.
+
+### Risque restant
+- Le contrôle refuse le fichier au lieu de noircir ce qu'il trouve. Ajouter des boîtes demanderait de placer les glyphes restants et de vérifier de nouveau (même chantier que L2/L4 complets, estimé au §12).
+- Un mot formé par l'ordre de lecture reconstruit à cheval sur deux lignes d'un seul morceau (règle du §13) peut faire refuser à tort. Aucun cas dans les corpus.
+
+### Commandes pour le contrôleur (après rebuild)
+- `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar5\s-wrap.pdf "مارس|شهر أبريل"` (puis `--browser=webkit`) : attendu refusé, « can still be read on page 1 ».
+- `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar5\s-latin.pdf "مارس|شركة Microsoft"` : refusé.
+- `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar3\s-lowrap.pdf "مارس|شركة Microsoft"` et `s-lolatin.pdf` : livrés, termes absents.
+- Puis les commandes des §8 à §13.

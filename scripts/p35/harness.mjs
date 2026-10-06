@@ -20,7 +20,7 @@ const lib = await import(from('node_modules/pdf-lib/cjs/index.js')).then((m) => 
 const pdfjsLib = await import(from('node_modules/pdfjs-dist/legacy/build/pdf.mjs'));
 if (typeof globalThis.regeneratorRuntime === 'undefined') globalThis.regeneratorRuntime = (await import(from('node_modules/regenerator-runtime/runtime.js'))).default || globalThis.regeneratorRuntime;
 const fontkit = await import(from('node_modules/@pdf-lib/fontkit/dist/fontkit.umd.js')).then((m) => m.default || m);
-const { matchSpans, annotationText, patternSpans, annotationMatches, redactionQuads, textLayerWords, drawInvisibleWords, pageGlyphs, glyphTermMatches, confirmedTermSpans, readingOrderHit, unreadableShare, UNREADABLE_SHARE, removeInvisibleWords, itemGeometry, glyphTermQuads, invisibleTextFont, hasArabic } = await import(from('app/lib/pdfRedact.js'));
+const { matchSpans, annotationText, patternSpans, annotationMatches, redactionQuads, textLayerWords, drawInvisibleWords, pageGlyphs, glyphTermMatches, confirmedTermSpans, readingOrderHit, unreadableShare, UNREADABLE_SHARE, removeInvisibleWords, visibleTermLeft, itemGeometry, glyphTermQuads, invisibleTextFont, hasArabic } = await import(from('app/lib/pdfRedact.js'));
 const { sanitizeForCopy, verifyRedacted, UNREADABLE_ANNOTATIONS } = await import(from('app/lib/redactSanitize.js'));
 const { withActualTextUnicode } = await import(from('app/lib/pdfActualText.js'));
 const SFD = path.join(ROOT, 'node_modules/pdfjs-dist/standard_fonts/').replace(/\\/g, '/');
@@ -97,6 +97,7 @@ export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
   const kept = {}, quadsOf = {}, exact = { spans: 0, placed: 0 }, layer = {};
   let arabicFont = null;
   const layered = new Map();
+  const stillVisible = [];
   for (let i = 0; i < pdf.numPages; i++) {
     const hit = found.get(i);
     if (!hit) { const [c] = await outDoc.copyPages(srcDoc, [i]); outDoc.addPage(c); continue; }
@@ -107,6 +108,8 @@ export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
     const geometry = geo && geo.geometry;
     // the black boxes: the matched characters of the text runs, plus the terms found in the glyphs drawn (P37)
     const quads = [...redactionQuads(items, content.styles, spans, boxes.map((an) => an.rect), measureOf, geometry, 0.5), ...(geo ? glyphTermQuads(geo.glyphs, terms, geo.inkOf, 0.5) : [])];
+    // as the page (seventh review S1): a term still visible outside the boxes of a blacked-out page → refused
+    if (terms.length) { let g = geo && geo.glyphs; if (!g) { try { g = await pageGlyphs(page, pdfjsLib); } catch { g = null; } } if (!g || visibleTermLeft(g, quads, terms)) stillVisible.push(i + 1); }
     exact.spans += spans.length;
     exact.placed += spans.filter((sp) => geometry && geometry[sp.k]).length;
     quadsOf[i + 1] = quads;
@@ -120,6 +123,7 @@ export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
     if (page.rotate) p.setRotation(lib.degrees(page.rotate));
   }
   if (arabicFont) await arabicFont.finalize();
+  if (stillVisible.length) return { status: 'REFUSED', reason: `a term can still be read on page ${stillVisible.join(', ')}`, stillVisible, unreadable, hits: [...found.keys()].map((i) => i + 1), quads: quadsOf, pages: pdf.numPages, removed, bytes: await outDoc.save() };
   let bytes = await outDoc.save();
   const verify = (b) => verifyRedacted(b, { terms, textMatches, annotMatches: (t) => annotationMatches(t, terms, kinds), annotText: annotationText, pdfjsLib: { getDocument: (o) => pdfjsLib.getDocument({ ...o, standardFontDataUrl: SFD, verbosity: 0 }) }, lib, pageCount: pdf.numPages, glyphHit: terms.length ? async (pg) => { const g = await glyphsOf(pg); if (!g) throw new Error('the glyphs of a page could not be read'); return glyphTermMatches(g, terms).length > 0 || readingOrderHit(g, terms); } : null });
   let check = await verify(bytes);
