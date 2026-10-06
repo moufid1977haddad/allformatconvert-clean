@@ -69,7 +69,7 @@ export default function AIDetectorPage() {
               </p>
             </div>
           )}
-          {result && <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2" data-caveat>No AI detector can prove who wrote a text. This one uses Pangram&apos;s detection model, which in an independent study (University of Chicago, 2025) called essentially no human text AI and recognised 96–98 % of AI texts — in English; results on other languages and on texts edited after an AI wrote them are less certain. Do not use it alone to accuse anyone.</p>}
+          {result && <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2" data-caveat>No AI detector can prove who wrote a text. This one uses Pangram&apos;s detection model, which in an independent study (University of Chicago, 2025) called essentially no human text AI and recognized 96–98 % of AI texts — in English; results on other languages and on texts edited after an AI wrote them are less certain. Do not use it alone to accuse anyone.</p>}
         </div>
       </div>
       <SeoContent
@@ -93,7 +93,7 @@ export default function AIDetectorPage() {
         privacyTitle="Where your text is analyzed"
         privacy="Your text is sent to our server and then to Pangram's detection API, which returns the verdict. We do not save the text. To apply the daily allowance and the budget, our database counts the words billed per visitor, under a hashed IP address, and the cost of each analysis. What Pangram keeps is governed by its own terms."
         faqs={[
-          { q: "How accurate is this AI detector?", a: "No detector is certain. In an independent 2025 study by the University of Chicago, Pangram's detector called almost no human text AI and recognised 96–98 % of texts written by recent models, in English. Results in other languages and on AI drafts edited by a person are less certain." },
+          { q: "How accurate is this AI detector?", a: "No detector is certain. In an independent 2025 study by the University of Chicago, Pangram's detector called almost no human text AI and recognized 96–98 % of texts written by recent models, in English. Results in other languages and on AI drafts edited by a person are less certain." },
           { q: "Why is there a minimum and a maximum length?", a: `${AI_DETECT_MIN_WORDS} words is the shortest text the page sends: below it, there is too little writing to judge. ${AI_DETECT_MAX_WORDS.toLocaleString('en-US')} words is the longest per analysis, so split a long essay into parts and compare the verdicts of each part.` },
           { q: "Can the word count be higher than my word processor's?", a: "Yes, on purpose. To never count fewer words than Pangram bills, the page keeps the highest of three counts, so hyphenated or very long words weigh more. Each analysis is then rounded up to the next hundred words of your daily allowance." },
           { q: "Can a text be judged both AI and human?", a: "Yes. A mixed verdict means Pangram found parts that read as AI-written and parts that read as human or AI-assisted. Look at the three percentages to see how the text splits; a mix is common when a person edits an AI draft." }

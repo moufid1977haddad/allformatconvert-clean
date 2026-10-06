@@ -215,3 +215,70 @@ Mesures, toutes conformes : titres 50-58 caractères, métas 130-153, About 88-1
 
 - Pages **sans aucun défaut** : **developer-tools/url-parser** et **text-tools/url-encoder**.
 - math-tools/number-base-converter n'a qu'un défaut : R11, partagé avec son jumeau.
+
+## Troisième passe (2026-10-06)
+
+### Pages relues
+
+J'ai relu en entier, texte et chaînes d'interface, les 11 pages touchées :
+- unicode-converter, html-entity-decoder, html-encoder, hex-to-text, hash-generator, jwt-decoder ;
+- base64-encoder, url-encoder et number-base-converter (dev) ;
+- base64-encoder (file-tools) et number-base-converter (math).
+
+### Corrections vérifiées
+
+- **R1-R7** : chaque privacy cite maintenant le refus de copie, sans « only ». Le contenu du rapport annoncé (message, nom de
+  l'outil, nom et version du navigateur) correspond à `reportError.js` et `ToolErrorWatch.jsx:27-36`.
+- **R8** : « (a cancel excepted) » correspond à `NOT_AN_ERROR` (`useToolError.js:17,25`).
+- **R9** : la note JWT dit maintenant « not sent to our servers » (`jwt-decoder/page.jsx:81`).
+- **R10** : l'étape 4 dit maintenant « Click "Copy" and paste… ».
+- **R11** : la nouvelle FAQ dev « Can I get FFFFFFFF for -1? » est vérifiée avec le code de l'outil : 4294967295 en base 10 donne
+  FFFFFFFF. Elle ne recoupe plus la question de la page math.
+- **R12-R14** : réécritures exactes ; les deux About disent maintenant où se fait le calcul.
+- **Méta Base64 (dev)** : 136 caractères, openGraph identique.
+
+### Contrôles
+
+- **Exemples** : réexécutés en Node, ils restent exacts (Base64, Hex, HTML, Unicode, base 16).
+- **Structure** : titres 50-58 caractères, métas 130-153, About 88-113 mots, privacy 57-75 mots.
+- **content-verify** : 0 échec sur developer-tools, file-tools et math-tools.
+
+### Défaut restant
+
+| # | Page | Endroit | Phrase (citation courte) | Problème | Preuve | Correction proposée |
+|---|---|---|---|---|---|---|
+| T1 | developer-tools/unicode-converter ↔ developer-tools/html-entity-decoder | privacy (dernière phrase) | « if the page fails, for instance when the browser refuses a copy, we receive the error, the tool's name and your browser's name and version, never the text you pasted » / « If the page fails, for instance when the browser refuses a copy, we receive the error, the tool's name and your browser's name and version, without your text. » | **B — Quasi identique (5)** : les deux phrases ne diffèrent que par la fin, sur deux pages voisines. Elles reprennent toutes deux la formulation que j'avais proposée pour R1 et R2. | `unicode-converter/page.jsx:51`, `html-entity-decoder/page.jsx:54` | Reformuler l'une des deux, en gardant les mêmes faits. Exemple pour le décodeur : « A copy the browser refuses, or any other failure of the page, reaches us as an error report: the error, the tool's name, your browser's name and version, never your text. » |
+
+### Totaux de la troisième passe
+
+| | |
+|---|---|
+| Pages relues | 11 |
+| Défaut restant | 1 : point 5 (T1), gravité B |
+| Pages sans défaut | toutes les autres pages de la liste ; seules unicode-converter et html-entity-decoder portent T1 |
+
+## Quatrième passe (2026-10-06)
+
+J'ai relu la privacy de HTML Entity Decoder (`html-entity-decoder/page.jsx:54`) et je l'ai comparée à celle de Unicode
+Converter (`unicode-converter/page.jsx:51`).
+
+- **T1 est corrigé** : les deux phrases ne se ressemblent plus. Elles n'ont aucun n-gramme de 5 mots en commun hors du nom des
+  données envoyées.
+- **Un défaut reste**, introduit par la nouvelle formulation : la phrase ne nomme pas le message d'erreur, qui est pourtant envoyé.
+
+| # | Page | Endroit | Phrase (citation courte) | Problème | Preuve | Correction proposée |
+|---|---|---|---|---|---|---|
+| Q1 | developer-tools/html-entity-decoder | privacy (dernière phrase) | « sends us an error report naming this tool and your browser with its version; the entities you pasted are not part of it » | **B — Incomplet (3)**. Le rapport contient aussi le message d'erreur, nettoyé (`errorMessage`), et le type d'erreur (`errorType`). La phrase n'en dit rien, alors que la règle « Rapports d'erreur » demande de nommer le message. De plus, « the entities you pasted » est plus étroit que la vérité : aucune partie du texte collé n'est envoyée. | `app/tools/ToolErrorWatch.jsx:27-34` (`reportToolError({ tool, error, errorType })`) ; `app/lib/reportError.js:138-147` (payload : `tool`, `errorType`, `errorMessage: sanitizeErrorMessage(…)`, `browser`) | « A crash of this page, a blocked clipboard included, sends us an error report with the cleaned error message, this tool's name and your browser with its version; nothing you pasted is part of it. » |
+
+**Totaux de la quatrième passe** : 1 page relue, 1 défaut (point 3, gravité B). Les 12 autres pages restent sans défaut.
+
+## Cinquième passe (2026-10-06)
+
+J'ai relu la privacy de HTML Entity Decoder (`html-entity-decoder/page.jsx:54`). La phrase finale est désormais :
+« A crash of this page, a blocked clipboard included, sends us an error report with the cleaned error message, this tool's
+name and your browser with its version; nothing you pasted is part of it. »
+
+Elle correspond au rapport réellement envoyé (`ToolErrorWatch.jsx:27-34` ; `reportError.js:138-147`). Elle ne ressemble
+plus à la phrase de Unicode Converter. Q1 est donc corrigé.
+
+**0 défaut.** Les 13 pages de la liste sont sans défaut.

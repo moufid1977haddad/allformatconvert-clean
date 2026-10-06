@@ -78,7 +78,7 @@ export default function JwtDecoderPage() {
               : verdict.valid
                 ? <p className="text-sm text-green-700 font-semibold" data-verdict="valid">Signature verified ({verdict.alg}): this token was signed with this key and has not been changed{verdict.note ? ` (${verdict.note})` : ''}. Check exp / nbf in the decoded payload as well.</p>
                 : <p role="alert" className="text-sm text-red-600 font-semibold" data-verdict="invalid">Invalid signature ({verdict.alg}){verdict.reason ? `: ${verdict.reason}` : ''} {verdict.reason ? '.' : ' — the token was changed, or signed with another key.'} Do not trust it.</p>)}
-            <p className="text-xs text-neutral-500">Checked in your browser with WebCrypto; the key and the token are not sent anywhere. HS256/384/512, RS256/384/512, PS256/384/512, ES256/384/512 and EdDSA (Ed25519, in browsers that support it).</p>
+            <p className="text-xs text-neutral-500">Checked in your browser with WebCrypto; the key and the token are not sent to our servers. HS256/384/512, RS256/384/512, PS256/384/512, ES256/384/512 and EdDSA (Ed25519, in browsers that support it).</p>
           </div>
           {decoded && ['header','payload'].map(k => <div key={k} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4"><div className="text-neutral-500 text-sm mb-2 uppercase">{k}</div><pre className="font-mono text-sm text-indigo-400 overflow-x-auto">{decoded[k]}</pre>{k === 'payload' && decoded.times.length > 0 && <ul className="mt-2 text-sm text-neutral-600">{decoded.times.map(t => <li key={t}>{t}</li>)}</ul>}</div>)}
         </div>

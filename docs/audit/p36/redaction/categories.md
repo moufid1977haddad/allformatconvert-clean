@@ -132,3 +132,124 @@ réencodage (MP4/MOV/M4V/3GP/3G2), Screen Recorder indisponible sur iPhone/iPad.
 - `app/tools/image-tools/layout.tsx` a maintenant des fins de ligne LF dans la copie de travail (index en LF, Git les
   normalise ; aucun effet sur le contenu).
 - Non vérifié dans le code : capacité des formats Whisper (renvoyé à OpenAI), durée max du service média (variable).
+
+## Corrections après relecture (06/10)
+
+Relecture : `docs/audit/p36/relecture/categories.md` (78 défauts). Les 78 sont traités ; chacun a été revérifié dans le code
+avant correction. Mêmes fichiers autorisés ; seules des chaînes changent (arbre syntaxique des 12 `page.jsx` identique à
+`HEAD` une fois les textes neutralisés ; `parseDiagnostics` = 0 sur les 24 fichiers).
+
+Contrôles : `privacy-claims.mjs` 0 failure ; `instructions.mjs` 0 mismatch (225 pages, 1 763 libellés) ; FAQ toutes entre
+25 et 70 mots, aucune réponse ouvrant par « Because / It depends / Once » ; aucune phrase commune à deux pages de catégorie
+(hors « Yes. » / « No. ») ; titres ≤ 60, descriptions 110-155 (vidéo : 143), openGraph identiques.
+
+Chiffres : `docs/audit/p36/preuves/categories.json` (83 preuves, clé `/tools/<catégorie>`), vérifiées par script : chaque
+`pattern` trouve sa valeur dans `file` ET chaque `claim` figure mot pour mot dans la page ou le layout de la catégorie.
+Les décomptes sans unité ont été vérifiés en exécutant le code : 14 formats de l'Audio Merger
+(`app/lib/audioMerge.js` `MERGE_FORMATS`), 37 types de codes-barres (`barcode-generator/symbologies.js` `ALL.length`),
+102 langues OCR (`lib/ocrLanguageCodes.js` `LANGUAGES.length`), 16 / 11 / 39 / 37 / 15 cartes (pages de catégorie).
+
+Par page (résumé de ce qui a changé) :
+- **ai-tools (5)** : condition complète de l'Upscaler sur l'appareil (WebGPU, pas de transparence, résultat qui tient en
+  mémoire, sinon ou au choix : serveur) ; FAQ 2 réécrite (« We keep no text », fichiers du service média supprimés à la
+  livraison ou à l'expiration) ; 2 000 mots/jour « each analysis rounded up to the next 100 words » (`lib/ai/pangram.js:56-58`) ;
+  carte Data Extractor « structured data, as JSON or a table » (`lib/ai/toolPrompts.js:33-35`) ; étape 3 propre aux outils
+  (AI Writer/Chatbot, verdict d'AI Detector) ; « when to try again » retiré (message horaire « try again later »).
+- **audio-tools (8)** : passage par le service média au-delà de 4 MB pour Audio to Text (About + FAQ) ; question de taille
+  renommée et plafond de 2 GB de la copie nettoyée d'Audio Metadata (`MetadataStripper.jsx`) ; conseil Compressor « when
+  ffmpeg can read it » (`audio-compressor/page.jsx:60-61`) ; moteur ffmpeg.wasm « unless your browser has it cached » ;
+  étapes 3-4 propres à l'audio (Splitter, Merger ; Equalizer WAV, Waveform PNG) ; FAQ « No, except in two cases ».
+- **converter-tools (3)** : « up to 20 popular currencies » ; « Click Copy in Color Converter, select the result in the
+  other converters » ; 8 devises sans historique datées « when we checked on October 3, 2026 » ; FAQ taux ouverte par
+  « Daily: ».
+- **developer-tools (7)** : deux exceptions (API Tester ; images liées chargées par Markdown Previewer/Editor,
+  `markdown-previewer/page.jsx:60`) dans About et FAQ ; rapports d'erreur : message affiché OU plantage, nom de l'outil,
+  nom et version du navigateur ; FAQ CORS sans « Because » ni Postman/curl ; cartes SCSS to CSS et TypeScript to JS
+  distinctes du sous-titre. **Relecteur en partie inexact** : il proposait « SCSS or indented Sass » ; la page ne passe
+  que `style` (`scss-to-css/page.jsx:14`) et dit que la syntaxe indentée n'est pas acceptée (`scss-to-css/page.jsx:36`) :
+  carte « SCSS to expanded or compressed CSS ».
+- **file-tools (2)** : FAQ de taille exacte (5 GB et 1 000 parties ; 700/100 MB ; 1,9 GB/300 MB ; File Metadata 300 MB
+  `app/lib/embeddedMetadata.js:4` ; seuls File Encryptor, File Converter et TAR Extractor chargent tout le fichier) ;
+  étape 4 propre (ZIP de ZIP/TAR Extractor, dossier dans Chrome/Edge) ; le conseil « dossier » devenu un conseil File
+  Splitter (contrôle des parties).
+- **gif-tools (9)** : cinq cartes vidéo→GIF différenciées (60 s une seule fois) ; GIF Maker sans « crop par image »
+  (`gif-maker/page.jsx:14, 149` : un seul réglage d'ajustement) ; toute la vidéo est envoyée, le serveur coupe ; « our own
+  media service (ffmpeg on Railway), not an outside conversion company » ; « says when the hourly or daily limit is
+  reached » (`app/api/media/ticket/route.js:38-41`) ; FAQ taille sans « Because », « no motion prediction » ; conseils 1 et
+  4 réécrits (gifsicle dans le navigateur ; Image to GIF dimensionné par la 1re image).
+- **image-tools (13)** : Image Captioner nommé (OpenAI) dans About et FAQ ; Upscaler « unless it runs on your device » ;
+  métadonnées : lecture JPG/HEIC/TIFF/PNG/AVIF, suppression JPG et PNG seulement, WebP non lu
+  (`image-metadata/page.jsx:97, 117`) ; conseil HEIC → JPG d'abord ; Image Comparison prend deux images ; ZIP aussi pour
+  Image Compressor ; carte Compressor avec ses formats ; About « works on the image… canvas API, WebGL or WebAssembly » ;
+  étape 3 propre ; phrase de remplissage supprimée ; cartes Flip/HEIC to JPG/HEIC to PNG distinctes des sous-titres.
+- **math-tools (4)** : 40 chiffres « when a fraction never ends » ; conseil Fraction Calculator avec la case du nombre
+  entier, numérateur et dénominateur séparés (`fraction-calculator/page.jsx:25, 46`) ; FAQ 3999 sans « Because » ;
+  « a change of 50% ».
+- **pdf-tools (9)** : FAQ 2 réécrite (≤ 70 mots) : EPUB/MOBI/Markdown envoient du HTML construit sur la page, Translate
+  texte nommé, repli iPhone/iPad = le PDF entier ; FAQ 1 : traduction texte dans l'allocation partagée, comptes propres
+  (traduction PDF entier, HTML depuis une adresse, replis iPhone/iPad), service média au-delà de 4 MB ; cartes PDF Editor
+  (stylo et surligneur, pas d'annotations PDF) et Redact (e-mails, téléphones, cartes, `app/lib/pdfRedact.js:56-62`) ;
+  étapes 2 et 3 propres au PDF (syntaxe « 1, 3, 5-7 », « 3, 1, 2 ») ; Google Cloud Translation « when offered ».
+- **qr-barcodes-tools (3)** : « 5,000 per ZIP or per PDF of label sheets » (`config.js:2 MAX_BATCH`, `labels.js:24
+  MAX_LABELS`) ; dernière phrase de l'About : bibliothèques qrcode, bwip-js, zxing-wasm, jsQR (imports vérifiés) ; caméra
+  « decodes with jsQR, which reads QR codes alone » ; FAQ suivi des scans allongée à 25 mots minimum.
+- **text-tools (3)** : conseil « Ignore surrounding spaces » (`duplicate-remover/page.jsx:33`) ; réserve Safari 7 jours
+  (`sticky-notes/page.jsx`) ; rapports d'erreur (message ou plantage, outil, navigateur, jamais le texte).
+- **video-tools (11)** : carte Screen Recorder « sound in Chrome and Edge » ; méta réécrite (« some upload to our media
+  service, the others work in your browser », 143 car.) ; étape 2 : 1 GB pour Compressor, Converter, Filter, Resizer,
+  Rotator, Video to GIF ; étape 3 propre (« Compatible everywhere » / « Instant, lossless », « Precise cut ») ; FAQ 1 :
+  Rotator obligatoire en « Compatible everywhere » pour les miroirs et les formats hors MP4/MOV/M4V/3GP/3G2
+  (`video-rotator/page.jsx:62-63`), Merger « unless all clips can be copied as they are » (`video-merger/page.jsx:25-38`),
+  Trimmer « Precise cut estimated at over 45 seconds locally » (`video-trimmer/page.jsx:23-29`) ; FAQ 3 et 4 précisées
+  (copie impossible ; réglage de rotation réécrivable) ; conseils : 150 images PNG de Video to GIF, conditions exactes de
+  copie du Merger.
+- **Les 12 pages, chiffres** : preuves ajoutées (ci-dessus) ; « 4 MB » retiré de la FAQ IA lors du raccourcissement.
+
+Mots visibles des `page.jsx` (première version → après corrections) : ai 711 → 733, audio 629 → 676, converter 480 → 496,
+developer 1 026 → 1 042, file 548 → 568, gif 583 → 600, image 758 → 824, math 438 → 452, pdf 946 → 945, qr 441 → 477,
+text 563 → 576, video 654 → 691.
+
+## Corrections après deuxième passe (06/10)
+
+Les 16 défauts de la section « Deuxième passe » de `docs/audit/p36/relecture/categories.md` sont corrigés, chacun revérifié
+dans le code :
+- **ai-tools** : fin de la FAQ 1 « Each tool says when a limit is reached. » (phrase unique sur le site).
+- **audio-tools** : la FAQ « Is my audio uploaded? » nomme le service vocal du navigateur en mode micro (« Google's in
+  Chrome »).
+- **gif-tools** : conseil gifsicle conditionné au choix d'un nombre de boucles ou d'une compression
+  (`GifFromVideoTool.jsx:24-25`) ; carte MOV to GIF distincte du sous-titre de l'outil.
+- **image-tools** : conseil HEIC to JPG (le JPG ne recopie ni EXIF ni GPS, `heic-to-jpg/page.jsx:98`) ; Background
+  Remover « a JPEG copy of at most 1,024 px » (`background-remover/page.jsx:21, 37`) ; « 25, 50 or 75% ».
+- **video-tools** : Screen Recorder envoie seulement pour « Make an MP4 » (WebM, Firefox ; MP4 natif ailleurs,
+  `screen-recorder/page.jsx:11-17`) ; Trimmer envoie seulement le morceau autour d'une « Precise cut » estimée à plus de
+  45 s ; Rotator : « required for mirrors and for formats without a rotation setting » ; conditions de copie du Merger
+  complètes (codec unique, profil, format du son, `video-merger/page.jsx:37-39`) ; « 1 GB » limité à Compressor,
+  Converter, Filter, Resizer, Rotator et Video to GIF.
+- **pdf-tools** : Text to PDF ajouté (About et FAQ 2 : texte qui demande une police absente → Chromium,
+  `text-to-pdf/page.jsx:53`) ; FAQ 1 « Yes, for some server tools », fichiers ≤ 4 MB envoyés à LibreOffice, Chromium ou
+  pdf-tools non comptés (`app/api/convert-to-pdf/route.ts:195-207`) ; Redact « keeps most of the other words searchable »
+  (`pdf-redact/page.jsx:315`) ; carte Translate PDF « when offered ».
+- **file-tools** : Base64 Encoder ajouté aux outils qui chargent tout le fichier (`base64-encoder/page.jsx:49`).
+
+FAQ ramenées à 70 mots ou moins (ai, audio, file, pdf, video). Preuves : 84 (claim « 25, 50 or 75% » mis à jour, « 1,024 px »
+ajouté pour image-tools), 0 problème au script de vérification. `privacy-claims.mjs` 0 failure, `instructions.mjs`
+0 mismatch, `parseDiagnostics` 0, structure des `page.jsx` identique à `HEAD`. Mots des `page.jsx` (première version →
+maintenant) : audio 629 → 681, gif 583 → 603, image 758 → 837, pdf 946 → 965, video 654 → 699, autres inchangés depuis la
+correction précédente.
+
+## Corrections après troisième passe (06/10)
+
+Les 4 défauts de la section « Troisième passe » sont corrigés :
+- **pdf-tools, About** : la liste des opérations du navigateur est retirée ; 113 mots (≤ 120).
+- **pdf-tools, FAQ 2** : la dernière phrase nomme les quatre outils, ce qui part et où : « On iPhone and iPad, OCR, Redact,
+  PDF to Image and PDF to JPG may send the whole PDF to our pdf-tools service. » (`app/lib/serverPageRender.js:58-59`,
+  `app/lib/serverPageOcr.js:63, 82`). La première liste est raccourcie (« the Office and HTML converters », « Merge PDF's
+  Office files ») ; la réponse fait 70 mots.
+- **pdf-tools, FAQ 1** : « Other files of 4 MB or less sent to our LibreOffice, Chromium or pdf-tools service are not
+  counted. » La phrase ne contredit plus les cas comptés nommés juste avant (adresse web : `lib/quota/urlPdfRateLimit.js` ;
+  replis iPhone/iPad : `app/api/pdf-render`, `app/api/pdf-ocr`). 68 mots.
+- **video-tools, conseil Merger** : la liste ajoute le format de pixels et l'en-tête de codec
+  (`video-merger/page.jsx:37-39` : `pix_fmt`, `extradata_hash || extradata_size`).
+
+Contrôles : `privacy-claims.mjs` 0 failure ; `instructions.mjs` 0 mismatch ; `parseDiagnostics` 0 sur les 24 fichiers ;
+structure des 12 `page.jsx` identique à `HEAD` ; preuves inchangées (84), script de vérification 0 problème.

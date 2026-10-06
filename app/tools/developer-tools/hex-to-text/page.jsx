@@ -50,7 +50,7 @@ export default function HexToTextPage() {
           { label: "Text encoding", value: "UTF-8 only, in both directions" }
         ]}
         privacyTitle={"Where your text is processed"}
-        privacy={"Both directions use your browser's TextEncoder and TextDecoder inside this page, so neither the hex nor the text leaves your computer. When the tool shows an error, such as an odd number of digits, we receive that message, the tool's name and your browser's name and version, without what you pasted."}
+        privacy={"Both directions use your browser's TextEncoder and TextDecoder inside this page, so neither the hex nor the text leaves your computer. When the tool shows an error, such as an odd number of digits, or the browser refuses a copy, we receive that message, the tool's name and your browser's name and version, without what you pasted."}
         faqs={[
           { q: "Is é written as two bytes?", a: "Yes: c3 a9, because the tool writes UTF-8 bytes. e9 is the Latin-1 code for é; pasting e9 alone into Hex to Text gives an error, since that single byte is not valid UTF-8." },
           { q: "What hex formats can I paste?", a: "Any pairs of hex digits: 48656c6c6f, 48 65 6c 6c 6f, 48:65:6c, 0x48,0x65 or \\x48\\x65. Upper and lower case both work, and separators are removed before decoding, so mixing them is fine." },

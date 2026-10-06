@@ -11,7 +11,7 @@ import { useToolError } from '../../../lib/useToolError';
 // came out squashed). Now, as on ezgif (read 26/09/2026: crop to a common size, alignment, reordering), each frame
 // is fitted inside the output with a background colour (default), cropped to fill it, or stretched on request; the
 // output size and the order of frames can be chosen, and the loop count set.
-const FITS = [['fit', 'Fit (keep proportions, add background)'], ['fill', 'Crop to fill (keep proportions)'], ['stretch', 'Stretch (old behaviour)']];
+const FITS = [['fit', 'Fit (keep proportions, add background)'], ['fill', 'Crop to fill (keep proportions)'], ['stretch', 'Stretch (old behavior)']];
 const MAX_SIDE = 1920; // ezgif's limit too
 
 // Where an image of w x h goes inside W x H.
@@ -198,7 +198,7 @@ export default function GifMakerPage() {
         privacy="Your pictures are read and the GIF is encoded with gifenc on this page; nothing you add is uploaded. A failure shown on the page reaches our error log as a cleaned message with the tool and browser names; your pictures and their names are not included."
         faqs={[
           { q: "Can each frame have its own duration?", a: "Yes. Type a number of milliseconds, from 20 to 10000, under a frame; leave it empty to use \"Frame Delay\". Frames taken from an animated GIF arrive with their original durations filled in; one under 20 ms is replaced by \"Frame Delay\"." },
-          { q: "Can I mix portrait and landscape pictures?", a: "Yes. \"Fit (keep proportions, add background)\" places each one inside the GIF on the background color, \"Crop to fill (keep proportions)\" fills the frame and cuts the edges, and \"Stretch (old behaviour)\" distorts the picture to fit." },
+          { q: "Can I mix portrait and landscape pictures?", a: "Yes. \"Fit (keep proportions, add background)\" places each one inside the GIF on the background color, \"Crop to fill (keep proportions)\" fills the frame and cuts the edges, and \"Stretch (old behavior)\" distorts the picture to fit." },
           { q: "Will transparent PNGs stay transparent?", a: "No. Every frame is painted on the background color first, white unless you change it, so transparent areas take that color. Image to GIF keeps 1-bit transparency if you need it." },
           { q: "Can I choose the size of the GIF?", a: `Yes. \"Largest width and height (no frame shrunk)\" is the default, \"Same as the first image\" uses the size of the first picture, and \"Custom…\" lets you type both sides. A side above ${MAX_SIDE} px is scaled down.` },
           { q: "Can I add an animated GIF?", a: "Yes. Its frames are added in order, up to 300 per GIF, each with its own duration (under 20 ms, \"Frame Delay\" applies), and a note under the button says how many were added." }

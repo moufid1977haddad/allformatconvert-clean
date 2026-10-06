@@ -131,3 +131,9 @@ Les 12 défauts de la section « Deuxième passe » de `relecture/audio.md` sont
 - `audio-booster/page.jsx:98`, libellé de case : « Normalize instead (even loudness at -16 LUFS, the podcast and streaming standard) » → « Normalize instead (even loudness at -16 LUFS) ». Le contrôleur l'a autorisé ; la logique est inchangée. Les textes de la page qui citent ce libellé ne le citent que par « Normalize instead », qui reste exact.
 
 Les trois contrôles ont été relancés après ces modifications (résultat dans le message final).
+
+## Corrections après troisième passe (06/10)
+
+- Audio Booster, FAQ 5 : la phrase partagée avec Compressor, « That service limits jobs per connection per hour and per day. », est remplacée par « Each Opus boost counts as one job in your connection's hourly and daily allowance there. »
+- Audio Merger, vie privée : la phrase de rapport d'erreur partagée avec Compressor est remplacée par « Should a merge fail, we receive one report: its cleaned message, the tool, and your browser with its version. » Elle reste fidèle à `app/lib/reportError.js:140-154`. Merger n'envoie ni l'extension ni la taille du fichier : `reportToolError` y est appelé sans `file` (`audio-merger/page.jsx:236`).
+- Après ces deux reformulations, aucune phrase n'est commune à deux pages du lot. Les trois contrôles ont été relancés.

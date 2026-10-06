@@ -198,3 +198,14 @@ Deux phrases nouvelles nommaient l'appareil sans l'envoi : la confidentialité d
 - `content-verify --only=ai-tools/` : 0 défaut (C6 compris) ;
 - `instructions.mjs` : 0 écart ;
 - `privacy-claims.mjs` : 0 défaut.
+
+## Correction après troisième passe (06/10)
+
+Défaut accepté : Background Remover, FAQ 1.
+- **Avant** : « edge pixels take the subject's color so no tint of the old background is left ».
+- **Après** : « edge pixels take the subject's color, which reduces, but does not fully remove, the old background's tint along the edges ».
+- **Preuve** : la teinte de fond restant dans les bords est mesurée à 11,0 % puis 3,9 %, pas à zéro (`background-remover/page.jsx:64-66`).
+- **Contrôles** :
+  - `content-verify --only=ai-tools/` : 0 défaut ;
+  - `instructions.mjs` : 0 écart ;
+  - `privacy-claims.mjs` : 0 défaut.

@@ -12,7 +12,7 @@ export default function NumberBaseConverterDevPage() {
       </div>
       <SeoContent
         title={"Number Base Converter"}
-        description={"This page shows how the converter reads programming notation. Paste a value the way source code writes it, such as 0xFF, 0b1010 or 0o17, with _ digit separators as in 0xFFFF_FFFF, set From Base to match, and read binary, octal, decimal and hexadecimal at once, plus a fifth result for any other base up to 36 that you pick. The arithmetic uses BigInt, so a value like 0xFFFF_FFFF_FFFF_FFFF stays exactly 18446744073709551615 instead of being rounded. A negative value keeps its minus sign; two's complement is not computed. Results update on every keystroke."}
+        description={"This page shows how the converter reads programming notation. Paste a value the way source code writes it, such as 0xFF, 0b1010 or 0o17, with _ digit separators as in 0xFFFF_FFFF, set From Base to match, and read binary, octal, decimal and hexadecimal at once, plus a fifth result for any other base up to 36 that you pick. The arithmetic uses BigInt, so a value like 0xFFFF_FFFF_FFFF_FFFF stays exactly 18446744073709551615 instead of being rounded. A negative value keeps its minus sign; two's complement is not computed. Results update on every keystroke, computed with BigInt arithmetic in this page."}
         example={{
           caption: "The largest unsigned 64-bit value, typed with its prefix and separators, From Base set to Hexadecimal (16):",
           inputLabel: "Value",
@@ -37,7 +37,7 @@ export default function NumberBaseConverterDevPage() {
         privacy={"Conversion happens in this page with exact integer arithmetic run by your browser, so the values you type are not sent to our servers. The results are page text: if you turn on a translation in the language menu, Google receives them. When the clipboard refuses a copy, we receive that error, the tool's name and your browser's name and version, not your value."}
         faqs={[
           { q: "How do I convert hex to binary?", a: "Set From Base to Hexadecimal and type the value, with or without its prefix, as in 0x0F or 0F. The Binary card shows the result at once, without leading zeros: 0x0F gives 1111." },
-          { q: "Does it show two's complement for negative numbers?", a: "No. A negative value is shown with a minus sign in every base, so -1 stays -1 in hex rather than FFFFFFFF. A two's complement pattern needs a fixed width, which this tool does not ask for." },
+          { q: "Can I get FFFFFFFF for -1?", a: "No. The converter writes -1 as -1 in hex, keeping the minus sign in every base, because a bit pattern such as FFFFFFFF depends on a register width that it never asks for. For an eight-digit hex pattern, add 4294967296 (2^32) to the negative value first: -1 then gives FFFFFFFF." },
           { q: "Can it handle values above 2^64?", a: "Yes. It works with BigInt, so 2^64, written 0x1_0000_0000_0000_0000, converts to 18446744073709551616 exactly, and larger values work the same way. A JavaScript Number would round them." },
           { q: "Why do I get Not a number in base 16?", a: "The value has a character outside that base's digits, such as G in hex, or a prefix that belongs to another base, such as 0x10 with Binary selected. Below the field, the alert lists what base 16 allows: 0123456789…F." }
         ]}

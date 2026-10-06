@@ -66,11 +66,11 @@ export default function WebPtoJPGPage() {
       </div>
       <SeoContent
         title="WebP to JPG"
-        description={`WebP to JPG converts a WebP image, often saved from a website, into a JPG for apps and forms that do not accept WebP. Set "JPG quality" from 10 to 100 (92 at first) and choose the colour that replaces transparent areas, white unless you change it. An animated WebP is turned into its first frame, and a note says so as soon as you pick the file. One image per conversion; the JPG keeps the WebP's name. Decoding and encoding happen in your browser, with MozJPEG in WebAssembly for very large images on iPhone and iPad.`}
+        description={`WebP to JPG converts a WebP image, often saved from a website, into a JPG for apps and forms that do not accept WebP. Set "JPG quality" from 10 to 100 (92 at first) and choose the color that replaces transparent areas, white unless you change it. An animated WebP is turned into its first frame, and a note says so as soon as you pick the file. One image per conversion; the JPG keeps the WebP's name. Decoding and encoding happen in your browser, with MozJPEG in WebAssembly for very large images on iPhone and iPad.`}
         howToTitle="How to convert WebP to JPG"
         howTo={[
           `Pick the .webp image you saved; a note appears if it is animated.`,
-          `Adjust "JPG quality" and the colour next to "Transparent areas become".`,
+          `Adjust "JPG quality" and the color next to "Transparent areas become".`,
           `Click "Convert".`,
           `Click "Download" for a JPG named like the WebP.`
         ]}
@@ -83,7 +83,7 @@ export default function WebPtoJPGPage() {
         privacy={`The WebP is opened by your browser and re-encoded as a JPG without leaving the device; we do not receive the image. If an error appears on screen, we log its cleaned wording with the tool's name and your browser's name and version (no file name, no image data) to find and fix the problem.`}
         faqs={[
           { q: "Can I choose the JPG quality?", a: `Yes. The "JPG quality" slider goes from 10 to 100 and starts at 92. Lower values give a smaller file with more visible compression; set it before clicking "Convert", and convert again to try another value.` },
-          { q: "Can I pick the colour of a transparent background?", a: `Yes. Transparent areas are filled with the colour picked next to "Transparent areas become", white by default, because a JPG cannot store transparency. Pick black or any other colour to match where the picture will be used.` },
+          { q: "Can I pick the colour of a transparent background?", a: `Yes. Transparent areas are filled with the color picked next to "Transparent areas become", white by default, because a JPG cannot store transparency. Pick black or any other color to match where the picture will be used.` },
           { q: "Does the JPG keep an animated WebP's motion?", a: `No. Only the first frame is kept, since JPG holds one still picture. The page warns you when the WebP is animated; to keep the motion, convert it to a GIF instead.` }
         ]}
         tips={[

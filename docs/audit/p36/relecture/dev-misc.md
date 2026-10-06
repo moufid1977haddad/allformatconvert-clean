@@ -148,3 +148,18 @@ FileDownload « Download » / « Download all (N files, ZIP) »).
 5 Doublon 2 : T1, T2). T4-T6 sont dans des fichiers partagés (`CronPaste.jsx`, `app/lib/timestamp.js`). Pages sans aucun
 défaut, interface comprise : api-tester, color-picker, diff-viewer, markdown-to-html, password-generator, regex-tester,
 uuid-generator.
+
+## Quatrième passe (06/10/2026)
+
+T1-T6 vérifiés dans le code : sous-titres distincts (cron-expression « Paste a cron expression and read it in plain
+English », builder « Build a cron schedule from presets, field by field », previewer « Paste Markdown and check the HTML it
+produces », aspect-ratio « Simplify a width and height, or find a missing side ») ; plus aucune occurrence de « Build and
+validate », ni de « for any dimensions », et « Write and preview… » ne reste que sur markdown-editor. Note `CronPaste`
+exécutée en Node (`splitCron` extrait du fichier) : 6 et 7 champs donnent la nouvelle note Quartz/Spring + AWS, conforme à
+la ligne « Not read » et à la FAQ 2 de cron-expression ; la ligne crontab et les macros sont inchangées. `app/lib/timestamp.js`
+exécuté : nouveau message de saisie exact (décimales acceptées pour les secondes) ; messages de plage « from year -271821 to
+year 275760 » conformes à `new Date(±8.64e15)` et à la ligne « Date range » ; le diff ne touche que ces chaînes, aucune
+logique. `content-verify --only=developer-tools/` : aucun échec sur mes 13 pages (le seul échec, C3, concerne
+number-base-converter, hors lot).
+
+**0 défaut.** Les 13 pages du lot dev-misc sont sans défaut, texte SEO et chaînes d'interface compris.

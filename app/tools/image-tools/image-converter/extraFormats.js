@@ -172,7 +172,7 @@ export async function encodeExtra(format, raster, quality, onProgress = () => {}
   const rgba = raster.rgba();
   switch (format) {
     case 'bmp': return { blob: encodeBmp(rgba, width, height), note: hasAlpha(rgba) ? 'transparency flattened onto white (BMP)' : '' };
-    case 'gif': return { blob: await encodeGif(rgba, width, height, onProgress), note: 'reduced to 256 colours with dithering (GIF limit)' };
+    case 'gif': return { blob: await encodeGif(rgba, width, height, onProgress), note: 'reduced to 256 colors with dithering (GIF limit)' };
     case 'ico': { const r = await encodeIco(raster); return { blob: r.blob, note: `icon sizes ${r.sizes.join(', ')} px` }; }
     case 'tiff': return { blob: await encodeTiff(rgba, width, height), note: '' };
     case 'pdf': return { blob: await encodePdf(raster, rgba, width, height, quality, onProgress), note: '' };

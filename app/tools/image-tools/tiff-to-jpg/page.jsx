@@ -177,11 +177,11 @@ export default function TiffToJpgPage() {
       </div>
       <SeoContent
         title="TIFF to JPG"
-        description={`TIFF to JPG converts a TIFF image, such as a scan, a fax or a photo exported for print, into a JPG for viewers and websites that do not display TIFF. Set the "Quality" slider (it starts at 90) and the colour transparent areas should take. For a file with several pages, the first conversion tells you how many there are and lets you pick another page. The decoder is UTIF.js: 1 to 32-bit integer grey and RGB, palette and 8-bit CMYK TIFFs are read, the orientation tag is applied, and a colour profile, which is not applied, is reported. The file is decoded and encoded in a background worker of your browser.`}
+        description={`TIFF to JPG converts a TIFF image, such as a scan, a fax or a photo exported for print, into a JPG for viewers and websites that do not display TIFF. Set the "Quality" slider (it starts at 90) and the color transparent areas should take. For a file with several pages, the first conversion tells you how many there are and lets you pick another page. The decoder is UTIF.js: 1 to 32-bit integer gray and RGB, palette and 8-bit CMYK TIFFs are read, the orientation tag is applied, and a color profile, which is not applied, is reported. The file is decoded and encoded in a background worker of your browser.`}
         howToTitle="How to convert TIFF to JPG"
         howTo={[
           `Pick the .tif or .tiff scan or photo in the upload area; its name is shown.`,
-          `Set the "Quality" slider and the colour next to "Transparent areas become".`,
+          `Set the "Quality" slider and the color next to "Transparent areas become".`,
           `Click "Convert to JPG"; "Cancel" stops a conversion that takes too long.`,
           `For a multi-page TIFF, type another number in the "Page" box and click "Convert to JPG" again.`,
           `Click "Download" to save the JPG, named after the TIFF.`
@@ -189,18 +189,18 @@ export default function TiffToJpgPage() {
         specs={[
           { label: 'Input format', value: `TIFF (.tif, .tiff), one file` },
           { label: 'Output format', value: `JPG, quality 10 to 100` },
-          { label: 'Not supported', value: `Planar colour storage, and CMYK other than 8 bits per channel: refused with a message` },
+          { label: 'Not supported', value: `Planar color storage, and CMYK other than 8 bits per channel: refused with a message` },
           { label: 'Time limit', value: `Decoding stops after ${TIFF_DECODE_TIMEOUT_MS / 1000} seconds with an explanation; encoding gets more time for large images` }
         ]}
         privacy={`The TIFF is copied into a Web Worker inside your browser, decoded there with UTIF.js and written as a JPG, by the browser or by MozJPEG in WebAssembly for images over ${Math.floor(CANVAS_MAX_PIXELS / 1e5) / 10} megapixels. The file is not uploaded. Failures send a report: the cleaned error text, extension, size range, tool name and your browser's name and version.`}
         faqs={[
           { q: "Can I convert a page other than the first one?", a: `Yes. After the first conversion of a multi-page TIFF, the page says how many pages it has and shows a "Page" box. Type the page number, then click "Convert to JPG" again; reduced-size thumbnails stored in the file are not counted as pages.` },
-          { q: "Is the TIFF's colour profile applied?", a: `No. A profile such as Adobe RGB is not applied, so colours can look duller than in a colour-managed editor; the page says so under the result. Convert the image to sRGB in your editor first for faithful colours.` },
+          { q: "Is the TIFF's colour profile applied?", a: `No. A profile such as Adobe RGB is not applied, so colors can look duller than in a color-managed editor; the page says so under the result. Convert the image to sRGB in your editor first for faithful colors.` },
           { q: "Can I convert a 16-bit TIFF?", a: `Yes. It is converted to 8 bits per channel, the depth of a JPG. The darkest and brightest values actually present are stretched to black and white, so scientific or scanner files that use only part of the 16-bit range do not come out near-black.` },
           { q: "Why did the conversion stop?", a: `The decoder went ${TIFF_DECODE_TIMEOUT_MS / 1000} seconds without finishing, far longer than a normal TIFF needs, which usually means a non-standard LZW variant. The message suggests re-saving the file with Deflate/ZIP or no compression.` }
         ]}
         tips={[
-          `If the TIFF has transparency you want to keep, use TIFF to PNG instead of picking a background colour.`
+          `If the TIFF has transparency you want to keep, use TIFF to PNG instead of picking a background color.`
         ]}
       />
     </div>

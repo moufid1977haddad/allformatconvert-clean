@@ -216,3 +216,18 @@ corrigé.
 - `instructions.mjs` : 0 mismatch.
 - `privacy-claims.mjs` : 0 échec.
 - `tsc --noEmit` : aucune erreur sur image-editor.
+
+## Corrections après troisième passe (06/10)
+Les trois phrases quasi identiques relevées en troisième passe sont reformulées.
+- **Image Blur, étape 4** : « Click "Download": a blurred JPG, PNG or WebP is saved in its own format, any other picture
+  as a PNG. » Elle ne ressemble plus à l'étape 4 d'Add Border.
+- **Image Resizer, privacy** : « If resizing fails with a message, we are sent that message once cleaned, the name
+  Image Resizer, and which browser and version you used. » Elle ne ressemble plus à la phrase de Brightness and
+  Contrast.
+- **Image Rotate, étape 1** : « Click the upload box and pick the photo you want to straighten or turn. » Elle ne
+  ressemble plus à l'étape 1 d'Image Inverter.
+
+**Contrôles.**
+- `content-verify --only=image-tools/` : 0 échec.
+- `instructions.mjs` : 0 mismatch.
+- `privacy-claims.mjs` : 0 échec.

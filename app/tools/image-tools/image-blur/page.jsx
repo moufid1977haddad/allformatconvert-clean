@@ -87,7 +87,7 @@ export default function ImageBlurPage() {
           "Click the upload box and choose the photo to soften.",
           "Set \"Blur\" anywhere from 1 to 20 px; it starts at 5.",
           "Click \"Apply Blur\" and wait for the preview.",
-          "Click \"Download\"; the blurred copy keeps the format of a JPG, PNG or WebP, and any other format comes back as PNG.",
+          "Click \"Download\": a blurred JPG, PNG or WebP is saved in its own format, any other picture as a PNG.",
         ]}
         specs={[
           { label: "Blur radius", value: "1 to 20 px (standard deviation of the Gaussian), measured on the full-size image" },

@@ -172,7 +172,7 @@ export default function TiffToPngPage() {
       </div>
       <SeoContent
         title="TIFF to PNG"
-        description={`TIFF to PNG saves a TIFF image as a PNG, a lossless format that every browser displays, which Chrome, Edge and Firefox on a computer cannot do with TIFF. Transparency in the TIFF is kept. For a multi-page file, the first conversion reports the page count and offers a "Page" box to convert any other page. The UTIF.js decoder reads 1 to 32-bit integer grey and RGB images, palette images and 8-bit CMYK, which is turned into RGB. Files with more than 8 bits per channel are brought down to 8 bits, their darkest and brightest values stretched to black and white. The orientation tag is applied.`}
+        description={`TIFF to PNG saves a TIFF image as a PNG, a lossless format that every browser displays, which Chrome, Edge and Firefox on a computer cannot do with TIFF. Transparency in the TIFF is kept. For a multi-page file, the first conversion reports the page count and offers a "Page" box to convert any other page. The UTIF.js decoder reads 1 to 32-bit integer gray and RGB images, palette images and 8-bit CMYK, which is turned into RGB. Files with more than 8 bits per channel are brought down to 8 bits, their darkest and brightest values stretched to black and white. The orientation tag is applied.`}
         howToTitle="How to convert TIFF to PNG"
         howTo={[
           `Load the .tiff or .tif image into the upload area.`,
@@ -183,14 +183,14 @@ export default function TiffToPngPage() {
         specs={[
           { label: 'Input format', value: `TIFF (.tif, .tiff), one file` },
           { label: 'Output format', value: `PNG, 8 bits per channel, transparency kept` },
-          { label: 'Refused', value: `Planar colour storage, and CMYK at more than 8 bits per channel` },
+          { label: 'Refused', value: `Planar color storage, and CMYK at more than 8 bits per channel` },
           { label: 'Time limit', value: `${TIFF_DECODE_TIMEOUT_MS / 1000} seconds to decode, then the worker is stopped with a message` }
         ]}
         privacy={`Decoding and PNG encoding take place in a worker thread of your own browser; the TIFF does not travel to any server. Should the conversion fail, we receive a log entry with the cleaned error wording, the file extension, its size range, the tool's name and your browser's name and version, but never the image or its file name.`}
         faqs={[
-          { q: "Is the PNG an exact copy of the TIFF?", a: `Yes for opaque 8-bit grey or RGB TIFFs: PNG compression is lossless. Partly transparent pixels can change slightly, more for nearly transparent ones; a 16-bit or other high-depth TIFF is reduced to 8 bits with its range stretched; CMYK becomes RGB; an embedded colour profile is not applied.` },
+          { q: "Is the PNG an exact copy of the TIFF?", a: `Yes for opaque 8-bit gray or RGB TIFFs: PNG compression is lossless. Partly transparent pixels can change slightly, more for nearly transparent ones; a 16-bit or other high-depth TIFF is reduced to 8 bits with its range stretched; CMYK becomes RGB; an embedded color profile is not applied.` },
           { q: "Can I convert all pages of a multi-page TIFF?", a: `Yes, one at a time. After converting, type the next number in the "Page" box and click "Convert to PNG" again; each page is downloaded as its own PNG.` },
-          { q: "Does a TIFF with an alpha channel stay transparent?", a: `Yes. A TIFF with an alpha channel gives a PNG with the same transparent areas; nothing is flattened onto a colour, unlike TIFF to JPG.` }
+          { q: "Does a TIFF with an alpha channel stay transparent?", a: `Yes. A TIFF with an alpha channel gives a PNG with the same transparent areas; nothing is flattened onto a color, unlike TIFF to JPG.` }
         ]}
         tips={[
           `If the decoder stalls on a non-standard LZW TIFF, re-save the file with Deflate/ZIP compression or none, as the message suggests, and convert it again.`

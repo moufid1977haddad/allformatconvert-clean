@@ -214,7 +214,7 @@ export default function ImageUpscalerPage() {
           { q: "How large can the image be?", a: `${MAX_INPUT_PIXELS / 1e6} megapixels, for example 3000×2000, and ${MAX_FILE_BYTES / 1048576} MB. At 4× such an image becomes ${(MAX_INPUT_PIXELS * 16) / 1e6} megapixels. Larger photos are refused before any work starts; shrink them first with Image Resizer.` },
           { q: "Does 2× take less time than 4×?", a: "No. The model always enlarges 4×, and the 2× result is the 4× result reduced by half, so both take about the same time. Choose 2× when you do not need the larger file." },
           { q: "Is transparency kept?", a: "Yes. An image with transparent areas is always processed on our server, which enlarges the colors with the AI model and resizes the transparency layer with a standard filter, then joins both in the PNG." },
-          { q: "Is the AI model openly licensed?", a: "Yes. Philip Hofmann trained 4xNomos2_hq_mosr and published it under the Creative Commons Attribution 4.0 licence; the page credits it under the tool. We chose it after comparing nine open models on the same photo." }
+          { q: "Is the AI model openly licensed?", a: "Yes. Philip Hofmann trained 4xNomos2_hq_mosr and published it under the Creative Commons Attribution 4.0 license; the page credits it under the tool. We chose it after comparing nine open models on the same photo." }
         ]}
         tips={[
           "The first run on your device downloads the AI model; later runs during the same visit start sooner.",

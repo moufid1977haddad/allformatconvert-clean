@@ -167,3 +167,45 @@ aucun n'est contesté. Les 79 sont corrigés.
   - Part maximale de phrases identiques sur le site : 9,5 %.
 - `node scripts/content-checks/instructions.mjs` : 0 mismatch sur 225 pages.
 - `node scripts/content-checks/privacy-claims.mjs` : 0 failure.
+
+## Corrections après deuxième passe (06/10)
+
+Les 14 défauts de la deuxième passe (R1-R14) sont corrigés, plus le C6 sur la méta de Base64 Encoder. J'ai vérifié
+chacun dans le code ; aucun n'est contesté.
+
+- **R1-R7 — refus de copie signalé.** Le bouton Copy n'a pas de `.catch` sur ces pages, donc un refus du presse-papiers
+  est signalé par `app/tools/ToolErrorWatch.jsx:27-36`. Chaque bloc privacy le dit maintenant, sans « only » : le
+  message, le nom de l'outil, le nom et la version du navigateur, jamais le texte.
+  Pages : unicode-converter, html-entity-decoder, html-encoder, base64 (dev), file-tools base64, url-encoder (dev),
+  hex-to-text.
+- **R8 — Hash Generator.** Le bloc privacy dit « When the red box shows an error (a cancel excepted) ». Le message
+  d'annulation n'est pas envoyé (`app/lib/useToolError.js:17,25`).
+- **R9 — chaîne d'interface JWT.** Note sous « Verify signature » (`jwt-decoder/page.jsx:81`) :
+
+  | Avant | Après |
+  |---|---|
+  | « the key and the token are not sent anywhere » | « the key and the token are not sent to our servers » |
+
+  La section privacy de la page dit déjà que Google Traduction reçoit le texte de la page si une traduction est activée.
+- **R10 — HTML Encoder, étape 4.** Elle devient « Click "Copy" and paste the escaped result into your HTML… ».
+- **R11 — FAQ des jumeaux convertisseurs de bases.** Dans la page dev, la question devient « Can I get FFFFFFFF for -1? ».
+  La réponse explique la largeur de registre et le calcul -1 + 4294967296 (2^32) = 4294967295 = FFFFFFFF (vérifié en
+  Node). La page math garde sa question.
+- **R12 — dernière étape de Base64 (dev).** Elle est réécrite : « Copy the Base64 or the decoded text… ; "Download"
+  writes base64.txt… ».
+- **R13 — About de Base64 (dev).** Il dit maintenant où se fait le travail : « Your browser's TextEncoder, btoa and atob
+  do the work. »
+- **R14 — About du convertisseur de bases (dev).** Il dit maintenant « computed with BigInt arithmetic in this page ».
+- **C6 — méta de Base64 Encoder.** La phrase « Runs in your browser. » devient « …, all inside your browser. »
+  (openGraph identique).
+
+### Contrôles
+
+| Contrôle | Résultat |
+|---|---|
+| `content-verify --only=developer-tools/` | 0 échec |
+| `content-verify --only=file-tools/` | 0 échec |
+| `content-verify --only=text-tools/` | 0 échec |
+| `content-verify --only=math-tools/` | 0 échec |
+| `instructions.mjs` | 0 mismatch |
+| `privacy-claims.mjs` | 0 failure |

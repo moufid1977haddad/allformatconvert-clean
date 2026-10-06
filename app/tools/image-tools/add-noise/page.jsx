@@ -74,7 +74,7 @@ export default function AddNoisePage() {
           <AnimatedImageNote file={file} />
           {error && <p className="text-red-400 text-center text-sm">{error}</p>}
           <div><label className="block text-sm text-neutral-500 mb-1">Intensity: {intensity}</label><input aria-label="Intensity" type="range" min="1" max="100" value={intensity} onChange={e => setIntensity(parseInt(e.target.value))} className="w-full" /></div>
-          <label className="flex items-center gap-2 text-sm text-neutral-600"><input id="noise-colour" type="checkbox" checked={colour} onChange={(e) => setColour(e.target.checked)} /> Colour noise (each colour channel its own grain)</label>
+          <label className="flex items-center gap-2 text-sm text-neutral-600"><input id="noise-colour" type="checkbox" checked={colour} onChange={(e) => setColour(e.target.checked)} /> Color noise (each color channel its own grain)</label>
           <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Add Noise</button>
           {result && <div className="space-y-2"><img alt="Preview of your image" src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
         </div>
@@ -86,7 +86,7 @@ export default function AddNoisePage() {
         howTo={[
           "Click the upload box and choose the photo to texture.",
           "Move the \"Intensity\" slider: it starts at 30, 1 is barely visible and 100 is very coarse.",
-          "Tick \"Colour noise (each colour channel its own grain)\" for colored speckles, or leave it off for gray grain.",
+          "Tick \"Color noise (each color channel its own grain)\" for colored speckles, or leave it off for gray grain.",
           "Click \"Add Noise\", look at the preview, then click \"Download\"; a grainy JPG, PNG or WebP keeps its format, while other files come back as PNG.",
         ]}
         specs={[
@@ -99,7 +99,7 @@ export default function AddNoisePage() {
         privacy={"Grain is generated inside this tab, with a random sequence seeded by the browser's own secure generator, and the photo never leaves your device. The result is a temporary file held by the page until you save it. Should an error message appear, its cleaned wording is sent to us for debugging, together with the tool and the browser's name and version; the photo and its name are not part of it."}
         faqs={[
           { q: "Is this Gaussian noise?", a: "No. Each pixel is moved by a whole number picked evenly between minus and plus the intensity, so the noise is uniform. There is no Gaussian, Poisson or salt-and-pepper option; the only choice is gray grain or colored grain." },
-          { q: "Does colored noise change the hue of pixels?", a: "Yes, slightly. With \"Colour noise\" ticked, red, green and blue each get their own random amount, which scatters small colored specks. Without it, the same amount goes to all three, so a pixel only gets lighter or darker." },
+          { q: "Does colored noise change the hue of pixels?", a: "Yes, slightly. With \"Color noise\" ticked, red, green and blue each get their own random amount, which scatters small colored specks. Without it, the same amount goes to all three, so a pixel only gets lighter or darker." },
           { q: "Will I get the same grain twice?", a: "No. The random sequence is seeded again from the browser's secure generator on every click, so each run draws a different pattern, even with the same photo and the same settings." },
           { q: "Does the grain touch transparent areas?", a: "No, not visibly. Only red, green and blue are changed and the alpha channel stays as it was, so fully see-through areas stay see-through; semi-transparent edges get grain like the rest. A PNG stays a PNG and a WebP stays a WebP." },
         ]}

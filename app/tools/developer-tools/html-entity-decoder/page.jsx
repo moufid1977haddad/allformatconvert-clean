@@ -51,7 +51,7 @@ export default function HtmlEntityDecoderPage() {
           { label: "Tags and other text", value: "Left exactly as written" }
         ]}
         privacyTitle={"Where your text is processed"}
-        privacy={"Decoding happens in this tab: numeric codes are converted by the page's own script, and each named entity is handed alone to your browser's DOMParser, which does not run scripts or fetch images. What you paste stays in this tab and disappears when it closes; only a crash of the page itself would send us an error report, without your text."}
+        privacy={"Decoding happens in this tab: numeric codes are converted by the page's own script, and each named entity is handed alone to your browser's DOMParser, which does not run scripts or fetch images. What you paste stays in this tab and disappears when it closes. A crash of this page, a blocked clipboard included, sends us an error report with the cleaned error message, this tool's name and your browser with its version; nothing you pasted is part of it."}
         faqs={[
           { q: "Why does my text still show &amp; after decoding?", a: "It was escaped twice, which some CMS and export scripts do: &amp;amp; decodes to &amp;. Each Decode removes exactly one layer and always reads the input box, so copy the result back into it and decode again to reach the plain character." },
           { q: "Are HTML tags removed?", a: "No. Only entities change; tags such as <b>, <p> or <a href> stay exactly as written in the output. That keeps the markup intact when you only want readable accents and symbols." },

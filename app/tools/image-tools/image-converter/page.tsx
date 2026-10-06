@@ -352,7 +352,7 @@ export default function ImageConverterPage() {
                   </div>
                   ) : (
                   <p className="flex-1 min-w-[160px] text-xs text-neutral-500 self-center" data-no-quality>
-                    {format.toUpperCase()} has no quality setting here: {format === 'gif' ? 'it is written with 256 colours (the GIF limit).' : 'it is written without lossy compression.'}
+                    {format.toUpperCase()} has no quality setting here: {format === 'gif' ? 'it is written with 256 colors (the GIF limit).' : 'it is written without lossy compression.'}
                   </p>
                   )}
                 </div>
@@ -436,10 +436,10 @@ export default function ImageConverterPage() {
         ]}
         privacy={`Your images are decoded and re-encoded inside your browser, mostly in a background worker; Photoshop files, SVG drawings and, in browsers that cannot open HEIC, HEIC photos are opened on the page first. No image is uploaded. The AVIF and WebP encoders and the LibRaw decoder are downloaded from our site the first time they are needed. When a file fails, a report goes to our error log: cleaned message, file extension, size range, tool name, browser name and version.`}
         faqs={[
-          { q: "Can I convert camera RAW files?", a: `Yes. CR2, CR3, NEF, ARW, DNG (iPhone ProRAW included), ORF, RW2, RAF, PEF and the other listed formats are developed at full resolution with the camera's white balance and colour matrix. Measured on a 24-megapixel file: about 10 seconds in Chromium and 40 seconds in Firefox. Sigma X3F files are refused, since their colours cannot be developed correctly here.` },
+          { q: "Can I convert camera RAW files?", a: `Yes. CR2, CR3, NEF, ARW, DNG (iPhone ProRAW included), ORF, RW2, RAF, PEF and the other listed formats are developed at full resolution with the camera's white balance and color matrix. Measured on a 24-megapixel file: about 10 seconds in Chromium and 40 seconds in Firefox. Sigma X3F files are refused, since their colors cannot be developed correctly here.` },
           { q: "Is there an image size limit?", a: `Yes. Each image can be up to ${MAX_MEGAPIXELS} megapixels on a computer and ${MOBILE_MAX_MEGAPIXELS} on a phone, iPhone or iPad, which covers 48-megapixel iPhone photos, and each file up to ${MAX_FILE_SIZE_LABEL}. A larger file is skipped with a message naming it.` },
           { q: "Can I make WebP or AVIF files on an iPhone?", a: `Yes. Safari, like every browser on iPhone and iPad, has no WebP encoder of its own, so libwebp compiled to WebAssembly makes the WebP; AVIF always comes from a WebAssembly encoder, in every browser. Each encoder is fetched from our site when you convert to its format; on a computer, Chrome, Edge and Firefox make WebP up to 30 megapixels with their own encoder instead. AVIF takes longer than the other formats.` },
-          { q: "Do PNG and TIFF keep every pixel?", a: `Yes, both are written without loss. JPG, WebP and AVIF are lossy and follow the "Quality" slider; GIF is reduced to 256 colours with dithering; BMP has no transparency and is flattened onto white; ICO is resized to the icon sizes.` },
+          { q: "Do PNG and TIFF keep every pixel?", a: `Yes, both are written without loss. JPG, WebP and AVIF are lossy and follow the "Quality" slider; GIF is reduced to 256 colors with dithering; BMP has no transparency and is flattened onto white; ICO is resized to the icon sizes.` },
           { q: "Does PDF output merge the batch into one file?", a: `No. Choosing PDF here gives one PDF per image, each page the size of the image at 72 dpi. To put several images in a single PDF, use Image to PDF.` }
         ]}
         tips={[

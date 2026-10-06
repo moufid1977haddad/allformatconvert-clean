@@ -161,3 +161,25 @@ messages, notes, placeholders). La liste de contrôle est la même, avec les pr�
 - Remarque : les lignes Rust et Python ne sont pas des régressions. Je les avais laissées passer en première passe, puis la
   correction C#/Go m'a montré le même manque. Les défauts de code hors texte (note `//` en Python, ligne `Usage:` de PHP
   sans `JSON_BIGINT_AS_STRING`) restent ouverts, comme le dit le compte rendu du rédacteur.
+
+## Troisième passe (06/10)
+
+J'ai relu entièrement les 10 pages touchées (méta, About, étapes, specs, privacy, FAQ, sous-titre et chaînes d'interface) :
+css-formatter, json-to-typescript, javascript-formatter, code-minifier, json-to-rust, json-to-python, json-to-go,
+scss-to-css, js-minifier et code-formatter.
+
+- **Les 10 corrections sont exactes.** Je les ai vérifiées dans le code ou dans Node :
+  - Rust : `#[serde(untagged)] enum` pour une valeur à deux types ; `serde_json::Value` pour une clé toujours nulle ou un tableau vide.
+  - Python : `Union[int, str]` et `List[Any]`.
+  - Code Minifier : les noms `minified.js/.ts/.css/.html` (`'minified.' + lang`).
+  - Les « unexpected failure » sont signalées par `app/tools/ToolErrorWatch.jsx`.
+  - Code Formatter : le message dit maintenant « recognized ».
+- **Exemples :** les 18 donnent toujours exactement la sortie affichée.
+- **Structure :** métas de 137 à 154 caractères ; About de 89 à 112 mots ; privacy de 56 à 76 mots ; FAQ inchangées et conformes.
+- **Unicité :** aucune nouvelle phrase n'est identique à une phrase d'une autre page. Seul le bout de phrase « an unexpected failure of the page is reported the same way » se retrouve dans les privacy de json-to-go et de js-minifier, à l'intérieur de phrases différentes : il est exact, et ce n'est pas un doublon de phrase, donc je ne le compte pas.
+- **Contrôles automatiques :**
+  - `content-verify --only=developer-tools/` : 0 échec sur ces 18 pages. Le seul échec C6 restant est sur base64-encoder, une page d'un autre lot.
+  - `instructions.mjs` : 0 écart.
+  - `privacy-claims.mjs` : 0 échec.
+
+**0 défaut.** Les 18 pages du lot dev-code sont sans défaut. Restent ouverts, hors texte : la note `//` dans la sortie Python, et la ligne `Usage:` du mode classes PHP sans `JSON_BIGINT_AS_STRING`.

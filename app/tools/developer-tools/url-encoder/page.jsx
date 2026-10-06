@@ -71,7 +71,7 @@ export default function UrlEncoderDevPage() {
           { label: "Errors", value: "A broken escape gives Invalid URL encoding; a lone surrogate character cannot be encoded" }
         ]}
         privacyTitle={"Where your text is processed"}
-        privacy={"Encoding and decoding call your browser's own encodeURIComponent, encodeURI and decodeURIComponent inside this page, so the strings you paste, tokens and keys included, are not sent to our servers. When Encode or Decode fails, we receive the browser's error message, the tool's name and your browser's name and version, without the text that caused it."}
+        privacy={"Encoding and decoding call your browser's own encodeURIComponent, encodeURI and decodeURIComponent inside this page, so the strings you paste, tokens and keys included, are not sent to our servers. When Encode, Decode or a copy to the clipboard fails, we receive the browser's error message, the tool's name and your browser's name and version, without the text that caused it."}
         faqs={[
           { q: "Should I use encodeURIComponent or encodeURI?", a: "Use encodeURIComponent (\"A value\") for a single parameter: it escapes & = ? / # so they cannot end the value early. Use encodeURI (\"A whole URL\") for a complete address that must keep working; it leaves : / ? # & = and + untouched." },
           { q: "Why does + turn into a space when I decode?", a: "The box \"Decode “+” as a space (form data and query strings)\" is ticked by default, matching application/x-www-form-urlencoded data. Untick it when + means a real plus sign, as in a+b@x.com. A value and Strict RFC 3986 encode + as %2B, so their output never contains a raw +." },

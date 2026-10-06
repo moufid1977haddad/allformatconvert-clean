@@ -48,7 +48,7 @@ export default function UnicodeConverterPage() {
           { label: "Not handled", value: "UTF-8 bytes (see Hex to Text) and HTML entities (see HTML Entity Decoder)" }
         ]}
         privacyTitle={"Where your text is processed"}
-        privacy={"Both buttons run a short script inside this page: your text is not sent to a server and is not saved. The converter has no error messages of its own; only if the page itself crashed would we receive the error, the tool's name and your browser's name and version, never the text you pasted."}
+        privacy={"Both buttons run a short script inside this page: your text is not sent to a server and is not saved. The converter has no error messages of its own; if the page fails, for instance when the browser refuses a copy, we receive the error, the tool's name and your browser's name and version, never the text you pasted."}
         faqs={[
           { q: "How many \\u escapes does an emoji take?", a: "Two for emoji above U+FFFF, such as 😀 (\\ud83d\\ude00), which JavaScript stores as a surrogate pair; one for older emoji in the basic plane, such as ☕ (\\u2615). From Unicode joins a pair back into one character." },
           { q: "Can it read \\u{1F600} or U+1F600?", a: "Yes. Besides \\uXXXX, From Unicode reads the ES2015 \\u{…} form and U+ code points with four to six hex digits. A lowercase u+ is not recognized and stays as typed." },

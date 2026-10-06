@@ -136,3 +136,28 @@ Totaux de la deuxième passe :
 - Pages sans aucun défaut (11) :
   - gif-tools : avi-to-gif, gif-compressor, gif-maker, gif-to-mp4, mov-to-gif, video-to-gif, webm-to-gif.
   - file-tools : file-encryptor, file-metadata, tar-extractor, zip-extractor.
+
+## Troisième passe (2026-10-06)
+
+J'ai relu en entier les 8 pages touchées : mp4-to-gif, image-to-gif, apng-to-gif, gif-to-apng, file-splitter, file-converter, file-comparator et zip-creator (méta et OG comprises). J'ai aussi relu les deux textes partagés modifiés :
+
+- **Note de `MediaServiceTool.jsx:135`** : juste. Elle dit « converted on our video server · the uploaded video is deleted when processing ends, the result once it has been downloaded or after a set time ».
+  - L'entrée est supprimée à la fin du traitement, réussi ou non (`jobs.py:271,400,407-408`).
+  - La sortie est supprimée après un téléchargement complet par la page (`main.py:228-240`), sinon après le délai d'expiration (`jobs.py:411-418`).
+  - Cette note n'est affichée que par des outils vidéo (5 pages GIF, 4 pages video-tools), donc « video » est juste.
+- **Message de `gifEncode.js:57`** : juste. La limite est maintenant calculée, `(16 777 216 / 1e6).toFixed(1)` = 16.8, comme sur les pages.
+
+Vérification des 8 corrections :
+- D2-1 : la nouvelle FAQ 3 de mp4-to-gif n'affirme plus rien de faux.
+- D2-2, D2-3 : les phrases génériques sont remplacées par des phrases propres à l'outil.
+- D2-4 : la phrase de file-converter est remise en ordre.
+- D2-5, D2-6 : les quasi-doublons ont disparu (aucune paire ≥ 0,7 nouvelle).
+- D2-7 : plus aucun « Colours » sur apng-to-gif ni gif-to-apng.
+- D2-8 : la méta de zip-creator est exacte et dans la longueur (151 caractères).
+
+Contrôles :
+- `content-verify` : gif-tools 0 échec, file-tools 0 échec.
+- `instructions.mjs` : 0 mismatch.
+- `privacy-claims.mjs` : 0 failure.
+
+**0 défaut.** Les 19 pages sont sans défaut.

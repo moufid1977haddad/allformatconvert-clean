@@ -143,3 +143,33 @@ En repassant la comparaison sur tout le site, j'ai relevé deux quasi-doublons. 
 - Par point de la liste : point 5 (générique ou dupliqué) 2, tous les autres points 0.
 - Pages sans aucun défaut (12) : audio-converter, audio-equalizer, audio-metadata, audio-splitter, audio-to-text, audio-trimmer, audio-waveform, voice-recorder, media-player, screen-recorder, subtitle-generator, video-metadata.
 - Pages avec un défaut : audio-booster, audio-compressor, audio-merger.
+
+## Quatrième passe (06/10)
+
+J'ai vérifié les trois pages modifiées (Booster, Compressor, Merger), puis refait la comparaison de phrases sur les 223 pages.
+
+- **Audio Booster, FAQ 5 :** corrigée. La nouvelle phrase, « Each Opus boost counts as one job in your connection's hourly and daily allowance there. », est juste : un travail par boost Opus (`opusService.js:142`), seau `media_rate` par IP pour l'heure et le jour (`ticket/route.js:28-36`). Elle est unique sur le site.
+- **Audio Compressor :** inchangée et sans défaut.
+- **Audio Merger, vie privée :** le texte est cassé (voir le tableau). La correction a été insérée au milieu de l'ancienne phrase au lieu de la remplacer.
+
+| Page | Endroit | Phrase (citation courte) | Problème | Preuve | Correction proposée |
+|---|---|---|---|---|---|
+| audio-merger | Privacy | « …and the Opus file once your browserShould a merge fail, we receive one report: its cleaned message, the tool, and your browser with its version.nd version are reported to us. » | (6) Anglais incorrect et texte tronqué. Il manque « has it, or after a set time. » après « browser » ; il manque une espace avant « Should » ; il reste « nd version are reported to us. » à la fin. Le texte publié serait illisible et faux (« are reported to us » sans sujet). | `audio-tools/audio-merger/page.jsx:430` | « …the service erases that FLAC as soon as it is encoded and the Opus file once your browser has it, or after a set time. Should a merge fail, we receive one report: its cleaned message, the tool, and your browser with its version. » |
+
+Comparaison de phrases sur les 15 pages : aucune phrase identique en dehors des listes de formats des specs (données, non comptées depuis la première passe).
+
+Le seul rapprochement restant dans le lot est la question « Can I make an iPhone ringtone? » (Converter) contre « Can I make an iPhone ringtone with it? » (Trimmer), score 0,67. Ces questions ne sont pas identiques et sont en place depuis la première passe : je les signale au propriétaire, sans les compter comme défaut.
+
+**Bilan de la quatrième passe : 1 défaut** (point 6 Structure / anglais : audio-merger, vie privée). Les 14 autres pages n'ont aucun défaut.
+
+## Cinquième passe (06/10)
+
+J'ai vérifié la réparation de la vie privée d'Audio Merger (`audio-merger/page.jsx:430`) :
+- **Anglais :** correct, et la phrase est complète.
+- **Suppression sur le service :** le FLAC est effacé dès la fin de l'encodage, et le fichier Opus après son téléchargement ou après un délai fixé (`jobs.py:400`, `main.py:240`, balayage `jobs.py:411-418`).
+- **Rapport d'erreur :**
+  - le contenu dit est exact : `reportToolError` est appelé sans `file` (`page.jsx:236`), donc ni extension ni taille ne partent (`reportError.js:140-154`) ;
+  - « one report » est juste : le message affiché n'est pas renvoyé une deuxième fois dans les 3 s (`useToolError.js:28-29`, `failureReportedRecently`).
+- **Unicité :** la phrase n'existe sur aucune autre page.
+
+**Bilan de la cinquième passe : 0 défaut.** Les 15 pages du lot sont sans défaut.

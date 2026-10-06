@@ -164,3 +164,22 @@ Doublons relancés : rien de nouveau.
 **Bilan de la troisième passe** : 11 pages relues, **1 défaut** (point 3). Pages sans aucun défaut : les 10 autres
 (video-compressor, video-converter, video-filter, video-merger, video-resizer, video-rotator, video-screenshot,
 video-to-audio, video-trimmer, video-watermark).
+
+## Quatrième passe (06/10)
+
+Seule la note partagée `MediaServiceTool.jsx:135` a changé (pages et layouts des 11 outils inchangés depuis la
+troisième passe). Nouvelle note : « converted on our video server · the uploaded video is deleted when processing ends,
+the result once it has been downloaded or after a set time », vérifiée sur chaque page qui l'affiche :
+video-compressor, video-converter, video-filter, video-resizer, video-to-gif (et gif-tools mp4-, mov-, avi-, webm-,
+video-to-gif via `GifFromVideoTool`).
+- « converted on our video server » : vrai partout — compression, conversion, filtre, redimensionnement et GIF sont
+  faits par ffmpeg sur le service (`runMediaJob`, `ffmpeg_ops.build_command`). Sur Video to GIF, l'étape gifsicle et
+  l'extraction de PNG faites dans le navigateur ne sont plus contredites (plus de « not in your browser ») et sont dites
+  dans la section privacy.
+- « the uploaded video is deleted when processing ends » : `jobs.py:400` (succès), `_fail` `:267-271`, annulation `:363-365`,
+  `finally` `:407-408`.
+- « the result once it has been downloaded or after a set time » : `main.py` `/result` → `jobs.delete_output` après
+  téléchargement complet ; balayeur `jobs.py:411-418` (`JOB_TTL_SECONDS`) ; résultat « pas plus petit » supprimé tout de
+  suite (`jobs.py:394-399`), ce qui reste couvert.
+
+**0 défaut.** Les 11 pages sont sans défaut.

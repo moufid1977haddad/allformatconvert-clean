@@ -95,7 +95,7 @@ export default function GifCompressorPage() {
         howTo={[
           "Choose the .gif to shrink; it plays above the settings.",
           "Move the \"Quality\" slider: 100 keeps only the lossless optimization of gifsicle, lower values allow more lossy compression.",
-          "If needed, pick fewer \"Colours\" (128 down to 16) or a smaller \"Size\".",
+          "If needed, pick fewer \"Colors\" (128 down to 16) or a smaller \"Size\".",
           "Click \"Compress\" and compare \"Before\" and \"After\".",
           "Click \"Download\" to save compressed.gif."
         ]}
@@ -110,7 +110,7 @@ export default function GifCompressorPage() {
         privacy="gifsicle runs as WebAssembly inside this page: the GIF is read from your device and the compressed copy stays in this page until you download it; nothing is uploaded. The gifsicle code is part of the site's own files. If something fails, the report sent to our error log holds the cleaned message, the tool name and your browser and its version, not the GIF."
         faqs={[
           { q: "Will my GIF stay animated?", a: "Yes. gifsicle rewrites every frame with its delay; only the pixel data is optimized, simplified by the lossy setting, reduced in colors or scaled. The preview under the button plays the compressed version before you download it." },
-          { q: "Is lowering the quality the only way to shrink a GIF?", a: "No. \"Colours\" keeps 128, 64, 32 or 16 colors instead of up to 256, and \"Size\" scales every frame down. Flat graphics often look the same with far fewer colors. You can combine all three settings and compress again." },
+          { q: "Is lowering the quality the only way to shrink a GIF?", a: "No. \"Colors\" keeps 128, 64, 32 or 16 colors instead of up to 256, and \"Size\" scales every frame down. Flat graphics often look the same with far fewer colors. You can combine all three settings and compress again." },
           { q: "Can the result be larger than my GIF?", a: "Yes, for a GIF that is already well optimized. The page then shows \"Larger by\" with a percentage and says so, so you can keep your original or lower the quality and try again." },
           { q: "Will a low quality setting show noise?", a: "Yes, at low values: the lossy mode of gifsicle changes pixels so the data compresses better, which can look like speckles, mostly on flat color areas. Raise \"Quality\" and compress again if you see it." },
           { q: "Is there a size limit?", a: `Yes: the picture of the GIF may be up to ${OPENABLE_PIXELS / 1e6} megapixels, read from its header before compression starts. The file size has no fixed limit; a large GIF needs more memory and time on your device.` }

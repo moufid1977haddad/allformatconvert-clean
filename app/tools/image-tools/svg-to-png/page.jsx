@@ -120,7 +120,7 @@ export default function SvgToPngPage() {
       </div>
       <SeoContent
         title="SVG to PNG"
-        description={`SVG to PNG turns a vector drawing into a PNG image of the size you choose. When the file is opened, the width and height boxes are filled from the SVG's own width and height, or its viewBox, with the longer side set to 512 pixels; while "Keep the SVG's proportions" is ticked, changing one side updates the other. The background stays transparent, or you can fill it with a colour. Because the SVG is drawn fresh at the chosen size, a large PNG stays sharp. There is no DPI setting: sizes are in pixels. The drawing is rendered by your browser on this page.`}
+        description={`SVG to PNG turns a vector drawing into a PNG image of the size you choose. When the file is opened, the width and height boxes are filled from the SVG's own width and height, or its viewBox, with the longer side set to 512 pixels; while "Keep the SVG's proportions" is ticked, changing one side updates the other. The background stays transparent, or you can fill it with a color. Because the SVG is drawn fresh at the chosen size, a large PNG stays sharp. There is no DPI setting: sizes are in pixels. The drawing is rendered by your browser on this page.`}
         howToTitle="How to convert SVG to PNG"
         howTo={[
           `Pick an .svg file in the upload area; the size boxes fill in from the drawing.`,

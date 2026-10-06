@@ -151,3 +151,17 @@ limite affichée, ce qui est exact : `pdf-editor/page.jsx:371-373`, `pdf-merge/p
 Bilan deuxième passe : **9 défauts** (G 0 · M 1 · m 8) — [1] 3 · [2] 0 · [3] 0 · [4] 0 · [5] 2 · [6] 4 · [7] 0.
 Pages sans aucun défaut : pdf-crop, pdf-delete-pages, pdf-editor, pdf-extract-text, pdf-forms, pdf-number-pages,
 pdf-ocr, pdf-organize, pdf-protect, pdf-redact, pdf-sign, pdf-split (12 pages).
+
+## Troisième passe (06/10)
+
+Pages touchées relues en entier (méta, About, étapes, specs, privacy, FAQ, astuces, chaînes d'interface) : pdf-compare,
+pdf-compress (dont la note « Extreme » : « Larger images reduced to 72 dpi and saved as JPEG », conforme à
+`compress.py:106-112`), pdf-merge, pdf-reorder-pages, pdf-repair, pdf-unlock, pdf-rotate, pdf-watermark.
+Vérifié : fourchette « 0.1% to 78.8% » et preuve ajoutée (`RAPPORT-ecarts-marche.md:98`, motif de `preuves/pdf-2.json`
+présent) ; FAQ 2 de Compare conforme au message « Neither PDF has text » (`page.jsx:94`) ; méta Compare 154 caractères ;
+FAQ 3 de Merge 65 mots ; About de Reorder (105 mots) avec lieu de traitement ; Repair FAQ 3 grammaticale ; privacy
+d'Unlock (48 mots) exacte (`@cantoo/pdf-lib` dérive la clé d'un mot de passe vide, `pdfUnlock.js:13-14`) et sans
+phrase partagée ; dernières étapes de Rotate et Watermark distinctes. Contrôles : `content-verify --only=pdf-tools/`
+0 échec, `instructions.mjs` 0 écart, `privacy-claims.mjs` 0 échec ; aucune nouvelle phrase dupliquée.
+
+**0 défaut.** Les 20 pages pdf-2 sont sans défaut.

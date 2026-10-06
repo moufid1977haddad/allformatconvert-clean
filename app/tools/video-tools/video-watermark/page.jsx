@@ -564,7 +564,7 @@ export default function VideoWatermarkPage() {
         howTo={[
           `Choose or drop a video file of ${MAX_DURATION / 60} minutes or less; the page checks its length first.`,
           "Under \"Watermark Type\", choose text and type it in \"Watermark Text\", or choose image and pick a logo under \"Watermark Image\".",
-          "Set \"Size\", \"Opacity\" and, for text, \"Text colour\", then click one of the 9 buttons under \"Position\".",
+          "Set \"Size\", \"Opacity\" and, for text, \"Text color\", then click one of the 9 buttons under \"Position\".",
           "Click \"Add Watermark\" and follow the progress bar while the video is encoded.",
           "Play the result and click \"Download\" to save the MP4, named after your video with -watermarked."
         ]}

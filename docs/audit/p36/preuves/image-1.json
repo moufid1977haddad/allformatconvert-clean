@@ -56,9 +56,9 @@
       "pattern": "48 MP \\(8064 x 6048"
     },
     {
-      "claim": "256 colours",
+      "claim": "256 colors",
       "file": "app/tools/image-tools/image-converter/page.tsx",
-      "pattern": "256 colours \\(the GIF limit\\)"
+      "pattern": "256 colors \\(the GIF limit\\)"
     },
     {
       "claim": "72 dpi",
@@ -90,7 +90,7 @@
   ],
   "/tools/image-tools/tiff-to-jpg": [
     {
-      "claim": "1 to 32-bit integer grey and RGB",
+      "claim": "1 to 32-bit integer gray and RGB",
       "file": "app/lib/tiffDecode.js",
       "pattern": "2, 4, 6, 10, 12, 14, 24, 32"
     },
@@ -112,7 +112,7 @@
   ],
   "/tools/image-tools/tiff-to-png": [
     {
-      "claim": "1 to 32-bit integer grey and RGB",
+      "claim": "1 to 32-bit integer gray and RGB",
       "file": "app/lib/tiffDecode.js",
       "pattern": "2, 4, 6, 10, 12, 14, 24, 32"
     },

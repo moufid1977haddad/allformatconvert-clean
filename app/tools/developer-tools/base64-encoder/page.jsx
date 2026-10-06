@@ -34,7 +34,7 @@ export default function Base64EncoderPage() {
       </div>
       <SeoContent
         title={"Base64 Encoder"}
-        description={"Base64 Encoder turns text into Base64 and Base64 back into text. Your text is first written as UTF-8 bytes, so accented letters, other scripts and emoji come back exactly as typed, and the result matches what Python's base64 module or Node.js Buffer produce for the same text. Tick the URL-safe option to get the - and _ alphabet without = padding used in JWTs and URL parameters. Decode reads both alphabets, missing padding and wrapped lines. When the decoded bytes are not UTF-8 text, the tool gives their count instead of garbled characters. It works on pasted text only; to encode a file, use File to Base64."}
+        description={"Base64 Encoder turns text into Base64 and Base64 back into text. Your text is first written as UTF-8 bytes, so accented letters, other scripts and emoji come back exactly as typed, and the result matches what Python's base64 module or Node.js Buffer produce for the same text. Tick the URL-safe option to get the - and _ alphabet without = padding used in JWTs and URL parameters. Decode reads both alphabets, missing padding and wrapped lines. When the decoded bytes are not UTF-8 text, the tool gives their count instead of garbled characters. Your browser's TextEncoder, btoa and atob do the work. It takes pasted text only; to encode a file, use File to Base64."}
         example={{
           caption: "The text below encoded twice: once as is, once with the URL-safe box ticked. Decode turns either result back into the same text.",
           inputLabel: "Text",
@@ -47,7 +47,7 @@ export default function Base64EncoderPage() {
           "Paste the text to encode, or the Base64 to decode, into the box.",
           "For a URL, a file name or a JWT, tick \"URL-safe Base64 when encoding\" before encoding.",
           "Click \"Encode\" or \"Decode\"; invalid Base64 gets a message that names the problem.",
-          "The result shows in a second box: \"Copy\" takes it, and \"Download\" saves it as base64.txt, a name kept even for decoded text."
+          "Copy the Base64 or the decoded text with \"Copy\"; \"Download\" writes base64.txt, a name it keeps even for decoded text."
         ]}
         specs={[
           { label: "Input", value: "Any text for Encode; for Decode, standard or URL-safe Base64, with or without = padding, spaces and line breaks ignored" },
@@ -56,7 +56,7 @@ export default function Base64EncoderPage() {
           { label: "Not handled", value: "Files (see File to Base64) and binary results, which are reported as a byte count" }
         ]}
         privacyTitle={"Where your text is processed"}
-        privacy={"Encoding and decoding run in this page with your browser's TextEncoder, btoa and atob, so the text you paste is not sent anywhere and nothing is stored. If an error message appears, we receive that message, the tool's name and your browser's name and version, never the text you pasted, so that we can fix problems."}
+        privacy={"Encoding and decoding run in this page with your browser's TextEncoder, btoa and atob, so the text you paste is not sent anywhere and nothing is stored. If an error message appears or the browser refuses a copy, we receive that error, the tool's name and your browser's name and version, never the text you pasted, so that we can fix problems."}
         faqs={[
           { q: "Is Base64 encryption?", a: "No. Base64 only rewrites bytes with 64 printable characters, and anyone can decode it with this page or one line of code. Do not use it to hide passwords, keys or personal data; use real encryption for that." },
           { q: "How much longer is Base64 than my text?", a: "About a third longer than the UTF-8 bytes it encodes, since every three bytes become four characters. Most accented letters take two bytes and most emoji four, so text outside plain English grows more than its letter count suggests." },

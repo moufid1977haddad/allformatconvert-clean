@@ -45,7 +45,7 @@ export default function BMPtoPNGPage() {
       </div>
       <SeoContent
         title="BMP to PNG"
-        description={`BMP to PNG turns a Windows bitmap (.bmp) into a PNG file. A bitmap usually stores its pixels as raw rows; PNG stores them with lossless compression. The width and height stay the same, the colours stay as your browser shows them, and the new file keeps the bitmap's name with a .png ending. This page converts one bitmap per click; for a batch, or for JPG or WebP output, use Image Converter. A bitmap your browser cannot open is refused with a message instead of giving a wrong picture. The bitmap is decoded and re-saved on this page.`}
+        description={`BMP to PNG turns a Windows bitmap (.bmp) into a PNG file. A bitmap usually stores its pixels as raw rows; PNG stores them with lossless compression. The width and height stay the same, the colors stay as your browser shows them, and the new file keeps the bitmap's name with a .png ending. This page converts one bitmap per click; for a batch, or for JPG or WebP output, use Image Converter. A bitmap your browser cannot open is refused with a message instead of giving a wrong picture. The bitmap is decoded and re-saved on this page.`}
         howToTitle="How to convert BMP to PNG"
         howTo={[
           `Pick your .bmp file in the upload area; the bitmap appears there as a preview.`,
@@ -60,7 +60,7 @@ export default function BMPtoPNGPage() {
         ]}
         privacy={`The bitmap is decoded by your own browser and written out as a PNG on this page. It is not uploaded to us or to anyone else. If the conversion fails, a cleaned report goes to our error log: the message shown, the tool's name and your browser's name and version, without the file or its name.`}
         faqs={[
-          { q: "Does converting BMP to PNG change the picture?", a: `No. PNG is lossless, so the PNG has the same size and the colours your browser displays for the bitmap. One exception: in a 32-bit bitmap with partly transparent pixels, those pixels can shift slightly on the way through the browser's canvas.` },
+          { q: "Does converting BMP to PNG change the picture?", a: `No. PNG is lossless, so the PNG has the same size and the colors your browser displays for the bitmap. One exception: in a 32-bit bitmap with partly transparent pixels, those pixels can shift slightly on the way through the browser's canvas.` },
           { q: "Why is my BMP file refused?", a: `Either it is too large or it cannot be read. Above ${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels the message gives the bitmap's size; otherwise it says the file may be damaged or in a form your browser cannot open.` },
           { q: "Does Image Converter take a whole set of bitmaps?", a: `Yes. This page takes one bitmap at a time, but Image Converter accepts a batch of BMP files, converts them one after another, and offers all results together as a ZIP.` }
         ]}

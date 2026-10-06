@@ -154,3 +154,32 @@ png-to-ico, png-to-jpg, svg-to-png, tiff-to-jpg, webp-to-jpg, webp-to-png.
 
 Pages encore en défaut (8, en comptant les deux pages de chaque paire) : tiff-to-png, image-converter, bmp-to-png,
 heic-to-png, jpg-to-png, jpg-to-webp, png-to-webp, ico-to-png.
+
+## Troisième passe (06/10)
+
+J'ai relu en entier les pages modifiées : tiff-to-png, bmp-to-png, heic-to-png, png-to-webp, ico-to-png et image-converter (texte et note d'interface WebP, page.tsx:326). J'ai aussi relancé l'extraction et la comparaison des phrases sur les 18 pages et les 225 du site.
+
+Les 8 défauts de la deuxième passe sont corrigés :
+- Le seuil de 30 Mpx de la FAQ 3 d'Image Converter correspond à `NATIVE_WEBP_MAX_PIXELS` (config.ts:21) et à `encodeRaster` du worker.
+- La note WebP dit bien que le fichier est récupéré à la conversion.
+- Plus aucune phrase identique ni quasi identique (seuil 0,75) hors des exclusions déjà admises.
+- La structure est conforme et toutes les FAQ respectent la règle du 06/10.
+
+| # | Page | Endroit | Phrase (citation courte) | Problème | Preuve (fichier:ligne) | Correction proposée |
+|---|---|---|---|---|---|---|
+| 1 | png-to-webp | privacy (dernière phrase) | « A failed WebP encode sends us its cleaned error wording… » | **3** Plus étroit que le code. Tout message d'erreur affiché part par `useToolError`, pas seulement un échec d'encodage : décodage impossible, image de plus de 268 Mpx, fichier illisible. La phrase laisse croire que ces autres échecs ne sont pas envoyés. | png-to-webp/page.jsx:31-35 (catch autour de `loadRaster` et de l'encodage → `setError`), privacy à :75 ; useToolError.js | « A failed conversion sends us its cleaned error wording… » |
+
+**Bilan de la troisième passe** : 6 pages relues, **1 défaut** (point 3). Les autres points sont à 0.
+
+Pages sans défaut : les 17 autres.
+
+## Quatrième passe (06/10)
+
+J'ai relu en entier la section privacy de png-to-webp (page.jsx:75) et je l'ai comparée au code. Tout correspond :
+
+- **Lieu du traitement.** Le PNG est lu par `loadRaster` et le WebP est écrit dans la page (page.jsx:31-34).
+- **Origine de libwebp.** libwebp sert à tous les fichiers sans perte et à tous les WebP faits sur Safari, iPhone ou iPad (bigImage.js `encodeWebpWasm` ; imageOutput.js `encodeRaster`, repli quand le navigateur n'a pas d'encodeur WebP).
+- **Téléchargement unique.** libwebp vient de `/wasm/webp_enc.wasm` et n'est récupéré qu'une fois par page grâce à `wasmCache` (bigImage.js).
+- **Ce qui part en cas d'échec.** Les trois échecs cités passent tous par le même `catch` puis `setError` (page.jsx:35) : erreur d'encodage (limite de 16 383 px comprise), fichier illisible, image au-delà de la limite (`loadRaster`). `useToolError` transmet alors à `reportToolError` le message nettoyé, le nom de l'outil, le type d'erreur et le nom et la version du navigateur (reportError.js:142-155). Aucun fichier n'est passé, donc ni extension ni taille ne partent ; l'image n'est jamais envoyée.
+
+**0 défaut.** Le relevé du lot image-1 est à zéro sur les 18 pages.

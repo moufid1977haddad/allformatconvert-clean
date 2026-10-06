@@ -1,0 +1,337 @@
+{
+ "pages": 225,
+ "max": 0.05,
+ "over": [],
+ "top": [
+  {
+   "a": "/tools/pdf-tools/pdf-ai-summary",
+   "b": "/tools/pdf-tools/pdf-to-excel",
+   "shared": 1,
+   "ratio": 0.05
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-ai-summary",
+   "b": "/tools/pdf-tools/pdf-to-word",
+   "shared": 1,
+   "ratio": 0.05
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-to-excel",
+   "b": "/tools/pdf-tools/pdf-to-word",
+   "shared": 1,
+   "ratio": 0.05
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-extract-text",
+   "b": "/tools/pdf-tools/pdf-rotate",
+   "shared": 1,
+   "ratio": 0.048
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-number-pages",
+   "b": "/tools/pdf-tools/pdf-rotate",
+   "shared": 1,
+   "ratio": 0.048
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-rotate",
+   "b": "/tools/pdf-tools/pdf-watermark",
+   "shared": 1,
+   "ratio": 0.048
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-rotate",
+   "b": "/tools/video-tools/video-rotator",
+   "shared": 1,
+   "ratio": 0.048
+  },
+  {
+   "a": "/tools/developer-tools/code-formatter",
+   "b": "/tools/developer-tools/js-minifier",
+   "shared": 1,
+   "ratio": 0.045
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-extract-text",
+   "b": "/tools/pdf-tools/pdf-watermark",
+   "shared": 1,
+   "ratio": 0.045
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-number-pages",
+   "b": "/tools/pdf-tools/pdf-watermark",
+   "shared": 1,
+   "ratio": 0.045
+  },
+  {
+   "a": "/tools/audio-tools/audio-metadata",
+   "b": "/tools/pdf-tools/pdf-extract-text",
+   "shared": 1,
+   "ratio": 0.043
+  },
+  {
+   "a": "/tools/gif-tools/apng-to-gif",
+   "b": "/tools/pdf-tools/pdf-extract-text",
+   "shared": 1,
+   "ratio": 0.043
+  },
+  {
+   "a": "/tools/gif-tools/image-to-gif",
+   "b": "/tools/pdf-tools/pdf-extract-text",
+   "shared": 1,
+   "ratio": 0.043
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-extract-text",
+   "b": "/tools/pdf-tools/pdf-number-pages",
+   "shared": 1,
+   "ratio": 0.043
+  },
+  {
+   "a": "/tools/pdf-tools/pdf-merge",
+   "b": "/tools/pdf-tools/pdf-unlock",
+   "shared": 1,
+   "ratio": 0.042
+  },
+  {
+   "a": "/tools/audio-tools/audio-metadata",
+   "b": "/tools/video-tools/video-metadata",
+   "shared": 1,
+   "ratio": 0.04
+  },
+  {
+   "a": "/tools/file-tools/file-splitter",
+   "b": "/tools/gif-tools/gif-to-apng",
+   "shared": 1,
+   "ratio": 0.04
+  },
+  {
+   "a": "/tools/file-tools/zip-creator",
+   "b": "/tools/gif-tools/gif-to-apng",
+   "shared": 1,
+   "ratio": 0.04
+  },
+  {
+   "a": "/tools/file-tools/zip-extractor",
+   "b": "/tools/gif-tools/gif-to-apng",
+   "shared": 1,
+   "ratio": 0.04
+  },
+  {
+   "a": "/tools/gif-tools/apng-to-gif",
+   "b": "/tools/gif-tools/gif-to-apng",
+   "shared": 1,
+   "ratio": 0.04
+  },
+  {
+   "a": "/tools/gif-tools/gif-compressor",
+   "b": "/tools/gif-tools/gif-to-apng",
+   "shared": 1,
+   "ratio": 0.04
+  },
+  {
+   "a": "/tools/gif-tools/gif-to-apng",
+   "b": "/tools/pdf-tools/epub-to-pdf",
+   "shared": 1,
+   "ratio": 0.04
+  },
+  {
+   "a": "/tools/text-tools/text-truncator",
+   "b": "/tools/text-tools/whitespace-remover",
+   "shared": 1,
+   "ratio": 0.04
+  },
+  {
+   "a": "/tools/file-tools/file-splitter",
+   "b": "/tools/file-tools/zip-extractor",
+   "shared": 1,
+   "ratio": 0.038
+  },
+  {
+   "a": "/tools/file-tools/file-splitter",
+   "b": "/tools/pdf-tools/epub-to-pdf",
+   "shared": 1,
+   "ratio": 0.038
+  },
+  {
+   "a": "/tools/file-tools/zip-creator",
+   "b": "/tools/file-tools/zip-extractor",
+   "shared": 1,
+   "ratio": 0.038
+  },
+  {
+   "a": "/tools/file-tools/zip-creator",
+   "b": "/tools/pdf-tools/epub-to-pdf",
+   "shared": 1,
+   "ratio": 0.038
+  },
+  {
+   "a": "/tools/file-tools/zip-extractor",
+   "b": "/tools/gif-tools/apng-to-gif",
+   "shared": 1,
+   "ratio": 0.038
+  },
+  {
+   "a": "/tools/file-tools/zip-extractor",
+   "b": "/tools/gif-tools/gif-compressor",
+   "shared": 1,
+   "ratio": 0.038
+  },
+  {
+   "a": "/tools/file-tools/zip-extractor",
+   "b": "/tools/pdf-tools/epub-to-pdf",
+   "shared": 1,
+   "ratio": 0.038
+  },
+  {
+   "a": "/tools/gif-tools/apng-to-gif",
+   "b": "/tools/pdf-tools/epub-to-pdf",
+   "shared": 1,
+   "ratio": 0.038
+  },
+  {
+   "a": "/tools/gif-tools/gif-compressor",
+   "b": "/tools/pdf-tools/epub-to-pdf",
+   "shared": 1,
+   "ratio": 0.038
+  },
+  {
+   "a": "/tools/video-tools/video-filter",
+   "b": "/tools/video-tools/video-rotator",
+   "shared": 1,
+   "ratio": 0.038
+  },
+  {
+   "a": "/tools/ai-tools/sentiment-analyzer",
+   "b": "/tools/converter-tools/mobi-to-epub",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/audio-tools/audio-metadata",
+   "b": "/tools/gif-tools/apng-to-gif",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/audio-tools/audio-metadata",
+   "b": "/tools/gif-tools/image-to-gif",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/file-tools/file-splitter",
+   "b": "/tools/file-tools/zip-creator",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/file-tools/file-splitter",
+   "b": "/tools/gif-tools/apng-to-gif",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/file-tools/zip-creator",
+   "b": "/tools/gif-tools/apng-to-gif",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/file-tools/zip-creator",
+   "b": "/tools/gif-tools/gif-compressor",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/gif-tools/apng-to-gif",
+   "b": "/tools/gif-tools/gif-compressor",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/gif-tools/apng-to-gif",
+   "b": "/tools/gif-tools/image-to-gif",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/video-tools/video-compressor",
+   "b": "/tools/video-tools/video-resizer",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/video-tools/video-resizer",
+   "b": "/tools/video-tools/video-watermark",
+   "shared": 1,
+   "ratio": 0.037
+  },
+  {
+   "a": "/tools/file-tools/file-splitter",
+   "b": "/tools/gif-tools/gif-compressor",
+   "shared": 1,
+   "ratio": 0.034
+  },
+  {
+   "a": "/tools/video-tools/video-compressor",
+   "b": "/tools/video-tools/video-watermark",
+   "shared": 1,
+   "ratio": 0.034
+  },
+  {
+   "a": "/tools/developer-tools/hash-generator",
+   "b": "/tools/video-tools/video-to-audio",
+   "shared": 1,
+   "ratio": 0.031
+  }
+ ],
+ "repeated": [
+  {
+   "s": "is there a size limit",
+   "pages": [
+    "/tools/file-tools/file-splitter",
+    "/tools/file-tools/zip-creator",
+    "/tools/file-tools/zip-extractor",
+    "/tools/gif-tools/apng-to-gif",
+    "/tools/gif-tools/gif-compressor",
+    "/tools/gif-tools/gif-to-apng",
+    "/tools/pdf-tools/epub-to-pdf"
+   ]
+  },
+  {
+   "s": "no, not always",
+   "pages": [
+    "/tools/audio-tools/audio-metadata",
+    "/tools/gif-tools/apng-to-gif",
+    "/tools/gif-tools/image-to-gif",
+    "/tools/pdf-tools/pdf-extract-text"
+   ]
+  },
+  {
+   "s": "choose the pdf",
+   "pages": [
+    "/tools/pdf-tools/pdf-extract-text",
+    "/tools/pdf-tools/pdf-number-pages",
+    "/tools/pdf-tools/pdf-rotate",
+    "/tools/pdf-tools/pdf-watermark"
+   ]
+  },
+  {
+   "s": "is there a usage limit",
+   "pages": [
+    "/tools/pdf-tools/pdf-ai-summary",
+    "/tools/pdf-tools/pdf-to-excel",
+    "/tools/pdf-tools/pdf-to-word"
+   ]
+  },
+  {
+   "s": "is the sound kept",
+   "pages": [
+    "/tools/video-tools/video-compressor",
+    "/tools/video-tools/video-resizer",
+    "/tools/video-tools/video-watermark"
+   ]
+  }
+ ]
+}

@@ -116,7 +116,7 @@ export default function AddTextToImagePage() {
             <label className="block"><span className="block text-neutral-500 mb-1">Opacity: {Math.round(opacity * 100)}%</span><input id="tx-opacity" aria-label="Opacity (%)" type="range" min="0.1" max="1" step="0.05" value={opacity} onChange={e => setOpacity(Number(e.target.value))} className="w-full" /></label>
             <label className="block"><span className="block text-neutral-500 mb-1">Rotation: {angle}°</span><input id="tx-angle" aria-label="Rotation (degrees)" type="range" min="-180" max="180" value={angle} onChange={e => setAngle(Number(e.target.value))} className="w-full" /></label>
             <label className="block"><span className="block text-neutral-500 mb-1">Outline: {outline}px</span><input id="tx-outline" aria-label="Outline (px)" type="range" min="0" max="30" value={outline} onChange={e => setOutline(Number(e.target.value))} className="w-full" /></label>
-            {outline > 0 && <label className="flex items-center gap-2"><span className="text-neutral-500">Outline colour</span><input id="tx-outline-color" type="color" value={outlineColor} onChange={e => setOutlineColor(e.target.value)} /></label>}
+            {outline > 0 && <label className="flex items-center gap-2"><span className="text-neutral-500">Outline color</span><input id="tx-outline-color" type="color" value={outlineColor} onChange={e => setOutlineColor(e.target.value)} /></label>}
           </div>
           <button onClick={apply} disabled={!image || !text} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Apply Text</button>
           {result && <div className="space-y-2"><img alt="Preview of your image" src={result.url} className="max-h-48 mx-auto rounded" /><FileDownload href={result.url} name={result.name} /></div>}
@@ -145,7 +145,7 @@ export default function AddTextToImagePage() {
           { q: "Can I write several lines?", a: "Yes. Press Enter in the text box to start a new line. The lines are centered on the X/Y point, one under the other, spaced at 1.2 times the font size, and the outline and shadow apply to every line." },
           { q: "Can I add two separate text boxes?", a: "No. There is one block of text per image. Clicking \"Apply Text\" again redraws your current text on the original photo; it does not stack a second layer. For a second caption, download the result, load it again and add the next text." },
           { q: "Is the font size measured on the preview?", a: "No. It is counted in pixels of the full photo, so on a large phone photo the default size looks small. Raise \"Font Size\" (up to 800 px) and click \"Apply Text\" again to check." },
-          { q: "Can I make a classic meme caption?", a: "Yes. Choose \"Impact (memes)\", keep a white \"Color\", raise \"Outline\" a few pixels with a black \"Outline colour\", and move \"Y Position\" near the top or the bottom. Bold is already on by default." },
+          { q: "Can I make a classic meme caption?", a: "Yes. Choose \"Impact (memes)\", keep a white \"Color\", raise \"Outline\" a few pixels with a black \"Outline color\", and move \"Y Position\" near the top or the bottom. Bold is already on by default." },
         ]}
         tips={[
           "The settings stay in place when you load another photo, so you can put the same caption on several pictures one after the other.",

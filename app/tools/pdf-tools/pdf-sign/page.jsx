@@ -390,7 +390,7 @@ export default function Page() {
           { label: 'Input', value: `PDF; signature image: PNG, JPG or WebP` },
           { label: 'Signature', value: `Drawn, typed in a handwriting font, or uploaded` },
           { label: 'Pages', value: `Last (default), first, every page or a page number` },
-          { label: 'Placement', value: `Bottom right (default), bottom left, bottom centre, top right, or dragged` },
+          { label: 'Placement', value: `Bottom right (default), bottom left, bottom center, top right, or dragged` },
           { label: 'Result', value: `signed.pdf` },
         ]}
         privacy={`Your drawing, typed name or signature photo and the PDF are combined by pdf-lib in this browser tab, and none of them is sent to us. The handwriting font is served by this site, not loaded from Google. A PDF that needs a password to open is refused when you choose it.`}

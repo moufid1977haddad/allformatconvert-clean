@@ -58,23 +58,23 @@ export default function PNGtoJPGPage() {
       </div>
       <SeoContent
         title="PNG to JPG"
-        description={`PNG to JPG turns a PNG image into a JPG file. JPG has no transparency, so the page asks which colour the transparent areas should become (white at first) and paints it under the image before encoding. The "JPG quality" slider, from 10 to 100, sets how much detail the compression keeps; it starts at 92. An animated PNG gives its first frame only, and the page says so before you convert. One image per conversion. The JPG is encoded in your browser; for very large images on an iPhone or iPad, by MozJPEG in WebAssembly.`}
+        description={`PNG to JPG turns a PNG image into a JPG file. JPG has no transparency, so the page asks which color the transparent areas should become (white at first) and paints it under the image before encoding. The "JPG quality" slider, from 10 to 100, sets how much detail the compression keeps; it starts at 92. An animated PNG gives its first frame only, and the page says so before you convert. One image per conversion. The JPG is encoded in your browser; for very large images on an iPhone or iPad, by MozJPEG in WebAssembly.`}
         howToTitle="How to convert PNG to JPG"
         howTo={[
           `Choose the PNG to flatten; it appears in the upload area.`,
           `Set the "JPG quality" slider.`,
-          `Next to "Transparent areas become", pick the colour for the transparent parts.`,
+          `Next to "Transparent areas become", pick the color for the transparent parts.`,
           `Click "Convert", then "Download" to get the JPG with the PNG's name.`
         ]}
         specs={[
           { label: 'Input format', value: `PNG (.png), one file` },
-          { label: 'Output format', value: `JPG, quality 10 to 100, transparent areas filled with the colour you pick` },
+          { label: 'Output format', value: `JPG, quality 10 to 100, transparent areas filled with the color you pick` },
           { label: 'Largest image', value: `${Math.round(RASTER_MAX_PIXELS / 1e6)} megapixels on a computer` },
           { label: 'On iPhone and iPad', value: `MozJPEG needs several times the image's memory, so very large images may not fit; ${PHONE_MAX_MP} megapixels is the largest size confirmed on a real iPhone` }
         ]}
         privacy={`Conversion happens inside this tab: the browser decodes the PNG, fills the transparent areas and writes the JPG. The image is never transferred to a server. If an error appears, a cleaned report (message, tool name, browser name and version) is logged so that we can fix problems.`}
         faqs={[
-          { q: "Can I choose the colour of the transparent parts?", a: `Yes. They take the colour chosen next to "Transparent areas become", white unless you change it. Half-transparent edges are blended with that colour, so pick the colour of the page or document the JPG will sit on.` },
+          { q: "Can I choose the colour of the transparent parts?", a: `Yes. They take the color chosen next to "Transparent areas become", white unless you change it. Half-transparent edges are blended with that color, so pick the color of the page or document the JPG will sit on.` },
           { q: "Will I lose quality converting PNG to JPG?", a: `Yes, some. JPG is lossy, so fine detail and sharp edges get slightly blurred. The slider starts at 92; lower values make a smaller file with more visible artifacts.` },
           { q: "Can I convert many PNG files at once?", a: `No. Every click on "Convert" handles one PNG. Image Converter takes a batch and writes JPG files with transparency flattened onto white.` }
         ]}

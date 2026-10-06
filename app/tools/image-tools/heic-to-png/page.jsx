@@ -85,7 +85,7 @@ export default function HeicToPngPage() {
         ]}
         privacy={`The photo is not sent anywhere: the HEIC is read on your phone or computer, by the browser's own decoder or by the heic2any library, fetched from our site only when needed, and the PNG is produced right there. A failed conversion sends a short report to our error log (cleaned message, extension, size range, tool name, browser name and version); the photo itself and its name are never part of it.`}
         faqs={[
-          { q: "Is the PNG an exact copy of the HEIC photo?", a: `Yes, of the pixels your browser decodes. Nothing is compressed away, but the browser works with 8 bits per colour channel, so a photo stored with more than 8 bits per channel comes out at 8 bits.` },
+          { q: "Is the PNG an exact copy of the HEIC photo?", a: `Yes, of the pixels your browser decodes. Nothing is compressed away, but the browser works with 8 bits per color channel, so a photo stored with more than 8 bits per channel comes out at 8 bits.` },
           { q: "Is the iPhone's location removed from the PNG?", a: `Yes. The PNG is built from the pixels alone; the location, date and camera details stored in the HEIC are not copied.` },
           { q: "Is a photo bigger than Safari's canvas limit converted whole?", a: `Yes. iOS decodes the HEIC itself, at full size, and a photo larger than one Safari canvas allows is decoded in strips, so big photos from recent iPhones are converted whole.` }
         ]}

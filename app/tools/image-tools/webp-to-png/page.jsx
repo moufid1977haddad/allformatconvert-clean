@@ -71,7 +71,7 @@ export default function WebPtoPNGPage() {
         ]}
         privacy={`No upload takes place: your browser decodes the WebP and the PNG is built in memory on this page, by the canvas or, for very large images on iPhone and iPad, by the page's own PNG writer. When an error is shown, its cleaned message, the tool's name and your browser's name and version reach our log.`}
         faqs={[
-          { q: "Does the PNG keep the transparent areas?", a: `Yes. WebP and PNG both have an alpha channel, so transparent and semi-transparent pixels stay that way. Partly transparent edge colours can change slightly in the browser's canvas, more for nearly transparent pixels.` },
+          { q: "Does the PNG keep the transparent areas?", a: `Yes. WebP and PNG both have an alpha channel, so transparent and semi-transparent pixels stay that way. Partly transparent edge colors can change slightly in the browser's canvas, more for nearly transparent pixels.` },
           { q: "Does converting restore detail a lossy WebP lost?", a: `No. The PNG stores the WebP exactly as decoded, including any blur or blocks from its compression. It only stops further loss if you edit and save the picture again.` },
           { q: "Can I convert an animated WebP?", a: `No, not as an animation. The PNG holds the first frame only, and a note says so when you pick the file. To keep every frame, convert the animation to GIF.` }
         ]}

@@ -195,7 +195,7 @@ export default function ImageResizerPage() {
           { label: "WebP result", value: "At most 16,383 pixels on either side" },
         ]}
         privacyTitle="Where your image is processed"
-        privacy={"The picture is redrawn at its new size by this page in your browser, and it is not sent to a server, Safari included for WebP. The resized file waits in the tab until you download it. When the page displays an error, the cleaned text of that message is reported to us with the tool's name and your browser's name and version."}
+        privacy={"The picture is redrawn at its new size by this page in your browser, and it is not sent to a server, Safari included for WebP. The resized file waits in the tab until you download it. If resizing fails with a message, we are sent that message once cleaned, the name Image Resizer, and which browser and version you used."}
         faqs={[
           { q: "Will my image be stretched?", a: "No, not by default: \"Keep proportions\" is ticked, so typing a new width recalculates the height from the original ratio, and the reverse. Untick it only if you want another shape; the image is then squeezed to the size you type." },
           { q: "Can it make an image bigger?", a: "Yes, in \"By pixels\" mode once you untick \"Do not enlarge if the image is smaller\". Enlarging only spreads the existing pixels and adds no detail; AI Image Upscaler is the tool that rebuilds detail." },

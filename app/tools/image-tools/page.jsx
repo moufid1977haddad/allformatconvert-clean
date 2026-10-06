@@ -3,12 +3,12 @@ import Link from 'next/link';
 import { ToolIcon, CategoryIcon, toolTextColors, categoryColors } from '../../lib/toolIcons';
 
 const tools = [
-  { title: 'Image Compressor', description: 'Compress up to 20 images, format kept', href: '/tools/image-tools/image-compressor', group: 'Transform' },
+  { title: 'Image Compressor', description: 'Up to 20 JPG, PNG, WebP, AVIF or SVG, format kept', href: '/tools/image-tools/image-compressor', group: 'Transform' },
   { title: 'Image Converter', description: 'To WebP, PNG, JPG, AVIF, GIF, BMP, TIFF, ICO or PDF', href: '/tools/image-tools/image-converter', group: 'Transform' },
-  { title: 'Image Resizer', description: 'Resize in pixels or by 25, 50 or 75 %', href: '/tools/image-tools/image-resizer', group: 'Transform' },
+  { title: 'Image Resizer', description: 'Resize in pixels or by 25, 50 or 75%', href: '/tools/image-tools/image-resizer', group: 'Transform' },
   { title: 'Image Cropper', description: 'Crop in pixels or to a preset aspect ratio', href: '/tools/image-tools/image-cropper', group: 'Transform' },
   { title: 'Image Rotate', description: 'Rotate 90°, 180°, 270° or any angle', href: '/tools/image-tools/image-rotate', group: 'Transform' },
-  { title: 'Image Flip', description: 'Flip images horizontally or vertically', href: '/tools/image-tools/image-flip', group: 'Transform' },
+  { title: 'Image Flip', description: 'Mirror an image left-right, top-bottom or both', href: '/tools/image-tools/image-flip', group: 'Transform' },
   { title: 'Round Corners', description: 'Round the corners, transparent or colored', href: '/tools/image-tools/round-corners', group: 'Annotate' },
   { title: 'Add Text to Image', description: 'Write text with font, outline and shadow', href: '/tools/image-tools/add-text-to-image', group: 'Annotate' },
   { title: 'Image Editor', description: 'Adjustments, effects, border and text in one editor', href: '/tools/image-tools/image-editor', group: 'Annotate' },
@@ -24,8 +24,8 @@ const tools = [
   { title: 'Image Pixelator', description: 'Pixelate the whole image into square blocks', href: '/tools/image-tools/image-pixelator', group: 'Filters & Effects' },
   { title: 'Add Noise', description: 'Add mono or color film grain', href: '/tools/image-tools/add-noise', group: 'Annotate' },
   { title: 'Add Vignette', description: 'Darken the edges with a radial vignette', href: '/tools/image-tools/add-vignette', group: 'Annotate' },
-  { title: 'HEIC to JPG', description: 'Convert iPhone HEIC photos to JPG', href: '/tools/image-tools/heic-to-jpg', group: 'Convert Format' },
-  { title: 'HEIC to PNG', description: 'Convert iPhone HEIC photos to PNG', href: '/tools/image-tools/heic-to-png', group: 'Convert Format' },
+  { title: 'HEIC to JPG', description: 'iPhone HEIC or HEIF photo to JPG, quality adjustable', href: '/tools/image-tools/heic-to-jpg', group: 'Convert Format' },
+  { title: 'HEIC to PNG', description: 'HEIC or HEIF photos from an iPhone to PNG', href: '/tools/image-tools/heic-to-png', group: 'Convert Format' },
   { title: 'WebP to PNG', description: 'Convert WebP to PNG, transparency kept', href: '/tools/image-tools/webp-to-png', group: 'Convert Format' },
   { title: 'WebP to JPG', description: 'Convert WebP to JPG on a background color', href: '/tools/image-tools/webp-to-jpg', group: 'Convert Format' },
   { title: 'PNG to JPG', description: 'Convert PNG to JPG with quality control', href: '/tools/image-tools/png-to-jpg', group: 'Convert Format' },
@@ -61,30 +61,30 @@ export default function ImageToolsPage() {
       <div className="max-w-2xl mx-auto mt-12 space-y-8 px-4 pb-12">
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-3">About Image Tools</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Every tool on this page edits the image in your browser, with the canvas API and, for HEIC, TIFF and camera RAW files, decoders that run on the page, so your pictures are not uploaded. The two image tools that use a server, Background Remover and Image Upscaler, are on the AI Tools page. The tools fall into format converters, transforms (resize, crop, rotate, flip), effects and filters, and analysis: metadata, side-by-side comparison and duplicate search.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed">Every tool on this page works on the image in your browser, with the canvas API, WebGL or WebAssembly code, so your pictures are not uploaded. Three image tools that send a picture are on the AI Tools page: Image Captioner sends it to OpenAI through our server, Background Remover to our own service, and Image Upscaler to our server unless it runs on your device. The tools fall into format converters, transforms (resize, crop, rotate, flip), effects and filters, and analysis: metadata, side-by-side comparison and duplicate search.</p>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">How to use Image Tools</h2>
           <ol className="space-y-2">
             <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">1</span>Pick a format converter such as HEIC to JPG or PNG to WebP, a transform, an effect, or an analysis tool.</li>
             <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">2</span>Open the image from your device; Image Compressor and Image Converter accept several at once.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Set the options, such as quality, size in pixels, angle or effect strength.</li>
-            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download the result; with several images, Image Converter offers them in one ZIP.</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">3</span>Set the tool's own controls, such as the JPG quality in PNG to JPG, the free angle in Image Rotate or the blur strength in Image Blur.</li>
+            <li className="flex gap-3 text-sm text-neutral-600 dark:text-neutral-400"><span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">4</span>Download the result; with several images, Image Compressor and Image Converter offer them in one ZIP.</li>
           </ol>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
           <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Which image formats are supported?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">JPG, PNG, WebP, GIF, BMP, TIFF, HEIC, ICO and SVG have their own converters, and Image Converter also reads PSD and camera RAW files and writes AVIF, ICO and PDF. Each tool page lists what it opens.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Are my images uploaded?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No. The tools listed here process images in your browser. Only Background Remover and Image Upscaler, in AI Tools, send an image to our own server, and the upscaler does so only when it cannot run on your device.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I remove the GPS location from a photo?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes. Image Metadata Viewer shows the EXIF, GPS, IPTC and XMP data of an image and saves a copy without metadata for JPG, PNG and WebP files.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How many images can I process at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">20 in Image Compressor. Image Converter and Duplicate Image Finder also take several images at once; the other tools take one image at a time.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Which image formats are supported?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">JPG, PNG, WebP, GIF, BMP, TIFF, HEIC, ICO and SVG have their own converters, and Image Converter also reads PSD and camera RAW files and writes AVIF, ICO and PDF.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Are my images uploaded?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">No. The tools listed here process images in your browser. On the AI Tools page, Image Captioner sends an image to OpenAI through our server, Background Remover sends a JPEG copy of at most 1,024 px to our own service, and Image Upscaler uses our server unless it runs on your device.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Can I remove the GPS location from a photo?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Yes, for JPG and PNG files. Image Metadata Viewer shows the EXIF, GPS, IPTC and XMP data of a JPG, HEIC, TIFF, PNG or AVIF image, and saves a copy without metadata for JPG and PNG; WebP metadata is not read.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How many images can I process at once?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">20 in Image Compressor. Image Converter and Duplicate Image Finder also take several images at once, Image Comparison takes two, and the other tools take one image at a time.</p></div>
           </div>
         </div>
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Before posting a photo, check Image Metadata Viewer for GPS coordinates and save a copy without them.</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Before posting an iPhone photo, convert it with HEIC to JPG: the new JPG carries no EXIF or GPS data. Check any other JPG or PNG in Image Metadata Viewer.</li>
             <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>PNG to JPG and WebP to JPG let you pick the color that fills transparent areas, since JPG has no transparency.</li>
             <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>PNG to ICO puts several icon sizes in one .ico file, ready to use as a favicon.</li>
             <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Use the difference image in Image Comparison to see which pixels an edit or a compression changed.</li>

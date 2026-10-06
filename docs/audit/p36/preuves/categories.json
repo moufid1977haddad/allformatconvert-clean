@@ -1,0 +1,446 @@
+{
+ "/tools/ai-tools": [
+  {
+   "claim": "10 languages",
+   "file": "app/tools/ai-tools/ai-translator/page.jsx",
+   "pattern": "const languages = \\['English', 'French', 'Spanish', 'German', 'Italian', 'Portuguese', 'Arabic', 'Chinese', 'Japanese', 'Russian'\\];"
+  },
+  {
+   "claim": "2× or 4×",
+   "file": "app/tools/ai-tools/image-upscaler/page.jsx",
+   "pattern": "\\[2, 4\\]"
+  },
+  {
+   "claim": "40 to 1,000 words",
+   "file": "lib/ai/pangram.js",
+   "pattern": "AI_DETECT_MAX_WORDS = 1000;[\\s\\S]*AI_DETECT_MIN_WORDS = 40;"
+  },
+  {
+   "claim": "25 MB",
+   "file": "lib/quota/limits.js",
+   "pattern": "MAX_AUDIO_UPLOAD_BYTES = 25 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "2,000 words a day",
+   "file": "lib/ai/pangram.js",
+   "pattern": "AI_DETECT_FREE_WORDS_PER_DAY = 2000"
+  },
+  {
+   "claim": "100 words",
+   "file": "lib/ai/pangram.js",
+   "pattern": "Math\\.ceil\\(words \\/ 100\\)\\) \\* 100"
+  },
+  {
+   "claim": "5 images a day",
+   "file": "lib/quota/imageGen.js",
+   "pattern": "IMAGE_GEN_PER_IP_PER_DAY = 5;"
+  },
+  {
+   "claim": "1,024 px",
+   "file": "app/tools/ai-tools/background-remover/page.jsx",
+   "pattern": "RESIZE_TARGET_PX = 1024"
+  },
+  {
+   "claim": "8,000 characters",
+   "file": "lib/quota/limits.js",
+   "pattern": "MAX_PROMPT_CHARS = 8000"
+  },
+  {
+   "claim": "1,000 tokens",
+   "file": "app/api/ai/route.ts",
+   "pattern": "max_tokens: 1000"
+  },
+  {
+   "claim": "1,000 characters",
+   "file": "app/tools/ai-tools/image-generator/page.jsx",
+   "pattern": "MAX_CHARS = 1000"
+  }
+ ],
+ "/tools/audio-tools": [
+  {
+   "claim": "18 formats",
+   "file": "app/tools/audio-tools/audio-converter/page.jsx",
+   "pattern": "It writes 18 formats: MP3, WAV, AAC, FLAC"
+  },
+  {
+   "claim": "64 to 320 kbps",
+   "file": "app/tools/audio-tools/audio-compressor/page.jsx",
+   "pattern": "\\['64', '96', '128', '192', '256', '320'\\]"
+  },
+  {
+   "claim": "0.25× to 5×",
+   "file": "app/tools/audio-tools/audio-booster/page.jsx",
+   "pattern": "min=\\{0\\.25\\} max=\\{5\\} step=\\{0\\.25\\}"
+  },
+  {
+   "claim": "4 MB",
+   "file": "lib/quota/limits.js",
+   "pattern": "OFFICE_STAGED_THRESHOLD_BYTES = 4 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "2 GB",
+   "file": "app/components/MetadataStripper.jsx",
+   "pattern": "MAX_BYTES = 2 \\* 1024 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "25 MB",
+   "file": "lib/quota/limits.js",
+   "pattern": "MAX_AUDIO_UPLOAD_BYTES = 25 \\* 1024 \\* 1024"
+  }
+ ],
+ "/tools/converter-tools": [
+  {
+   "claim": "12 categories",
+   "file": "app/tools/converter-tools/unit-converter/page.jsx",
+   "pattern": "Unit Converter covers 12 categories"
+  },
+  {
+   "claim": "20 popular currencies",
+   "file": "app/tools/converter-tools/currency-converter/page.jsx",
+   "pattern": "POPULAR = \\['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'INR', 'MXN', 'BRL', 'KRW', 'SGD', 'HKD', 'NZD', 'SEK', 'NOK', 'ZAR', 'TRY', 'AED'\\]"
+  },
+  {
+   "claim": "5 years",
+   "file": "app/tools/converter-tools/currency-converter/RateHistory.jsx",
+   "pattern": "days: 5 \\* 366, group: 'week'"
+  },
+  {
+   "claim": "10 years",
+   "file": "app/tools/converter-tools/currency-converter/RateHistory.jsx",
+   "pattern": "id: '10Y', days: 10 \\* 366, group: 'month'"
+  },
+  {
+   "claim": "1 week",
+   "file": "app/tools/converter-tools/currency-converter/RateHistory.jsx",
+   "pattern": "id: '1W', days: 7"
+  },
+  {
+   "claim": "8 currencies",
+   "file": "app/tools/converter-tools/currency-converter/page.jsx",
+   "pattern": "not available for 8 of the 166 currencies when we checked on October 3, 2026"
+  },
+  {
+   "claim": "3, 4, 6 or 8 digits",
+   "file": "app/tools/converter-tools/color-converter/page.jsx",
+   "pattern": "use 3, 4, 6 or 8 digits"
+  }
+ ],
+ "/tools/developer-tools": [
+  {
+   "claim": "1,000 UUIDs",
+   "file": "app/tools/developer-tools/uuid-generator/page.jsx",
+   "pattern": "Math\\.min\\(1000, Math\\.max\\(1,"
+  },
+  {
+   "claim": "12 dialects",
+   "file": "app/tools/developer-tools/sql-formatter/page.jsx",
+   "pattern": "\\[\\['sql','Standard SQL'\\](,\\['\\w+','[^']+'\\]){11}\\]\\.map"
+  },
+  {
+   "claim": "13 languages",
+   "file": "app/lib/codeFormat.js",
+   "pattern": "export const LANGUAGES = \\[\\s*(\\{ id: '\\w+', label: '[^']+', ext: '\\w+' \\},\\s*){13}\\];"
+  },
+  {
+   "claim": "8 presets",
+   "file": "app/tools/developer-tools/cron-expression-builder/page.jsx",
+   "pattern": "const presets = \\[(\\['[^']+','[^']+'\\],?){8}\\]"
+  }
+ ],
+ "/tools/file-tools": [
+  {
+   "claim": "5 GB",
+   "file": "app/tools/file-tools/file-splitter/config.js",
+   "pattern": "MAX_FILE_SIZE_BYTES = 5 \\* 1024 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "1,000 parts",
+   "file": "app/tools/file-tools/file-splitter/config.js",
+   "pattern": "MAX_CHUNKS = 1000"
+  },
+  {
+   "claim": "700 MB",
+   "file": "app/tools/file-tools/zip-creator/config.js",
+   "pattern": "MAX_TOTAL_SIZE_BYTES = 700 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "100 MB",
+   "file": "app/tools/file-tools/zip-creator/config.js",
+   "pattern": "MAX_TOTAL_SIZE_BYTES = 100 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "1.9 GB",
+   "file": "app/tools/file-tools/zip-extractor/config.js",
+   "pattern": "MAX_FILE_BYTES = 1900 \\* 1000 \\* 1000"
+  },
+  {
+   "claim": "300 MB on those devices",
+   "file": "app/tools/file-tools/zip-extractor/config.js",
+   "pattern": "MAX_FILE_BYTES = 300 \\* 1000 \\* 1000"
+  },
+  {
+   "claim": "above 300 MB",
+   "file": "app/lib/embeddedMetadata.js",
+   "pattern": "MAX_FULL_READ = 300 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "600,000 iterations",
+   "file": "app/lib/textCrypto.js",
+   "pattern": "600000"
+  }
+ ],
+ "/tools/gif-tools": [
+  {
+   "claim": "60 s",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "MAX_SECONDS = 60"
+  },
+  {
+   "claim": "60 seconds",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "MAX_SECONDS = 60"
+  },
+  {
+   "claim": "0.2 seconds",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "0\\.2"
+  },
+  {
+   "claim": "1 GB",
+   "file": "app/components/MediaServiceTool.jsx",
+   "pattern": "MAX_UPLOAD_MB = 1024"
+  }
+ ],
+ "/tools/image-tools": [
+  {
+   "claim": "20 in Image Compressor",
+   "file": "app/tools/image-tools/image-compressor/page.jsx",
+   "pattern": "MAX_FILES = 20\\b"
+  },
+  {
+   "claim": "1,024 px",
+   "file": "app/tools/ai-tools/background-remover/page.jsx",
+   "pattern": "RESIZE_TARGET_PX = 1024"
+  },
+  {
+   "claim": "Up to 20 JPG",
+   "file": "app/tools/image-tools/image-compressor/page.jsx",
+   "pattern": "MAX_FILES = 20\\b"
+  },
+  {
+   "claim": "25, 50 or 75%",
+   "file": "app/tools/image-tools/image-resizer/page.jsx",
+   "pattern": "PERCENTS = \\[25, 50, 75\\]"
+  }
+ ],
+ "/tools/math-tools": [
+  {
+   "claim": "1 to 3999",
+   "file": "app/tools/math-tools/roman-numeral-converter/page.jsx",
+   "pattern": "n >= 1 && n <= 3999"
+  },
+  {
+   "claim": "23 statistics",
+   "file": "app/tools/math-tools/statistics-calculator/page.jsx",
+   "pattern": "a list of numbers with 23 values"
+  },
+  {
+   "claim": "23 values",
+   "file": "app/tools/math-tools/statistics-calculator/page.jsx",
+   "pattern": "a list of numbers with 23 values"
+  },
+  {
+   "claim": "12 significant digits",
+   "file": "app/tools/math-tools/scientific-calculator/page.jsx",
+   "pattern": "results keep 12 significant digits"
+  },
+  {
+   "claim": "10 in Percentage Calculator",
+   "file": "app/tools/math-tools/percentage-calculator/page.jsx",
+   "pattern": "up to 10 significant digits"
+  },
+  {
+   "claim": "40 digits",
+   "file": "app/tools/math-tools/number-base-converter/page.jsx",
+   "pattern": "fraction that does not end stops after 40 digits"
+  },
+  {
+   "claim": "last 10 calculations",
+   "file": "app/tools/math-tools/scientific-calculator/page.jsx",
+   "pattern": "\\.slice\\(0, 10\\)"
+  },
+  {
+   "claim": "any base to 36",
+   "file": "app/tools/math-tools/number-base-converter/page.jsx",
+   "pattern": "any base from 2 to 36"
+  }
+ ],
+ "/tools/pdf-tools": [
+  {
+   "claim": "102 languages",
+   "file": "lib/ocrLanguageCodes.js",
+   "pattern": "LANGUAGES"
+  },
+  {
+   "claim": "5 formats",
+   "file": "app/tools/pdf-tools/pdf-number-pages/page.jsx",
+   "pattern": "const FORMATS = \\[\\s*(\\['[^']*', '[^']*'\\],\\s*){5}\\];"
+  },
+  {
+   "claim": "6 positions",
+   "file": "app/tools/pdf-tools/pdf-number-pages/page.jsx",
+   "pattern": "const POSITIONS = \\['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right'\\];"
+  },
+  {
+   "claim": "AES-128",
+   "file": "app/tools/pdf-tools/pdf-protect/page.jsx",
+   "pattern": "AES-128 for every file"
+  },
+  {
+   "claim": "200 MB",
+   "file": "lib/quota/limits.js",
+   "pattern": "MAX_PDF_COMPRESS_STAGED_BYTES = 200 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "100 MB",
+   "file": "lib/quota/limits.js",
+   "pattern": "MAX_OFFICE_STAGED_BYTES = 100 \\* 1024 \\* 1024"
+  },
+  {
+   "claim": "4 MB",
+   "file": "lib/quota/limits.js",
+   "pattern": "OFFICE_STAGED_THRESHOLD_BYTES = 4 \\* 1024 \\* 1024"
+  }
+ ],
+ "/tools/qr-barcodes-tools": [
+  {
+   "claim": "5,000 per ZIP",
+   "file": "app/tools/qr-barcodes-tools/barcode-generator/config.js",
+   "pattern": "MAX_BATCH = 5000"
+  },
+  {
+   "claim": "per PDF of label sheets",
+   "file": "app/tools/qr-barcodes-tools/barcode-generator/labels.js",
+   "pattern": "MAX_LABELS = 5000"
+  },
+  {
+   "claim": "5 MB",
+   "file": "app/tools/qr-barcodes-tools/barcode-generator/page.jsx",
+   "pattern": "file\\.size > 5e6"
+  },
+  {
+   "claim": "up to 20 QR codes",
+   "file": "app/tools/qr-barcodes-tools/qr-scanner/page.jsx",
+   "pattern": "up to 20 in one image"
+  },
+  {
+   "claim": "72 to 2400 dpi",
+   "file": "app/tools/qr-barcodes-tools/barcode-generator/render.js",
+   "pattern": "clamp\\(Number\\(ui\\.dpi\\) \\|\\| 300, 72, 2400\\)"
+  },
+  {
+   "claim": "vCard 3.0",
+   "file": "app/tools/qr-barcodes-tools/qr-generator/page.jsx",
+   "pattern": "vCard 3\\.0 contact"
+  }
+ ],
+ "/tools/text-tools": [
+  {
+   "claim": "12 cases",
+   "file": "app/tools/text-tools/case-converter/page.jsx",
+   "pattern": "Convert text to 12 letter and programming cases"
+  },
+  {
+   "claim": "1 to 100 times",
+   "file": "app/tools/text-tools/text-repeater/page.jsx",
+   "pattern": "n < 1 \\|\\| n > 100"
+  },
+  {
+   "claim": "10 FIGlet fonts",
+   "file": "app/tools/text-tools/ascii-art/page.jsx",
+   "pattern": "choose one of ten fonts"
+  },
+  {
+   "claim": "1,000,000 characters",
+   "file": "app/components/TextArea.jsx",
+   "pattern": "const LIMIT = 1_000_000;"
+  },
+  {
+   "claim": "600,000 iterations",
+   "file": "app/lib/textCrypto.js",
+   "pattern": "600000"
+  },
+  {
+   "claim": "seven days",
+   "file": "app/tools/text-tools/sticky-notes/page.jsx",
+   "pattern": "site you have not opened during seven days of browsing"
+  }
+ ],
+ "/tools/video-tools": [
+  {
+   "claim": "18 audio formats",
+   "file": "app/tools/video-tools/video-to-audio/page.jsx",
+   "pattern": "one of 18 audio formats"
+  },
+  {
+   "claim": "22 video formats",
+   "file": "app/tools/video-tools/video-converter/page.jsx",
+   "pattern": "The 22 video outputs"
+  },
+  {
+   "claim": "60 s",
+   "file": "app/components/GifFromVideoTool.jsx",
+   "pattern": "MAX_SECONDS = 60"
+  },
+  {
+   "claim": "2 min",
+   "file": "app/tools/video-tools/video-watermark/page.jsx",
+   "pattern": "MAX_DURATION = 120;"
+  },
+  {
+   "claim": "2 minutes",
+   "file": "app/tools/video-tools/video-watermark/page.jsx",
+   "pattern": "MAX_DURATION = 120;"
+  },
+  {
+   "claim": "1 GB",
+   "file": "app/components/MediaServiceTool.jsx",
+   "pattern": "MAX_UPLOAD_MB = 1024"
+  },
+  {
+   "claim": "300 MB",
+   "file": "app/tools/video-tools/video-trimmer/page.jsx",
+   "pattern": "MAX_MB_DESKTOP = 300"
+  },
+  {
+   "claim": "100 MB on phones",
+   "file": "app/tools/video-tools/video-trimmer/page.jsx",
+   "pattern": "MAX_MB_MOBILE = 100"
+  },
+  {
+   "claim": "2 GB in total",
+   "file": "app/tools/video-tools/video-merger/page.jsx",
+   "pattern": "mobile \\? 700e6 : 2e9"
+  },
+  {
+   "claim": "700 MB on phones",
+   "file": "app/tools/video-tools/video-merger/page.jsx",
+   "pattern": "mobile \\? 700e6 : 2e9"
+  },
+  {
+   "claim": "150 PNG frames",
+   "file": "app/tools/video-tools/video-to-gif/page.jsx",
+   "pattern": "Frame extraction: 1 to 15 per second over 1 to 10 seconds"
+  },
+  {
+   "claim": "45 seconds",
+   "file": "app/tools/video-tools/video-trimmer/page.jsx",
+   "pattern": "return local > 45;"
+  },
+  {
+   "claim": "4 more filters",
+   "file": "app/tools/video-tools/video-filter/page.jsx",
+   "pattern": "name: 'Saturate'"
+  }
+ ]
+}

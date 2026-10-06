@@ -188,3 +188,51 @@ exacte. Il reste 19 défauts, en majorité nés des nouvelles formulations.
   - Image Metadata ne lit pas les métadonnées des WebP.
   - Le message d'erreur WebP (`bigImage.js:224`) propose AVIF, qu'Image Resizer n'offre pas.
   - Dans Image Editor, la bordure reste carrée par-dessus les coins arrondis.
+
+## Troisième passe (06/10)
+
+J'ai relu en entier les 18 pages touchées par la correction (toutes sauf image-cropper) : texte SEO, `metadata` et
+chaînes d'interface. J'ai aussi vérifié deux chaînes d'interface :
+- Image Editor : `<UploadPrompt what="an image" />`, avec l'import à la ligne 9.
+- Image Rotate : l'option « Colour (fills the corners and any transparency; JPG, PNG and WebP keep their format) »
+  est exacte (`encodeRasterLike`, `imageOutput.js:122-125`).
+
+Les contrôles automatiques sont à zéro : content-verify (37 pages, 0 échec), instructions (0 libellé faux),
+privacy-claims (0 échec). Aucune phrase de mes pages n'est identique à une autre phrase du site.
+
+Les 19 défauts de la deuxième passe sont corrigés. La règle de format (« tout autre format → PNG »), le nom de l'outil
+dans le rapport d'erreur, la FAQ 4 d'Add Vignette et les méta sont désormais exacts.
+
+Il reste 3 phrases quasi identiques, nées des nouvelles formulations.
+
+| Page | Endroit | Phrase (citation courte) | Problème | Preuve | Correction proposée |
+|---|---|---|---|---|---|
+| add-border-to-image / image-blur | étape 4 | « the framed copy keeps the format of a JPG, PNG or WebP, and any other picture becomes a PNG » / « the blurred copy keeps the format of a JPG, PNG or WebP, and any other format comes back as PNG » | (5) Les deux étapes partagent 11 mots consécutifs ; seul le nom de la copie change. Les deux pages sont des filtres du même gabarit. | comparaison par n-grammes de 10 mots | reformuler l'une des deux (ex. Blur : « Click "Download": JPG, PNG and WebP come back blurred in their own format, other pictures as PNG. ») |
+| brightness-contrast / image-resizer | privacy | « …is reported to us with the tool's name and your browser's name and version. » | (5) Fin de phrase identique sur 15 mots, soit presque toute la phrase. | comparaison | reformuler celle de Resizer |
+| image-inverter / image-rotate | étape 1 | « Click the upload box and choose the picture to turn into a negative. » / « Click the upload box and choose the picture to turn. » | (5) Quasi identiques : celle de Rotate est le début exact de celle d'Inverter. | comparaison | Rotate : « Click the upload box and pick the photo you want to straighten or turn. » |
+
+**Bilan de la troisième passe**
+- **3 défauts restants**, tous au point (5) ; 0 aux points (1), (2), (3), (4), (6) et (7).
+- Les recoupements limités à l'énumération imposée « cleaned text, tool's name, browser's name and version » sont
+  tolérés : cette énumération est exigée par la consigne.
+- Pages concernées : add-border-to-image, image-blur, brightness-contrast, image-resizer, image-inverter, image-rotate.
+- Les 13 autres pages sont sans défaut.
+
+## Quatrième passe (06/10)
+
+J'ai relu en entier les trois pages retouchées : Image Blur (étape 4), Image Resizer (privacy) et Image Rotate
+(étape 1). Les nouvelles phrases sont exactes :
+- Blur : JPG, PNG et WebP gardent leur format ; tout autre format sort en PNG (`imageOutput.js:122-125`).
+- Resizer : le rapport d'erreur contient le message nettoyé, l'outil et le navigateur avec sa version
+  (`reportError.js:142-155`).
+- Rotate : l'étape d'envoi est propre à l'outil.
+
+J'ai ensuite comparé les phrases des 19 pages entre elles et avec tout le site.
+- Aucune phrase n'est identique.
+- Aucune paire ne partage plus que des fragments de 10 mots. Ces fragments sont soit l'énumération imposée du
+  rapport d'erreur, soit des listes de formats dans `specs`. J'ai toléré les mêmes recoupements à la troisième passe.
+
+Les contrôles automatiques donnent 0 : content-verify (37 pages, 0 échec), instructions (0 libellé faux),
+privacy-claims (0 échec).
+
+**0 défaut.**

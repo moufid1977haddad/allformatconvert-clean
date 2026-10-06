@@ -39,7 +39,7 @@ export default function HtmlEncoderPage() {
           "Paste the text or code sample you want to show on a web page.",
           "Click \"Encode\" to replace the ampersand, the angle brackets and both kinds of quotes with entities.",
           "To undo it, paste escaped text and click \"Decode\".",
-          "Paste the escaped result into your HTML with \"Copy\", or keep it with \"Download\" (the file is encoded.txt, even after a decode)."
+          "Click \"Copy\" and paste the escaped result into your HTML, or keep it with \"Download\" (the file is encoded.txt, even after a decode)."
         ]}
         specs={[
           { label: "Escaped by Encode", value: "& < > and both quote marks, written &amp; &lt; &gt; &quot; &#39;" },
@@ -47,7 +47,7 @@ export default function HtmlEncoderPage() {
           { label: "Passes", value: "One: &amp;lt; becomes &lt;, never <" }
         ]}
         privacyTitle={"Where your text is processed"}
-        privacy={"Escaping is a plain text replacement done by this page's script, and named entities are looked up with your browser's own HTML parser, which runs no script and loads nothing. Nothing you paste leaves the page or is stored; if the page itself crashed, we would receive the error, the tool's name and your browser's name and version, not your text."}
+        privacy={"Escaping is a plain text replacement done by this page's script, and named entities are looked up with your browser's own HTML parser, which runs no script and loads nothing. Nothing you paste leaves the page or is stored. When something fails, such as a copy the browser refuses, we get that error with the tool's name and your browser's name and version, not your text."}
         faqs={[
           { q: "Is escaping these five characters enough to make text safe in HTML?", a: "Yes for text between tags and for attribute values inside quotes. No for an unquoted attribute, a link address (a javascript: address stays harmful once escaped), or code placed inside script or style elements: those need other escaping or validation." },
           { q: "Does Decode read both &#39; and &apos;?", a: "Yes. Encode writes the apostrophe as &#39;, and Decode turns both &#39; and &apos; back into an apostrophe, so text escaped either way reads the same after decoding." },

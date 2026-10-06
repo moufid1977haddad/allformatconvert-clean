@@ -44,9 +44,9 @@ export default function MathToolsPage() {
         <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-6">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Frequently Asked Questions</h2>
           <div className="space-y-4">
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How precise are the results?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">12 significant digits in Scientific and Statistics Calculator, and 10 in Percentage Calculator. Fraction Calculator is exact and shows a repeating decimal in parentheses; Number Base Converter is exact and shows 40 digits after the point.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">How precise are the results?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">12 significant digits in Scientific and Statistics Calculator, and 10 in Percentage Calculator. Fraction Calculator is exact and shows a repeating decimal in parentheses; Number Base Converter is exact and stops at 40 digits after the point, marked …, when a fraction never ends.</p></div>
             <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Does Scientific Calculator use degrees or radians?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Both: you choose the mode, and sin, cos and tan follow it. The calculator also has log10, ln, square roots, powers, factorials, π, e, the Ans key, a memory and the last 10 calculations.</p></div>
-            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Why does Roman Numeral Converter stop at 3999?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">Because standard Roman numerals have no symbol above M and repeat it at most three times, so MMMCMXCIX is the largest standard form. The converter also refuses non-standard forms such as IIII.</p></div>
+            <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Why does Roman Numeral Converter stop at 3999?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">MMMCMXCIX, 3999, is the largest standard form: there is no symbol above M, and M repeats at most three times. The converter also refuses non-standard forms such as IIII.</p></div>
             <div><p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Which statistics does Statistics Calculator give?</p><p className="text-sm text-neutral-500 dark:text-neutral-400">23 values, including the mean, geometric and harmonic means, median, mode, range, variance and standard deviation, quartiles computed inclusively or exclusively, skewness, kurtosis and outliers.</p></div>
           </div>
         </div>
@@ -54,9 +54,9 @@ export default function MathToolsPage() {
           <h2 className="text-xl font-bold text-neutral-800 dark:text-white mb-4">Tips and Tricks</h2>
           <ul className="space-y-2">
             <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Paste a column from a spreadsheet into Statistics Calculator: tabs, new lines, commas and semicolons all separate values.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>In Fraction Calculator, type a mixed number as 1 3/4; a decimal such as 0.75 becomes an exact fraction.</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>In Fraction Calculator, enter 1 3/4 as 1 in the small whole-number box, 3 as numerator and 4 as denominator; a decimal such as 0.75 becomes an exact fraction.</li>
             <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Scientific Calculator keeps your last 10 calculations, and Ans reuses the previous result.</li>
-            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Percentage change divides by the absolute starting value, so going from -50 to -25 is a change of +50 %.</li>
+            <li className="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400"><span className="text-indigo-500">✓</span>Percentage change divides by the absolute starting value, so going from -50 to -25 is a change of 50%.</li>
           </ul>
         </div>
       </div>

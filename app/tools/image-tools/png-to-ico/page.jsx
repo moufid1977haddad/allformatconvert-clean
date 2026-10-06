@@ -165,12 +165,12 @@ export default function PngToIcoPage() {
           { label: 'Input format', value: `PNG (.png), one file` },
           { label: 'Output format', value: `ICO named favicon.ico, with PNG-compressed entries` },
           { label: 'Icon sizes', value: `${ALL_SIZES.join(', ')} px square; ${DEFAULT_SIZES.join(', ')} selected at first` },
-          { label: 'Non-square images', value: `Fit (whole image, transparent margins) or Fill (cropped to the square, centred)` }
+          { label: 'Non-square images', value: `Fit (whole image, transparent margins) or Fill (cropped to the square, centered)` }
         ]}
         privacy={`Each icon size is drawn on a canvas in your browser and packed into the .ico by the page's own code. The PNG you choose is not uploaded anywhere. A displayed error message is logged for us in cleaned form, with the tool's name and your browser's name and version, without the image or its name.`}
         faqs={[
           { q: "Can I include more sizes than the default ones?", a: `Yes. ${ALL_SIZES.length} sizes are offered: ${ALL_SIZES.join(', ')} pixels. ${DEFAULT_SIZES.join(', ')} are selected at first; click any size button to add or remove it, and the icon holds exactly the sizes that are highlighted.` },
-          { q: "Is a rectangular image stretched to a square?", a: `No. "Fit" keeps the whole picture centred on a transparent square; "Fill" crops it to the square from the centre. Choose one under "Image that is not square"; in both cases the proportions are kept.` },
+          { q: "Is a rectangular image stretched to a square?", a: `No. "Fit" keeps the whole picture centered on a transparent square; "Fill" crops it to the square from the center. Choose one under "Image that is not square"; in both cases the proportions are kept.` },
           { q: "Will a small PNG look sharp at the largest size?", a: `No. Every size is drawn from your PNG, so an image smaller than a selected size is enlarged and looks soft. Start from a PNG at least as big as the largest size you select.` },
           { q: "Does the icon work on Windows XP?", a: `No. The sizes are stored as PNG inside the icon, which Windows reads from Vista onward. Older systems expect bitmap entries, which this tool does not write.` }
         ]}

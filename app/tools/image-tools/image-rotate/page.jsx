@@ -68,7 +68,7 @@ export default function ImageRotatePage() {
         description={"Image Rotate turns a picture clockwise. The 90, 180 and 270 degree presets move the pixels exactly, with no resampling, and keep the format of a JPG, PNG or WebP. Any other angle, set with the slider or typed to the half degree, makes the canvas larger so the whole picture fits, and fills the new corners either with transparency (saved as PNG) or with a color you pick, which keeps a JPG, PNG or WebP in its format. Those angles are resampled bilinearly, which softens the picture slightly. Every format other than JPG, PNG and WebP is saved as PNG. The rotation runs in your browser."}
         howToTitle={"How to rotate an image"}
         howTo={[
-          "Click the upload box and choose the picture to turn.",
+          "Click the upload box and pick the photo you want to straighten or turn.",
           "Click a preset (90, 180 or 270 degrees), move \"Custom angle\", or type the value in \"Angle (degrees, clockwise)\".",
           "For an angle that is not a quarter turn, set \"Background\" to transparent or to a colour.",
           "Click \"Rotate\", then click \"Download\".",

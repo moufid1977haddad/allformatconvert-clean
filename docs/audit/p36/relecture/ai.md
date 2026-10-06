@@ -230,3 +230,16 @@ Les autres points vérifiés :
 - Pages relues : **7**, plus `localUpscale.js`. Les 9 autres pages n'ont pas changé depuis la deuxième passe, où elles avaient 0 défaut.
 - Défauts restants : **1**, au point (1) Exactitude (T1). Aucun défaut aux points (2) à (7).
 - Pages sans aucun défaut : **15 sur 16**. Seule background-remover en a encore un.
+
+## Quatrième passe (06/10)
+
+T1 est corrigé. La FAQ 1 de Background Remover dit maintenant : « edge pixels take the subject's color, which reduces, but
+does not fully remove, the old background's tint along the edges ». C'est conforme à la mesure de `page.jsx:64-66`, où la
+couleur du fond restée sur le bord passe de 11,0 % à 4,8 %, puis à 3,9 % : elle baisse sans tomber à zéro.
+
+Aucune autre occurrence de « tint » ne subsiste dans la page ni dans `layout.tsx`. La réponse fait environ 55 mots, dans
+l'intervalle de 25 à 70 mots, et commence par « No ».
+
+Les trois contrôles automatiques donnent 0 échec, 0 écart sur 1 763 libellés et 0 échec.
+
+**0 défaut.** Les 16 pages du lot « ai » sont sans défaut.

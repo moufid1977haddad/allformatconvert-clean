@@ -3,11 +3,11 @@ import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
   title: { absolute: "Base64 Encode and Decode — UTF-8 Text, URL-Safe Option" },
-  description: "Encode text to Base64 or decode it back. UTF-8 keeps accents and emoji intact, and a URL-safe option fits JWTs. Runs in your browser.",
+  description: "Encode text to Base64 or decode it back. UTF-8 keeps accents and emoji intact, and a URL-safe option fits JWTs, all inside your browser.",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/base64-encoder" },
   openGraph: {
     title: "Base64 Encode and Decode — UTF-8 Text, URL-Safe Option",
-    description: "Encode text to Base64 or decode it back. UTF-8 keeps accents and emoji intact, and a URL-safe option fits JWTs. Runs in your browser.",
+    description: "Encode text to Base64 or decode it back. UTF-8 keeps accents and emoji intact, and a URL-safe option fits JWTs, all inside your browser.",
     url: "https://www.onlineconvertools.com/tools/developer-tools/base64-encoder",
   },
 };

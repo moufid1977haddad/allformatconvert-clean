@@ -126,7 +126,7 @@ export default function CsvToTsvPage() {
         faqs={[
           { q: "Does it read semicolon CSV files from European Excel?", a: "Yes. The semicolon is one of the four separators detected, so Nom;Prix with 12,5 keeps its columns. Values are not changed: the decimal comma is copied as it is into the TSV." },
           { q: "Will a value with a line break split my rows?", a: "No. Inside quotes in the CSV, a line break or a tab belongs to the value, and the TSV writes that value in double quotes so Excel and LibreOffice read it back as one cell." },
-          { q: "Can I choose the encoding of an old CSV file?", a: "Yes. After you open a file, \"Encoding:\" shows what was detected, and choosing another reads the file again with it. A file with a byte order mark or valid UTF-8 is recognised; otherwise the code page of your browser language is assumed." },
+          { q: "Can I choose the encoding of an old CSV file?", a: "Yes. After you open a file, \"Encoding:\" shows what was detected, and choosing another reads the file again with it. A file with a byte order mark or valid UTF-8 is recognized; otherwise the code page of your browser language is assumed." },
         ]}
         tips={[
           "To go back from tabs to commas, use TSV to CSV.",
