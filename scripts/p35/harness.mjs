@@ -20,7 +20,7 @@ const lib = await import(from('node_modules/pdf-lib/cjs/index.js')).then((m) => 
 const pdfjsLib = await import(from('node_modules/pdfjs-dist/legacy/build/pdf.mjs'));
 if (typeof globalThis.regeneratorRuntime === 'undefined') globalThis.regeneratorRuntime = (await import(from('node_modules/regenerator-runtime/runtime.js'))).default || globalThis.regeneratorRuntime;
 const fontkit = await import(from('node_modules/@pdf-lib/fontkit/dist/fontkit.umd.js')).then((m) => m.default || m);
-const { matchSpans, annotationText, patternSpans, annotationMatches, redactionQuads, textLayerWords, drawInvisibleWords, pageGlyphs, glyphTermMatches, itemGeometry, glyphTermQuads, invisibleTextFont, hasArabic } = await import(from('app/lib/pdfRedact.js'));
+const { matchSpans, annotationText, patternSpans, annotationMatches, redactionQuads, textLayerWords, drawInvisibleWords, pageGlyphs, glyphTermMatches, confirmedTermSpans, itemGeometry, glyphTermQuads, invisibleTextFont, hasArabic } = await import(from('app/lib/pdfRedact.js'));
 const { sanitizeForCopy, verifyRedacted, UNREADABLE_ANNOTATIONS } = await import(from('app/lib/redactSanitize.js'));
 const { withActualTextUnicode } = await import(from('app/lib/pdfActualText.js'));
 const SFD = path.join(ROOT, 'node_modules/pdfjs-dist/standard_fonts/').replace(/\\/g, '/');
@@ -59,7 +59,12 @@ export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
   const srcDoc = await lib.PDFDocument.load(ab, { ignoreEncryption: true });
   const outDoc = await lib.PDFDocument.create();
   const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await withActualTextUnicode(ab.buffer.slice(ab.byteOffset, ab.byteOffset + ab.length))), standardFontDataUrl: SFD, fontExtraProperties: true, verbosity: 0 }).promise;
-  const textMatches = (strs, eols) => terms.some((t) => matchSpans(strs, t).length) || patternSpans(strs, kinds, eols).length > 0;
+  // P37 third review (R2): the final check looks for each term as typed in the text (an Arabic term where the glyphs
+  // confirm it) and for the terms still DRAWN (glyphHit below), not for every permuted form — "سالم" (another name) on
+  // another page made a "سلام" redaction refused. The glyphs of each page are read once.
+  const glyphCache = new WeakMap();
+  const glyphsOf = async (pg) => { if (!glyphCache.has(pg)) glyphCache.set(pg, pageGlyphs(pg, pdfjsLib).catch(() => null)); return glyphCache.get(pg); };
+  const textMatches = async (strs, eols, pg, its) => (its ? confirmedTermSpans(its, terms, pg && terms.length ? await glyphsOf(pg) : null).length > 0 : terms.some((t) => matchSpans(strs, t, { forms: 'exact' }).length)) || patternSpans(strs, kinds, eols).length > 0;
   const spansOf = (strs) => [...terms.flatMap((t) => matchSpans(strs, t)), ...patternSpans(strs, kinds)];
   const helv = await outDoc.embedFont(lib.StandardFonts.Helvetica);
   const measureOf = () => ({ real: false, width: (s) => { try { return helv.widthOfTextAtSize(s, 100); } catch { return s.length * 55; } } });
@@ -69,14 +74,15 @@ export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
     const content = await textOf(page);
     const items = content.items.filter((it) => typeof it.str === 'string');
     const strs = items.map((it) => it.str);
-    const spans = [...terms.flatMap((t, ti) => matchSpans(strs, t, { forms: 'exact' }).map((sp) => ({ ...sp, m: `t${ti}:${sp.m}` }))), ...patternSpans(strs, kinds, items.map((it) => !!it.hasEOL))];
     const all = await page.getAnnotations();
     const annots = all.filter((an) => an.rect && annotationMatches(annotationText(an), terms, kinds));
-    // as the page (second review N4): the terms are also searched in the glyphs drawn
+    // as the page (second review N4): the terms are also searched in the glyphs drawn; third review: the text matches
+    // of an Arabic term only where the glyphs confirm them; a page without a match is cleaned up (R3)
     let glyphs = null;
     try { glyphs = await pageGlyphs(page, pdfjsLib); } catch { glyphs = null; }
     const drawnHits = glyphs && terms.length ? glyphTermMatches(glyphs, terms).length : 0;
-    if (!spans.length && !annots.length && !drawnHits) continue;
+    const spans = [...confirmedTermSpans(items, terms, glyphs), ...patternSpans(strs, kinds, items.map((it) => !!it.hasEOL))];
+    if (!spans.length && !annots.length && !drawnHits) { page.cleanup(); continue; }
     const opaque = all.filter((an) => an.rect && UNREADABLE_ANNOTATIONS.has(an.subtype) && !annots.includes(an));
     found.set(i, { page, content, items, spans, boxes: [...annots, ...opaque], glyphs });
   }
@@ -108,7 +114,7 @@ export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
   }
   if (arabicFont) await arabicFont.finalize();
   const bytes = await outDoc.save();
-  const check = await verifyRedacted(bytes, { terms, textMatches, annotMatches: (t) => annotationMatches(t, terms, kinds), annotText: annotationText, pdfjsLib: { getDocument: (o) => pdfjsLib.getDocument({ ...o, standardFontDataUrl: SFD, verbosity: 0 }) }, lib, pageCount: pdf.numPages, glyphHit: terms.length ? async (pg) => glyphTermMatches(await pageGlyphs(pg, pdfjsLib), terms).length > 0 : null });
+  const check = await verifyRedacted(bytes, { terms, textMatches, annotMatches: (t) => annotationMatches(t, terms, kinds), annotText: annotationText, pdfjsLib: { getDocument: (o) => pdfjsLib.getDocument({ ...o, standardFontDataUrl: SFD, verbosity: 0 }) }, lib, pageCount: pdf.numPages, glyphHit: terms.length ? async (pg) => { const g = await glyphsOf(pg); if (!g) throw new Error('the glyphs of a page could not be read'); return glyphTermMatches(g, terms).length > 0; } : null });
   return { status: check.ok ? 'ok' : 'REFUSED', reason: check.reason, hits: [...found.keys()].map((i) => i + 1), kept, layer, quads: quadsOf, exact, pages: pdf.numPages, removed, bytes };
 }
 

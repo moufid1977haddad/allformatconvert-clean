@@ -68,7 +68,9 @@ function boxOf(r, inkOf, px = 0.5) {
 // D4
 check('D4 "السلام" found in PDF.js\'s reading "السالم"', R.matchSpans(['قال السالم عليكم'], 'السلام').length === 1);
 check('D4 "الله" found in PDF.js\'s reading "هللا"', R.matchSpans(['ورحمة هللا وبركاته'], 'الله').length === 1);
-check('D4 annotations too', R.matchesText('تعليق: السالم', 'السلام'));
+// third review (R2): an annotation's text is stored in reading order (no glyph read): the term as typed, not its
+// misread forms ("سالم" in a comment is another name)
+check('D4/R2 annotations: the term as typed, not a misread form', R.matchesText('تعليق: السلام', 'السلام') && !R.matchesText('تعليق: سالم', 'سلام'));
 check('D4 a Latin term is unchanged (no reversed form)', R.matchSpans(['abc cba'], 'abc').length === 1);
 // D6: an RTL run "ابا" drawn left to right as glyphs a(wide) b a(narrow): reading order is reversed, so the first
 // character (logical) is the RIGHTMOST glyph

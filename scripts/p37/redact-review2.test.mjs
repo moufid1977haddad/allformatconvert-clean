@@ -4,7 +4,13 @@
 //      « مارس » (found on another page): never "no match", never a file that still holds it (pdftotext);
 //   N5 a lam-alef reading must not black out other names: « سلام » blacks out « السلام » but not « سالم » (Salem),
 //      « فلاح » blacks out « الفلاح » but not « فالح » (Faleh) — no black box over their glyphs;
-//   the form PDF.js reads comes first in termVariants (a long phrase kept it within the 64 forms).
+//   the form PDF.js reads comes first in termVariants (a long phrase kept it within the 64 forms);
+//   third review R1: an Arabic term is not matched backwards in the glyphs — « رب » finds nothing in « وبركاته »
+//      (one.pdf); R2: « سلام » with « سالم » on page 2 (salam.pdf) is redacted, not refused (fixtures:
+//      scripts/p37/review/make-arabic-pages.mjs, %TEMP%\p37-review-redact\ar3);
+//   controller decision (06/10): the term as typed, found in PDF.js's text, is ALWAYS redacted or refused, even where the
+//      glyphs do not read it: rab.pdf page 2 (« البريد », which PDF.js reads with a piece « رب ») alone, as a PDF of its
+//      own — never delivered with « رب » in its text (accepted: page 2 of rab.pdf is blacked out, over-redaction).
 // Fixtures: node scripts/p37/review/make-arabic-two-pages.mjs (%TEMP%\p37-review-redact\ar2) and
 // node scripts/p37/make-arabic-fixtures.mjs (%TEMP%\p37-arabic\lo-Arial-names.pdf).
 //   node scripts/p37/redact-review2.test.mjs [--harness=<harness.mjs>] [--impl=<pdfRedact.js>]
@@ -68,5 +74,31 @@ if (fs.existsSync(NAMES)) {
     check(`N5 « ${term} » blacks out « ${black} »`, g.status === 'ok' && g.hit === true, `status ${g.status}, box over it: ${g.hit}`);
   }
 } else check('N5 fixture', false, `missing ${NAMES}: run scripts/p37/make-arabic-fixtures.mjs`);
+// R1, R2
+const AR3 = path.join(os.tmpdir(), 'p37-review-redact', 'ar3');
+if (fs.existsSync(path.join(AR3, 'one.pdf'))) {
+  const one = await redact(path.join(AR3, 'one.pdf'), ['رب']);
+  check('R1 « رب » is not found backwards in « وبركاته » (one.pdf)', one.status === 'nomatch', `status ${one.status}, pages ${JSON.stringify(one.hits || [])}`);
+  const rab = await redact(path.join(AR3, 'rab.pdf'), ['رب']);
+  check('R1 « رب » blacks out page 1 (« يا رب »); page 2 too, as PDF.js reads « رب » in « البريد » (accepted over-redaction)', rab.status === 'ok' && rab.hits.includes(1), `status ${rab.status}, pages ${JSON.stringify(rab.hits || [])}`);
+  // controller decision: a PDF whose text (as PDF.js reads it, from its ToUnicode) holds the term while its glyphs do
+  // not read it: page 2 of rab.pdf on its own
+  const { PDFDocument } = await import(pathToFileURL(path.join(ROOT, 'node_modules/pdf-lib/cjs/index.js')).href).then((m) => m.default || m);
+  const src = await PDFDocument.load(fs.readFileSync(path.join(AR3, 'rab.pdf')));
+  const solo = await PDFDocument.create();
+  const [p2] = await solo.copyPages(src, [1]);
+  solo.addPage(p2);
+  const soloFile = path.join(AR3, 'misread-only.pdf');
+  fs.writeFileSync(soloFile, await solo.save());
+  const sdoc = await pdfjs.getDocument({ data: new Uint8Array(fs.readFileSync(soloFile)), standardFontDataUrl: SFD, verbosity: 0 }).promise;
+  const before = (await (await sdoc.getPage(1)).getTextContent()).items.map((x) => x.str).join('');
+  await sdoc.destroy();
+  const mis = await redact(soloFile, ['رب']);
+  let after = '';
+  if (mis.bytes) { const d2 = await pdfjs.getDocument({ data: new Uint8Array(mis.bytes), standardFontDataUrl: SFD, verbosity: 0 }).promise; after = (await (await d2.getPage(1)).getTextContent()).items.map((x) => x.str).join(''); await d2.destroy(); }
+  check('decision: text holds « رب », glyphs do not read it → redacted or refused, never delivered with it', N(before).includes(N('رب')) && (mis.status === 'REFUSED' || (mis.status === 'ok' && !N(after).includes(N('رب')))), `PDF.js text before: ${N(before).includes(N('رب')) ? 'holds it' : 'does not hold it'}; status ${mis.status}; after: ${mis.bytes ? (N(after).includes(N('رب')) ? 'STILL HOLDS IT' : 'clean') : '-'}`);
+  const salam = await redact(path.join(AR3, 'salam.pdf'), ['سلام']);
+  check('R2 « سلام » with « سالم » on page 2 is redacted, not refused (salam.pdf)', salam.status === 'ok' && !N(text(salam.bytes)).includes(N('سلام')) && N(text(salam.bytes)).includes(N('سالم')), `status ${salam.status}${salam.reason ? ` (${salam.reason})` : ''}`);
+} else check('R1/R2 fixtures', false, `missing ${AR3}: run scripts/p37/review/make-arabic-pages.mjs`);
 console.log(`\n${fails ? `${fails} FAIL` : 'all PASS'}`);
 process.exit(fails ? 1 : 0);

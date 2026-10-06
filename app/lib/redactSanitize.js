@@ -274,7 +274,8 @@ function stringOperands(t) {
 
 
 /**
- * Reads the finished file again. terms: the visitor's terms; textMatches(strs, eols) / annotMatches(text): the page's
+ * Reads the finished file again. terms: the visitor's terms; textMatches(strs, eols, page, items) (may be async) /
+ * annotMatches(text): the page's
  * own matching (patterns included); glyphHit(page) (optional, P37 second review N4): whether a term is still DRAWN on a
  * PDF.js page (its glyphs in drawing order, app/lib/pdfRedact.js glyphTermMatches — PDF.js's text can read a right-to-
  * left phrase out of order or with its ligatures reversed). Resolves {ok: true} or {ok: false, reason}.
@@ -287,7 +288,7 @@ export async function verifyRedacted(bytes, { terms, textMatches, annotMatches, 
     for (let i = 1; i <= doc.numPages; i++) {
       const page = await doc.getPage(i);
       const items = (await page.getTextContent()).items.filter((it) => typeof it.str === 'string');
-      if (textMatches(items.map((it) => it.str), items.map((it) => !!it.hasEOL))) return { ok: false, reason: `a term is still in the text of page ${i}` };
+      if (await textMatches(items.map((it) => it.str), items.map((it) => !!it.hasEOL), page, items)) return { ok: false, reason: `a term is still in the text of page ${i}` };
       for (const an of await page.getAnnotations()) if (annotMatches(annotText(an))) return { ok: false, reason: `a term is still in an annotation of page ${i}` };
       if (glyphHit && await glyphHit(page, doc)) return { ok: false, reason: `a term is still drawn on page ${i}` };
     }

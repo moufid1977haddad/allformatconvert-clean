@@ -1,0 +1,4 @@
+# P37 review n3 (pdf TAB term): refusal on a variant (« سالم » page 2), reversed-form over-match (« رب »)
+ar3/salam.pdf	سلام
+ar3/rab.pdf	رب
+ar3/one.pdf	رب

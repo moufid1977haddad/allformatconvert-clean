@@ -74,7 +74,9 @@ export function annotationText(a) {
   return parts.flat().filter((v) => typeof v === 'string').join(' ');
 }
 
-export const matchesText = (text, keyword) => { const t = norm(text); return termVariants(keyword).some((n) => t.includes(n)); };
+// P37 third review (R2): an annotation's text, a form value, a string of the file are stored in reading order — no
+// glyph is read there, so no form PDF.js misreads: the term as typed ("سالم" in a comment no longer matches "سلام")
+export const matchesText = (text, keyword) => !!norm(keyword) && norm(text).includes(norm(keyword));
 
 // ---- P24 (03/10): several terms and automatic patterns, as iLovePDF's redaction offers (text search plus automatic
 // e-mail, phone and card numbers; read 02/10). Patterns run on the page's text with the items joined as they follow
@@ -447,28 +449,57 @@ function glyphRects(gl, style, inkOf) {
  * operation) when its ink may lie anywhere. Returns quadrilaterals.
  */
 export function glyphTermMatches(glyphs, terms) {
+  // third review (R1, R3 note): two texts in drawing order — each glyph's text as given, and each RIGHT-TO-LEFT glyph's
+  // text reversed (a lam-alef drawn left to right); a Latin ligature ("ﬁ") is never reversed
   const hays = [false, true].map((rev) => {
     let hay = '';
     const at = [];
-    glyphs.forEach((gl, n) => { if (!gl.M) return; let t = norm(gl.u); if (rev) t = Array.from(t).reverse().join(''); for (const ch of t) { hay += ch; at.push(n); } });
-    return { hay, at };
+    glyphs.forEach((gl, n) => { if (!gl.M) return; let t = norm(gl.u); if (rev && isRtlText(t)) t = Array.from(t).reverse().join(''); for (const ch of t) { hay += ch; at.push(n); } });
+    return { hay, at, rev };
   });
+  // where glyph n starts, along the direction glyph a advances
+  const along = (a, n) => { const A = glyphs[a], B = glyphs[n]; const pa = apply(A.M, A.x0, 0), pb = apply(B.M, B.x0, 0); const d = Math.hypot(A.M[0], A.M[1]) || 1; return ((pb[0] - pa[0]) * A.M[0] + (pb[1] - pa[1]) * A.M[1]) / d; };
   const found = new Map(); // "first-last" → [glyph indexes]
   for (const term of terms) {
     const nd0 = norm(term);
     if (!nd0) continue;
-    // second review (N5): only the term and, drawn right to left, its reverse — the forms the glyphs themselves show
-    const forms = isRtlText(nd0) ? [nd0, Array.from(nd0).reverse().join('')] : [nd0];
-    for (const nd of new Set(forms)) {
-      for (const { hay, at } of hays) {
-        for (let j = hay.indexOf(nd); j >= 0; j = hay.indexOf(nd, j + 1)) {
-          const a = Math.min(at[j], at[j + nd.length - 1]), z = Math.max(at[j], at[j + nd.length - 1]);
-          if (!found.has(`${a}-${z}`)) found.set(`${a}-${z}`, Array.from({ length: z - a + 1 }, (_, i) => a + i));
+    const rtl = isRtlText(nd0);
+    const reversed = Array.from(nd0).reverse().join('');
+    // third review (R1): the reading order must agree with the real drawing direction. A left-to-right term: as typed,
+    // glyphs as given. A right-to-left term drawn left to right (the usual order of the glyphs in a PDF): reversed, in
+    // the text where right-to-left glyphs are reversed; drawn right to left (or one glyph): as typed, glyphs as given.
+    // ("رب" no longer blacks out the "بر" of "وبركاته", which reads "رب" only backwards.)
+    const tries = rtl ? [[reversed, true, 'right'], [nd0, false, 'left']] : [[nd0, false, null]];
+    for (const [nd, inRev, way] of tries) {
+      const { hay, at } = hays[inRev ? 1 : 0];
+      for (let j = hay.indexOf(nd); j >= 0; j = hay.indexOf(nd, j + 1)) {
+        const first = at[j], last = at[j + nd.length - 1];
+        if (way) {
+          const p = first === last ? 0 : along(first, last);
+          const tiny = 0.05 * (glyphs[first].size || 1) * (Math.hypot(glyphs[first].M[0], glyphs[first].M[1]) || 1);
+          const dir = p > tiny ? 'right' : p < -tiny ? 'left' : 'none';
+          // one glyph (or no advance): its text as given, in reading order
+          if (dir === 'none' ? way !== 'left' : dir !== way) continue;
         }
+        const a = Math.min(first, last), z = Math.max(first, last);
+        if (!found.has(`${a}-${z}`)) found.set(`${a}-${z}`, Array.from({ length: z - a + 1 }, (_, i) => a + i));
       }
     }
   }
   return [...found.values()];
+}
+
+/**
+ * Third review (R2) and controller decision (06/10): the matches of the terms in a page's TEXT, each term EXACTLY as
+ * typed (matchSpans 'exact'), with the match id of the page ("t<term>:<offset>"). The typed form found in PDF.js's text
+ * is ALWAYS redacted and ALWAYS checked in the final check, with no glyph confirmation: a silent leak is worse than
+ * blacking out too much or refusing (PDF.js reading a piece "رب" inside "البريد" makes it blacked out: over-redaction,
+ * as before P37). Only the PERMUTED forms (lam-alef, reversed readings) need the glyphs: they are found in the glyphs
+ * drawn, with the drawing direction (glyphTermMatches), never in the text (a third argument, the glyphs, is ignored).
+ */
+export function confirmedTermSpans(items, terms) {
+  const strs = items.map((it) => it.str);
+  return terms.flatMap((term, ti) => matchSpans(strs, term, { forms: 'exact' }).map((sp) => ({ ...sp, m: `t${ti}:${sp.m}` })));
 }
 
 export function glyphTermQuads(glyphs, terms, inkOf = () => null, px = 0.5) {

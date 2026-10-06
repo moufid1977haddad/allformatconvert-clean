@@ -171,3 +171,33 @@ Les PDF arabes faits par Chrome sont maintenant noircis : la recherche par glyph
 - `RED=1` fixtures (déjà dans %TEMP%) ; `node scripts/p37/review/real-page-review.mjs <origin> --browser=chromium` et `--browser=webkit --device=iphone` : attendu **21/21**.
 - `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p37/review/traps-r2.txt --root=%TEMP%\p37-review-redact --browser=chromium` (puis webkit) : attendu 3 ok, 0 fuite.
 - Puis les commandes des §6 et §8 (real-page 15 + 4, 31 pièges, review-traps).
+
+## 10. Relecture n° 3 (00184b46 : GO avec conditions, aucune fuite) — corrections R1 à R3
+
+| Défaut | Correction | Test : avant (copie de 00184b46) → après |
+|---|---|---|
+| R1 un terme arabe trouvé à l'envers dans les glyphes (« رب » noircissait « بر » dans « وبركاته ») | `glyphTermMatches` suit le vrai sens du dessin (position des glyphes le long de la ligne). Pour un terme de droite à gauche dessiné vers la droite (cas usuel), seule la forme inversée est acceptée, dans le texte où les glyphes RTL sont inversés. Pour un dessin vers la gauche, ou un seul glyphe, seule la forme telle quelle. Un terme latin n'est cherché que tel quel ; une ligature latine (« ﬁ ») n'est plus inversée. (Une première version exigeait aussi que les glyphes confirment le terme trouvé dans le texte : remplacée par la décision du contrôleur, voir plus bas.) | `redact-review2.test.mjs` : one.pdf « رب » : ok 1 occurrence → **aucune correspondance** |
+| R2 refus sur une forme voisine (« سالم » page 2, terme « سلام ») | Contrôle final = le terme tel que tapé dans le texte, plus la recherche par glyphes (avec le sens du dessin). Les chaînes du fichier et le texte des annotations sont en ordre de lecture (aucun glyphe lu) : `matchesText` cherche le terme tel que tapé. Les formes permutées ne servent plus qu'à la couche invisible (côté sûr). Le cas « D4 annotations » du test D1-D6 est réécrit dans ce sens. | salam.pdf : **REFUSED** → **ok**, « سلام » absent, « سالم » présent |
+| R3 mémoire de la passe 1 | `page.cleanup()` après la passe 1 pour une page sans correspondance (page et banc Node). | `node --expose-gc scripts/p37/pass1-cleanup-cost.mjs` (300 pages denses) : mémoire gardée **+20 Mo → -1 Mo** ; temps 6,4 s → 6,1 s |
+
+### Relances (code final), toutes sans fuite
+- `redact-review-fixes` tout PASS ; `redact-review2` tout PASS (3 FAIL sur 00184b46) ; box-fit 15/15 ; `review/fit-adversarial` 19/19 ; `ocr-scan` 4/4 et `ocr-variants` 2/2 à 100 % ; arabe 4/4.
+- 31 pièges avec OCR : 31 ok (seul signal : r2/g5, connu).
+- `review-traps.txt` 5/5 ; `review/traps-r2.txt` 3/3 ; `review/traps-r3.txt` : salam ok, one « nomatch » (juste), rab ok (pages 1 et 2), 0 signal.
+- Navigateur, sans build : `redact-canvas-check.mjs --review` → Chromium et WebKit tout PASS.
+- content-verify 0, instructions 0, privacy-claims 0, ESLint 0 erreur. Texte de la page inchangé.
+
+### Décision du contrôleur (06/10) : jamais de fuite silencieuse
+- Ma première version de R1 ignorait un terme arabe trouvé dans le texte de PDF.js si les glyphes ne le confirmaient pas, en passe 1 comme au contrôle final. Risque : un mot vraiment dessiné, mais dans un ordre inhabituel, restait visible sans signal. Le contrôleur l'a refusé : une fuite silencieuse est pire qu'un sur-noircissement ou un refus.
+- Règle appliquée : le terme EXACT tel que tapé, trouvé dans le texte de PDF.js (comme avant P37), est TOUJOURS noirci en passe 1 et TOUJOURS cherché au contrôle final (refus s'il reste). Aucune confirmation par les glyphes n'est demandée pour lui. Seules les formes PERMUTÉES (lam-alef, lectures inversées) passent par les glyphes, avec le sens du dessin. R1 (glyphes) et R2 (« سالم » ne fait plus refuser « سلام ») restent corrigés.
+- Conséquence acceptée et visible : quand PDF.js lit un morceau « رب » dans « البريد » (rab.pdf, page 2), ce morceau est noirci. C'est un sur-noircissement, comme avant P37, et le résumé compte la page.
+- Test (`redact-review2.test.mjs`, cas « decision ») : la page 2 de rab.pdf, seule, devient un PDF. Son texte (ToUnicode lu par PDF.js) contient « رب », mais ses glyphes ne lisent pas ce mot. Avec la règle précédente (copie de travail rejouée) : « No match found », le PDF restait tel quel → **FAIL**. Avec la règle actuelle : noirci, « رب » absent du texte du résultat → **PASS**.
+- Relances après ce changement, toutes sans fuite :
+  - `redact-review-fixes` et `redact-review2` : tout PASS. box-fit 15/15 ; fit-adversarial 19/19 ; ocr-scan et ocr-variants à 100 % ; arabe 4/4.
+  - 31 pièges avec OCR : 31 ok, seul signal r2/g5 (connu). review-traps 5/5 ; traps-r2 3/3 ; traps-r3 : 2 ok + 1 nomatch, 0 signal.
+  - Navigateur : `redact-canvas-check --review` tout PASS en Chromium et en WebKit.
+  - Contrôles de contenu 0 ; ESLint 0 erreur.
+
+### Commandes pour le contrôleur (après rebuild)
+- `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p37/review/traps-r3.txt --root=%TEMP%\p37-review-redact --browser=chromium` (puis webkit) : attendu salam ok, one nomatch, rab ok (pages 1 et 2), 0 fuite.
+- `node scripts/p37/review/real-page-review.mjs <origin> --browser=chromium` et `--browser=webkit --device=iphone` : 21/21. Puis les commandes des §6, §8 et §9.

@@ -146,3 +146,61 @@ D1 à D6 sont corrigés et vérifiés, en Node et sur la vraie page (Chromium et
 ## 4. À ajouter aux bancs
 - `RED=1` pour fabriquer les fixtures, puis `node scripts/p37/review/real-page-review.mjs <origin> --browser=chromium` et `--browser=webkit --device=iphone`. Attendu après N1 et N3 : 21/21 (aujourd'hui 18/21 dans les deux moteurs).
 - `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p37/review/traps-r2.txt --root=%TEMP%\p37-review-redact --browser=chromium`.
+
+---
+
+# Relecture n° 3 — commit 00184b46 (corrections N1-N5)
+
+Date : 06/10/2026. Même rôle, mêmes règles. Vraie page : build de production de 00184b46 sur http://localhost:3137 (servi par le contrôleur).
+Nouveaux scripts : `scripts/p37/review/make-arabic-pages.mjs`, `traps-r3.txt`, `pass1-cost.mjs`. Fixtures : `%TEMP%\p37-review-redact\ar3\`.
+
+## Verdict : GO avec conditions
+
+Aucune fuite trouvée : ni texte, ni pixel, ni couche invisible. N1 à N5 sont corrigés. Il reste deux défauts d'exactitude en arabe (R1, R2) : l'outil noircit ou refuse à tort. Ce ne sont pas des fuites, mais ce sont des résultats faux. Condition : corriger R1 (petit correctif) avant d'annoncer l'arabe. R2 est une décision du propriétaire. R3 est conseillé pour l'iPhone.
+
+## 1. Corrections vérifiées
+| Défaut | Preuve | Résultat |
+|---|---|---|
+| N1 texte OCR sous l'image, `/ca 0` | `ocr-variants.mjs` (Node) ; `real-page-review.mjs` ocr-under-image, ocr-alpha-0 | 100 % couvert en Node ; vraie page : voir §4 |
+| N2 canvasInk et police de repli | `canvas-ink-fallback.mjs`, Chromium et WebKit | face non chargée → null (avant : boîte fausse) ; Helvetica système inchangée |
+| N3 Type 3, FontBBox fausse | fit-adversarial type3-bbox-too-small | 0 px (avant : 800 px en Node, 850 px sur la vraie page) |
+| N4 phrase arabe | `redact-review2.test.mjs` ; `traps-r2.txt` en Node avec `--ocr` | phrase seule et avec « مارس » : ok, absente de pdftotext. La forme PDF.js est parmi les 2 premières |
+| N5 « سلام » / « سالم » | `redact-review2.test.mjs` ; `ar3/one.pdf` | « سالم » n'est plus noirci ; « السلام » l'est |
+
+- Non-régression Node : `fit-adversarial` 19/19. box-fit 15/15. Arabe 4/4. `redact-review-fixes` et `redact-review2` : tout PASS. 31 pièges avec `--ocr` : 31 ok (seul signal : r2/g5, connu). `traps-r2.txt` : 3/3 ok, 0 fuite.
+- Suivi de `ca` / `CA` : il fait partie de l'état empilé, donc q/Q, formulaires et groupes le rétablissent comme le PDF. Un formulaire peint avec `ca 0` transmet 0 à son texte (invisible, côté sûr).
+- Image qui recouvre du texte : le test se fait au centre du glyphe, avec le CTM courant (y compris dans un formulaire). Pour les variantes groupées ou répétées, tous les glyphes déjà dessinés sont marqués (côté sûr). Un logo, une signature ou un masque d'image posé sur du texte élargit seulement la boîte. Pas de fuite possible par ce chemin.
+
+## 2. Défauts restants
+
+### R1 — FAIBLE-MOYENNE : la recherche par glyphes noircit le mot ARABE INVERSÉ
+- Repro : `node scripts/p37/review/make-arabic-pages.mjs one "قال سلام للجميع/زارنا سالم أمس/السلام عليكم ورحمة الله وبركاته"`, puis le terme « رب ».
+  - Le fichier ne contient pas « رب ». Pourtant le résultat est « ok, 1 occurrence » et « بر » est noirci au milieu de « وبركاته ». Image : `%TEMP%\p37-review-redact\one-rab-painted.png`.
+  - `rab.pdf` (page 2 : « عنوان البريد والشركة », sans « رب ») : la page 2 est noircie aussi. Vraie page Chromium : « ok pages 1,2 ».
+- Cause : `glyphTermMatches` cherche le terme ET son envers dans l'ordre du dessin. L'arabe est dessiné de gauche à droite (ordre visuel). L'envers du terme y correspond donc à l'ordre de lecture, ce qui est juste. Le terme tel quel, lui, y correspond au mot lu à l'envers, ce qui est faux.
+- Risque : surtout les termes de 2 ou 3 lettres, et les correspondances à cheval sur deux mots, puisque les espaces sont ignorés. Le compteur du résumé est faussé, et un vrai mot est effacé sans raison.
+- Correctif : pour un terme RTL, regarder le sens réel du dessin dans la correspondance (abscisses le long de la ligne). Si les glyphes avancent vers la droite, n'accepter que l'envers ; garder la forme telle quelle seulement pour un dessin de droite à gauche.
+
+### R2 — MOYENNE (utilisabilité, côté sûr) : refus de fichier sur une forme voisine
+- Le risque gardé par l'auteur est confirmé. Repro : `make-arabic-pages.mjs salam "قال سلام للجميع في الاجتماع" "زارنا سالم أمس في المكتب"`, terme « سلام » → REFUSED, « a term is still in the text of page 2 ». Même résultat sur la vraie page (Chromium, `traps-r3.txt`).
+- Le message est faux pour l'utilisateur : la page 2 ne contient pas « سلام », mais « سالم », un autre nom. Il ne reçoit aucun fichier.
+- Portée : toutes les formes (permutées et inversées) de `termVariants` servent au contrôle final. Un terme court refusera tout document qui contient, ailleurs, son envers en ordre de lecture ou sa forme lam-alef permutée. Pour les termes de 4 lettres ou plus, c'est rare ; pour les noms avec « لا » (سلام, فلاح, علاء, صلاح), c'est fréquent.
+- Gravité : pas de fuite, pas de silence. Mais l'outil devient inutilisable sur ces documents.
+- Correction possible (décision du propriétaire) : dans `verifyRedacted`, chercher le terme exact dans le texte, plus la recherche par glyphes (avec R1 corrigé). Celle-ci voit déjà les formes que PDF.js lit de travers, là où le dessin les montre. Ne garder les formes permutées dans le texte que pour un run dont la géométrie montre un glyphe à plusieurs caractères.
+
+### R3 — FAIBLE (iPhone) : coût de la recherche par glyphes en passe 1
+- `pass1-cost.mjs` (Node), 300 pages denses (2,1 M glyphes) : texte 1,9 s, glyphes 2,4 s (8 ms par page). Le temps est acceptable. Mais le tas grossit de 85 Mo : chaque page garde sa liste d'opérations dans PDF.js.
+- Sur iPhone, cette mémoire s'ajoute au grand canvas de la passe 2. La page ne libère pas les pages sans correspondance.
+- Correctif : appeler `page.cleanup()` après la passe 1 pour une page sans correspondance, et ne garder que `glyphs` pour les pages touchées.
+- Fausse correspondance latine : la botte de foin « inversée » renverse aussi les ligatures latines (« ﬁ » devient « if »). Un terme comme « if » est alors trouvé dans « office ». C'est rare et du côté sûr. Il suffit de n'inverser que les glyphes de droite à gauche.
+
+## 3. Points vérifiés sans défaut
+- Délai de 20 s par page en passe 1 : en cas d'échec, le contrôle final relit les glyphes. Un terme encore dessiné donne un refus, pas un fichier.
+- Page trouvée par les glyphes seuls : elle est noircie, comptée, et sa couche invisible n'a pas le terme (la nouvelle recherche garde toutes les formes).
+- Motifs automatiques (e-mail, téléphone, carte) : toujours par le texte seul, comme avant (dit par l'auteur).
+- PDF arabe de Chrome (chrome-Arial) : « مارس » est maintenant noirci, et absent de pdftotext et de `-layout`.
+
+## 4. Vraie page (localhost:3137, build 00184b46)
+- `real-page-review.mjs` : **Chromium 21/21, WebKit iPhone 21/21** (avant : 18/21 dans chaque moteur). OCR sous l'image et `ca 0` : 0 px non noir.
+- `redact-bench.mjs traps-r2.txt` (Chromium) : 3 ok, 0 fuite (« السلام » ; la phrase « وبركاته لا إله إلا الله », avant « No match found » ; OCR sous l'image).
+- `redact-bench.mjs traps-r3.txt` (Chromium) : salam.pdf REFUSED (R2) ; rab.pdf et one.pdf « ok » avec un faux noircissement (R1). 0 fuite.
