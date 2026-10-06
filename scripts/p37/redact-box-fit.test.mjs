@@ -10,7 +10,7 @@
 //   - coverage: every ink pixel of the match (grey < 128) has its centre inside a black box — must be 100 %;
 //   - neighbours: the deepest ink pixel of a neighbour inside a black box, in pt — must be at most the stated margin,
 //     max(2 % of the font size, 0.5 pt = one pixel of the page's 144 dpi picture), + 0.25 pt (one pixel here).
-// Fixtures: standard fonts (Helvetica 14 and 6 pt, Times-Italic, Courier-Bold 36), a simple TrueType font (Liberation
+// The text is red (pure black boxes are then told apart from ink on the real page's result). Fixtures: standard fonts (Helvetica 14 and 6 pt, Times-Italic, Courier-Bold 36), a simple TrueType font (Liberation
 // Sans, WinAnsi), Type 0 fonts (Noto Sans, Noto Serif Italic, Noto Naskh Arabic, right to left), TJ kerning inside and
 // around the match, character spacing (Tc), word spacing (Tw), horizontal scaling (Tz), a text rise, a rotated page
 // (/Rotate 90) with text turned 30°, and text inside a scaled form XObject.
@@ -98,7 +98,9 @@ async function build(v) {
     const other = (dy, s) => `BT /F1 ${v.size} Tf ${tr(mode === 'others')} 1 0 0 1 72 ${400 + dy} Tm ${tj([s])} ET`;
     const above = v.arabic ? ' نص في السطر الأعلى' : 'Ligne au-dessus du texte gjpq';
     const below = v.arabic ? ' نص في السطر الأدنى' : 'Ligne en dessous du texte bdfhk';
-    const body = `${other(lead, above)}\nBT ${state} ${tm} ${show} ET\n${other(-lead, below)}`;
+    // red text: on the real page's result (scripts/p37/redact-real-page.mjs) a black box and the ink are told apart
+    const body = `1 0 0 rg
+${other(lead, above)}\nBT ${state} ${tm} ${show} ET\n${other(-lead, below)}`;
     const page = d.addPage([612, 792]);
     const res = d.context.obj({ Font: { F1: fontRef } });
     if (v.form) {
@@ -142,8 +144,10 @@ for (const v of VARIANTS) {
   const spans = impl.matchSpans(items.map((it) => it.str), term);
   const helv = await (await lib.PDFDocument.create()).embedFont(lib.StandardFonts.Helvetica);
   const measureOf = () => ({ real: false, width: (s) => { try { return helv.widthOfTextAtSize(s, 100); } catch { return s.length * 55; } } });
-  const geometry = impl.itemGeometry ? (await pageGeometry(page, items, content.styles)).geometry : null;
-  const quads = impl.redactionQuads(items, content.styles, spans, [], measureOf, geometry, 0.5);
+  const geo = impl.itemGeometry ? await pageGeometry(page, items, content.styles) : null;
+  const geometry = geo && geo.geometry;
+  // as the page: the matched characters of the runs, plus the term found in the glyphs drawn
+  const quads = [...impl.redactionQuads(items, content.styles, spans, [], measureOf, geometry, 0.5), ...(impl.glyphTermQuads && geo ? impl.glyphTermQuads(geo.glyphs, [term], geo.inkOf, 0.5) : [])];
   const placed = geometry ? spans.filter((sp) => geometry[sp.k]).length : 0;
   const vp = page.getViewport({ scale: K, rotation: page.rotate });
   const fsUser = v.size * (v.form || 1);
@@ -166,6 +170,7 @@ for (const v of VARIANTS) {
   console.log(`${ok ? 'PASS' : 'FAIL'} ${v.id}: spans ${spans.length} (exact ${placed}), match ink ${ink} px, covered ${cov.toFixed(2)} %, neighbour ink in a box ${nIn} px, deepest ${deep.toFixed(2)} pt (allowed ${allowed.toFixed(2)})${ok ? '' : ` at ${JSON.stringify(where)}, boxes ${JSON.stringify(quads.map((q) => q.map((pt) => pt.map((x) => +x.toFixed(1)))))}`}`);
 }
 if (!process.argv.includes('--keep')) for (const f of fs.readdirSync(OUT)) if (/\.(pgm)$/.test(f)) fs.rmSync(path.join(OUT, f));
+fs.writeFileSync(path.join(OUT, 'variants.json'), JSON.stringify(Object.fromEntries(VARIANTS.map((v) => [v.id, { fontSize: v.size * (v.form || 1), term: v.arabic ? AR.match : MATCH }])), null, 1));
 fs.writeFileSync(path.join(OUT, `result-${path.basename(arg('impl', 'pdfRedact.js'), '.js')}.json`), JSON.stringify(rows, null, 1));
 console.log(`\n${VARIANTS.length - fails}/${VARIANTS.length} fixtures pass`);
 process.exit(fails ? 1 : 0);

@@ -8,7 +8,7 @@
 // font PDF.js converted (fontkit on font.data; the page measures it with the browser's canvas instead); Arabic words
 // of the invisible layer are written in Noto Sans Arabic (invisibleTextFont); text read as NFC as the page's
 // app/lib/pdfjs.js does. The result also gives the black boxes of each page (quads, PDF user space) and how many
-// spans were placed exactly.
+// spans were placed exactly. The terms are also searched in the glyphs drawn and those glyphs covered (glyphTermQuads).
 //   node scripts/p35/harness.mjs <pdf> "term1|term2" [out.pdf]
 import fs from 'node:fs';
 import path from 'node:path';
@@ -20,7 +20,7 @@ const lib = await import(from('node_modules/pdf-lib/cjs/index.js')).then((m) => 
 const pdfjsLib = await import(from('node_modules/pdfjs-dist/legacy/build/pdf.mjs'));
 if (typeof globalThis.regeneratorRuntime === 'undefined') globalThis.regeneratorRuntime = (await import(from('node_modules/regenerator-runtime/runtime.js'))).default || globalThis.regeneratorRuntime;
 const fontkit = await import(from('node_modules/@pdf-lib/fontkit/dist/fontkit.umd.js')).then((m) => m.default || m);
-const { matchSpans, annotationText, patternSpans, annotationMatches, redactionQuads, textLayerWords, drawInvisibleWords, glyphsOfOperatorList, itemGeometry, invisibleTextFont, hasArabic } = await import(from('app/lib/pdfRedact.js'));
+const { matchSpans, annotationText, patternSpans, annotationMatches, redactionQuads, textLayerWords, drawInvisibleWords, glyphsOfOperatorList, itemGeometry, glyphTermQuads, invisibleTextFont, hasArabic } = await import(from('app/lib/pdfRedact.js'));
 const { sanitizeForCopy, verifyRedacted, UNREADABLE_ANNOTATIONS } = await import(from('app/lib/redactSanitize.js'));
 const { withActualTextUnicode } = await import(from('app/lib/pdfActualText.js'));
 const SFD = path.join(ROOT, 'node_modules/pdfjs-dist/standard_fonts/').replace(/\\/g, '/');
@@ -44,7 +44,7 @@ export async function pageGeometry(page, items, styles, { ink = true } = {}) {
   const glyphs = glyphsOfOperatorList(ops, pdfjsLib.OPS, (n) => fonts.get(n) || null);
   const parsed = new Map();
   const inkOf = (font, ch) => {
-    if (!ink || !font || !font.data || font.isType3Font) return null;
+    if (!ink || !font || !font.data || font.isType3Font || font.remeasure) return null;
     if (!parsed.has(font)) { try { parsed.set(font, fontkit.create(Buffer.from(font.data))); } catch { parsed.set(font, null); } }
     const fk = parsed.get(font);
     if (!fk) return null;
@@ -54,7 +54,7 @@ export async function pageGeometry(page, items, styles, { ink = true } = {}) {
       return [b.minX / u, b.minY / u, b.maxX / u, b.maxY / u].map((v) => (Number.isFinite(v) ? v : 0));
     } catch { return null; }
   };
-  return { glyphs, geometry: itemGeometry(items, styles, glyphs, inkOf) };
+  return { glyphs, inkOf, geometry: itemGeometry(items, styles, glyphs, inkOf) };
 }
 
 export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
@@ -89,9 +89,11 @@ export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
     if (!hit) { const [c] = await outDoc.copyPages(srcDoc, [i]); outDoc.addPage(c); continue; }
     const { page, content, items, spans, boxes } = hit;
     const unit = page.getViewport({ scale: 1, rotation: 0 });
-    let geometry = null;
-    try { geometry = (await pageGeometry(page, items, content.styles)).geometry; } catch { geometry = null; }
-    const quads = redactionQuads(items, content.styles, spans, boxes.map((an) => an.rect), measureOf, geometry, 0.5);
+    let geo = null;
+    try { geo = await pageGeometry(page, items, content.styles); } catch { geo = null; }
+    const geometry = geo && geo.geometry;
+    // the black boxes: the matched characters of the text runs, plus the terms found in the glyphs drawn (P37)
+    const quads = [...redactionQuads(items, content.styles, spans, boxes.map((an) => an.rect), measureOf, geometry, 0.5), ...(geo ? glyphTermQuads(geo.glyphs, terms, geo.inkOf, 0.5) : [])];
     exact.spans += spans.length;
     exact.placed += spans.filter((sp) => geometry && geometry[sp.k]).length;
     quadsOf[i + 1] = quads;

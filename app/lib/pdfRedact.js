@@ -315,6 +315,68 @@ export function bidiReorder(arr, keyOf = (x) => x) {
   return runs.reverse().flatMap((r) => (r.t === 'L' ? r.xs : r.xs.reverse()));
 }
 
+// A glyph's rectangles in its run space (x along the run, y up, the font size included): adv, its advance × the font's
+// height (ascent, descent); ink, its ink boxes (the glyph, and its accent when PDF.js draws one) or null when the ink is
+// not known.
+function glyphRects(gl, style, inkOf) {
+  const f = gl.font || {}, s = gl.size;
+  let asc = Number(f.ascent ?? style.ascent), desc = Number(f.descent ?? style.descent);
+  asc = Number.isFinite(asc) && asc > 0 ? Math.min(Math.max(asc, 0.7), 1.6) : 0.9;
+  desc = Number.isFinite(desc) && desc < 0 ? Math.max(Math.min(desc, -0.1), -0.8) : -0.25;
+  const rect = (x0, x1, y0, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+  const adv = rect(gl.x0, gl.x1, desc * s, asc * s);
+  const okInk = (i) => i && i.length === 4 && i.every(Number.isFinite) && i[2] - i[0] < 4 && i[3] - i[1] < 4;
+  const ink = gl.ch ? inkOf(gl.font, gl.ch) : null;
+  if (!okInk(ink)) return { adv, ink: null };
+  const out = [rect(gl.x0 + ink[0] * s, gl.x0 + ink[2] * s, ink[1] * s, ink[3] * s)];
+  if (gl.accent) {
+    const ai = gl.accent.fontChar ? inkOf(gl.font, gl.accent.fontChar) : null;
+    if (!okInk(ai)) return { adv, ink: null };
+    const ox = gl.x0 + (gl.accent.offset?.x || 0) * s, oy = (gl.accent.offset?.y || 0) * s;
+    out.push(rect(ox + ai[0] * s, ox + ai[2] * s, oy + ai[1] * s, oy + ai[3] * s));
+  }
+  return { adv, ink: out };
+}
+
+/**
+ * P37: the black boxes of the terms found in the GLYPHS drawn, independently of PDF.js's text runs (a safety net: the
+ * f4b trap of the P33 review draws "Mu", a combining diaeresis moved back over the "u", then "ller", and PDF.js placed
+ * the run "ller" 6 pt left of where it is drawn, so the padded estimate left the tail of the "r" visible). The glyphs'
+ * text in drawing order (accents, case, spaces and hyphens ignored, as the search does) is searched for each term,
+ * and for a right-to-left term its reverse too; every glyph from the first to the last of a match is covered: its
+ * advance × font height and ink box, plus the margin, or padded as before when its ink is not known. glyphs:
+ * glyphsOfOperatorList(…); styles: the page's text styles (unused keys are fine). Returns quadrilaterals.
+ */
+export function glyphTermQuads(glyphs, terms, inkOf = () => null, px = 0.5) {
+  let hay = '';
+  const at = [];
+  glyphs.forEach((gl, n) => { if (!gl.M) return; for (const ch of norm(gl.u)) { hay += ch; at.push(n); } });
+  const quads = [];
+  for (const term of terms) {
+    const needle = norm(term);
+    if (!needle) continue;
+    const needles = isRtlText(needle) ? [needle, Array.from(needle).reverse().join('')] : [needle];
+    for (const nd of new Set(needles)) {
+      for (let j = hay.indexOf(nd); j >= 0; j = hay.indexOf(nd, j + 1)) {
+        const first = at[j], last = at[j + nd.length - 1];
+        for (let n = Math.min(first, last); n <= Math.max(first, last); n++) {
+          const gl = glyphs[n];
+          if (!gl.M) continue;
+          const { adv, ink } = glyphRects(gl, {}, inkOf);
+          const sx = Math.hypot(gl.M[0], gl.M[1]) || 1, sy = Math.hypot(gl.M[2], gl.M[3]) || 1;
+          const pts = [adv, ...(ink || [])].flat();
+          let x0 = Math.min(...pts.map((p) => p[0])), x1 = Math.max(...pts.map((p) => p[0])), y0 = Math.min(...pts.map((p) => p[1])), y1 = Math.max(...pts.map((p) => p[1]));
+          const fs = gl.size * sy;
+          if (ink) { const m = Math.max(0.02 * fs, px); x0 -= m / sx; x1 += m / sx; y0 -= m / sy; y1 += m / sy; }
+          else { x0 -= (0.15 * fs) / sx; x1 += (0.15 * fs) / sx; y0 = Math.min(y0, -0.3 * gl.size); y1 = Math.max(y1, 1.05 * gl.size); }
+          quads.push([[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(([x, y]) => apply(gl.M, x, y)));
+        }
+      }
+    }
+  }
+  return quads;
+}
+
 /**
  * For each text item: null (its characters cannot be placed exactly: the padded estimate is used) or { fs, chars }
  * where chars[c] is null (a space, or a character without a glyph of its own) or the box of character c in the run's
@@ -362,14 +424,21 @@ function itemChars(it, style, placed, inkOf) {
   // drawn over (or the nearest one)
   const withText = members.filter((m) => unitsOf(m.gl.u).length);
   const accents = members.filter((m) => !unitsOf(m.gl.u).length && /\S/.test(m.gl.u || ''));
-  const orders = [withText];
-  if (it.dir === 'rtl' || isRtlText(it.str)) orders.push([...withText].reverse(), bidiReorder(withText, (m) => m.gl.u));
-  let owner = null;
-  for (const order of orders) {
-    const seq = order.flatMap((m) => unitsOf(m.gl.u).map((ch) => [ch, m]));
+  // right to left: the glyphs reversed, or reversed by runs (digits and Latin keep their order); a glyph that carries
+  // several characters (lam-alef) in its own order, or reversed with the rest — PDF.js reverses the whole run character
+  // by character, so it reads such a glyph's "لا" as "ال" (docs/audit/ETUDE-EDITEUR-PDF-ARABE.md §4)
+  const orders = [[withText, false]];
+  if (it.dir === 'rtl' || isRtlText(it.str)) {
+    const rev = [...withText].reverse(), runs = bidiReorder(withText, (m) => m.gl.u);
+    orders.push([rev, false], [rev, true], [runs, false], [runs, true]);
+  }
+  let owner = null, flipped = false;
+  for (const [order, inner] of orders) {
+    const seq = order.flatMap((m) => { const u = unitsOf(m.gl.u); return (inner ? u.reverse() : u).map((ch) => [ch, m]); });
     if (seq.length !== strUnits.length || seq.some(([ch], q) => ch !== strUnits[q][0])) continue;
     owner = new Map(); // character → its glyphs
     seq.forEach(([, m], q) => { const c = strUnits[q][1]; if (!owner.has(c)) owner.set(c, new Set()); owner.get(c).add(m); });
+    flipped = inner;
     break;
   }
   if (!owner) return null;
@@ -387,26 +456,11 @@ function itemChars(it, style, placed, inkOf) {
   const boxCache = new Map();
   const boxOf = (m) => {
     if (boxCache.has(m)) return boxCache.get(m);
-    const { gl } = m, f = gl.font || {}, s = gl.size;
-    let asc = Number(f.ascent ?? style.ascent), desc = Number(f.descent ?? style.descent);
-    asc = Number.isFinite(asc) && asc > 0 ? Math.min(Math.max(asc, 0.7), 1.6) : 0.9;
-    desc = Number.isFinite(desc) && desc < 0 ? Math.max(Math.min(desc, -0.1), -0.8) : -0.25;
-    const rect = (x0, x1, y0, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(([x, y]) => toUV(apply(gl.M, x, y)));
-    const span = (pts) => ({ lo: Math.min(...pts.map((p) => p[0])), hi: Math.max(...pts.map((p) => p[0])), dn: Math.min(...pts.map((p) => p[1])), up: Math.max(...pts.map((p) => p[1])) });
-    const adv = span(rect(gl.x0, gl.x1, desc * s, asc * s));
-    const box = { a0: adv.lo, a1: adv.hi, ...adv, pad: true };
-    const ink = gl.ch ? inkOf(gl.font, gl.ch) : null;
-    if (ink && ink.every(Number.isFinite) && ink[2] - ink[0] < 4 && ink[3] - ink[1] < 4) {
-      const parts = [adv, span(rect(gl.x0 + ink[0] * s, gl.x0 + ink[2] * s, ink[1] * s, ink[3] * s))];
-      let ok = true;
-      if (gl.accent) {
-        const ai = gl.accent.fontChar ? inkOf(gl.font, gl.accent.fontChar) : null;
-        const ox = gl.x0 + (gl.accent.offset?.x || 0) * s, oy = (gl.accent.offset?.y || 0) * s;
-        if (ai && ai.every(Number.isFinite)) parts.push(span(rect(ox + ai[0] * s, ox + ai[2] * s, oy + ai[1] * s, oy + ai[3] * s)));
-        else ok = false;
-      }
-      if (ok) Object.assign(box, { lo: Math.min(...parts.map((p) => p.lo)), hi: Math.max(...parts.map((p) => p.hi)), dn: Math.min(...parts.map((p) => p.dn)), up: Math.max(...parts.map((p) => p.up)), pad: false });
-    }
+    const { adv, ink } = glyphRects(m.gl, style, inkOf);
+    const span = (r) => { const pts = r.map(([x, y]) => toUV(apply(m.gl.M, x, y))); return { lo: Math.min(...pts.map((p) => p[0])), hi: Math.max(...pts.map((p) => p[0])), dn: Math.min(...pts.map((p) => p[1])), up: Math.max(...pts.map((p) => p[1])) }; };
+    const a = span(adv);
+    const box = { a0: a.lo, a1: a.hi, ...a, pad: !ink };
+    if (ink) { const parts = [a, ...ink.map(span)]; Object.assign(box, { lo: Math.min(...parts.map((p) => p.lo)), hi: Math.max(...parts.map((p) => p.hi)), dn: Math.min(...parts.map((p) => p.dn)), up: Math.max(...parts.map((p) => p.up)) }); }
     boxCache.set(m, box);
     return box;
   };
@@ -415,7 +469,21 @@ function itemChars(it, style, placed, inkOf) {
     const boxes = [...ms, ...(extra.get(c) || [])].map(boxOf);
     chars[c] = { a0: Math.min(...boxes.map((b) => b.a0)), a1: Math.max(...boxes.map((b) => b.a1)), lo: Math.min(...boxes.map((b) => b.lo)), hi: Math.max(...boxes.map((b) => b.hi)), dn: Math.min(...boxes.map((b) => b.dn)), up: Math.max(...boxes.map((b) => b.up)), pad: boxes.some((b) => b.pad) };
   }
-  return { fs, chars };
+  // the run's text with each multi-character glyph read in its own order again (for the invisible layer), when PDF.js
+  // reversed it
+  let text = null;
+  if (flipped) {
+    const out = it.str.split('');
+    for (const [, cs] of glyphChars) {
+      if (cs.length < 2) continue;
+      const pos = [...new Set(cs)].sort((x, y) => x - y);
+      const vals = pos.map((c) => it.str[c]).reverse();
+      pos.forEach((c, n) => { out[c] = vals[n]; });
+    }
+    text = out.join('');
+    if (text === it.str) text = null;
+  }
+  return { fs, chars, text };
 }
 
 // The exact box of characters c0..c1 of a run, with the black box's margin, or null when one of them is not placed
@@ -508,7 +576,7 @@ export function textLayerWords(items, styles, spans, quads, measureOf, spansOf, 
         if (bs.some((b) => b.pad)) Object.assign(box, { lo: box.lo - 0.15 * geo.fs, hi: box.hi + 0.15 * geo.fs });
         if (quads.some((q) => quadsMeet(quadOf(g, box.lo, box.hi, box.dn, box.up), q))) continue;
         const a0 = Math.min(...bs.map((b) => b.a0)), a1 = Math.max(...bs.map((b) => b.a1));
-        if (a1 - a0 > 0) words.push({ str: m[0], ...at(a0, a1) });
+        if (a1 - a0 > 0) words.push({ str: geo.text ? geo.text.slice(c0, c1) : m[0], ...at(a0, a1) });
         continue;
       }
       if (quads.some((q) => quadsMeet(paddedQuad(it, style, c0, c1, measureOf, g), q))) continue;
@@ -517,7 +585,9 @@ export function textLayerWords(items, styles, spans, quads, measureOf, spansOf, 
       words.push({ str: m[0], ...at(pos.x0, pos.x1) });
     }
   });
-  for (let kept = words; ;) {
+  // control characters (a font's codes without text, as PDF.js reads them) are not written
+  const clean = words.map((w) => ({ ...w, str: w.str.replace(/[\u0000-\u001f\u007f-\u009f]/g, '') })).filter((w) => /\S/.test(w.str));
+  for (let kept = clean; ;) {
     const found = spansOf(kept.map((w) => w.str));
     if (!found.length) return kept;
     const drop = new Set(found.map((sp) => sp.k));

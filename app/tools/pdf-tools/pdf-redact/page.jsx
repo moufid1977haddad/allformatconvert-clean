@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
-import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf } from '../../../lib/pdfRedact';
+import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf, glyphsOfOperatorList, itemGeometry, glyphTermQuads, invisibleTextFont, hasArabic } from '../../../lib/pdfRedact';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -30,6 +30,31 @@ const noSubscribe = () => () => {};
 // message is scrolled into view (on a phone it appeared under the keyboard / below the fold).
 const STEP_LIMIT_MS = () => (typeof window !== 'undefined' && window.__redactStepLimitMs) || 60000;
 const quoteTerms = (terms) => terms.map((t) => `“${t}”`).join(', ');
+
+// P37 (06/10): the Arabic words outside the black boxes stay selectable too. Their invisible text is written in Noto
+// Sans Arabic (SIL Open Font License 1.1, public/fonts/noto/OFL.txt, the face Text to PDF already uses), downloaded only
+// when a redacted page keeps an Arabic word, and subset to the characters written.
+const ARABIC_FONT_URL = '/fonts/noto/NotoSansArabic-Regular.ttf';
+async function loadArabicFont(doc, lib) {
+  // @pdf-lib/fontkit's build calls a global regeneratorRuntime (Babel generators), as in app/lib/textPdf.js
+  if (typeof globalThis.regeneratorRuntime === 'undefined') globalThis.regeneratorRuntime = (await import('regenerator-runtime')).default;
+  const fontkit = (await import('@pdf-lib/fontkit')).default;
+  const r = await fetch(ARABIC_FONT_URL);
+  if (!r.ok) throw new Error(`the Arabic font could not be downloaded (HTTP ${r.status})`);
+  return invisibleTextFont(doc, fontkit.create(new Uint8Array(await r.arrayBuffer())), lib);
+}
+
+// P37: where each glyph of a page is drawn (PDF.js's operator list, placed as its canvas places it) and each text run's
+// characters tied to their glyphs (app/lib/pdfRedact.js itemGeometry); fonts read once PDF.js has them.
+async function pageGeometry(page, pdfjsLib, items, styles, inkOf) {
+  const ops = await page.getOperatorList({ annotationMode: pdfjsLib.AnnotationMode.DISABLE });
+  const names = new Set();
+  ops.fnArray.forEach((fn, n) => { if (fn === pdfjsLib.OPS.setFont) names.add(ops.argsArray[n][0]); });
+  const fonts = new Map();
+  for (const name of names) fonts.set(name, await new Promise((resolve) => { try { page.commonObjs.get(name, resolve); } catch { resolve(null); } }));
+  const glyphs = glyphsOfOperatorList(ops, pdfjsLib.OPS, (name) => fonts.get(name) || null);
+  return { glyphs, geometry: itemGeometry(items, styles, glyphs, inkOf) };
+}
 
 function drawUnrotated(ctx, img, W, H, rot) {
   ctx.save();
@@ -95,6 +120,7 @@ export default function Page() {
       // P35: the matches among the words kept on a redacted page, read as one line (no line end: the most matches)
       const spansOf = (strs) => [...terms.flatMap((t) => matchSpans(strs, t)), ...patternSpans(strs, kinds)];
       let helvetica = null;
+      let arabicFont = null, arabicFontProblem = '';
 
       // Pass 1 (P33): every page is searched BEFORE anything is copied — the pages without a match are then copied from
       // a source in which the redacted pages are empty shells (app/lib/redactSanitize.js, independent review 05/10).
@@ -212,7 +238,28 @@ export default function Page() {
           const font = `${f && f.italic ? 'italic ' : ''}${f && (f.bold || f.black) ? 'bold ' : ''}100px ${real ? `"${it.fontName}", ` : ''}${style.fontFamily || 'sans-serif'}`;
           return { real, width: (s) => { measure.font = font; return measure.measureText(s).width; } };
         };
-        const quads = redactionQuads(items, content.styles, spans, boxes.map((an) => an.rect), measureOf);
+        // P37: each glyph's ink, measured in the face PDF.js drew it with (not known for a page our PDF service drew, a
+        // Type 3 font, a font PDF.js re-measures and shifts or squeezes, or a font the browser did not load: that glyph is
+        // padded by 15 % of the font size as before)
+        const inkCache = new Map();
+        const inkOf = (font, ch) => {
+          if (!drawn || !font || font.isType3Font || font.remeasure || font.systemFontInfo || !font.loadedName || !loadedFaces.has(font.loadedName)) return null;
+          const key = `${font.loadedName}|${ch}`;
+          if (!inkCache.has(key)) {
+            measure.font = `${font.italic ? 'italic' : 'normal'} ${font.black ? '900' : font.bold ? 'bold' : 'normal'} 100px "${font.loadedName}", ${font.fallbackName || 'sans-serif'}`;
+            const mt = measure.measureText(ch);
+            inkCache.set(key, [-mt.actualBoundingBoxLeft / 100, -mt.actualBoundingBoxDescent / 100, mt.actualBoundingBoxRight / 100, mt.actualBoundingBoxAscent / 100]);
+          }
+          return inkCache.get(key);
+        };
+        // P37: the black boxes fit the matched characters (their glyphs' advance and ink, plus one pixel or 2 % of the
+        // font size); a run whose glyphs cannot be tied to its text keeps the padded estimate. The terms are also
+        // searched in the glyphs drawn, and those glyphs covered. Without the glyphs (no answer in 20 s), the padded
+        // estimate is used for every match, as before.
+        let geo = null;
+        try { geo = await withTimeout(pageGeometry(page, pdfjsLib, items, content.styles, inkOf), 20000, 'timeout'); } catch (e) { console.warn(`[pdf-redact] page ${i + 1}: glyph positions not read (${e?.message}); padded boxes used`); }
+        const px = 1 / viewport.scale;
+        const quads = [...redactionQuads(items, content.styles, spans, boxes.map((an) => an.rect), measureOf, geo && geo.geometry, px), ...(geo ? glyphTermQuads(geo.glyphs, terms, inkOf, px) : [])];
         for (const q of quads) poly(q);
 
         const blob = await step(new Promise((resolve) => canvas.toBlob(resolve, 'image/png')), `${where}: making the blacked-out image`);
@@ -225,13 +272,18 @@ export default function Page() {
         // P35 (D3): the words outside the black boxes stay selectable, as invisible text over the picture (the page's
         // point (x, y) is where the scale-1, rotation-0 view puts it, the new page's y axis going up)
         if (!helvetica) helvetica = await outDoc.embedFont(lib.StandardFonts.Helvetica);
-        const words = textLayerWords(items, content.styles, spans, quads, measureOf, spansOf);
+        const words = textLayerWords(items, content.styles, spans, quads, measureOf, spansOf, geo && geo.geometry);
+        if (!arabicFont && !arabicFontProblem && words.some((w) => hasArabic(w.str))) {
+          setProgress(`${where}: loading the Arabic font for its selectable text...`);
+          try { arabicFont = await step(loadArabicFont(outDoc, lib), `${where}: loading the Arabic font`); } catch (e) { if (e instanceof StepTimeout) throw e; arabicFontProblem = e.message; }
+        }
         const toPage = ([x, y]) => { const [vx, vy] = unit.convertToViewportPoint(x, y); return [vx, ph - vy]; };
-        drawInvisibleWords(newPage, helvetica, words, toPage, lib);
+        drawInvisibleWords(newPage, helvetica, words, toPage, lib, arabicFont);
         if (rotation) newPage.setRotation(degrees(rotation));
       }
 
       relinkDestinations(outDoc, lib);
+      if (arabicFont) await step(arabicFont.finalize(), 'Saving the redacted PDF');
       setProgress('Saving the redacted PDF...');
       const pdfBytes = await step(outDoc.save(), 'Saving the redacted PDF');
       // P33: the finished file is read again; a file in which a term can still be found is not handed over
@@ -248,7 +300,7 @@ export default function Page() {
       const byServer = drawnByServer.length ? ` This device could not draw ${drawnByServer.length > 1 ? 'pages' : 'page'} ${listPages(drawnByServer)}, so our own PDF service drew ${drawnByServer.length > 1 ? 'them' : 'it'} before the blacking out: your PDF was sent there, then deleted.` : '';
       const dropped = removed.annotations + removed.links ? ` On the other pages, ${[removed.annotations ? `${removed.annotations} stamp${removed.annotations > 1 ? 's' : ''} or attachment${removed.annotations > 1 ? 's' : ''} (content this tool cannot check)` : '', removed.links ? `${removed.links} link${removed.links > 1 ? 's' : ''} to a redacted page or running a script` : ''].filter(Boolean).join(' and ')} ${removed.annotations + removed.links > 1 ? 'were' : 'was'} removed.` : '';
       const detail = perPage.map(([pg, n]) => `page ${pg}: ${n}`).join(', ');
-      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a picture of the page with an invisible text layer holding the words outside the black boxes (so they can still be selected and searched; words next to a black box, vertical text, and words with letters our text font cannot write — Greek, Cyrillic, Arabic, Asian scripts and some accented letters — are not kept), and the finished file was checked: the blacked-out text no longer exists in it.${dropped} Check the result before sharing it: text drawn as an image (a scan) or inside a fill pattern cannot be found.${byServer}`);
+      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a picture of the page with an invisible text layer holding the words outside the black boxes (so they can still be selected and searched; words touching a black box, vertical text, and words with letters our text fonts cannot write — Greek, Cyrillic, Hebrew, Asian scripts and some accented letters — are not kept), and the finished file was checked: the blacked-out text no longer exists in it.${arabicFontProblem ? ` Arabic words were not kept as selectable text: ${arabicFontProblem}.` : ''}${dropped} Check the result before sharing it: text drawn as an image (a scan) or inside a fill pattern cannot be found.${byServer}`);
       } finally {
         if (renderer) renderer.close();
       }
@@ -293,7 +345,7 @@ export default function Page() {
       </div>
       <SeoContent
         title="PDF Redact"
-        description={`PDF Redact finds the words or phrases you list, one per line, and if you tick them every e-mail address, phone number and card number, in the text of your PDF and in its form fields and comments. The search ignores case, spaces, line breaks, accents and hyphens. Each page with a match is rebuilt as a picture with the matches blacked out in the pixels, plus an invisible text layer for the other words, so the hidden text is gone from the file. The finished PDF is searched again and withheld if a term can still be found. Scanned pages have no text to search: run PDF OCR first.`}
+        description={`PDF Redact finds the words or phrases you list, one per line, and if you tick them every e-mail address, phone number and card number, in the text of your PDF and in its form fields and comments. The search ignores case, spaces, line breaks, accents and hyphens. Each page with a match is rebuilt as a picture with the matches blacked out in the pixels, plus an invisible text layer for the other words, so the hidden text is gone from the file. Each black box is fitted to the glyphs of the matched letters, so the words beside them stay readable. The finished PDF is searched again and withheld if a term can still be found. Scanned pages have no text to search: run PDF OCR first.`}
         howToTitle="How to redact text in a PDF"
         howTo={[
           `Choose the PDF; a file that needs a password to open is refused at once.`,
@@ -304,7 +356,8 @@ export default function Page() {
         specs={[
           { label: 'Input', value: `PDF with a text layer` },
           { label: 'Automatic patterns', value: `E-mail addresses; phone numbers of 9 to 15 digits; card numbers of 13 to 19 digits that pass the Luhn check` },
-          { label: 'Pages with a match', value: `Replaced by a picture with black boxes and invisible text for the remaining words` },
+          { label: 'Pages with a match', value: `Replaced by a picture with black boxes and invisible text for the remaining words, Arabic included` },
+          { label: 'Black boxes', value: `The matched letters' glyphs plus 2% of the font size or one pixel, whichever is larger; where a line's glyphs cannot be tied to its text, 15% of the font size on each side, or the whole line` },
           { label: 'Pages without a match', value: `Copied, minus stamps, attachments, media and links to redacted pages, scripts or other files; the redacted file keeps no bookmarks, document properties or fillable form fields` },
           { label: 'On iPhone and iPad', value: `A matched page that fails or is not drawn within ${LOCAL_PAGE_LIMIT_LABEL} is drawn by our PDF service, for PDFs up to ${Math.floor(STAGED_MAX_BYTES / 1048576)} MB, up to 300 pages per hour and 1,000 pages per day per network` },
           { label: 'Result', value: `redacted.pdf` },
@@ -312,7 +365,7 @@ export default function Page() {
         privacy={`On a computer or an Android device, searching, drawing and blacking out all happen in your browser, and the PDF is not uploaded. On an iPhone or iPad, a page with a match that the device fails to draw, or does not draw within ${LOCAL_PAGE_LIMIT_LABEL}, is drawn by our own PDF service (pdf-tools, not a third party): the PDF is sent there and then deleted, and the black boxes are still applied in your browser. The page tells you when this happens.`}
         faqs={[
           { q: "Is the text really removed, not just covered?", a: `Yes. A matched page is replaced by a picture of itself with the matches blacked out in the pixels, so no text sits under the boxes; only the other words come back as invisible text. The saved file is searched again, and if a term can still be found, no file is given.` },
-          { q: "Will the rest of a redacted page stay searchable?", a: `Yes, mostly. Words outside the black boxes are written back as invisible, selectable text. Not kept: words right next to a box, vertical text, and words with letters the standard font cannot write, such as Greek, Cyrillic, Arabic or Asian scripts. Links and form fields on that page are gone.` },
+          { q: "Will the rest of a redacted page stay searchable?", a: `Yes, mostly. Words outside the black boxes are written back as invisible, selectable text in reading order, Arabic words included, as the PDF's own text gives them. Not kept: words that touch a box, vertical text, and words in scripts the text layer cannot write, such as Greek, Cyrillic, Hebrew or Asian scripts. Links and form fields on that page are gone.` },
           { q: "Does it find a name written with or without accents?", a: `Yes. Accents, case, spaces, line breaks and hyphens are ignored, so Muller also finds Müller, and a word split across two lines is found too. This can black out slightly more than you typed, never less, so check the pages listed in the summary.` },
           { q: "Do pages without a match stay as they were?", a: `Yes, mostly: their text, images and ordinary links stay. Stamps, file attachments and media are removed because their content cannot be checked, with links that jump to a redacted page or run a script. The whole redacted file also loses its bookmarks, document properties and fillable form fields.` },
           { q: "Can it redact a scanned PDF?", a: `No. A scan has no text layer, so nothing can be found and the tool reports that there was no match. Run PDF OCR to get a searchable PDF, then redact that file.` },

@@ -85,6 +85,16 @@
       "claim": "1,000 pages",
       "file": "lib/quota/config.js",
       "pattern": "PDF_RENDER_PAGES_PER_DAY = 1000;"
+    },
+    {
+      "claim": "2%",
+      "file": "app/lib/pdfRedact.js",
+      "pattern": "m = Math\\.max\\(0\\.02 \\* fs, px \\|\\| 0\\)"
+    },
+    {
+      "claim": "15%",
+      "file": "app/lib/pdfRedact.js",
+      "pattern": "b\\.a0 - 0\\.15 \\* fs, b\\.a1 \\+ 0\\.15 \\* fs"
     }
   ],
   "/tools/pdf-tools/pdf-repair": [
