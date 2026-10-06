@@ -284,3 +284,52 @@ Les quatre cas se testent avec « مارس » en page 1 et le terme en page 2. A
   - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar5\c-latin.pdf "مارس|شركة Microsoft"` (attendu : refusé, « could not be redacted safely »)
   - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar5\c-wrap.pdf "مارس|شهر أبريل"` (attendu : refusé)
   - chacune avec `--browser=chromium` puis `--browser=webkit`.
+
+## 13. Relecture n° 6 (1a968394 : GO avec conditions) — C1, L5, faux refus par jonction de colonnes
+
+Toutes les corrections sont testées dans `scripts/p37/redact-review6.test.mjs`. Sur une copie de 1a968394 : **11 FAIL**. Après : **tout PASS**.
+
+| Point | Correction | Avant → après |
+|---|---|---|
+| C1 `/SMask /None` faisait planter toute rédaction (P33) | `redactSanitize.js` : `gs.lookupMaybe(PDFName.of('SMask'), PDFDict, PDFName)`, seul le cas dictionnaire est traité. Nouveau piège `r6/smask-none.pdf` (`scripts/p37/make-smask-none.mjs`), ajouté à `scripts/p35/traps.txt` (32 pièges). | 7 fichiers (le piège et emro-rc67, emro-rc72, lb-abl-annual, ma-bo-6279, ma-bo-7116, wb-ok-content) : « Expected instance of PDFDict, but got instance of PDFName » → noircis (ma-bo-6279 « 6279 » : refusé, le numéro est aussi dans les données du fichier, comportement attendu) |
+| L5 (1) « ں » (U+06BA, police de repli de Chrome) | `norm` replie ں → ن (et les bancs aussi) | test unitaire FAIL → PASS |
+| L5 (2) texte illisible annoncé | `unreadableShare` : part des glyphes sans texte lisible (vide, contrôle, zone privée). Une page au-dessus de 1 % (et 3 glyphes au moins) est nommée dans le résumé et dans « No match found » : « Pages …: part of the text cannot be read …, so a term there may not be found. Check these pages, or run PDF OCR first. » | wb-ok-content : pages signalées (avant : rien) ; un PDF bien lu : aucune page |
+| Faux refus par jonction de colonnes (wiki-ar-oman « ريال ») | `readingOrderHit` cherche chaque morceau de ligne à part (séparateur que `norm` garde), plus deux jonctions : avec le morceau de la ligne suivante dans la même colonne, et d'une ligne à l'autre quand les deux sont d'un seul morceau (paragraphe coupé). Les deux cellules d'une ligne de tableau ne se joignent plus, et L2/L4 restent attrapés (`redact-review2` tout PASS). Deuxième cause, sur une page noircie : deux mots invisibles gardés côte à côte, lus ensemble par PDF.js (« عبري » + « ا لفن »). Si le contrôle final trouve un terme dans le TEXTE d'une page noircie, ce texte ne peut venir que de sa couche invisible (la page est une image) : la page perd sa couche (`removeInvisibleWords`, couche dans son propre flux), et le fichier est vérifié de nouveau, une fois par page. Le résumé le dit. La couche invisible est aussi vérifiée dans l'ordre des lignes et dans l'ordre où PDF.js la relit. | wiki-ar-oman « ريال » : REFUSED → **ok**, terme absent (pages 14 et 22 sans texte sélectionnable) |
+
+- Texte de la page :
+  - nouvelle FAQ « Can it miss a word that is in the PDF? » : oui, quand le PDF ne dit pas quelles lettres sont certains caractères (certains PDF arabes) ; les pages sont listées ; si un terme reste lisible, aucun fichier n'est donné ;
+  - la FAQ sur le texte sélectionnable précise qu'une page peut ne garder aucun mot.
+  - L'arabe reste annoncé seulement pour la couche invisible. Contrôles : content-verify 0, instructions 0, privacy-claims 0.
+
+### Faux refus et mots manqués (`review/corpus-words.mjs`)
+| Corpus | Mots | Trouvés | Refusés | Manqués | Faux refus |
+|---|---|---|---|---|---|
+| 37 PDF arabes (lot 4) | 1 249 | 1 198 | 10 | 41 | 1 → **0** |
+| 24 PDF de `scripts/p27/pdfa-corpus` | 432 | 408 | 0 | 24 | **0** |
+
+Les mots manqués restants :
+- PDF dont PDF.js lit mal le texte : wb-ok-content, ma-bo, polices de repli de Chrome. Les pages concernées sont maintenant signalées, sauf ma-bo, où des lettres manquent sans caractère illisible.
+- Dans le corpus p27, des mots accentués de LibreOffice (« être »). Le script du relecteur ne passe pas par `withActualTextUnicode`, alors que la page, elle, les trouve (vu à la relecture n° 6).
+
+### Relances, toutes sans fuite
+- `redact-review-fixes`, `redact-review2`, `redact-review6` : tout PASS. box-fit 15/15 ; fit-adversarial 19/19 ; ocr-scan 4/4 et ocr-variants 2/2 à 100 % ; arabe 4/4.
+- 32 pièges avec OCR : 32 ok (seul signal : r2/g5, connu).
+- review-traps 5/5 ; traps-r2 3/3 ; traps-r3 2 ok + 1 nomatch ; traps-r4 4 ok + 1 nomatch ; traps-r5 3 ok + 3 refusés : 0 fuite.
+- Navigateur (code de la page) : Chromium et WebKit tout PASS. ESLint 0 erreur.
+
+### L5 à long terme : estimation chiffrée
+- But : une page signalée illisible (part > 1 %) n'est plus seulement annoncée. Elle est aussi cherchée par l'OCR serveur déjà en place (pdf-tools : Tesseract, langues ara+eng, la file d'attente de P35). Les mots trouvés par l'OCR donnent leurs boîtes, et la page est noircie.
+- Travail :
+  1. appel de l'OCR serveur pour les seules pages signalées, avec les termes ; retour des mots avec leurs boîtes (format hOCR / TSV de Tesseract), conversion en coordonnées de la page : 1 jour ;
+  2. correspondance des termes sur le texte OCR (même `norm`), boîtes noires avec la marge élargie (l'OCR n'est pas exact au pixel), comptage dans le résumé : 0,5 jour ;
+  3. contrôle final : si l'OCR d'une page noircie lit encore un terme, refus : 0,5 jour ;
+  4. textes de la page et de confidentialité (la page est alors envoyée au service), quotas, tests (Node et vraie page, Chromium et WebKit, corpus arabe) et relecture : 1 à 1,5 jour.
+- Total : **3 à 3,5 jours**. Coût d'exploitation : celui de l'OCR serveur actuel, seulement pour les pages signalées.
+- Limite : la qualité de Tesseract sur l'arabe de petite taille. Une page signalée et non trouvée par l'OCR reste annoncée.
+
+### Commandes pour le contrôleur (après rebuild)
+- `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p35/traps.txt --root=%TEMP%\p33-review-redact --browser=chromium --ocr` (puis webkit) : 32 ok, dont `r6/smask-none.pdf`.
+- `node scripts/p37/review/real-page-terms.mjs <origin> scripts\audit\results\arabe-corpus\pdfs\wiki-ar-oman.pdf "ريال"` : livré, plus de refus.
+- `node scripts/p37/review/real-page-terms.mjs <origin> scripts\audit\results\arabe-corpus\pdfs\wb-ok-content.pdf "zzqq"` : « No match found » avec la phrase « part of the text cannot be read » et la liste des pages.
+- `node scripts/p37/review/real-page-terms.mjs <origin> scripts\audit\results\arabe-corpus\pdfs\emro-rc67.pdf "2020"` : plus d'erreur « Expected instance… ».
+- Puis les commandes des §8 à §12.

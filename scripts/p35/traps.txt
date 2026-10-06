@@ -1,4 +1,4 @@
-# The 31 trap PDFs of the P33 reviews (rounds 1-2, in %TEMP%\p33-review-redact): <pdf> TAB <term>
+# The 31 trap PDFs of the P33 reviews (rounds 1-2) and r6/smask-none.pdf (P37 sixth review C1, scripts/p37/make-smask-none.mjs), in %TEMP%\p33-review-redact: <pdf> TAB <term>
 f1-link-dest.pdf	ZORGLUB-77
 f2-shared-resources.pdf	ZORGLUB-77
 f3-field-kids.pdf	ZORGLUB-77
@@ -30,3 +30,4 @@ r3/h2-checkbox-other-state.pdf	ZORGLUB-77
 r3/h3-button-down-appearance.pdf	ZORGLUB-77
 r3/h4-link-appearance.pdf	ZORGLUB-77
 r3/h5-tiling-pattern.pdf	ZORGLUB-77
+r6/smask-none.pdf	ZORGLUB-77

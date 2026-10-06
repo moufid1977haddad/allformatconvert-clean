@@ -101,7 +101,10 @@ function prunedResources(lib, ctx, res, text, depth, seen) {
       if (key === 'XObject' || key === 'Pattern') pruneStream(ref);
       if (key === 'ExtGState') {
         const gs = ctx.lookupMaybe(ref, PDFDict);
-        const mask = gs && gs.lookupMaybe(PDFName.of('SMask'), PDFDict);
+        // P37 sixth review (C1): /SMask is often the name /None (Word, InDesign…): lookupMaybe with PDFDict alone threw
+        // ("Expected instance of PDFDict, but got instance of PDFName"); only a soft-mask dictionary has a form to prune
+        const smask = gs && gs.lookupMaybe(PDFName.of('SMask'), PDFDict, PDFName);
+        const mask = smask instanceof PDFDict ? smask : null;
         if (mask && mask.get(PDFName.of('G'))) pruneStream(mask.get(PDFName.of('G')));
       }
     }
@@ -288,9 +291,9 @@ export async function verifyRedacted(bytes, { terms, textMatches, annotMatches, 
     for (let i = 1; i <= doc.numPages; i++) {
       const page = await doc.getPage(i);
       const items = (await page.getTextContent()).items.filter((it) => typeof it.str === 'string');
-      if (await textMatches(items.map((it) => it.str), items.map((it) => !!it.hasEOL), page, items)) return { ok: false, reason: `a term is still in the text of page ${i}` };
-      for (const an of await page.getAnnotations()) if (annotMatches(annotText(an))) return { ok: false, reason: `a term is still in an annotation of page ${i}` };
-      if (glyphHit && await glyphHit(page, doc)) return { ok: false, reason: `a term is still drawn on page ${i}` };
+      if (await textMatches(items.map((it) => it.str), items.map((it) => !!it.hasEOL), page, items)) return { ok: false, reason: `a term is still in the text of page ${i}`, page: i, where: 'text' };
+      for (const an of await page.getAnnotations()) if (annotMatches(annotText(an))) return { ok: false, reason: `a term is still in an annotation of page ${i}`, page: i, where: 'annotation' };
+      if (glyphHit && await glyphHit(page, doc)) return { ok: false, reason: `a term is still drawn on page ${i}`, page: i, where: 'drawn' };
     }
     const att = await doc.getAttachments();
     if (att && Object.keys(att).length) return { ok: false, reason: 'the file has attachments' };

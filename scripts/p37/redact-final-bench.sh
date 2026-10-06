@@ -35,3 +35,11 @@ for b in chromium "webkit --device=iphone"; do
   node scripts/p37/review/real-page-terms.mjs "$O" "$T\p37-review-redact\ar5\c-wrap.pdf" "مارس|شهر أبريل" --browser=$b 2>&1 | tail -2
 done
 for b in chromium webkit; do for l in scripts/p37/traps-r4.txt scripts/p37/traps-r5.txt; do echo "== $l $b"; node scripts/p35/redact-bench.mjs "$O" --list=$l --root="$T\p37-review-redact" --browser=$b --ocr 2>&1 | grep -vE "^\s*$"; done; done
+# relecture n° 6: C1 (/SMask /None), column-join false refusal, unreadable pages announced
+C=scripts/audit/results/arabe-corpus/pdfs
+for b in chromium "webkit --device=iphone"; do
+  echo "== R6 $b"
+  node scripts/p37/review/real-page-terms.mjs "$O" "$C/wiki-ar-oman.pdf" "ريال" --browser=$b 2>&1 | tail -2
+  node scripts/p37/review/real-page-terms.mjs "$O" "$C/wb-ok-content.pdf" "zzqq" --browser=$b 2>&1 | tail -2
+  node scripts/p37/review/real-page-terms.mjs "$O" "$C/emro-rc67.pdf" "2020" --browser=$b 2>&1 | tail -2
+done

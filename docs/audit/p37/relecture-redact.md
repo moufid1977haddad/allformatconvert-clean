@@ -251,3 +251,82 @@ Repro, **vraie page Chromium** (`real-page-terms.mjs`) :
 2. Dans `glyphTermMatches`, construire la forme dessinée d'un terme RTL avec `bidiReorder` (chiffres et latin gardent leur ordre) au lieu d'un simple envers.
 3. Ajouter `mixed.pdf` et `wrap15.pdf` (avec « مارس ») aux tests (`redact-review2.test.mjs`) et au banc vraie page. Le banc à un seul terme ne voit pas la fuite : il faut deux termes.
 
+
+
+---
+
+# Relecture n° 5 — commit e839c5b9 (correction F1)
+
+(Section ajoutée au round 6 : au round 5, l'écriture de cette section avait échoué. Le résumé avait bien été rendu au contrôleur.)
+
+Verdict rendu : **GO avec conditions**.
+- F1 est corrigé : sur la vraie page Chromium, mixed.pdf et wrap15.pdf donnent un fichier sans le terme.
+- Quatre fuites silencieuses ont été trouvées en arabe. Elles existaient avant P37 : la recherche les avait déjà.
+  - **L1 (élevée)** : lettres persanes que Chromium écrit (ﯾ lu ی, ﮫ lu ھ). Tout terme avec ي ou ه médian échouait.
+  - **L2** : terme mêlé de latin, coupé dans l'ordre visuel.
+  - **L3** : tatweel.
+  - **L4** : phrase coupée en fin de ligne.
+- Fixtures : `%TEMP%\p37-review-redact\ar5\` (`make-chrome-arabic.mjs`) et `ar3\`.
+
+---
+
+# Relecture n° 6 — commit 1a968394 (L1-L4, contrôle final en ordre de lecture)
+
+Date : 06/10/2026. Même rôle, mêmes règles. Vraie page : build de production de 1a968394 sur http://localhost:3137.
+Nouveaux scripts :
+- `scripts/p37/review/corpus-words.mjs` : chaque mot lu par pdftotext sur de vrais PDF, passé aux détecteurs de la page ;
+- `bad-unicode-share.mjs` ;
+- `real-page-terms.mjs` (déjà là).
+Corpus : les 37 PDF arabes publics du lot 4 (`scripts/audit/results/arabe-corpus/pdfs`) et les 24 PDF de `scripts/p27/pdfa-corpus`.
+
+## Verdict : GO avec conditions
+
+L1 à L4 sont corrigés : sur la vraie page, en Chromium et en WebKit, chaque cas est noirci ou refusé. Je n'ai trouvé aucun nouveau faux refus notable. Deux défauts restent. Ils existaient avant P37, mais ils touchent de vrais documents :
+- **C1 (bloquant pour la mise en ligne, simple)** : un plantage sur environ 10 % des vrais PDF (`/SMask /None`).
+- **L5 (à annoncer ou atténuer)** : des PDF dont PDF.js lit mal le texte.
+
+## 1. L1 à L4 vérifiés
+Vraie page (`real-page-terms.mjs`, « مارس » en page 1, le terme en page 2), **Chromium et WebKit, mêmes résultats** :
+| Cas | Résultat |
+|---|---|
+| c-harakat « المدير العام » (L1) | 2 occurrences, pdftotext ne lit plus le terme |
+| c-wrap « الرياض » (L1) | idem |
+| tatweel « المدير العام » (L3) | idem |
+| c-latin « شركة Microsoft » (L2) | REFUSED, « a term is still drawn on page 2 » |
+| lo-latin-wrap « شركة Microsoft » (L4) | REFUSED |
+| c-wrap « شهر أبريل » (L4) | REFUSED |
+
+L2 et L4 sont refusés, pas noircis : c'est la version minimale annoncée par l'auteur. Pas de fuite, mais pas de fichier non plus.
+
+## 2. Faux refus (`corpus-words.mjs`)
+Méthode : chaque mot pdftotext d'une page, trouvé sur sa page, est cherché sur les autres pages du document. Un faux refus = `readingOrderHit` le voit sur une page où pdftotext ne le lit pas comme mot et où la passe 1 ne le trouve pas.
+- 37 PDF arabes, 1 249 mots : **1 faux refus** (wiki-ar-oman p2, « ريال », formé à travers deux colonnes ou cellules).
+- 24 PDF latins (p27), 652 mots : **0**.
+- Le risque est réel mais faible. `norm` retire tous les espaces : couper les morceaux à 1,5 em (`readingOrderText`) n'empêche donc pas de joindre deux colonnes. Pour le réduire : joindre les morceaux d'une ligne et les lignes avec un séparateur que `norm` garde (par exemple « \u0001 », retiré seulement pour les termes coupés), ou chercher un terme uniquement dans un même morceau ou deux lignes voisines d'une même colonne.
+
+## 3. Défauts restants
+
+### C1 — ÉLEVÉE (préexistant, P33) : « Redaction failed: Expected instance of e, but got instance of e »
+- `app/lib/redactSanitize.js`, `prunedResources`, l. 104 : `gs.lookupMaybe(PDFName.of('SMask'), PDFDict)` lève une exception quand `/SMask` vaut le nom `/None`. C'est la valeur ordinaire écrite par Word, InDesign et beaucoup d'outils.
+- Fichiers touchés : emro-rc67, emro-rc72, lb-abl-annual, ma-bo-6279, ma-bo-7116, wb-ok-content, soit **au moins 6 sur 61** vrais PDF. La redaction échoue avec un message incompréhensible, même pour un terme latin (« ISSN », « 2014 ») ; confirmé sur la vraie page Chromium. Pas de fuite (aucun fichier n'est donné), mais l'outil est inutilisable sur ces PDF.
+- Correctif : `gs.lookupMaybe(PDFName.of('SMask'), PDFDict, PDFName)`, et ne traiter que le cas `PDFDict`. Ajouter un PDF avec `/SMask /None` aux pièges.
+
+### L5 — ÉLEVÉE pour l'arabe (préexistant) : texte que PDF.js lit mal, alors que pdftotext le lit
+- Corpus arabe : sur 1 249 mots lus par pdftotext, **41 ne sont trouvés ni par la passe 1 ni par le contrôle final**. Cas réels :
+  - wb-ok-content (rapport de la Banque mondiale, 16 mots sur 29) : ToUnicode cassée, PDF.js lit des caractères de contrôle. 38,9 % des glyphes n'ont pas de texte lisible.
+  - ma-bo-6279 et ma-bo-7116 (Bulletin officiel du Maroc) : PDF.js perd des lettres (« السنة » lu « النة », « عشرة » lu « عشة »).
+  - Chrome avec police de repli (p27-chrome-calibri : « مرحبا », « رسمية ») : glyphes lus « \u0000 », et « ں » (U+06BA) pour ن.
+- Conséquences, vérifiées sur la vraie page :
+  - terme seul : « No match found » ;
+  - avec un autre terme sur la même page (p27-chrome-calibri, « Ελλάδας » + « مرحبا بالعالم ») : « Blacked out 1 occurrence », et l'expression arabe reste **visible sur l'image** (non noircie) ;
+  - avec un autre terme sur une autre page : le terme reste dans le fichier (même schéma que D4).
+- Le contrôle final repose aussi sur PDF.js : il ne peut pas le voir.
+- Atténuations proposées :
+  1. Ajouter ں → ن au repli de `norm`.
+  2. Signal honnête : compter, par page, les glyphes dessinés sans texte lisible (vide, contrôle, zone privée ; `bad-unicode-share.mjs`). Au-delà de ~1 %, dire dans le résumé, et dans « No match found », que le texte de ces pages ne peut pas être lu de façon fiable, et que des termes peuvent y être manqués (avec la liste des pages). Ce signal attrape wb-ok-content ; il ne voit pas ma-bo (lettres perdues sans caractère de contrôle).
+  3. À plus long terme : passer ces pages à l'OCR serveur (déjà disponible) pour la recherche.
+
+## 4. Suites relancées (bancs corrigés, pdftotext en UTF-8), sans fuite
+- 31 pièges avec `--ocr` : 31 ok (r2/g5 connu). `traps-r4` et `traps-r5` de l'auteur : ok ou REFUSED attendus.
+- fit-adversarial 19/19 ; ocr-scan et ocr-variants à 100 % ; box-fit 15/15 ; arabe 4/4 ; `redact-review2` tout PASS.
+- Accents (p27-lo-cambria-accents) : trouvés par la page grâce à `withActualTextUnicode` (mon scan brut, sans ActualText, les donnait manqués : faux signal de mon script, pas de l'outil).

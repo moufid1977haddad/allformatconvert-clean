@@ -20,7 +20,7 @@ const lib = await import(from('node_modules/pdf-lib/cjs/index.js')).then((m) => 
 const pdfjsLib = await import(from('node_modules/pdfjs-dist/legacy/build/pdf.mjs'));
 if (typeof globalThis.regeneratorRuntime === 'undefined') globalThis.regeneratorRuntime = (await import(from('node_modules/regenerator-runtime/runtime.js'))).default || globalThis.regeneratorRuntime;
 const fontkit = await import(from('node_modules/@pdf-lib/fontkit/dist/fontkit.umd.js')).then((m) => m.default || m);
-const { matchSpans, annotationText, patternSpans, annotationMatches, redactionQuads, textLayerWords, drawInvisibleWords, pageGlyphs, glyphTermMatches, confirmedTermSpans, readingOrderHit, itemGeometry, glyphTermQuads, invisibleTextFont, hasArabic } = await import(from('app/lib/pdfRedact.js'));
+const { matchSpans, annotationText, patternSpans, annotationMatches, redactionQuads, textLayerWords, drawInvisibleWords, pageGlyphs, glyphTermMatches, confirmedTermSpans, readingOrderHit, unreadableShare, UNREADABLE_SHARE, removeInvisibleWords, itemGeometry, glyphTermQuads, invisibleTextFont, hasArabic } = await import(from('app/lib/pdfRedact.js'));
 const { sanitizeForCopy, verifyRedacted, UNREADABLE_ANNOTATIONS } = await import(from('app/lib/redactSanitize.js'));
 const { withActualTextUnicode } = await import(from('app/lib/pdfActualText.js'));
 const SFD = path.join(ROOT, 'node_modules/pdfjs-dist/standard_fonts/').replace(/\\/g, '/');
@@ -71,6 +71,7 @@ export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
   const helv = await outDoc.embedFont(lib.StandardFonts.Helvetica);
   const measureOf = () => ({ real: false, width: (s) => { try { return helv.widthOfTextAtSize(s, 100); } catch { return s.length * 55; } } });
   const found = new Map();
+  const unreadable = [];
   for (let i = 0; i < pdf.numPages; i++) {
     const page = await pdf.getPage(i + 1);
     const content = await textOf(page);
@@ -83,16 +84,19 @@ export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
     let glyphs = null;
     try { glyphs = await pageGlyphs(page, pdfjsLib); } catch { glyphs = null; }
     const drawnHits = glyphs && terms.length ? glyphTermMatches(glyphs, terms).length : 0;
+    // sixth review (L5): pages part of whose text cannot be read (as the page reports them)
+    if (glyphs && terms.length) { const u = unreadableShare(glyphs); if (u.share > UNREADABLE_SHARE && u.bad >= 3) unreadable.push(i + 1); }
     const spans = [...confirmedTermSpans(items, terms, glyphs), ...patternSpans(strs, kinds, items.map((it) => !!it.hasEOL))];
     if (!spans.length && !annots.length && !drawnHits) { page.cleanup(); continue; }
     const opaque = all.filter((an) => an.rect && UNREADABLE_ANNOTATIONS.has(an.subtype) && !annots.includes(an));
     found.set(i, { page, content, items, spans, boxes: [...annots, ...opaque], glyphs });
   }
-  if (!found.size) return { status: 'nomatch' };
+  if (!found.size) return { status: 'nomatch', unreadable };
   const removed = sanitizeForCopy(srcDoc, [...found.keys()], lib);
   const img = await outDoc.embedPng(PNG);
   const kept = {}, quadsOf = {}, exact = { spans: 0, placed: 0 }, layer = {};
   let arabicFont = null;
+  const layered = new Map();
   for (let i = 0; i < pdf.numPages; i++) {
     const hit = found.get(i);
     if (!hit) { const [c] = await outDoc.copyPages(srcDoc, [i]); outDoc.addPage(c); continue; }
@@ -111,13 +115,22 @@ export async function redact(file, terms, kinds = [], { arabic = true } = {}) {
     const words = textLayerWords(items, content.styles, spans, quads, measureOf, spansOf, geometry);
     if (arabic && !arabicFont && words.some((w) => hasArabic(w.str))) arabicFont = invisibleTextFont(outDoc, fontkit.create(fs.readFileSync(ARABIC_FONT)), lib);
     layer[i + 1] = words.map((w) => w.str);
+    layered.set(i + 1, p);
     kept[i + 1] = drawInvisibleWords(p, helv, words, ([x, y]) => { const [vx, vy] = unit.convertToViewportPoint(x, y); return [vx, unit.height - vy]; }, lib, arabicFont);
     if (page.rotate) p.setRotation(lib.degrees(page.rotate));
   }
   if (arabicFont) await arabicFont.finalize();
-  const bytes = await outDoc.save();
-  const check = await verifyRedacted(bytes, { terms, textMatches, annotMatches: (t) => annotationMatches(t, terms, kinds), annotText: annotationText, pdfjsLib: { getDocument: (o) => pdfjsLib.getDocument({ ...o, standardFontDataUrl: SFD, verbosity: 0 }) }, lib, pageCount: pdf.numPages, glyphHit: terms.length ? async (pg) => { const g = await glyphsOf(pg); if (!g) throw new Error('the glyphs of a page could not be read'); return glyphTermMatches(g, terms).length > 0 || readingOrderHit(g, terms); } : null });
-  return { status: check.ok ? 'ok' : 'REFUSED', reason: check.reason, hits: [...found.keys()].map((i) => i + 1), kept, layer, quads: quadsOf, exact, pages: pdf.numPages, removed, bytes };
+  let bytes = await outDoc.save();
+  const verify = (b) => verifyRedacted(b, { terms, textMatches, annotMatches: (t) => annotationMatches(t, terms, kinds), annotText: annotationText, pdfjsLib: { getDocument: (o) => pdfjsLib.getDocument({ ...o, standardFontDataUrl: SFD, verbosity: 0 }) }, lib, pageCount: pdf.numPages, glyphHit: terms.length ? async (pg) => { const g = await glyphsOf(pg); if (!g) throw new Error('the glyphs of a page could not be read'); return glyphTermMatches(g, terms).length > 0 || readingOrderHit(g, terms); } : null });
+  let check = await verify(bytes);
+  // as the page (sixth review): a term in the text of a redacted page comes from its invisible words — the page loses them
+  const layerless = [];
+  while (!check.ok && check.where === 'text' && layered.has(check.page) && !layerless.includes(check.page) && removeInvisibleWords(layered.get(check.page), lib)) {
+    layerless.push(check.page);
+    bytes = await outDoc.save();
+    check = await verify(bytes);
+  }
+  return { status: check.ok ? 'ok' : 'REFUSED', reason: check.reason, unreadable, layerless, hits: [...found.keys()].map((i) => i + 1), kept, layer, quads: quadsOf, exact, pages: pdf.numPages, removed, bytes };
 }
 
 if (process.argv[2] && !process.argv[2].startsWith('--') && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

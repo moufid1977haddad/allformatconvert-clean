@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import SeoContent from '../../../components/SeoContent';
 import { openablePdfBytes } from '../../../lib/pdfDecrypt';
-import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf, glyphTermQuads, glyphTermMatches, confirmedTermSpans, readingOrderHit, invisibleTextFont, hasArabic, pageGlyphGeometry, pageGlyphs, itemGeometry, canvasInk } from '../../../lib/pdfRedact';
+import { matchSpans, annotationText, patternSpans, annotationMatches, termsOf, PATTERNS, redactionQuads, textLayerWords, drawInvisibleWords, standardWidthOf, glyphTermQuads, glyphTermMatches, confirmedTermSpans, readingOrderHit, unreadableShare, UNREADABLE_SHARE, removeInvisibleWords, invisibleTextFont, hasArabic, pageGlyphGeometry, pageGlyphs, itemGeometry, canvasInk } from '../../../lib/pdfRedact';
 import { loadPdfjs } from '../../../lib/pdfjs';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
@@ -117,6 +117,11 @@ export default function Page() {
       let helvetica = null;
       let arabicFont = null, arabicFontProblem = '';
       let inkCanvas = null, drawnInk = null;
+      // P37 sixth review (L5): pages part of whose text cannot be read (glyphs without readable letters: a broken text
+      // encoding, common in some Arabic PDFs) — said in the summary and in "No match found", never silently
+      const unreadablePages = [];
+      const layered = new Map(); // page number → the rebuilt page (with its invisible words)
+      const unreadableNote = () => (unreadablePages.length ? ` ${unreadablePages.length > 1 ? 'Pages' : 'Page'} ${listPages(unreadablePages)}: part of the text cannot be read (the PDF does not say which letters some of its characters are), so a term there may not be found. Check ${unreadablePages.length > 1 ? 'these pages' : 'this page'}, or run PDF OCR first.` : '');
 
       // Pass 1 (P33): every page is searched BEFORE anything is copied — the pages without a match are then copied from
       // a source in which the redacted pages are empty shells (app/lib/redactSanitize.js, independent review 05/10).
@@ -134,7 +139,13 @@ export default function Page() {
         // left phrase out of order, or its lam-alef reversed). Not read within 20 s: the final check reads it again.
         let glyphs = null, drawnHits = 0;
         if (terms.length) {
-          try { glyphs = await withTimeout(pageGlyphs(page, pdfjsLib), 20000, 'timeout'); drawnHits = glyphTermMatches(glyphs, terms).length; } catch (e) { console.warn(`[pdf-redact] page ${i + 1}: glyphs not read (${e?.message})`); }
+          try {
+            glyphs = await withTimeout(pageGlyphs(page, pdfjsLib), 20000, 'timeout');
+            drawnHits = glyphTermMatches(glyphs, terms).length;
+            // P37 sixth review (L5): a page part of whose text cannot be read is named to the visitor
+            const u = unreadableShare(glyphs);
+            if (u.share > UNREADABLE_SHARE && u.bad >= 3) unreadablePages.push(i + 1);
+          } catch (e) { console.warn(`[pdf-redact] page ${i + 1}: glyphs not read (${e?.message})`); }
         }
         // the terms as typed in the text, their lam-alef forms where the run draws that ligature (app/lib/pdfRedact.js
         // confirmedTermSpans), and the patterns
@@ -157,7 +168,7 @@ export default function Page() {
       if (totalMatches === 0) {
         // no file is made: nothing would be removed (P33: the terms are named back, as the market's tools do)
         const asked = [terms.length ? quoteTerms(terms) : '', ...kinds.map((k) => PATTERNS[k].label.toLowerCase())].filter(Boolean).join(', ');
-        setError(`No match found for ${asked} in this PDF's text (${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''} searched). Text that is part of a picture (a scan) cannot be found: run PDF OCR first.`);
+        setError(`No match found for ${asked} in this PDF's text (${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''} searched). Text that is part of a picture (a scan) cannot be found: run PDF OCR first.${unreadableNote()}`);
         setLoading(false);
         setProgress('');
         return;
@@ -276,16 +287,26 @@ export default function Page() {
         }
         const toPage = ([x, y]) => { const [vx, vy] = unit.convertToViewportPoint(x, y); return [vx, ph - vy]; };
         drawInvisibleWords(newPage, helvetica, words, toPage, lib, arabicFont);
+        layered.set(i + 1, newPage);
         if (rotation) newPage.setRotation(degrees(rotation));
       }
 
       relinkDestinations(outDoc, lib);
       if (arabicFont) await step(arabicFont.finalize(), 'Saving the redacted PDF');
       setProgress('Saving the redacted PDF...');
-      const pdfBytes = await step(outDoc.save(), 'Saving the redacted PDF');
+      let pdfBytes = await step(outDoc.save(), 'Saving the redacted PDF');
       // P33: the finished file is read again; a file in which a term can still be found is not handed over
       setProgress('Checking the redacted PDF...');
-      const check = await step(verifyRedacted(pdfBytes, { terms, textMatches, annotMatches: (t) => annotationMatches(t, terms, kinds), annotText: annotationText, pdfjsLib, lib, pageCount: pdf.numPages, glyphHit: terms.length ? async (pg) => { const g = await glyphsOf(pg); if (!g) throw new Error('the glyphs of a page could not be read'); return glyphTermMatches(g, terms).length > 0 || readingOrderHit(g, terms); } : null }), 'Checking the redacted PDF');
+      const verify = () => verifyRedacted(pdfBytes, { terms, textMatches, annotMatches: (t) => annotationMatches(t, terms, kinds), annotText: annotationText, pdfjsLib, lib, pageCount: pdf.numPages, glyphHit: terms.length ? async (pg) => { const g = await glyphsOf(pg); if (!g) throw new Error('the glyphs of a page could not be read'); return glyphTermMatches(g, terms).length > 0 || readingOrderHit(g, terms); } : null });
+      let check = await step(verify(), 'Checking the redacted PDF');
+      // P37 sixth review: a term read in the TEXT of a redacted page can only come from its invisible words (the page is
+      // a picture): that page loses them and the file is checked again (once per page) — never a file with the term
+      const layerless = [];
+      while (!check.ok && check.where === 'text' && layered.has(check.page) && !layerless.includes(check.page) && removeInvisibleWords(layered.get(check.page), lib)) {
+        layerless.push(check.page);
+        pdfBytes = await step(outDoc.save(), 'Saving the redacted PDF');
+        check = await step(verify(), 'Checking the redacted PDF');
+      }
       if (!check.ok) {
         setError(`This PDF could not be redacted safely: after blacking out, ${check.reason}. No file is given. Please tell us about it through the contact page (without the file), or redact it in a desktop tool.${sentToServer ? ' Your PDF was sent to our own PDF service for this attempt, then deleted.' : ''}`);
         setLoading(false);
@@ -297,7 +318,7 @@ export default function Page() {
       const byServer = drawnByServer.length ? ` This device could not draw ${drawnByServer.length > 1 ? 'pages' : 'page'} ${listPages(drawnByServer)}, so our own PDF service drew ${drawnByServer.length > 1 ? 'them' : 'it'} before the blacking out: your PDF was sent there, then deleted.` : '';
       const dropped = removed.annotations + removed.links ? ` On the other pages, ${[removed.annotations ? `${removed.annotations} stamp${removed.annotations > 1 ? 's' : ''} or attachment${removed.annotations > 1 ? 's' : ''} (content this tool cannot check)` : '', removed.links ? `${removed.links} link${removed.links > 1 ? 's' : ''} to a redacted page or running a script` : ''].filter(Boolean).join(' and ')} ${removed.annotations + removed.links > 1 ? 'were' : 'was'} removed.` : '';
       const detail = perPage.map(([pg, n]) => `page ${pg}: ${n}`).join(', ');
-      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a picture of the page with an invisible text layer holding the words outside the black boxes (so they can still be selected and searched; words touching a black box, vertical text, and words with letters our text fonts cannot write — Greek, Cyrillic, Hebrew, Asian scripts and some accented letters — are not kept), and the finished file was checked: the blacked-out text no longer exists in it.${arabicFontProblem ? ` Arabic words were not kept as selectable text: ${arabicFontProblem}.` : ''}${dropped} Check the result before sharing it: text drawn as an image (a scan) or inside a fill pattern cannot be found.${byServer}`);
+      setSummary(`Blacked out ${totalMatches} occurrence${totalMatches > 1 ? 's' : ''} (${detail}). ${pagesHit.length > 1 ? 'These pages are' : 'This page is'} now a picture of the page with an invisible text layer holding the words outside the black boxes (so they can still be selected and searched; words touching a black box, vertical text, and words with letters our text fonts cannot write — Greek, Cyrillic, Hebrew, Asian scripts and some accented letters — are not kept), and the finished file was checked: the blacked-out text no longer exists in it.${arabicFontProblem ? ` Arabic words were not kept as selectable text: ${arabicFontProblem}.` : ''}${dropped} Check the result before sharing it: text drawn as an image (a scan) or inside a fill pattern cannot be found.${layerless.length ? ` ${layerless.length > 1 ? 'Pages' : 'Page'} ${listPages(layerless)} kept no selectable text: some of ${layerless.length > 1 ? 'their' : 'its'} words, read together, could spell a term.` : ''}${unreadableNote()}${byServer}`);
       } finally {
         if (renderer) renderer.close();
       }
@@ -362,10 +383,11 @@ export default function Page() {
         privacy={`On a computer or an Android device, searching, drawing and blacking out all happen in your browser, and the PDF is not uploaded. On an iPhone or iPad, a page with a match that the device fails to draw, or does not draw within ${LOCAL_PAGE_LIMIT_LABEL}, is drawn by our own PDF service (pdf-tools, not a third party): the PDF is sent there and then deleted, and the black boxes are still applied in your browser. The page tells you when this happens.`}
         faqs={[
           { q: "Is the text really removed, not just covered?", a: `Yes. A matched page is replaced by a picture of itself with the matches blacked out in the pixels, so no text sits under the boxes; only the other words come back as invisible text. The saved file is searched again, and if a term can still be found, no file is given.` },
-          { q: "Will the rest of a redacted page stay searchable?", a: `Yes, mostly. Words outside the black boxes are written back as invisible, selectable text in reading order, Arabic words included, as the PDF's own text gives them. Not kept: words that touch a box, vertical text, and words in scripts the text layer cannot write, such as Greek, Cyrillic, Hebrew or Asian scripts. Links and form fields on that page are gone.` },
+          { q: "Will the rest of a redacted page stay searchable?", a: `Yes, mostly. Words outside the black boxes are written back as invisible, selectable text in reading order, Arabic words included, as the PDF's own text gives them. Not kept: words that touch a box, vertical text, and words in scripts the text layer cannot write, such as Greek, Cyrillic, Hebrew or Asian scripts; a page whose kept words could spell a term together keeps none. Links and form fields on that page are gone.` },
           { q: "Does it find a name written with or without accents?", a: `Yes. Accents, case, spaces, line breaks and hyphens are ignored, so Muller also finds Müller, and a word split across two lines is found too. This can black out slightly more than you typed, never less, so check the pages listed in the summary.` },
           { q: "Do pages without a match stay as they were?", a: `Yes, mostly: their text, images and ordinary links stay. Stamps, file attachments and media are removed because their content cannot be checked, with links that jump to a redacted page or run a script. The whole redacted file also loses its bookmarks, document properties and fillable form fields.` },
           { q: "Can it redact a scanned PDF?", a: `No. A scan has no text layer, so nothing can be found and the tool reports that there was no match. Run PDF OCR to get a searchable PDF, then redact that file.` },
+          { q: "Can it miss a word that is in the PDF?", a: `Yes, when the PDF does not say which letters some of its characters are, which happens with some Arabic PDFs: that text cannot be searched. The summary, and the message saying no match was found, list the pages where part of the text cannot be read; check them, or run PDF OCR first. If a term could still be read in the finished file, no file is given.` },
         ]}
         tips={[
           `Prefer full phrases to short fragments: a short term can match inside other words and turn more pages into pictures than needed.`,

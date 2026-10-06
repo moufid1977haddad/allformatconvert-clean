@@ -9,10 +9,10 @@
 // own glyph: "u" + "¨" is "u"), and so are hyphens and dashes ("ZORG-" at a line end + "LUB-77" was not found as
 // "ZORGLUB-77"). Both sides are folded the same way: "Muller" also finds "Müller" — over-redaction is the safe side.
 // P37 fifth review (L1, L3): Arabic letters a PDF writes with their Persian / Urdu forms (Chrome's fonts map the shared
-// glyphs to them: "ﯾ" reads "ی", "ﮫ" reads "ھ") fold to the Arabic ones — ی ى → ي, ک → ك, ھ ہ ە ۀ → ه — and the tatweel
+// glyphs to them: "ﯾ" reads "ی", "ﮫ" reads "ھ") fold to the Arabic ones — ی ى → ي, ک → ك, ں → ن (sixth review), ھ ہ ە ۀ → ه — and the tatweel
 // (kashida, U+0640, a stretching stroke) and the direction marks (U+200E, U+200F, U+202A-U+202E, U+2066-U+2069) are dropped,
 // on both sides ("على" also finds "علي": over-redaction, the safe side).
-export const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´ˆ-˝`¯¸]/gu, '').replace(/[\u0640\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '').replace(/[\u06CC\u0649]/g, '\u064A').replace(/\u06A9/g, '\u0643').replace(/[\u06BE\u06C1\u06D5\u06C0]/g, '\u0647').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
+export const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´ˆ-˝`¯¸]/gu, '').replace(/[\u0640\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '').replace(/[\u06CC\u0649]/g, '\u064A').replace(/\u06A9/g, '\u0643').replace(/\u06BA/g, '\u0646').replace(/[\u06BE\u06C1\u06D5\u06C0]/g, '\u0647').toLowerCase().replace(/\s+/g, '').replace(/[-­‐-―−]/g, '');
 
 // P37 review (D4): the forms a term can take in PDF.js's text. PDF.js reverses a right-to-left run character by
 // character, so a glyph that carries several characters comes out reversed: LibreOffice's lam-alef "لا" is read "ال"
@@ -540,14 +540,14 @@ export function confirmedTermSpans(items, terms, glyphs = null) {
 
 /**
  * P37 fifth review (L2, L4), for the FINAL CHECK only: a page's text rebuilt in reading order from the glyphs it draws —
- * lines (same direction, baselines within 0.4 of the font size) from top to bottom, each line cut where a gap is wider
- * than 1.5 × the font size; a piece holding right-to-left letters put in reading order with bidiReorder (digits and
- * Latin keep their order) and the pieces of such a line read right to left. PDF.js reads a right-to-left line with a
- * Latin word in it ("شركة Microsoft"), or a phrase wrapped onto the next line, in pieces out of order: rebuilt here, a
- * term still drawn is found, and the file is refused (never delivered). Every glyph counts, invisible ones included
- * (their text can be copied). Returns the text, lines separated by "\n".
+ * lines (same direction, baselines within 0.4 of the font size) from top to bottom, each line cut into pieces where a
+ * gap is wider than 2.5 × the font size (columns, table cells); a piece holding right-to-left letters put in reading
+ * order with bidiReorder (digits and Latin keep their order) and the pieces of such a line read right to left. PDF.js
+ * reads a right-to-left line with a Latin word in it ("شركة Microsoft"), or a phrase wrapped onto the next line, in
+ * pieces out of order: rebuilt here, a term still drawn is found, and the file is refused (never delivered). Every glyph
+ * counts, invisible ones included (their text can be copied). Returns the lines: [{ pieces: [{ text, lo, hi, v, size }] }].
  */
-export function readingOrderText(glyphs) {
+function readingOrderLines(glyphs) {
   const gs = [];
   for (const g of glyphs) {
     if (!g.M || !g.u || !/\S/.test(g.u)) continue;
@@ -566,15 +566,66 @@ export function readingOrderText(glyphs) {
   return lines.map((line) => {
     const row = line.gs.sort((a, b) => a.u - b.u);
     const pieces = [];
-    row.forEach((x, n) => { const prev = row[n - 1]; if (!n || x.u - (prev.u + prev.w) > 1.5 * Math.max(x.size, prev.size)) pieces.push([]); pieces[pieces.length - 1].push(x.g); });
+    row.forEach((x, n) => { const prev = row[n - 1]; if (!n || x.u - (prev.u + prev.w) > 2.5 * Math.max(x.size, prev.size)) pieces.push([]); pieces[pieces.length - 1].push(x); });
     const rtl = row.some((x) => isRtlText(x.g.u));
-    const texts = pieces.map((pc) => (pc.some((g) => isRtlText(g.u)) ? bidiReorder(pc, (g) => g.u) : pc).map((g) => g.u).join(''));
-    return (rtl ? texts.reverse() : texts).join(' ');
-  }).join('\n');
+    const out = pieces.map((pc) => {
+      const gl = pc.map((x) => x.g);
+      const text = (gl.some((g) => isRtlText(g.u)) ? bidiReorder(gl, (g) => g.u) : gl).map((g) => g.u).join('');
+      return { text, lo: pc[0].u, hi: pc[pc.length - 1].u + pc[pc.length - 1].w, v: line.v, ang: line.ang, size: Math.max(...pc.map((x) => x.size)) };
+    });
+    return { pieces: rtl ? out.reverse() : out };
+  });
 }
 
-/** Fifth review: is a term (as typed, folded by norm) in the page's reading-order text rebuilt from its glyphs? */
-export const readingOrderHit = (glyphs, terms) => { const text = norm(readingOrderText(glyphs)); return terms.some((term) => { const n = norm(term); return !!n && text.includes(n); }); };
+/** The page's reading-order text (pieces of a line separated by " | ", lines by "\n"), for reading and tests. */
+export function readingOrderText(glyphs) {
+  return readingOrderLines(glyphs).map((l) => l.pieces.map((p) => p.text).join(' | ')).join('\n');
+}
+
+/**
+ * Fifth review: is a term (as typed, folded by norm) still drawn in reading order? Sixth review: pieces are searched
+ * apart (a separator norm keeps), so two columns or table cells side by side never make a term ("ريال" across two
+ * cells of wiki-ar-oman refused a file); a piece and a piece of the NEXT line (within 2.5 × the font size below) are
+ * also searched joined when they are in the same column (overlapping along the line), or when both lines are one piece
+ * each (a wrapped paragraph, whatever its alignment), so a phrase wrapped onto the next line is still caught (L4).
+ */
+export const readingOrderHit = (glyphs, terms) => {
+  const lines = readingOrderLines(glyphs);
+  const SEP = '\u0001';
+  const texts = [lines.map((l) => l.pieces.map((p) => norm(p.text)).join(SEP)).join(SEP)];
+  lines.forEach((l, n) => {
+    const next = lines[n + 1];
+    if (!next) return;
+    for (const p of l.pieces) for (const q of next.pieces) {
+      if (Math.abs(p.ang - q.ang) >= 0.035 || p.v - q.v > 2.5 * Math.max(p.size, q.size)) continue;
+      // the same column (overlapping along the line), or the end of a line and the start of the next one (reading order)
+      const sameColumn = Math.min(p.hi, q.hi) > Math.max(p.lo, q.lo);
+      // (a line cut into several pieces is a table row or columns: only the same column there — "مجلس الشورى" at the end
+      // of one infobox row and "السلطة" at the start of the next made "ريال")
+      const wrapped = l.pieces.length === 1 && next.pieces.length === 1;
+      if (sameColumn || wrapped) texts.push(norm(p.text) + norm(q.text));
+    }
+  });
+  return terms.some((term) => { const t = norm(term); return !!t && texts.some((x) => x.includes(t)); });
+};
+
+/**
+ * P37 sixth review (L5): the share of the glyphs a page draws whose text cannot be read — none, a control character, a
+ * private-use code — as PDF.js gives it (a broken ToUnicode: a World Bank report had 38.9 % of them). A term written with
+ * such glyphs cannot be found by any search of the text: the page says so (UNREADABLE_SHARE), never silently.
+ * Spaces are not counted. Returns { share, bad, all }.
+ */
+export const UNREADABLE_SHARE = 0.01;
+export function unreadableShare(glyphs) {
+  let all = 0, bad = 0;
+  for (const g of glyphs) {
+    const u = g.u || '';
+    if (u && !/\S/.test(u)) continue;
+    all++;
+    if (!u || /[\u0000-\u001f\u007f-\u009f\ue000-\uf8ff\ufffd]/.test(u)) bad++;
+  }
+  return { share: all ? bad / all : 0, bad, all };
+}
 
 export function glyphTermQuads(glyphs, terms, inkOf = () => null, px = 0.5) {
   const quads = [];
@@ -886,10 +937,28 @@ export function textLayerWords(items, styles, spans, quads, measureOf, spansOf, 
   });
   // control characters (a font's codes without text, as PDF.js reads them) are not written
   const clean = words.map((w) => ({ ...w, str: w.str.replace(/[\u0000-\u001f\u007f-\u009f]/g, '') })).filter((w) => /\S/.test(w.str));
+  // P37 sixth review: the kept words are also checked in the order a reader of the page meets them — along each line,
+  // left to right and right to left (wiki-ar-oman: "عبري" and "ا لفن" kept side by side read "…ريال…" in PDF.js, and
+  // the file was refused for a term the page did not hold there)
+  const lineOrders = (ws) => {
+    const at = ws.map((w, n) => { const [a1, b1, , , x, y] = w.transform; const d = Math.hypot(a1, b1) || 1; return { n, ang: Math.round(Math.atan2(b1, a1) * 20), u: (x * a1 + y * b1) / d, v: (-x * b1 + y * a1) / d, h: Math.hypot(w.transform[2], w.transform[3]) || 1 }; });
+    const byLine = [...at].sort((p, q) => p.ang - q.ang || q.v - p.v || p.u - q.u);
+    const lines = [];
+    for (const x of byLine) { const l = lines[lines.length - 1]; if (l && l.ang === x.ang && Math.abs(l.v - x.v) <= 0.4 * Math.max(l.h, x.h)) l.xs.push(x); else lines.push({ ang: x.ang, v: x.v, h: x.h, xs: [x] }); }
+    const ltr = lines.flatMap((l) => [...l.xs].sort((p, q) => p.u - q.u).map((x) => x.n));
+    const rtl = lines.flatMap((l) => [...l.xs].sort((p, q) => q.u - p.u).map((x) => x.n));
+    // and as PDF.js reads the layer back: in drawing order, consecutive words of one line making a chunk, a right-to-left
+    // chunk read backwards
+    const chunks = [];
+    at.forEach((x) => { const c = chunks[chunks.length - 1]; if (c && c.ang === x.ang && Math.abs(c.v - x.v) <= 0.4 * Math.max(c.h, x.h)) c.xs.push(x); else chunks.push({ ang: x.ang, v: x.v, h: x.h, xs: [x] }); });
+    const read = chunks.flatMap((c) => (c.xs.some((x) => isRtlText(ws[x.n].str)) ? [...c.xs].reverse() : c.xs).map((x) => x.n));
+    return [ltr, rtl, read];
+  };
   for (let kept = clean; ;) {
-    const found = spansOf(kept.map((w) => w.str));
-    if (!found.length) return kept;
-    const drop = new Set(found.map((sp) => sp.k));
+    const drop = new Set();
+    for (const sp of spansOf(kept.map((w) => w.str))) drop.add(sp.k);
+    for (const order of lineOrders(kept)) for (const sp of spansOf(order.map((n) => kept[n].str))) drop.add(order[sp.k]);
+    if (!drop.size) return kept;
     kept = kept.filter((_, n) => !drop.has(n));
   }
 }
@@ -965,6 +1034,25 @@ export function invisibleTextFont(doc, fk, lib, baseName = 'NotoSansArabic-Regul
  * point of the source page's user space to the new page. A word neither can write (Helvetica's WinAnsi, even after
  * NFKC: ligatures, full-width forms; no Arabic font given) is skipped. Returns the number of words written.
  */
+const layerStreams = new WeakMap(); // pdf-lib page → the content stream of its invisible words
+
+/**
+ * P37 sixth review: takes the invisible words off a redacted page again (the page keeps its picture only). The final
+ * check refused a file for a term PDF.js read across two invisible Arabic words kept side by side ("عبري" + "ا لفن"
+ * read "…ريال…", wiki-ar-oman p. 14): such a term can only come from this layer (the page itself is a picture), so the
+ * page loses its layer and the file is checked again. Returns true when the page had a layer.
+ */
+export function removeInvisibleWords(page, lib) {
+  const ref = layerStreams.get(page);
+  if (!ref) return false;
+  const contents = page.node.Contents();
+  if (contents instanceof lib.PDFArray) {
+    for (let i = contents.size() - 1; i >= 0; i--) if (contents.get(i) === ref || String(contents.get(i)) === String(ref)) contents.remove(i);
+  } else page.node.set(lib.PDFName.of('Contents'), page.doc.context.obj([]));
+  layerStreams.delete(page);
+  return true;
+}
+
 export function drawInvisibleWords(page, font, words, toPage, lib, arabicFont = null) {
   const { pushGraphicsState, popGraphicsState, beginText, endText, setFontAndSize, setTextRenderingMode, TextRenderingMode, setCharacterSqueeze, setTextMatrix, showText } = lib;
   const ops = [];
@@ -990,6 +1078,12 @@ export function drawInvisibleWords(page, font, words, toPage, lib, arabicFont = 
     ops.push(setTextMatrix(A, B, C, D, o[0], o[1]), setCharacterSqueeze(squeeze), showText(enc.hex));
     n++;
   }
-  if (ops.length) page.pushOperators(pushGraphicsState(), beginText(), setTextRenderingMode(TextRenderingMode.Invisible), ...ops, endText(), popGraphicsState());
+  // P37 sixth review: in a content stream of its own, so removeInvisibleWords can take it away again
+  if (ops.length) {
+    const ctx = page.doc.context;
+    const ref = ctx.register(ctx.contentStream([pushGraphicsState(), beginText(), setTextRenderingMode(TextRenderingMode.Invisible), ...ops, endText(), popGraphicsState()]));
+    page.node.addContentStream(ref);
+    layerStreams.set(page, ref);
+  }
   return n;
 }
