@@ -1,0 +1,10 @@
+PASS  quality 10 %: the JPEG in the PDF is MozJPEG's at 10 %  -- PDF 1782 bytes, JPEG inside 846 bytes, MozJPEG at 10 %: 846 bytes
+PASS  quality 20 %: the JPEG in the PDF is MozJPEG's at 20 %  -- PDF 2005 bytes, JPEG inside 1069 bytes, MozJPEG at 20 %: 1069 bytes
+PASS  quality 30 %: the JPEG in the PDF is MozJPEG's at 30 %  -- PDF 2652 bytes, JPEG inside 1715 bytes, MozJPEG at 30 %: 1715 bytes
+PASS  quality 49 %: the JPEG in the PDF is MozJPEG's at 49 %  -- PDF 4062 bytes, JPEG inside 3125 bytes, MozJPEG at 49 %: 3125 bytes
+PASS  quality 50 %: the JPEG in the PDF is MozJPEG's at 50 %  -- PDF 4130 bytes, JPEG inside 3193 bytes, MozJPEG at 50 %: 3193 bytes
+PASS  quality 80 %: the JPEG in the PDF is MozJPEG's at 80 %  -- PDF 15644 bytes, JPEG inside 14705 bytes, MozJPEG at 80 %: 14705 bytes
+PASS  quality 100 %: the JPEG in the PDF is MozJPEG's at 100 %  -- PDF 152149 bytes, JPEG inside 151204 bytes, MozJPEG at 100 %: 151204 bytes
+PASS  a lower quality gives a smaller PDF (10 < 20 < 30 < 49 < 50)  -- {"10":1782,"20":2005,"30":2652,"49":4062,"50":4130,"80":15644,"100":152149}
+
+ALL PASS

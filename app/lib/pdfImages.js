@@ -152,7 +152,7 @@ const reducible = (head) => isMobileDevice() && !isTiffBytes(head);
 const sizeSentence = (name, size) => `${name} is ${size.width.toLocaleString('en-US')} × ${size.height.toLocaleString('en-US')} pixels (${Math.round((size.width * size.height) / 1e6)} megapixels)`;
 function overBoundSentence(name, size, canReduce) {
   if (!isMobileDevice()) return `${sizeSentence(name, size)}: more than a browser can turn into a PDF page (${MAX_DECODED_MP_COMPUTER} megapixels at most on a computer). Use a smaller version of the image (Image Resizer), or a JPEG.`;
-  const head = `${sizeSentence(name, size)}: on a phone the limit is ${PHONE_MAX_MP} megapixels for images other than JPEG photos, because turning it into a PDF page would need more memory than a phone browser gives a page.`;
+  const head = `${sizeSentence(name, size)}: on a phone or tablet the limit is ${PHONE_MAX_MP} megapixels for images other than JPEG photos, because turning it into a PDF page would need more memory than a phone browser gives a page.`;
   if (!canReduce) return `${head} Use a computer, a smaller version of the image (Image Resizer), or a JPEG.`;
   const r = reducedSize(size.width, size.height, PHONE_REDUCE_MP);
   return `${head} It can be reduced to ${r.width.toLocaleString('en-US')} × ${r.height.toLocaleString('en-US')} (${Math.round((r.width * r.height) / 1e6 * 10) / 10} MP, the size of a 48 MP phone photo) first.`;

@@ -208,7 +208,7 @@ export default function AudioTrimmerPage() {
           `Click "Trim Audio", listen, then click "Download" to save trimmed_ followed by your file name.`,
         ]}
         specs={[
-          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AC3, AIFF, AIF, AMR, MKA, WEBA, CAF` },
           { label: `Output format`, value: `The source's format; with a fade, MP3, WAV, FLAC, OGG, M4A, AAC and AIFF keep theirs and other formats become WAV` },
           { label: `Precision`, value: `Times to a tenth of a second; exact sample for WAV, AIFF, 16-bit FLAC and faded files; nearest audio frame for other copied files` },
           { label: `Fades`, value: `In and out, each in tenths of a second; together no longer than the part kept` },

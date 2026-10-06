@@ -1,0 +1,26 @@
+  FAIL beyond 64 bits: model.py compiles (py_compile) 
+    py_compile failed:
+    // Note: 2 whole numbers are beyond 64 bits; typed as a float here, so its last digits would be lost — read it as a string or a big-number type.
+                                                                                                             ^
+    SyntaxError: invalid character '�' (U+2014)
+  FAIL beyond 64 bits: no // comment and no false "typed as a float" note 
+    a line starts with //: // Note: 2 whole numbers are beyond 64 bits; typed as a float here, so its last digits would be lost — read it as a string or a big-number type.
+  PASS Python keeps the digits: json.loads gives an exact int (why int is right)
+  File "C:\Users\moufi\AppData\Local\Temp\p37-py-7RCePR\model2.py", line 1
+    // Note: 2 whole numbers are beyond 64 bits; typed as a float here, so its last digits would be lost � read it as a string or a big-number type.
+                                                                                                         ^
+SyntaxError: invalid character '�' (U+2014)
+  FAIL the dataclass built from json.loads holds the exact value 
+    Command failed: python -I C:\Users\moufi\AppData\Local\Temp\p37-py-7RCePR\model2.py
+      File "C:\Users\moufi\AppData\Local\Temp\p37-py-7RCePR\model2.py", line 1
+        // Note: 2 whole numbers are beyond 64 bits; typed as a float here, so its last digits would be lost � read it as a string or a big-number type.
+                                                                                                             ^
+    SyntaxError: invalid character '�' (U+2014)
+    
+  PASS other languages keep their note (C-style comment, Go/TS/Rust/C#)
+  PASS no big number: output unchanged and compiles
+3 passed, 3 failed
+(node:12352) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/moufi/Desktop/onlineconvertools/app/lib/jsonCodegen.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\moufi\Desktop\onlineconvertools\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)

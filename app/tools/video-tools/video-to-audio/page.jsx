@@ -129,7 +129,7 @@ export default function VideoToAudioPage() {
         specs={[
           { label: 'Input formats', value: "MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS" },
           { label: 'Output formats', value: "MP3, WAV, AAC, FLAC, OGG, M4A, Opus, WMA, AIFF, ALAC, AC3, M4R, M4B, MP2, WV, CAF, AU, MKA" },
-          { label: 'Bitrate', value: "128, 192, 256 or 320 kbps for the lossy formats that take one (AC3 and MP2: at least 192 kbps); lossless formats ignore it" },
+          { label: 'Bitrate', value: "128, 192, 256 or 320 kbps for the lossy formats that take one, AC3 and MP2 included; lossless formats ignore it" },
           { label: 'File size', value: "The page sets no cap, yet the whole video is copied into the tab's memory, so a very large file can fail" }
         ]}
         privacy="The video is read and converted by ffmpeg.wasm in this tab; neither the video nor the extracted sound is uploaded. The engine itself, about 10 MB, is downloaded from unpkg.com, a public code host, the first time. If extraction fails, we receive the cleaned error text, its type, the tool name, your browser and its version, the file extension and a size range, never the file."

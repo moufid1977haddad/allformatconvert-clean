@@ -103,7 +103,7 @@ export default function ExcelToJsonPage() {
     setProgress(0);
     setPhase('');
     clearResult();
-    setStatus('Cancelled.');
+    setStatus('Canceled.');
   };
 
   const convertFile = (f) => {
@@ -199,7 +199,7 @@ export default function ExcelToJsonPage() {
           { label: "Input", value: "XLSX, XLS, ODS or CSV file" },
           { label: "Output", value: "JSON object with one array of row objects per sheet" },
           { label: "On a computer", value: `up to ${MAX_FILE_SIZE_LABEL} and ${MAX_ROWS.toLocaleString('en-US')} rows across all sheets` },
-          { label: "On phones, iPhone and iPad", value: `up to ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows across all sheets` },
+          { label: "On phones and tablets", value: `up to ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows across all sheets` },
         ]}
         privacy={"Your spreadsheet is read by a background worker in your browser with the SheetJS library and is not uploaded. What can reach us is an error report: the error text after file names and quoted text are removed, the tool name, and the name and version of your browser."}
         faqs={[
@@ -207,7 +207,7 @@ export default function ExcelToJsonPage() {
           { q: "Are dates converted to text?", a: "Yes, to ISO 8601: 2024-01-15, or 2024-02-29T13:45:00 when the cell has a time, with no time zone added. Without this step an Excel date would come out as a serial number such as 45306." },
           { q: "Can I choose which sheets to convert?", a: "No. Every sheet is converted, hidden ones included, each under its own name in the JSON. Delete the arrays you do not need afterwards, or save the sheets you want as a separate workbook first." },
           { q: "Are duplicate column headers kept?", a: "Yes. When two columns share a header such as name, the second one becomes name_1 in each row object, so no value is overwritten." },
-          { q: "How big can the file be?", a: `${MAX_FILE_SIZE_LABEL} and ${MAX_ROWS.toLocaleString('en-US')} rows, counting all sheets, on a computer; ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows on phones, iPhone and iPad. Split a larger workbook into several files and convert them one by one.` },
+          { q: "How big can the file be?", a: `${MAX_FILE_SIZE_LABEL} and ${MAX_ROWS.toLocaleString('en-US')} rows, counting all sheets, on a computer; ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows on phones and tablets. Split a larger workbook into several files and convert them one by one.` },
         ]}
         tips={[
           "For CSV files instead of JSON, one per sheet, use Excel to CSV.",

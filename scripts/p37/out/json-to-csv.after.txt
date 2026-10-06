@@ -1,0 +1,6 @@
+  PASS flat row: "name","2024","10","2" stay in source order
+  PASS several rows: first-seen order across rows, integer keys included
+  PASS nested object with integer keys flattened in source order
+  PASS repeated key: last value, first position (as JSON.parse and json.loads)
+  PASS unchanged: exact numbers, arrays, empty {} column, plain values
+5 passed, 0 failed

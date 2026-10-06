@@ -1,0 +1,23 @@
+PASS JSX: arrow without return -- "const C = (p) => <div className=\"a\">{p.n}</div>;"
+PASS JSX: JSX in a variable -- "const el = <span id=\"x\" />;"
+PASS JSX: fragment as an argument -- "render(<><b>hi</b></>, root );"
+PASS JSX: generic arrow + JSX -- "const id = (x) => x;\nconst C = () => <p>{id(\"a\")}</p>;"
+PASS JSX: return (<div>) still works -- "function C() { return (<div>ok</div>); }"
+PASS cast without JSX: "const z: unknown = \"5\";\nconst y = <number>(<any>z) * 2;\nconsole.log(y);" -- 10
+PASS cast without JSX: "const a = <string>\"x\"; console.log(a.length);" -- 1
+PASS namespace with values: "namespace A { export const x = 1; export function f() { return x + 1; } }\nconsole.log(A.x,…" -- namespace "A" (line 1) contains code, not only types. This converter removes types only and cannot compile a namespace into JavaScript, so that code would be lost. Move them out of the namespace, or compile this file with tsc.
+PASS namespace with values: "namespace Outer.Inner { export const v = 2; }\nconsole.log(Outer.Inner.v);" -- namespace "Outer.Inner" (line 1) contains code, not only types. This converter removes types only and cannot compile a namespace into JavaScript, so that code would be lost. Move them out of the namespace, or compile this file with tsc.
+PASS namespace with values: "module M { export let q = 3; }\nconsole.log(M.q);" -- namespace "M" (line 1) contains code, not only types. This converter removes types only and cannot compile a namespace into JavaScript, so that code would be lost. Move them out of the namespace, or compile this file with tsc.
+PASS namespace with values: "namespace T { export interface I { a: number } }\nnamespace V { export enum E { A } }\nconso…" -- namespace "V" (line 2) contains code, not only types. This converter removes types only and cannot compile a namespace into JavaScript, so that code would be lost. Move them out of the namespace, or compile this file with tsc.
+PASS namespace with values: "declare namespace D { const y: number }\nnamespace W { console.log(\"side effect\"); }" -- namespace "W" (line 2) contains code, not only types. This converter removes types only and cannot compile a namespace into JavaScript, so that code would be lost. Move them out of the namespace, or compile this file with tsc.
+PASS type-only namespace kept out: "namespace T { export interface I { a: number } export type U = string; }\nconst v: T.I = { …" -- 1
+PASS type-only namespace kept out: "declare namespace D { const x: number; namespace E { const y: string } }\nconsole.log(1);" -- 1
+PASS type-only namespace kept out: "declare module \"m\" { namespace Q { const z: 1 } }\nconsole.log(2);" -- 2
+PASS type-only namespace kept out: "declare global { namespace NodeJS { interface ProcessEnv { A: string } } }\nexport {};\ncons…" -- 3
+PASS type-only namespace kept out: "export declare namespace X { function f(): void }\nconsole.log(4);" -- 4
+PASS type-only namespace kept out: "namespace Empty {}\nnamespace Nested { export namespace Deeper { export type K = 1 } }\ncons…" -- 5
+PASS namespace/module as identifiers -- 1 2
+PASS enum, parameter properties, satisfies, optional chaining -- 1 5 B 5 d / tsc 1 5 B 5 d
+PASS syntax error reports line:column -- Unexpected token (2:10)
+
+ALL PASS

@@ -65,7 +65,7 @@ export default function ImageToPdfPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Image to PDF</h1>
         <p className="text-neutral-500 text-center mb-2">Combine JPG, PNG, HEIC, WebP, GIF, BMP, TIFF or AVIF pictures, added in several rounds, into one PDF</p>
-        <p className="text-neutral-500 text-xs text-center mb-8">JPEG photos, except mirrored ones, go into the PDF without being decoded; other pictures can have up to {MAX_DECODED_MP_COMPUTER} megapixels each on a computer and {PHONE_MAX_MP} on phones, iPhone and iPad, where a larger one other than a TIFF can be reduced to {PHONE_MAX_MP} MP first.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">JPEG photos, except mirrored ones, go into the PDF without being decoded; other pictures can have up to {MAX_DECODED_MP_COMPUTER} megapixels each on a computer and {PHONE_MAX_MP} on phones and tablets, where a larger one other than a TIFF can be reduced to {PHONE_MAX_MP} MP first.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => inputRef.current.click()}>
             <p className="text-neutral-500"><UploadPrompt what="images" /> (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF)</p>
@@ -110,7 +110,7 @@ export default function ImageToPdfPage() {
           { label: 'Input formats', value: `JPG, PNG, HEIC, HEIF, WebP, GIF, BMP, TIFF, AVIF` },
           { label: 'Output', value: `One PDF, one page per picture and per TIFF page` },
           { label: 'Picture size on a computer', value: `JPEG: not limited by pixels, since it is not decoded (mirrored photos excepted); other formats: ${MAX_DECODED_MP_COMPUTER} MP each` },
-          { label: 'On phones, iPhone and iPad', value: `${PHONE_MAX_MP} MP for formats other than JPEG; a larger picture other than a TIFF can be reduced to ${PHONE_MAX_MP} MP` },
+          { label: 'On phones and tablets', value: `${PHONE_MAX_MP} MP for formats other than JPEG; a larger picture other than a TIFF can be reduced to ${PHONE_MAX_MP} MP` },
           { label: 'Page size', value: `"Fit to each picture": one pixel becomes one point, up to ${MAX_PAGE_POINTS.toLocaleString('en-US')} points per side; or A4, US Letter, US Legal, A5` },
         ]}
         privacy={`Your pictures are not uploaded. pdf-lib builds the PDF inside this browser tab, HEIC files are decoded by heic2any where the browser cannot open them, and TIFF files by the site's own decoder. If an error message appears, the cleaned message, the tool's name and your browser's name and version may reach us, never the images.`}
@@ -118,7 +118,7 @@ export default function ImageToPdfPage() {
           { q: `Can I mix JPG, PNG and HEIC in one PDF?`, a: `Yes. Every picture becomes its own page, whatever its format. A GIF gives its first frame and a multi-page TIFF gives one page per frame. A file that cannot be read is named in an error message; it is never dropped silently.` },
           { q: `Will the image quality drop?`, a: `No for JPEG photos, copied into the PDF byte for byte unless they are mirrored, and no for PNG and TIFF, which keep their pixels. WebP, AVIF, BMP and GIF pictures, and HEIC in Safari, are redrawn first, as JPEG for photos or PNG with transparency; in other browsers a HEIC becomes a lossless PNG page.` },
           { q: `Can I use A4 or Letter pages?`, a: `Yes. "Fit to each picture" makes every page the size of its picture. A4, US Letter, US Legal and A5 center each picture inside a margin of None, Small (10 mm) or Big (20 mm), scaled down to fit, never cropped or enlarged.` },
-          { q: `Is there a picture size limit on a phone?`, a: `Yes: ${PHONE_MAX_MP} megapixels for formats other than JPEG on phones, iPhone and iPad, against ${MAX_DECODED_MP_COMPUTER} on a computer or an Android tablet. A bigger picture is named as soon as you pick it, and, unless it is a TIFF, the Reduce button shrinks it and converts it in one step.` },
+          { q: `Is there a picture size limit on a phone?`, a: `Yes: ${PHONE_MAX_MP} megapixels for formats other than JPEG on phones and tablets, against ${MAX_DECODED_MP_COMPUTER} on a computer. A bigger picture is named as soon as you pick it, and, unless it is a TIFF, the Reduce button shrinks it and converts it in one step.` },
         ]}
         tips={[
           `Add the pictures in the order you want: they cannot be reordered once added.`,

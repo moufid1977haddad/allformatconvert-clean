@@ -236,7 +236,7 @@ export default function AudioSplitterPage() {
           `Play each part, then click "Download" for one of them or "Download all" for a ZIP.`,
         ]}
         specs={[
-          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AC3, AIFF, AIF, AMR, MKA, WEBA, CAF` },
           { label: `Output formats`, value: `MP3, WAV, AAC, FLAC, OGG (Vorbis), M4A, Opus, WMA, AIFF, ALAC, AC3, M4R, M4B, MP2, WV (WavPack), CAF, AU, MKA` },
           { label: `Parts`, value: `2 to ${MAX_PARTS} per run, each at least ${MIN_PART} s long` },
           { label: `Precision`, value: `Cut to the sample. In a test of 28/09/2026, WAV, FLAC, MP3 and OGG parts put back together matched the original length; M4A added 17 ms and WMA lost 0.1 s.` },

@@ -38,13 +38,36 @@ export function sentenceRanges(text) {
     const re = /[^.!?。！？]+(?:[.!?。！？]+|$)\s*/g; let m;
     while ((m = re.exec(text))) { if (!m[0]) { re.lastIndex++; continue; } out.push([m.index, m.index + m[0].length]); }
   }
-  // Merge a range into the next when it ends with a known abbreviation ("Mr. " + "Smith paid…").
+  // P37 (06/10): ICU does not end a sentence at a period followed by a lower-case word ("hello world. this is" was one
+  // sentence, Unicode rule SB8): Word Counter counted 1 and Sentence case left "this" in lower case. convertcase.net
+  // capitalizes "every letter after a full stop"; Word's Sentence case capitalizes "the first letter of a sentence".
+  // Split there: a single period, closing quotes or brackets, at least one space, opening quotes or brackets, then a
+  // lower-case letter -- except after a known abbreviation (e.g., etc., Mr.) or a one-letter initial. No space after
+  // the period (3.14, example.com, hello.world) and an ellipsis never split.
+  const cuts = [];
+  for (const m of text.matchAll(/(?<!\.)\.["'”’)\]»]*\s+(?=["'“‘(\[«]*\p{Ll})/gu)) {
+    const word = (text.slice(0, m.index).match(/[\p{L}\p{N}.]*$/u)[0]).toLowerCase();
+    if (!ABBREVIATIONS.has(word) && !/^\p{L}$/u.test(word)) cuts.push(m.index + m[0].length);
+  }
+  const split = [];
+  for (const [a, b] of out) {
+    let start = a;
+    for (const c of cuts) if (c > start && c < b) { split.push([start, c]); start = c; }
+    split.push([start, b]);
+  }
   const merged = [];
-  for (const r of out) {
+  for (const r of split) {
     const prev = merged[merged.length - 1];
     if (prev) {
-      const tail = text.slice(prev[0], prev[1]).trimEnd();
-      const m = tail.match(/(?:^|[\s(])([\p{L}.]+)\.$/u);
+      const prevText = text.slice(prev[0], prev[1]);
+      // P37: "?", "!" or "." glued to the next letter or digit ends nothing -- "what?ok", "page?q=test", "Yahoo!Mail",
+      // "3.50" (fallback splitter). Same rule as the period: a sentence ends only before a space or a line break.
+      if (/[.!?]["'”’)\]»]*$/.test(prevText) && /^[\p{L}\p{N}]/u.test(text.slice(r[0], r[1]))) { prev[1] = r[1]; continue; }
+      // Without Intl.Segmenter the fallback splits at every period: a period + space + lower-case word that is not
+      // one of the cuts above (initial, ellipsis) does not end a sentence, as ICU's rule SB8 says.
+      if (/\.["'”’)\]»]*\s+$/.test(prevText) && /^["'“‘(\[«]*\p{Ll}/u.test(text.slice(r[0], r[1])) && !cuts.includes(r[0])) { prev[1] = r[1]; continue; }
+      // Merge a range into the next when it ends with a known abbreviation ("Mr. " + "Smith paid…").
+      const m = prevText.trimEnd().match(/(?:^|[\s(])([\p{L}.]+)\.$/u);
       if (m && ABBREVIATIONS.has(m[1].toLowerCase())) { prev[1] = r[1]; continue; }
     }
     merged.push([...r]);
@@ -89,7 +112,8 @@ function baseWord(w, shouting) {
 }
 
 // Decided sentence by sentence: "HELLO WORLD." is shouting (lower-cased), NASA inside a normal sentence is an
-// acronym (kept) -- the reference keeps a fixed list only.
+// acronym (kept) -- the reference keeps a fixed list only. Sentences come from sentenceRanges, the same ranges Word
+// Counter counts (P37: a period + space + lower-case word starts one, "what?ok" does not).
 export function sentenceCase(text) {
   let out = '';
   for (const [a, b] of sentenceRanges(text)) {

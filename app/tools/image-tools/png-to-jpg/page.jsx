@@ -47,7 +47,7 @@ export default function PNGtoJPGPage() {
               <input id="jpg-quality" type="range" min="10" max="100" value={quality} onChange={(e) => setQuality(e.target.value)} className="w-full" />
             </label>
             <label className="text-neutral-600 flex items-center gap-2">Transparent areas become
-              <input id="jpg-background" type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="w-10 h-8" aria-label="Background colour" />
+              <input id="jpg-background" type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="w-10 h-8" aria-label="Background color" />
             </label>
           </div>
           <button onClick={convert} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
@@ -74,7 +74,7 @@ export default function PNGtoJPGPage() {
         ]}
         privacy={`Conversion happens inside this tab: the browser decodes the PNG, fills the transparent areas and writes the JPG. The image is never transferred to a server. If an error appears, a cleaned report (message, tool name, browser name and version) is logged so that we can fix problems.`}
         faqs={[
-          { q: "Can I choose the colour of the transparent parts?", a: `Yes. They take the color chosen next to "Transparent areas become", white unless you change it. Half-transparent edges are blended with that color, so pick the color of the page or document the JPG will sit on.` },
+          { q: "Can I choose the color of the transparent parts?", a: `Yes. They take the color chosen next to "Transparent areas become", white unless you change it. Half-transparent edges are blended with that color, so pick the color of the page or document the JPG will sit on.` },
           { q: "Will I lose quality converting PNG to JPG?", a: `Yes, some. JPG is lossy, so fine detail and sharp edges get slightly blurred. The slider starts at 92; lower values make a smaller file with more visible artifacts.` },
           { q: "Can I convert many PNG files at once?", a: `No. Every click on "Convert" handles one PNG. Image Converter takes a batch and writes JPG files with transparency flattened onto white.` }
         ]}

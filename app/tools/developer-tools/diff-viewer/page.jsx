@@ -65,7 +65,7 @@ export default function DiffViewerPage() {
         howTo={[
           "Paste the first version in \"Original\" and the new version in \"Modified\".",
           "Tick \"Ignore whitespace\" so that re-indented lines are not listed as removed and added, and \"Ignore case\" for changes of capitals only.",
-          "Click \"Compare\"; the button stays grey until both boxes contain text.",
+          "Click \"Compare\"; the button stays gray until both boxes contain text.",
           "Read the list: a red line was removed, a green line was added, and the two numbers on the left give its line in each text.",
         ]}
         specs={[

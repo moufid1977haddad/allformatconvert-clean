@@ -151,15 +151,24 @@ const quadOf = (g, lo, hi, dn, up) => {
   return [P(lo, dn), P(hi, dn), P(hi, up), P(lo, up)];
 };
 
-// Where characters c0..c1 (exclusive) of a run lie along its baseline. box: the range a black box covers ({x0, x1,
-// extra}); at: the measured position (for the text layer), null when it is not known. Only the matched characters are
-// covered (as Adobe Acrobat and PDF24 do), not the whole text run. Their position inside the run is measured with the
-// run's font (the font pdf.js loaded for it, else its fallback family); the box is widened by 15 % of the font size,
-// plus 4 % of the text before the match when only the fallback font could be used. P33 (review 05/10): when the
-// measured run differs from the PDF's own width by more than 3 % (character / word spacing Tc, Tw), the box is the
-// WHOLE run (over-redaction is the safe side).
+// P37 (06/10): right-to-left text. PDF.js gives a right-to-left run's text in reading order, the reverse of the order
+// its glyphs are drawn in, so a position measured from the run's left edge in that text is mirrored: such a run is
+// never measured that way (the black box is the whole run, unless the exact geometry below maps its glyphs).
+const RTL_CHAR = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
+export const isRtlText = (s) => RTL_CHAR.test(s);
+const ARABIC_CHAR = /[؀-ۿݐ-ݿࡰ-ࣿﭐ-﷿ﹰ-﻿]/;
+export const hasArabic = (s) => ARABIC_CHAR.test(s);
+
+// Where characters c0..c1 (exclusive) of a run lie along its baseline, when the exact geometry below is not available
+// for the run (fallback). box: the range a black box covers ({x0, x1, extra}); at: the measured position (for the text
+// layer), null when it is not known. Their position inside the run is measured with the run's font (the font pdf.js
+// loaded for it, else its fallback family); the box is widened by 15 % of the font size, plus 4 % of the text before
+// the match when only the fallback font could be used. P33 (review 05/10): when the measured run differs from the PDF's
+// own width by more than 3 % (character / word spacing Tc, Tw), the box is the WHOLE run (over-redaction is the safe
+// side). P37: a right-to-left run is the whole run too.
 function runRange(it, style, c0, c1, measureOf, g) {
   let x0 = 0, x1 = it.width || g.fs * it.str.length * 0.6, extra = 0, at = null;
+  if (isRtlText(it.str)) return { x0, x1, extra, at };
   if (!style.vertical && it.str.length > 1) {
     const m = measureOf(it, style);
     const all = m.width(it.str) || 1;
@@ -178,16 +187,265 @@ function runRange(it, style, c0, c1, measureOf, g) {
   } else if (!style.vertical) at = { x0, x1 };
   return { x0, x1, extra, at };
 }
-// the box of characters c0..c1 of a run, padded as a black box is
+// the box of characters c0..c1 of a run, padded as a black box is (fallback)
 function paddedQuad(it, style, c0, c1, measureOf, g = runGeom(it)) {
   const { x0, x1, extra } = runRange(it, style, c0, c1, measureOf, g);
   const pad = 0.15 * g.fs + extra;
   return quadOf(g, x0 - pad, x1 + pad, -0.3 * g.fs, 1.05 * g.fs);
 }
 
-/** The black boxes of a page: a quadrilateral (4 [x, y] points, PDF user space) per matched span and per box rect. */
-export function redactionQuads(items, styles, spans, rects, measureOf) {
-  const quads = spans.map((sp) => { const it = items[sp.k]; return paddedQuad(it, styles[it.fontName] || {}, sp.c0, sp.c1, measureOf); });
+// ---- P37 (06/10): the exact place of each character, from the glyphs PDF.js draws ----
+// Real iPhone pass of 06/10: redacting "photo-2" in "Image d'origine : photo-2.jpg", the black box covered the ":"
+// before and ".j" after, and cut the "p" of "jpg": the positions were measured on the text with a browser font, then
+// padded by 15 % of the font size on each side. Adobe Acrobat and MuPDF (PyMuPDF) cover the matched characters' own
+// boxes (advance width × font height), no more. Now the glyphs of the page are placed from PDF.js's operator list with
+// the arithmetic of PDF.js's own canvas drawing (font widths, Tc, Tw, Tz, TJ offsets, rise, text and page matrices,
+// forms), each glyph's ink box is added (italic overhangs, accents), and each character of a text run is tied to its
+// glyph(s) — only when the run's glyphs spell exactly the run's text, in drawing order or (right-to-left) reversed, and
+// fill exactly the run's width; otherwise that run keeps the padded estimate above. A black box is then the union of
+// the matched characters' boxes plus a margin of max(2 % of the font size, one pixel of the picture).
+
+const IDENTITY = [1, 0, 0, 1, 0, 0];
+const FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
+// m ∘ n: n applied first (as canvas transform() and PDF's cm)
+const mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
+const apply = (m, x, y) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
+const six = (m) => { const r = [0, 1, 2, 3, 4, 5].map((i) => Number(m && m[i])); return r.every(Number.isFinite) ? r : null; };
+
+/**
+ * Every glyph drawn by a page's content, from PDF.js's operator list (page.getOperatorList({ annotationMode:
+ * AnnotationMode.DISABLE })), placed as PDF.js's canvas places it (pdfjs-dist 5.7 display/canvas.js showText,
+ * showType3Text): [{ u: its text, M: the matrix from the glyph's run space to PDF user space, x0, x1: its advance in run
+ * units, x2: where the next glyph starts (spacing included), size, font, ch: the character PDF.js draws, accent }].
+ * fontOf(name) → the PDF.js font object (page.commonObjs). Glyphs of vertical fonts are not returned.
+ */
+export function glyphsOfOperatorList(opList, OPS, fontOf) {
+  const out = [];
+  let st = { ctm: IDENTITY, font: null, size: 0, dir: 1, Tc: 0, Tw: 0, Th: 1, TL: 0, rise: 0, Tm: IDENTITY, x: 0, y: 0, lx: 0, ly: 0, bad: false };
+  const stack = [];
+  const push = () => stack.push({ ...st });
+  const pop = () => { if (stack.length) st = stack.pop(); };
+  const matrixArg = (a) => six(typeof a[0] === 'number' ? a : a[0]);
+  const { fnArray, argsArray } = opList;
+  for (let i = 0; i < fnArray.length; i++) {
+    const a = argsArray[i] || [];
+    switch (fnArray[i]) {
+      case OPS.save: push(); break;
+      case OPS.restore: pop(); break;
+      case OPS.transform: { const m = matrixArg(a); if (m) st.ctm = mul(st.ctm, m); else st.bad = true; break; }
+      case OPS.paintFormXObjectBegin: { push(); if (a[0]) { const m = six(a[0]); if (m) st.ctm = mul(st.ctm, m); else st.bad = true; } break; }
+      case OPS.paintFormXObjectEnd: pop(); break;
+      case OPS.beginGroup: { push(); const gm = a[0] && a[0].matrix; if (gm) { const m = six(gm); if (m) st.ctm = mul(st.ctm, m); else st.bad = true; } break; }
+      case OPS.endGroup: pop(); break;
+      case OPS.beginText: st.Tm = IDENTITY; st.x = st.lx = 0; st.y = st.ly = 0; break;
+      case OPS.setTextMatrix: { const m = matrixArg(a); if (m) st.Tm = m; else st.bad = true; st.x = st.lx = 0; st.y = st.ly = 0; break; }
+      case OPS.moveText: st.lx += a[0]; st.ly += a[1]; st.x = st.lx; st.y = st.ly; break;
+      case OPS.setLeadingMoveText: st.TL = a[1]; st.lx += a[0]; st.ly += a[1]; st.x = st.lx; st.y = st.ly; break;
+      case OPS.setLeading: st.TL = -a[0]; break;
+      case OPS.nextLine: st.ly += st.TL; st.x = st.lx; st.y = st.ly; break;
+      case OPS.setCharSpacing: st.Tc = a[0]; break;
+      case OPS.setWordSpacing: st.Tw = a[0]; break;
+      case OPS.setHScale: st.Th = a[0] / 100; break;
+      case OPS.setTextRise: st.rise = a[0]; break;
+      case OPS.setFont: { const f = fontOf(a[0]); st.font = f || null; st.dir = a[1] < 0 ? -1 : 1; st.size = Math.abs(a[1]); break; }
+      case OPS.setGState: { for (const [k, v] of a[0] || []) if (k === 'Font') { st.font = fontOf(v[0]) || null; st.dir = v[1] < 0 ? -1 : 1; st.size = Math.abs(v[1]); } break; }
+      case OPS.showText: showText(a[0]); break;
+      default: break;
+    }
+  }
+  return out;
+
+  function showText(glyphs) {
+    const f = st.font;
+    if (!Array.isArray(glyphs) || !st.size) return;
+    if (!f) { st.bad = true; return; }
+    const fm = six(f.fontMatrix || FONT_IDENTITY_MATRIX) || FONT_IDENTITY_MATRIX;
+    const type3 = !!f.isType3Font;
+    const Th = st.Th * st.dir;
+    let x = 0;
+    if (f.vertical) {
+      for (const g of glyphs) {
+        if (typeof g === 'number') { x += g * st.size / 1000; continue; }
+        const spacing = (g.isSpace ? st.Tw : 0) + st.Tc;
+        const w = g.vmetric ? -g.vmetric[0] : g.width;
+        x += w * st.size * fm[0] - spacing * st.dir;
+      }
+      st.y -= x;
+      return;
+    }
+    // a glyph is placed only if everything that moves it is known (else its run keeps the padded estimate)
+    const M = st.bad ? null : mul(mul(st.ctm, st.Tm), [Th, 0, 0, 1, st.x, st.y + st.rise]);
+    if (f.isInvalidPDFjsFont) {
+      let total = 0;
+      for (const g of glyphs) if (typeof g !== 'number') total += g.width;
+      total *= st.size * fm[0];
+      for (const g of glyphs) if (typeof g !== 'number') out.push({ u: g.unicode || '', M, x0: 0, x1: total, x2: total, size: st.size, font: f, ch: null, accent: null, rough: true });
+      st.x += total * Th;
+      return;
+    }
+    for (const g of glyphs) {
+      if (typeof g === 'number') { x -= g * st.size / 1000; continue; }
+      const spacing = (g.isSpace ? st.Tw : 0) + st.Tc;
+      const adv = type3 ? (g.width * fm[0] + fm[4]) * st.size : g.width * st.size * fm[0];
+      const step = type3 ? adv + spacing : adv + spacing * st.dir;
+      out.push({ u: g.unicode || '', M, x0: x, x1: x + adv, x2: x + step, size: st.size, font: f, ch: type3 ? null : g.fontChar, accent: g.accent || null, rough: false });
+      x += step;
+    }
+    st.x += x * Th;
+  }
+}
+
+// text compared between a run and its glyphs: compatibility-decomposed, without accents (they are often separate
+// glyphs, or none), without spaces (PDF.js adds them for gaps), one UTF-16 unit at a time
+const MARKS = /[\p{M}¨´ˆ-˝`¯¸]/gu;
+const unitsOf = (s) => (s || '').normalize('NFKD').replace(MARKS, '').replace(/\s+/g, '').split('');
+const isLtrUnit = (c) => /[\p{N}]/u.test(c) || (/\p{L}/u.test(c) && !RTL_CHAR.test(c));
+
+/**
+ * A right-to-left word or run in the other order: the order of its runs reversed, and the characters of each
+ * right-to-left run reversed (a run of digits or Latin letters keeps its own order). keyOf(x) → the text of element x.
+ * Its own inverse: the drawing order of a word in reading order, and back.
+ */
+export function bidiReorder(arr, keyOf = (x) => x) {
+  const type = arr.map((x) => (isLtrUnit((keyOf(x) || '').normalize('NFKD')[0] || '') ? 'L' : 'R'));
+  // a separator between two left-to-right characters (1,250 / 15:30 / info@example.com) belongs to their run
+  for (let i = 1; i < arr.length - 1; i++) if (type[i] === 'R' && /^[.,:/%+@_-]$/.test(keyOf(arr[i])) && type[i - 1] === 'L' && type[i + 1] === 'L') type[i] = 'L';
+  const runs = [];
+  arr.forEach((x, i) => { const last = runs[runs.length - 1]; if (last && last.t === type[i]) last.xs.push(x); else runs.push({ t: type[i], xs: [x] }); });
+  return runs.reverse().flatMap((r) => (r.t === 'L' ? r.xs : r.xs.reverse()));
+}
+
+/**
+ * For each text item: null (its characters cannot be placed exactly: the padded estimate is used) or { fs, chars }
+ * where chars[c] is null (a space, or a character without a glyph of its own) or the box of character c in the run's
+ * frame (runGeom: u along the baseline from the run's start, v up from it, user space units): { a0, a1: its advance,
+ * lo, hi, dn, up: advance and ink together, pad: its ink is not known }. inkOf(font, ch) → [left, bottom, right, top]
+ * of the glyph's ink in em, or null when not known.
+ */
+export function itemGeometry(items, styles, glyphs, inkOf = () => null) {
+  const placed = glyphs.filter((gl) => gl.M).map((gl) => {
+    const p0 = apply(gl.M, gl.x0, 0), p1 = apply(gl.M, gl.x1, 0), p2 = apply(gl.M, gl.x2, 0);
+    const d = Math.hypot(gl.M[0], gl.M[1]) || 1;
+    return { gl, p0, p1, p2, dir: [gl.M[0] / d, gl.M[1] / d] };
+  });
+  return items.map((it) => { try { return itemChars(it, styles[it.fontName] || {}, placed, inkOf); } catch { return null; } });
+}
+
+function itemChars(it, style, placed, inkOf) {
+  if (!it.str || style.vertical || !Array.isArray(it.transform) || !(it.width > 0)) return null;
+  const g = runGeom(it);
+  const det = g.ux[0] * g.uy[1] - g.ux[1] * g.uy[0];
+  if (!(Math.abs(det) > 1e-6)) return null;
+  const toUV = ([x, y]) => { const dx = x - g.tx, dy = y - g.ty; return [(dx * g.uy[1] - dy * g.uy[0]) / det, (g.ux[0] * dy - g.ux[1] * dx) / det]; };
+  const fs = g.fs, W = it.width;
+  const tol = 0.02 * fs + 0.01;
+  // the glyphs drawn on this run's baseline, inside its width, in drawing order
+  const members = [];
+  for (const P of placed) {
+    if (P.dir[0] * g.ux[0] + P.dir[1] * g.ux[1] < 0.999) continue;
+    const [u0, v0] = toUV(P.p0), [u1, v1] = toUV(P.p1);
+    if (Math.abs(v0) > 0.2 * fs || Math.abs(v1) > 0.2 * fs) continue;
+    if (Math.min(u0, u1) < -tol || Math.max(u0, u1) > W + tol) continue;
+    members.push({ ...P, u0, u1, ue: toUV(P.p2)[0] });
+  }
+  if (!members.length || members.some((m) => m.gl.rough)) return null;
+  // they must fill the run: from its start to its end (PDF.js counts the spacing after the last glyph in some runs,
+  // not in others: either end is accepted)
+  const start = Math.min(...members.map((m) => Math.min(m.u0, m.u1)));
+  const advEnd = Math.max(...members.map((m) => Math.max(m.u0, m.u1))), penEnd = Math.max(...members.map((m) => Math.max(m.u1, m.ue)));
+  const near = 0.05 * fs + 0.05;
+  if (Math.abs(start) > near || (Math.abs(advEnd - W) > near && Math.abs(penEnd - W) > near)) return null;
+  // the run's characters, unit by unit
+  const strUnits = [];
+  for (let c = 0; c < it.str.length; c++) for (const ch of unitsOf(it.str[c])) strUnits.push([ch, c]);
+  // glyphs with text (in some order) against the run's text; a glyph with only an accent is tied to the glyph it is
+  // drawn over (or the nearest one)
+  const withText = members.filter((m) => unitsOf(m.gl.u).length);
+  const accents = members.filter((m) => !unitsOf(m.gl.u).length && /\S/.test(m.gl.u || ''));
+  const orders = [withText];
+  if (it.dir === 'rtl' || isRtlText(it.str)) orders.push([...withText].reverse(), bidiReorder(withText, (m) => m.gl.u));
+  let owner = null;
+  for (const order of orders) {
+    const seq = order.flatMap((m) => unitsOf(m.gl.u).map((ch) => [ch, m]));
+    if (seq.length !== strUnits.length || seq.some(([ch], q) => ch !== strUnits[q][0])) continue;
+    owner = new Map(); // character → its glyphs
+    seq.forEach(([, m], q) => { const c = strUnits[q][1]; if (!owner.has(c)) owner.set(c, new Set()); owner.get(c).add(m); });
+    break;
+  }
+  if (!owner) return null;
+  const glyphChars = new Map(); // glyph → its characters
+  for (const [c, ms] of owner) for (const m of ms) { if (!glyphChars.has(m)) glyphChars.set(m, []); glyphChars.get(m).push(c); }
+  const extra = new Map(); // character → accent glyphs drawn over it
+  for (const acc of accents) {
+    const mid = (acc.u0 + acc.u1) / 2;
+    let best = null, bd = Infinity;
+    for (const m of withText) { const d = mid < Math.min(m.u0, m.u1) ? Math.min(m.u0, m.u1) - mid : mid > Math.max(m.u0, m.u1) ? mid - Math.max(m.u0, m.u1) : 0; if (d < bd) { bd = d; best = m; } }
+    if (!best) return null;
+    for (const c of glyphChars.get(best)) { if (!extra.has(c)) extra.set(c, []); extra.get(c).push(acc); }
+  }
+  // each glyph's box in the run's frame: its advance × the font's height, and its ink
+  const boxCache = new Map();
+  const boxOf = (m) => {
+    if (boxCache.has(m)) return boxCache.get(m);
+    const { gl } = m, f = gl.font || {}, s = gl.size;
+    let asc = Number(f.ascent ?? style.ascent), desc = Number(f.descent ?? style.descent);
+    asc = Number.isFinite(asc) && asc > 0 ? Math.min(Math.max(asc, 0.7), 1.6) : 0.9;
+    desc = Number.isFinite(desc) && desc < 0 ? Math.max(Math.min(desc, -0.1), -0.8) : -0.25;
+    const rect = (x0, x1, y0, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(([x, y]) => toUV(apply(gl.M, x, y)));
+    const span = (pts) => ({ lo: Math.min(...pts.map((p) => p[0])), hi: Math.max(...pts.map((p) => p[0])), dn: Math.min(...pts.map((p) => p[1])), up: Math.max(...pts.map((p) => p[1])) });
+    const adv = span(rect(gl.x0, gl.x1, desc * s, asc * s));
+    const box = { a0: adv.lo, a1: adv.hi, ...adv, pad: true };
+    const ink = gl.ch ? inkOf(gl.font, gl.ch) : null;
+    if (ink && ink.every(Number.isFinite) && ink[2] - ink[0] < 4 && ink[3] - ink[1] < 4) {
+      const parts = [adv, span(rect(gl.x0 + ink[0] * s, gl.x0 + ink[2] * s, ink[1] * s, ink[3] * s))];
+      let ok = true;
+      if (gl.accent) {
+        const ai = gl.accent.fontChar ? inkOf(gl.font, gl.accent.fontChar) : null;
+        const ox = gl.x0 + (gl.accent.offset?.x || 0) * s, oy = (gl.accent.offset?.y || 0) * s;
+        if (ai && ai.every(Number.isFinite)) parts.push(span(rect(ox + ai[0] * s, ox + ai[2] * s, oy + ai[1] * s, oy + ai[3] * s)));
+        else ok = false;
+      }
+      if (ok) Object.assign(box, { lo: Math.min(...parts.map((p) => p.lo)), hi: Math.max(...parts.map((p) => p.hi)), dn: Math.min(...parts.map((p) => p.dn)), up: Math.max(...parts.map((p) => p.up)), pad: false });
+    }
+    boxCache.set(m, box);
+    return box;
+  };
+  const chars = new Array(it.str.length).fill(null);
+  for (const [c, ms] of owner) {
+    const boxes = [...ms, ...(extra.get(c) || [])].map(boxOf);
+    chars[c] = { a0: Math.min(...boxes.map((b) => b.a0)), a1: Math.max(...boxes.map((b) => b.a1)), lo: Math.min(...boxes.map((b) => b.lo)), hi: Math.max(...boxes.map((b) => b.hi)), dn: Math.min(...boxes.map((b) => b.dn)), up: Math.max(...boxes.map((b) => b.up)), pad: boxes.some((b) => b.pad) };
+  }
+  return { fs, chars };
+}
+
+// The exact box of characters c0..c1 of a run, with the black box's margin, or null when one of them is not placed
+// (geo: the run's itemGeometry entry; px: the size of one pixel of the page's picture, user space units).
+function exactBox(it, geo, c0, c1, px) {
+  if (!geo) return null;
+  let lo = Infinity, hi = -Infinity, dn = Infinity, up = -Infinity;
+  const fs = geo.fs, m = Math.max(0.02 * fs, px || 0);
+  for (let c = c0; c < c1; c++) {
+    const b = geo.chars[c];
+    if (!b) { if (unitsOf(it.str[c]).length) return null; continue; }
+    // a glyph whose ink is not known (a Type 3 font, a font the browser did not load) is padded as before
+    const [l, h, d, u] = b.pad ? [b.a0 - 0.15 * fs, b.a1 + 0.15 * fs, Math.min(b.dn, -0.3 * fs), Math.max(b.up, 1.05 * fs)] : [b.lo - m, b.hi + m, b.dn - m, b.up + m];
+    lo = Math.min(lo, l); hi = Math.max(hi, h); dn = Math.min(dn, d); up = Math.max(up, u);
+  }
+  return lo < hi ? { lo, hi, dn, up } : null;
+}
+
+/**
+ * The black boxes of a page: a quadrilateral (4 [x, y] points, PDF user space) per matched span and per box rect.
+ * geometry: itemGeometry(…) of the page (optional; without it, every span is padded as before); px: one pixel of the
+ * page's picture in user space units.
+ */
+export function redactionQuads(items, styles, spans, rects, measureOf, geometry = null, px = 0.5) {
+  const quads = spans.map((sp) => {
+    const it = items[sp.k];
+    const g = runGeom(it);
+    const b = exactBox(it, geometry && geometry[sp.k], sp.c0, sp.c1, px);
+    return b ? quadOf(g, b.lo, b.hi, b.dn, b.up) : paddedQuad(it, styles[it.fontName] || {}, sp.c0, sp.c1, measureOf, g);
+  });
   for (const [ax0, ay0, ax1, ay1] of rects) quads.push([[ax0, ay0], [ax1, ay0], [ax1, ay1], [ax0, ay1]]);
   return quads;
 }
@@ -210,14 +468,16 @@ function quadsMeet(a, b) {
 
 /**
  * The words of a redacted page that may stay selectable: [{ str, transform: [a, b, c, d, x, y] (the run's matrix moved
- * to the word's start, PDF user space), width (along the baseline, user space units) }], in the page's text order.
- * Left out: every word touched by a matched span; every word whose box, padded as a black box is (the whole run's box
- * when the run's spacing cannot be measured), meets a black box (text spans and annotation boxes); vertical text; a run
- * with a degenerate matrix or no width. spansOf(strs) is the page's own matching (terms and patterns): it is run again
- * on the words kept, joined with nothing in between, and the words of any match it finds are dropped too, until none is
- * left (two kept words around a removed one must not make a term).
+ * to the word's left edge, PDF user space), width (along the baseline, user space units) }], in the page's text order.
+ * Left out: every word touched by a matched span; every word whose box meets a black box (text spans and annotation
+ * boxes) — its exact box when the run is placed exactly (P37), else padded as a black box is (the whole run's box when
+ * the run's spacing cannot be measured); vertical text; a run with a degenerate matrix or no width. A right-to-left run
+ * that is not placed exactly is kept whole (one piece, at the run's place) when nothing touches it, else left out.
+ * spansOf(strs) is the page's own matching (terms and patterns): it is run again on the words kept, joined with nothing
+ * in between, and the words of any match it finds are dropped too, until none is left (two kept words around a
+ * removed one must not make a term).
  */
-export function textLayerWords(items, styles, spans, quads, measureOf, spansOf) {
+export function textLayerWords(items, styles, spans, quads, measureOf, spansOf, geometry = null) {
   const touched = new Map(); // item → [[c0, c1], …]
   for (const sp of spans) { if (!touched.has(sp.k)) touched.set(sp.k, []); touched.get(sp.k).push([sp.c0, sp.c1]); }
   const words = [];
@@ -228,13 +488,33 @@ export function textLayerWords(items, styles, spans, quads, measureOf, spansOf) 
     if (!(Math.abs(ta * td - tb * tc) > 1e-9) || !(it.width > 0)) return;
     const g = runGeom(it);
     const hits = touched.get(k) || [];
+    const geo = geometry && geometry[k];
+    const at = (x0, x1) => ({ transform: [ta, tb, tc, td, g.tx + g.ux[0] * x0, g.ty + g.ux[1] * x0], width: x1 - x0 });
+    if (!geo && isRtlText(it.str)) {
+      if (hits.length || quads.some((q) => quadsMeet(paddedQuad(it, style, 0, it.str.length, measureOf, g), q))) return;
+      words.push({ str: it.str.trim(), ...at(0, it.width) });
+      return;
+    }
     for (const m of it.str.matchAll(/\S+/g)) {
       const c0 = m.index, c1 = m.index + m[0].length;
       if (hits.some(([h0, h1]) => h0 < c1 && c0 < h1)) continue;
+      if (geo) {
+        // every character of the word with text must have its place, else the word is left out
+        const need = [];
+        for (let c = c0; c < c1; c++) if (unitsOf(it.str[c]).length) need.push(c);
+        if (!need.length || need.some((c) => !geo.chars[c])) continue;
+        const bs = need.map((c) => geo.chars[c]);
+        const box = { lo: Math.min(...bs.map((b) => b.lo)), hi: Math.max(...bs.map((b) => b.hi)), dn: Math.min(...bs.map((b) => b.dn)), up: Math.max(...bs.map((b) => b.up)) };
+        if (bs.some((b) => b.pad)) Object.assign(box, { lo: box.lo - 0.15 * geo.fs, hi: box.hi + 0.15 * geo.fs });
+        if (quads.some((q) => quadsMeet(quadOf(g, box.lo, box.hi, box.dn, box.up), q))) continue;
+        const a0 = Math.min(...bs.map((b) => b.a0)), a1 = Math.max(...bs.map((b) => b.a1));
+        if (a1 - a0 > 0) words.push({ str: m[0], ...at(a0, a1) });
+        continue;
+      }
       if (quads.some((q) => quadsMeet(paddedQuad(it, style, c0, c1, measureOf, g), q))) continue;
-      const { at } = runRange(it, style, c0, c1, measureOf, g);
-      if (!at || !(at.x1 - at.x0 > 0)) continue;
-      words.push({ str: m[0], transform: [ta, tb, tc, td, g.tx + g.ux[0] * at.x0,g.ty + g.ux[1] * at.x0], width: at.x1 - at.x0 });
+      const { at: pos } = runRange(it, style, c0, c1, measureOf, g);
+      if (!pos || !(pos.x1 - pos.x0 > 0)) continue;
+      words.push({ str: m[0], ...at(pos.x0, pos.x1) });
     }
   });
   for (let kept = words; ;) {
@@ -246,29 +526,101 @@ export function textLayerWords(items, styles, spans, quads, measureOf, spansOf) 
 }
 
 /**
- * Writes `words` on `page` (pdf-lib) as invisible text (rendering mode 3) in Helvetica, each word stretched (Tz) to
- * its width. toPage([x, y]) maps a point of the source page's user space to the new page. A word Helvetica (WinAnsi)
- * cannot write, even after NFKC (ligatures, full-width forms), is skipped. Returns the number of words written.
+ * P37: the font of the invisible words in Arabic script (and any other word given to it): a Type 0 font with one code
+ * per character, whose ToUnicode gives that character back, and whose glyph is the character's own glyph in the font
+ * given (fontkit; Noto Sans Arabic on the page), subset at the end. The text is written in drawing order (bidiReorder)
+ * one character per glyph, never shaped: the layer is invisible, only the text it gives back matters, and a shaped
+ * cluster (lam-alef, a letter and its vowel) read back by PDF.js and Poppler in the wrong order (docs/audit/
+ * ETUDE-EDITEUR-PDF-ARABE.md §4). Call finalize() once, before the document is saved.
  */
-export function drawInvisibleWords(page, font, words, toPage, lib) {
+export function invisibleTextFont(doc, fk, lib, baseName = 'NotoSansArabic-Regular') {
+  const { PDFName, PDFString, PDFHexString } = lib;
+  const ctx = doc.context;
+  const ref = ctx.nextRef();
+  const name = 'InvisibleArabic';
+  const cid = new Map(); // character → code
+  const chars = [null];
+  const upm = fk.unitsPerEm || 1000;
+  const widths = [0];
+  const glyphOf = (ch) => { try { return fk.glyphForCodePoint(ch.codePointAt(0)); } catch { return null; } };
+  return {
+    name, ref,
+    /** str (reading order) → { hex, width at size 1 } or null */
+    encode(str) {
+      const visual = bidiReorder(Array.from(str));
+      let hex = '', w = 0;
+      for (const ch of visual) {
+        if (!cid.has(ch)) {
+          if (chars.length >= 0xfffe) return null;
+          const gl = glyphOf(ch);
+          cid.set(ch, chars.length);
+          chars.push(ch);
+          widths.push(gl && gl.id ? Math.round((gl.advanceWidth * 1000) / upm) : 500);
+        }
+        const c = cid.get(ch);
+        hex += c.toString(16).padStart(4, '0');
+        w += widths[c] / 1000;
+      }
+      return w > 0 ? { hex: PDFHexString.of(hex), width: w } : null;
+    },
+    async finalize() {
+      const subset = fk.createSubset();
+      const gids = chars.map((ch) => { if (!ch) return 0; const gl = glyphOf(ch); return gl && gl.id ? subset.includeGlyph(gl.id) : 0; });
+      const bytes = await new Promise((resolve, reject) => {
+        const parts = [];
+        subset.encodeStream().on('data', (b) => parts.push(b)).on('end', () => { const n = parts.reduce((s, p) => s + p.length, 0), all = new Uint8Array(n); let o = 0; for (const p of parts) { all.set(p, o); o += p.length; } resolve(all); }).on('error', reject);
+      });
+      const base = PDFName.of(`RDCTAR+${baseName}`); // a subset's tag: six capital letters
+      const s = 1000 / upm;
+      const bb = fk.bbox || { minX: 0, minY: -300, maxX: 1000, maxY: 1000 };
+      const fontFile = ctx.register(ctx.flateStream(bytes, { Length1: bytes.length }));
+      const descriptor = ctx.register(ctx.obj({ Type: 'FontDescriptor', FontName: base, Flags: 4, FontBBox: [Math.round(bb.minX * s), Math.round(bb.minY * s), Math.round(bb.maxX * s), Math.round(bb.maxY * s)], ItalicAngle: 0, Ascent: Math.round((fk.ascent || 1000) * s), Descent: Math.round((fk.descent || -300) * s), CapHeight: Math.round((fk.capHeight || 700) * s), StemV: 80, FontFile2: fontFile }));
+      const map = new Uint8Array(chars.length * 2);
+      gids.forEach((gid, c) => { map[2 * c] = gid >> 8; map[2 * c + 1] = gid & 255; });
+      const cidToGid = ctx.register(ctx.flateStream(map));
+      const cidFont = ctx.register(ctx.obj({ Type: 'Font', Subtype: 'CIDFontType2', BaseFont: base, CIDSystemInfo: { Registry: PDFString.of('Adobe'), Ordering: PDFString.of('Identity'), Supplement: 0 }, FontDescriptor: descriptor, DW: 1000, W: [1, widths.slice(1)], CIDToGIDMap: cidToGid }));
+      const utf16 = (ch) => Array.from({ length: ch.length }, (_, i) => ch.charCodeAt(i).toString(16).padStart(4, '0')).join('');
+      const entries = chars.slice(1).map((ch, i) => `<${(i + 1).toString(16).padStart(4, '0')}> <${utf16(ch)}>`);
+      let cmap = '/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n/CMapName /Adobe-Identity-UCS def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n';
+      for (let i = 0; i < entries.length; i += 100) cmap += `${Math.min(100, entries.length - i)} beginbfchar\n${entries.slice(i, i + 100).join('\n')}\nendbfchar\n`;
+      cmap += 'endcmap\nCMapName currentdict /CMap defineresource pop\nend\nend\n';
+      const toUnicode = ctx.register(ctx.flateStream(cmap));
+      ctx.assign(ref, ctx.obj({ Type: 'Font', Subtype: 'Type0', BaseFont: base, Encoding: 'Identity-H', DescendantFonts: [cidFont], ToUnicode: toUnicode }));
+    },
+  };
+}
+
+/**
+ * Writes `words` on `page` (pdf-lib) as invisible text (rendering mode 3), each word stretched (Tz) to its width: in
+ * Helvetica (`font`), or, for a word in Arabic script, in `arabicFont` (invisibleTextFont, P37). toPage([x, y]) maps a
+ * point of the source page's user space to the new page. A word neither can write (Helvetica's WinAnsi, even after
+ * NFKC: ligatures, full-width forms; no Arabic font given) is skipped. Returns the number of words written.
+ */
+export function drawInvisibleWords(page, font, words, toPage, lib, arabicFont = null) {
   const { pushGraphicsState, popGraphicsState, beginText, endText, setFontAndSize, setTextRenderingMode, TextRenderingMode, setCharacterSqueeze, setTextMatrix, showText } = lib;
   const ops = [];
-  let key = null;
+  const keys = new Map();
+  let current = null, n = 0;
   for (const w of words) {
-    let str = w.str, hex = null;
-    for (const s of [w.str, w.str.normalize('NFKC')]) { try { hex = font.encodeText(s); str = s; break; } catch { /* a character outside WinAnsi */ } }
-    if (!hex) continue;
-    const hw = font.widthOfTextAtSize(str, 1);
+    let enc = null, f = null;
+    if (arabicFont && hasArabic(w.str)) { enc = arabicFont.encode(w.str); f = arabicFont; }
+    else {
+      for (const s of [w.str, w.str.normalize('NFKC')]) { try { enc = { hex: font.encodeText(s), width: font.widthOfTextAtSize(s, 1) }; break; } catch { /* a character outside WinAnsi */ } }
+      f = font;
+    }
+    if (!enc) continue;
     const [a, b, c, d, x, y] = w.transform;
     const o = toPage([x, y]), ex = toPage([x + a, y + b]), ey = toPage([x + c, y + d]);
     const A = ex[0] - o[0], B = ex[1] - o[1], C = ey[0] - o[0], D = ey[1] - o[1];
     const dl = Math.hypot(A, B);
-    if (!(hw > 0) || !(dl > 0)) continue;
-    const squeeze = (100 * w.width) / ((Math.hypot(a, b) || 1) * hw);
+    if (!(enc.width > 0) || !(dl > 0)) continue;
+    const squeeze = (100 * w.width) / ((Math.hypot(a, b) || 1) * enc.width);
     if (!Number.isFinite(squeeze) || squeeze <= 0) continue;
-    if (!key) key = page.node.newFontDictionary(font.name, font.ref);
-    ops.push(setTextMatrix(A, B, C, D, o[0], o[1]), setCharacterSqueeze(squeeze), showText(hex));
+    if (!keys.has(f)) keys.set(f, page.node.newFontDictionary(f.name, f.ref));
+    if (current !== f) { ops.push(setFontAndSize(keys.get(f), 1)); current = f; }
+    ops.push(setTextMatrix(A, B, C, D, o[0], o[1]), setCharacterSqueeze(squeeze), showText(enc.hex));
+    n++;
   }
-  if (ops.length) page.pushOperators(pushGraphicsState(), beginText(), setFontAndSize(key, 1), setTextRenderingMode(TextRenderingMode.Invisible), ...ops, endText(), popGraphicsState());
-  return ops.length / 3;
+  if (ops.length) page.pushOperators(pushGraphicsState(), beginText(), setTextRenderingMode(TextRenderingMode.Invisible), ...ops, endText(), popGraphicsState());
+  return n;
 }

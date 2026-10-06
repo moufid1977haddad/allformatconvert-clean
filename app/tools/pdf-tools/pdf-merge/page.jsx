@@ -103,7 +103,7 @@ export default function PdfMergePage() {
     setLoading(false);
     setProgress(0);
     setPhase('');
-    setStatus('Cancelled.');
+    setStatus('Canceled.');
   };
 
   // Images and Office documents become PDFs first; returns the list in the same order, or null after an error.
@@ -263,7 +263,7 @@ export default function PdfMergePage() {
           { label: 'Input formats', value: `PDF; JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF; DOC, DOCX, ODT, RTF; XLS, XLSX, CSV, ODS; PPT, PPTX, ODP` },
           { label: 'Files at once', value: `Two or more, in the order of the list` },
           { label: 'Office files', value: `Up to ${officeMaxLabel(MAX_OFFICE_STAGED_BYTES)} per document and ${officeMaxLabel(MAX_SPREADSHEET_STAGED_BYTES)} per spreadsheet` },
-          { label: 'Total size', value: `The combined cap of all listed files is printed above the upload area; smaller on phones, iPhone and iPad` },
+          { label: 'Total size', value: `The combined cap of all listed files is printed above the upload area; smaller on phones and tablets` },
           { label: 'Usage limits', value: `.docx conversions are limited per network per hour and per day within a monthly budget for the whole site; any Office file over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / 1048576)} MB also counts against a per-network hourly and daily upload limit` },
           { label: 'Result', value: `merged.pdf, with one bookmark per file if you keep the option` },
         ]}

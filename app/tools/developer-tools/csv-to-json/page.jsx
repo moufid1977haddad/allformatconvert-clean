@@ -136,7 +136,7 @@ export default function CsvToJsonPage() {
     setProgress(0);
     setPhase('');
     clearResult();
-    setStatus('Cancelled.');
+    setStatus('Canceled.');
   };
 
   const convert = () => {
@@ -290,7 +290,7 @@ export default function CsvToJsonPage() {
           { label: "Input", value: `.csv file up to ${MAX_FILE_SIZE_LABEL}, or pasted CSV` },
           { label: "Output", value: "JSON array of objects, JSON array of arrays, or JSON Lines (.jsonl)" },
           { label: "Rows from a file on a computer", value: `${MAX_ROWS.toLocaleString('en-US')}, header row included` },
-          { label: "Rows from a file on phones, iPhone and iPad", value: `${MOBILE_MAX_ROWS.toLocaleString('en-US')}, header row included` },
+          { label: "Rows from a file on phones and tablets", value: `${MOBILE_MAX_ROWS.toLocaleString('en-US')}, header row included` },
           { label: "Rows of pasted text", value: `${PASTE_MAX_ROWS.toLocaleString('en-US')} on every device` },
         ]}
         privacy={"Parsing and building the JSON happen in a background worker in your browser. Your CSV file and the text you paste are not uploaded. A failure, whether shown on the page or not, sends us a short report holding the cleaned error text, this tool's name and your browser and its version, never your data itself."}
@@ -298,7 +298,7 @@ export default function CsvToJsonPage() {
           { q: "Are columns with the same header kept?", a: "Yes. With \"Array of objects\" or JSON Lines, a second column named name becomes name_2, an empty header becomes column_ followed by its position, and values beyond the last header also get a column_ key. The status line lists each rename. \"Array of arrays\" keeps the header row exactly as written." },
           { q: "Do numeric columns become JSON numbers?", a: "Yes, when every value in a column is a number; in a semicolon file a decimal comma is read too, so 12,5 becomes 12.5. Values with a leading zero, such as 02134, and numbers with more than 15 significant digits stay strings. Untick \"Numbers as numbers\" to keep all values as strings." },
           { q: "Can I get JSON Lines instead of one array?", a: "Yes. Choose \"JSON Lines (one object per line)\" under \"Output\": each row becomes one compact JSON object on its own line, the format many log and data tools read. A file converted this way downloads as converted.jsonl." },
-          { q: "How large a CSV can I convert?", a: `${MAX_ROWS.toLocaleString('en-US')} rows from a file on a computer and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} on phones, iPhone and iPad, header row included, for files up to ${MAX_FILE_SIZE_LABEL}. Pasted text stops at ${PASTE_MAX_ROWS.toLocaleString('en-US')} rows on every device, because it is held in the page itself, so upload the file instead for more rows.` },
+          { q: "How large a CSV can I convert?", a: `${MAX_ROWS.toLocaleString('en-US')} rows from a file on a computer and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} on phones and tablets, header row included, for files up to ${MAX_FILE_SIZE_LABEL}. Pasted text stops at ${PASTE_MAX_ROWS.toLocaleString('en-US')} rows on every device, because it is held in the page itself, so upload the file instead for more rows.` },
         ]}
         tips={[
           "To turn the JSON back into CSV, use JSON to CSV, which also flattens nested objects into dotted columns.",

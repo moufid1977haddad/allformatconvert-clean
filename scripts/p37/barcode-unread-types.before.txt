@@ -1,0 +1,65 @@
+types without a reader: MSI Plessey, Pharmacode (one-track), Code 11, EAN-5 add-on (alone), EAN-2 add-on (alone)
+PASS  exactly these 5 types have no reader
+PASS  MSI 1234567, no check digit
+PASS  MSI 1234567, Mod 10 -> 12345674
+PASS  MSI 1234567, Mod 10 + Mod 10 -> 123456741
+PASS  MSI 1234567, Mod 11 -> 12345674
+PASS  MSI 1234567, Mod 11 + Mod 10 -> 123456741
+PASS  MSI 0, no check digit
+PASS  MSI 0, Mod 10 -> 00
+PASS  MSI 0, Mod 10 + Mod 10 -> 000
+PASS  MSI 0, Mod 11 -> 00
+PASS  MSI 0, Mod 11 + Mod 10 -> 000
+PASS  MSI 6, no check digit
+PASS  MSI 6, Mod 10 -> 67
+PASS  MSI 6, Mod 10 + Mod 10 -> 679
+FAIL  MSI 6, mod11: check value 10, clear refusal: mod11 check digit is 10 but badmod11 not specified  -- mod11 check digit is 10 but badmod11 not specified
+FAIL  MSI 6, mod1110: check value 10, clear refusal: mod11 check digit is 10 but badmod11 not specified  -- mod11 check digit is 10 but badmod11 not specified
+PASS  MSI 80523, no check digit
+PASS  MSI 80523, Mod 10 -> 805234
+PASS  MSI 80523, Mod 10 + Mod 10 -> 8052342
+PASS  MSI 80523, Mod 11 -> 805238
+PASS  MSI 80523, Mod 11 + Mod 10 -> 8052383
+PASS  MSI 9999999999, no check digit
+PASS  MSI 9999999999, Mod 10 -> 99999999990
+PASS  MSI 9999999999, Mod 10 + Mod 10 -> 999999999900
+PASS  MSI 9999999999, Mod 11 -> 99999999995
+PASS  MSI 9999999999, Mod 11 + Mod 10 -> 999999999959
+PASS  Pharmacode 3
+PASS  Pharmacode 1234
+PASS  Pharmacode 65535
+PASS  Pharmacode 131070
+PASS  Code 11 0123-4567, no check digit
+PASS  Code 11 0123-4567, check digits -> *0123-45678*
+PASS  Code 11 123, no check digit
+PASS  Code 11 123, check digits -> *123-*
+PASS  Code 11 0123456789, no check digit
+PASS  Code 11 0123456789, check digits -> *012345678903*
+PASS  Code 11 0123456789-1, no check digit
+PASS  Code 11 0123456789-1, check digits -> *0123456789-125*
+PASS  EAN-5 51299 (parity LGLLG)
+PASS  EAN-5 00000 (parity GGLLL)
+PASS  EAN-5 90000 (parity LGLGL)
+PASS  EAN-5 12345 (parity GLGLL)
+PASS  EAN-2 05 (parity LG)
+PASS  EAN-2 00 (parity LL)
+PASS  EAN-2 01 (parity LG)
+PASS  EAN-2 02 (parity GL)
+PASS  EAN-2 03 (parity GG)
+PASS  EAN-2 99 (parity GG)
+PASS  MSI Plessey refuses "12A": MSI must contain only digits
+PASS  MSI Plessey refuses "12.5": MSI must contain only digits
+PASS  Pharmacode (one-track) refuses "2": Pharmacode value must be between 3 and 131070
+PASS  Pharmacode (one-track) refuses "131071": Pharmacode value must be between 3 and 131070
+PASS  Pharmacode (one-track) refuses "12a": Pharmacode must contain only digits
+PASS  Pharmacode (one-track) refuses "0": Pharmacode value must be between 3 and 131070
+PASS  Code 11 refuses "12A4": Code 11 must contain only digits and dashes
+PASS  Code 11 refuses "12 34": Code 11 must contain only digits and dashes
+PASS  EAN-5 add-on (alone) refuses "1234": EAN-5 add-on must be 5 digits
+PASS  EAN-5 add-on (alone) refuses "123456": EAN-5 add-on must be 5 digits
+PASS  EAN-5 add-on (alone) refuses "12a45": EAN-5 add-on must contain only digits
+PASS  EAN-2 add-on (alone) refuses "1": EAN-2 add-on must be 2 digits
+PASS  EAN-2 add-on (alone) refuses "123": EAN-2 add-on must be 2 digits
+PASS  EAN-2 add-on (alone) refuses "ab": EAN-2 add-on must contain only digits
+
+2 failed

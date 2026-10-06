@@ -265,7 +265,7 @@ self.onmessage = async (e) => {
     if (format === 'png') {
       const r = await encodePng(img, quality, progress);
       out = r.blob;
-      note = r.colours ? `${r.colours}-colour palette, transparency kept` : 'lossless (no palette kept the quality)';
+      note = r.colours ? `${r.colours}-color palette, transparency kept` : 'lossless (no palette kept the quality)';
       if (targetBytes > 0) note += ` · a target size applies to JPG, WebP and AVIF; this PNG was compressed at ${quality}% (${out.size <= targetBytes ? 'it fits' : `${Math.round(out.size / 1024)} KB, over the target`})`;
     } else {
       // An already well-compressed JPEG/WebP can come out larger at the chosen quality. Like the reference

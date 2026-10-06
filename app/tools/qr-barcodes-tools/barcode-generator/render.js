@@ -72,7 +72,16 @@ export function bwipOptions(sym, text, ui, scale, unitsPerMm) {
 }
 
 // bwip-js's error text without its internal prefix: "bwipp.ean13badLength#10131: EAN-13 must be..." -> "EAN-13 must be..."
-export const cleanError = (e) => String(e?.message || e).replace(/^(bwipp|bwip-js)\.[\w#]+:\s*/, '');
+// P37 (06/10): one MSI number in 11 gets the Mod 11 value 10, which one digit cannot hold; BWIPP then says "mod11 check
+// digit is 10 but badmod11 not specified". Said plainly instead (no two-digit "10" is written: scanners disagree on it).
+const PLAIN = {
+  msiBadMod11NotSpecified: 'With Mod 11, this number gets the check value 10, which one MSI digit cannot hold. Choose Mod 10 or Mod 10 + Mod 10, or change the number.',
+};
+export const cleanError = (e) => {
+  const raw = String(e?.message || e);
+  const code = (/^bwipp\.(\w+)/.exec(raw) || [])[1];
+  return PLAIN[code] || raw.replace(/^(bwipp|bwip-js)\.[\w#]+:\s*/, '');
+};
 
 let bwip = null;
 async function engine() { bwip ??= (await import('bwip-js/browser')).default; return bwip; }
@@ -254,9 +263,9 @@ const lum = (c) => rgb(c).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 
 export function contrastError(bar, bg, transparent) {
   const a = lum(bar), b = lum(transparent ? '#FFFFFF' : bg); const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
   if (a > b) return transparent
-    ? 'On a transparent background the bars must be dark: most scanners cannot read light bars (it would be printed on white paper). Pick a darker bar colour.'
-    : 'The bars must be darker than the background: most scanners cannot read light bars on a dark background. Swap the two colours.';
-  if (ratio < 3) return `These colours are too close (contrast ${ratio.toFixed(1)}:1, at least 3:1 is needed to scan reliably). Pick darker bars or a lighter background.`;
+    ? 'On a transparent background the bars must be dark: most scanners cannot read light bars (it would be printed on white paper). Pick a darker bar color.'
+    : 'The bars must be darker than the background: most scanners cannot read light bars on a dark background. Swap the two colors.';
+  if (ratio < 3) return `These colors are too close (contrast ${ratio.toFixed(1)}:1, at least 3:1 is needed to scan reliably). Pick darker bars or a lighter background.`;
   return '';
 }
 

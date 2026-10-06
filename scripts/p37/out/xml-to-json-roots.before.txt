@@ -1,0 +1,61 @@
+  FAIL <a></a><c/>: refused at the second root (line 1, column 8) 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + ''
+    - 'Extra content at the end of the document: a second root element <c> after <a>; XML allows only one root element. (line 1, column 8)'
+    
+  FAIL <a/>
+<b/>: refused (line 2, column 1) 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + ''
+    - 'Extra content at the end of the document: a second root element <b> after <a>; XML allows only one root element. (line 2, column 1)'
+    
+  FAIL <a/><b></b>: refused (line 1, column 5) 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + ''
+    - 'Extra content at the end of the document: a second root element <b> after <a>; XML allows only one root element. (line 1, column 5)'
+    
+  FAIL <a></a><b></b>: same message as the other cases, at the < of <b> 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'Multiple possible root nodes found. (line 2, column 9)'
+    - 'Extra content at the end of the document: a second root element <b> after <a>; XML allows only one root element. (line 2, column 1)'
+    
+  FAIL attribute value holding > does not hide the second root 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + ''
+    - 'Extra content at the end of the document: a second root element <b> after <a>; XML allows only one root element. (line 1, column 15)'
+    
+  FAIL text after a self-closed root: refused 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + ''
+    - 'Extra content at the end of the document: text after the root element <a>. (line 1, column 5)'
+    
+  FAIL entity after a self-closed root: refused 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + ''
+    - 'Extra content at the end of the document: text after the root element <a>. (line 1, column 5)'
+    
+  FAIL CDATA after the root: refused 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + ''
+    - 'Extra content at the end of the document: text after the root element <a>. (line 1, column 5)'
+    
+  PASS valid: declaration, DOCTYPE, comments and PI around one root
+  PASS valid: nested self-closed and paired tags
+  PASS other errors keep the validator message
+3 passed, 8 failed

@@ -65,9 +65,28 @@ export async function diffLines(a, b, { ignoreWhitespace = false, ignoreCase = f
   return out;
 }
 
-export async function typescriptToJs(code, { jsx = false } = {}) {
-  const { transform } = await import('sucrase');
-  return transform(code, { transforms: jsx ? ['typescript', 'jsx'] : ['typescript'], disableESTransforms: true, keepUnusedImports: false, jsxRuntime: 'preserve' }).code; // P24: type-only imports removed as tsc does (they failed at load time in ESM); React, side-effect and used imports stay
+// TypeScript to JavaScript (P37 suites): the same code as the TypeScript to JS page (app/lib/typescriptToJs.js), so
+// JSX is found wherever it is written and a namespace holding code stops the conversion with a message naming it,
+// instead of being removed with that code. Type-only imports are removed as tsc does (P24).
+export async function typescriptToJs(code) {
+  const { convertTypescript } = await import('./typescriptToJs.js');
+  return convertTypescript(code);
+}
+
+// Code Minifier, TS mode: types removed as above, then Terser. Terser reads JavaScript only, so JSX that
+// convertTypescript kept (TSX) cannot be minified; that case gets a message saying so instead of Terser's
+// "Unexpected token". The code was TSX when Sucrase's plain TypeScript reading refuses it but the TSX reading worked.
+export async function minifyTypescript(code) {
+  const js = await typescriptToJs(code);
+  try {
+    return await minifyJs(js);
+  } catch (e) {
+    const { transform } = await import('sucrase/dist/index.js');
+    let tsx = false;
+    try { transform(code, { transforms: ['typescript'], disableESTransforms: true }); } catch { tsx = true; }
+    if (tsx) throw new Error('This code contains JSX (TSX). The types were removed, but Terser minifies plain JavaScript only and cannot read JSX. Compile the JSX in your build first, or use TypeScript to JS to remove the types only.');
+    throw e;
+  }
 }
 
 export async function scssToCss(code, { syntax = 'scss', style = 'expanded' } = {}) {

@@ -1,0 +1,31 @@
+  FAIL top level: name, 10, 2 in source order, numeric keys quoted 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + "'2': 'y'\n'10': x\nname: a\n"
+    - "name: a\n'10': x\n'2': 'y'\n"
+    
+  FAIL nested and inside arrays 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + "list:\n  - '1': 2\n    b: 1\nobj:\n  '0': null\n  z: true\n"
+    - "list:\n  - b: 1\n    '1': 2\nobj:\n  z: true\n  '0': null\n"
+    
+  PASS round trip: js-yaml reads back the same data
+  FAIL repeated key: last value, first position 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + "'5': 2\na: 3\n"
+    - "a: 3\n'5': 2\n"
+    
+  PASS unchanged: exact numbers, quoted strings, "__proto__" key
+  FAIL a key that looks like a big number or a negative is not reordered either 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + "'1': 4\nb: 1\n'-1': 2\n'4294967295': 3\n"
+    - "b: 1\n'-1': 2\n'4294967295': 3\n'1': 4\n"
+    
+2 passed, 4 failed

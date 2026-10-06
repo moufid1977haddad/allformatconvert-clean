@@ -14,19 +14,25 @@ import TextArea from '@/app/components/TextArea';
 import { fitScale, withTimeout, StepTimeout } from '../../../lib/canvasLimit'; // P31: one canvas cap for iPhone / iPad
 import { LANGUAGES, matchLanguages, optionLabel } from '../../../lib/ocrLanguages';
 import LanguageCombobox, { languageFromBrowser } from '@/app/components/LanguageCombobox';
-import { serverRenderAvailable, listPages, STAGED_MAX_BYTES } from '../../../lib/serverPageRender';
-import { ServerPageOcr, LOCAL_OCR_LIMIT_MS, LOCAL_OCR_LIMIT_LABEL } from '../../../lib/serverPageOcr';
+import { listPages, STAGED_MAX_BYTES } from '../../../lib/serverPageRender';
+import { ServerPageOcr } from '../../../lib/serverPageOcr';
+import { ocrFirstStep } from '../../../lib/ocrFirstStep';
 
-// P33 (05/10): the device's own recognition is watched. Real iPhone pass of 04/10 (iOS 26): the page stayed on "Page 1
-// of 3, Recognizing text… 0 %" for good, with no message (Playwright's WebKit recognizes the same PDF in ~4 s; cause
-// not reproduced, ranked hypotheses in docs/audit/RAPPORT-p33-redact-ocr-05-10.md §3b). On iPhone / iPad a step with
-// no progress for LOCAL_OCR_LIMIT_MS (preparing the engine, drawing the page, recognizing it), or a failure, hands
-// this page and the next ones to our OCR service (app/lib/serverPageOcr.js), said before and after. On a computer
-// nothing is sent; a step with no progress for DESKTOP_STALL_MS stops with a clear message instead of waiting forever.
+// P33 (05/10) then P37 (06/10): where the pages are read. Two real iPhone passes (04/10, iOS 26: "Recognizing text…
+// 0 %" for good; 06/10: "Drawing the page… 0 %", then our service read the 3 pages after the 20 s wait of P33) showed
+// that an iPhone does not finish the recognition, although Playwright's WebKit does it in ~4 s (cause not reproduced,
+// docs/audit/RAPPORT-p33-redact-ocr-05-10.md §3b). So on iPhone / iPad (app/lib/ocrFirstStep.js) every page goes to our
+// OCR service (app/lib/serverPageOcr.js) from the start, said before "Run OCR" and after; the OCR engine is not even
+// loaded there. On a computer or Android nothing is sent; a step with no progress for DESKTOP_STALL_MS stops with a
+// clear message instead of waiting forever.
 const DESKTOP_STALL_MS = 90000;
 const OFFERED = new Set(LANGUAGES.map((l) => l.code));
 const labelOf = (code) => LANGUAGES.find((l) => l.code === code)?.label || code;
 const noSubscribe = () => () => {};
+// P37: true when our OCR service reads the pages from the start (iPhone / iPad; tests: window.__forceServerPageRender)
+const serverFirstHere = () => typeof navigator !== 'undefined' && ocrFirstStep(navigator, window.__forceServerPageRender) === 'server';
+// on iPhone / iPad, the one step still done on the device per page (reading the page's own text, P35) gets 20 s
+const TEXT_CHECK_MS_IOS = 20000;
 
 class StallError extends Error { constructor(m) { super(m); this.name = 'StallError'; } }
 // rejects when `kick` has not been called for `ms` (each progress event of Tesseract.js calls it)
@@ -56,8 +62,8 @@ export default function Page() {
   const [serverNote, setServerNote] = useState('');
   const [textNote, setTextNote] = useState('');
   const fileRef = useRef();
-  // P33: the notice of the iPhone / iPad fallback, read after mounting (the server render does not know the device)
-  const onAppleTouch = useSyncExternalStore(noSubscribe, serverRenderAvailable, () => false);
+  // the notice of iPhone / iPad (P33, P37), read after mounting (the server render does not know the device)
+  const onAppleTouch = useSyncExternalStore(noSubscribe, serverFirstHere, () => false);
 
   // the browser's language is chosen first when PDF OCR offers it (owner's brief); the visitor's own choice wins
   useEffect(() => {
@@ -92,17 +98,24 @@ export default function Page() {
     setStage('');
     const lang = langs.join('+');
     const langLabel = langs.map(labelOf).join(' + ');
-    const canFallBack = serverRenderAvailable();
-    const limit = canFallBack ? LOCAL_OCR_LIMIT_MS() : DESKTOP_STALL_MS;
+    // P37: on iPhone / iPad our OCR service reads every page; the device only opens the PDF and builds the result
+    const serverFirst = serverFirstHere();
+    const limit = DESKTOP_STALL_MS;
     let worker = null;
     let remote = null;
-    let useServer = false;
     let sentToServer = false;
     const byServer = [];
     const alreadyText = []; // P35: pages with their own text layer (no OCR layer added)
+    let textCheckOff = false;
     let fullText = '';
     let kick = () => {};
     try {
+      if (serverFirst) {
+        remote = new ServerPageOcr(file);
+        // a PDF our service cannot take is refused here, before anything is sent
+        const refused = remote.tooLarge();
+        if (refused) { const err = new Error(refused); err.name = 'OcrSizeError'; throw err; }
+      }
       // Every page is rendered to a canvas and treated purely as an image --
       // this tool never reads getTextContent()/the PDF's text layer, which is
       // exactly what lets it read scanned/image-only pages that have no text
@@ -124,48 +137,46 @@ export default function Page() {
       // separate progress bars so there's never a silent multi-second gap.
       // Tesseract.js never rejects when the engine or a language model cannot be downloaded (blocked CDN,
       // network cut): the page stayed on "Downloading … language data" forever (found 28/09). Its errors are
-      // caught here, and loading stops when nothing has progressed for 30 s (20 s on iPhone / iPad, P33).
-      setStage('Preparing the OCR engine...');
-      try {
-        const { createWorker } = await import('tesseract.js');
-        const guard = stallGuard(canFallBack ? limit : 30000, 'download stalled');
-        kick = guard.kick;
-        let failLoad;
-        const loadFailed = new Promise((_, reject) => { failLoad = reject; });
-        loadFailed.catch(() => {});
-        const creating = createWorker(lang, 1, {
-          errorHandler: (err) => failLoad(err instanceof Error ? err : new Error(String(err))),
-          logger: (m) => {
-            kick();
-            if (m.status === 'loading tesseract core') {
-              setDownloadLabel('Downloading OCR engine...');
-              setDownloadPct(Math.round(m.progress * 100));
-            } else if (/loading.*(traineddata|language)/i.test(m.status)) {
-              setDownloadLabel(`Downloading ${langLabel} language data...`);
-              setDownloadPct(Math.round(m.progress * 100));
-            } else if (m.status === 'recognizing text') {
-              setPagePct(Math.round(m.progress * 100));
-            }
-          },
-        });
-        creating.catch(() => {}); // settled by the race below
+      // caught here, and loading stops when nothing has progressed for 30 s.
+      if (!serverFirst) {
+        setStage('Preparing the OCR engine...');
         try {
-          worker = await Promise.race([creating, loadFailed, guard.promise]);
+          const { createWorker } = await import('tesseract.js');
+          const guard = stallGuard(30000, 'download stalled');
+          kick = guard.kick;
+          let failLoad;
+          const loadFailed = new Promise((_, reject) => { failLoad = reject; });
+          loadFailed.catch(() => {});
+          const creating = createWorker(lang, 1, {
+            errorHandler: (err) => failLoad(err instanceof Error ? err : new Error(String(err))),
+            logger: (m) => {
+              kick();
+              if (m.status === 'loading tesseract core') {
+                setDownloadLabel('Downloading OCR engine...');
+                setDownloadPct(Math.round(m.progress * 100));
+              } else if (/loading.*(traineddata|language)/i.test(m.status)) {
+                setDownloadLabel(`Downloading ${langLabel} language data...`);
+                setDownloadPct(Math.round(m.progress * 100));
+              } else if (m.status === 'recognizing text') {
+                setPagePct(Math.round(m.progress * 100));
+              }
+            },
+          });
+          creating.catch(() => {}); // settled by the race below
+          try {
+            worker = await Promise.race([creating, loadFailed, guard.promise]);
+          } catch (loadErr) {
+            creating.then((w) => w.terminate()).catch(() => {});
+            throw loadErr;
+          } finally {
+            guard.stop();
+          }
         } catch (loadErr) {
-          creating.then((w) => w.terminate()).catch(() => {});
-          throw loadErr;
-        } finally {
-          guard.stop();
-        }
-      } catch (loadErr) {
-        if (!canFallBack) {
           const err = new Error(`The ${langLabel} language data could not be downloaded. Check your connection (a blocker or firewall may stop cdn.jsdelivr.net), then run the OCR again.`);
           err.name = 'OcrDownloadError';
           err.cause = loadErr;
           throw err;
         }
-        console.warn(`[pdf-ocr] the OCR engine did not start on this device (${loadErr?.name}: ${loadErr?.message}); our OCR service takes over`);
-        useServer = true;
       }
       setDownloadLabel('');
 
@@ -174,40 +185,30 @@ export default function Page() {
         setPagePct(0);
         let text = null;
         let layer = null;
-        if (!useServer) {
+        if (!serverFirst) {
+          const where = `Page ${i} of ${pdf.numPages}`;
+          const stalled = (what) => `${where}: ${what} made no progress for ${DESKTOP_STALL_MS / 1000} seconds on this device. Try again, or use a smaller PDF.`;
+          setStage('Drawing the page...');
+          const page = await withTimeout(pdf.getPage(i), limit, stalled('opening the page'));
+          const unit = page.getViewport({ scale: 1 });
+          const viewport = page.getViewport({ scale: fitScale(unit.width, unit.height, 2) });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          const task = page.render({ canvasContext: ctx, viewport });
+          await withTimeout(task.promise, limit, stalled('drawing the page'), () => task.cancel());
+          setStage('Recognizing text...');
+          const guard = stallGuard(limit, stalled('recognizing the text'));
+          kick = guard.kick;
           try {
-            const where = `Page ${i} of ${pdf.numPages}`;
-            const stalled = (what) => (canFallBack ? `${where}: ${what} made no progress for ${LOCAL_OCR_LIMIT_LABEL}.` : `${where}: ${what} made no progress for ${DESKTOP_STALL_MS / 1000} seconds on this device. Try again, or use a smaller PDF.`);
-            setStage('Drawing the page...');
-            const page = await withTimeout(pdf.getPage(i), limit, stalled('opening the page'));
-            const unit = page.getViewport({ scale: 1 });
-            const viewport = page.getViewport({ scale: fitScale(unit.width, unit.height, 2) });
-            const canvas = document.createElement('canvas');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            const ctx = canvas.getContext('2d');
-            const task = page.render({ canvasContext: ctx, viewport });
-            await withTimeout(task.promise, limit, stalled('drawing the page'), () => task.cancel());
-            setStage('Recognizing text...');
-            const guard = stallGuard(limit, stalled('recognizing the text'));
-            kick = guard.kick;
-            try {
-              const { data } = await Promise.race([worker.recognize(canvas, { pdfTitle: file.name, pdfTextOnly: true }, { text: true, pdf: true }), guard.promise]);
-              text = data.text;
-              layer = data.pdf ? new Uint8Array(data.pdf) : null;
-            } finally {
-              guard.stop();
-            }
-          } catch (e) {
-            if (!canFallBack) throw e;
-            console.warn(`[pdf-ocr] page ${i} not recognized on this device (${e?.name}: ${e?.message}); our OCR service recognizes it and the next pages`);
-            useServer = true;
-            // a stuck recognition cannot be cancelled: the worker is stopped, the service does the rest
-            if (worker) { const w = worker; worker = null; w.terminate().catch(() => {}); }
+            const { data } = await Promise.race([worker.recognize(canvas, { pdfTitle: file.name, pdfTextOnly: true }, { text: true, pdf: true }), guard.promise]);
+            text = data.text;
+            layer = data.pdf ? new Uint8Array(data.pdf) : null;
+          } finally {
+            guard.stop();
           }
-        }
-        if (useServer) {
-          if (!remote) remote = new ServerPageOcr(file);
+        } else {
           sentToServer = true;
           setStage('Recognizing it on our OCR service...');
           setPagePct(0);
@@ -220,7 +221,7 @@ export default function Page() {
               onStarted: () => setStage('Recognizing it on our OCR service...'),
             });
           } catch (e2) {
-            const err = new Error(`Page ${i} of ${pdf.numPages} could not be recognized on this device, and our OCR service could not recognize it either: ${e2.message}`);
+            const err = new Error(`Our OCR service could not recognize page ${i} of ${pdf.numPages}: ${e2.message}`);
             err.name = 'OcrPageError';
             throw err;
           }
@@ -234,14 +235,19 @@ export default function Page() {
         // the OCR layer too — its text would be copied twice. OCRmyPDF skips such pages by default (--skip-text) and
         // Adobe Acrobat refuses to recognize them ("renderable text"); the recognized text is still shown above.
         let hasText = false;
-        if (layer && text.trim()) {
+        if (layer && text.trim() && !textCheckOff) {
           try {
-            const tc = await withTimeout((await withTimeout(pdf.getPage(i), limit, 'timeout')).getTextContent(), limit, 'timeout');
+            const checkMs = serverFirst ? TEXT_CHECK_MS_IOS : limit;
+            const tc = await withTimeout((await withTimeout(pdf.getPage(i), checkMs, 'timeout')).getTextContent(), checkMs, 'timeout');
             // "already has text" = its own text is at least half as long as what was recognized: a scan with only a
             // stamp or a header in text ("Scanned by …") still gets the layer
             const own = tc.items.reduce((n, it) => n + (typeof it.str === 'string' ? it.str.replace(/\s+/g, '').length : 0), 0);
             hasText = own > 0 && own >= 0.5 * text.replace(/\s+/g, '').length;
-          } catch { /* not read in time: the layer is added, as before */ }
+          } catch {
+            // not read in time: the layer is added, as before; on iPhone / iPad (P37) the next pages are not checked
+            // either, so a device that cannot read pages does not wait 20 s more on each one
+            if (serverFirst) textCheckOff = true;
+          }
           if (hasText) alreadyText.push(i);
         }
         if (layer && text.trim() && !hasText) {
@@ -259,7 +265,7 @@ export default function Page() {
         setPdfUrl(URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })));
       }
       if (alreadyText.length) setTextNote(`${alreadyText.length > 1 ? 'Pages' : 'Page'} ${listPages(alreadyText)} already had selectable text: in the searchable PDF, the recognized text was not added to ${alreadyText.length > 1 ? 'them' : 'it'}, so ${alreadyText.length > 1 ? 'their' : 'its'} text is not doubled.`);
-      if (byServer.length) setServerNote(`This device could not recognize ${byServer.length > 1 ? 'pages' : 'page'} ${listPages(byServer)}, so our own OCR service recognized ${byServer.length > 1 ? 'them' : 'it'}: your PDF was sent there, then deleted.`);
+      if (byServer.length) setServerNote(`Our own OCR service recognized ${byServer.length > 1 ? 'pages' : 'page'} ${listPages(byServer)}: your PDF was sent there, then deleted.`);
 
       setOutput(fullText.trim() ? fullText.trim() : 'No text was recognized in this PDF.');
     } catch (e) {
@@ -267,11 +273,11 @@ export default function Page() {
       // `output` (the recognized text), which is exactly the file content
       // this feature must never transmit.
       // A download that failed on the visitor's side is not a defect of the tool: said, not reported.
-      if (e.name !== 'OcrDownloadError') reportToolError({ tool: 'pdf-ocr', file, error: e });
+      if (e.name !== 'OcrDownloadError' && e.name !== 'OcrSizeError') reportToolError({ tool: 'pdf-ocr', file, error: e });
       // the pages already recognized stay readable (P33)
       if (fullText.trim()) setOutput(fullText.trim());
       const sent = sentToServer ? ' Your PDF was sent to our own OCR service for this attempt, then deleted.' : '';
-      setError((e instanceof StepTimeout || ['OcrDownloadError', 'OcrPageError', 'StallError'].includes(e.name) ? e.message : 'OCR failed: ' + e.message) + sent);
+      setError((e instanceof StepTimeout || ['OcrDownloadError', 'OcrPageError', 'OcrSizeError', 'StallError'].includes(e.name) ? e.message : 'OCR failed: ' + e.message) + sent);
     } finally {
       if (worker) {
         try { await worker.terminate(); } catch { /* worker already gone */ }
@@ -287,7 +293,7 @@ export default function Page() {
       <div className="max-w-3xl mx-auto">
         <Link href="/tools/pdf-tools" className="text-indigo-600 text-sm hover:underline mb-6 inline-block">Back to PDF Tools</Link>
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800">PDF OCR</h1>
-        <p className="text-neutral-500 text-center mb-8">Read text from scanned PDFs and photographed pages with Tesseract, in your browser (on iPhone and iPad, a page the device cannot read goes to our own OCR service)</p>
+        <p className="text-neutral-500 text-center mb-8">Read text from scanned PDFs and photographed pages with Tesseract, in your browser (on iPhone and iPad, on our own OCR service)</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {file ? <p className="text-neutral-700 font-medium">{file.name}</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="a PDF file" /></p>}
@@ -321,7 +327,7 @@ export default function Page() {
             </button>
           )}
           {!loading && file && !langs.length && <p className="text-xs text-amber-700 text-center">Choose the language of the document.</p>}
-          {onAppleTouch && <p className="text-xs text-neutral-600 text-center" data-server-render-note>On iPhone and iPad, a page your device cannot recognize within {LOCAL_OCR_LIMIT_LABEL} is recognized by our own OCR service instead: your PDF is sent there, then deleted.</p>}
+          {onAppleTouch && <p className="text-xs text-neutral-600 text-center" data-server-render-note>On iPhone and iPad, the text is recognized by our own OCR service, not by your device: when you click &quot;Run OCR&quot;, your PDF is sent there, then deleted.</p>}
           {error && <p role="alert" className="text-red-600 text-center text-sm">{error}</p>}
           {serverNote && <p className="text-xs text-neutral-600 text-center" data-ocr-server-note>{serverNote}</p>}
           {textNote && <p className="text-xs text-neutral-600 text-center" data-ocr-text-note>{textNote}</p>}
@@ -342,23 +348,23 @@ export default function Page() {
         howTo={[
           `Choose the PDF to read.`,
           `Type in "Language of the document" to search by English name, native name or code, and choose one to three languages.`,
-          `Click "Run OCR"; the first run downloads the engine and the language data, then the pages are read one by one.`,
+          `Click "Run OCR". On a computer or Android device, the first run downloads the engine and the language data; on iPhone and iPad, the PDF goes to our OCR service. The pages are read one by one.`,
           `Copy the result with "Copy Text", or click "Download" for the -searchable.pdf file.`,
         ]}
         specs={[
           { label: 'Input', value: `PDF only: scans or photos placed in a PDF` },
           { label: 'Languages', value: `${LANGUAGES.length}, up to three at once` },
           { label: 'Output', value: `Recognized text, and a searchable PDF when text was found` },
-          { label: 'On iPhone and iPad', value: `A page that fails or is not recognized within ${LOCAL_OCR_LIMIT_LABEL} goes to our OCR service, for PDFs up to ${Math.floor(STAGED_MAX_BYTES / 1048576)} MB` },
+          { label: 'On iPhone and iPad', value: `Every page is recognized by our OCR service, for PDFs up to ${Math.floor(STAGED_MAX_BYTES / 1048576)} MB` },
           { label: 'Usage limits', value: `Our OCR service (iPhone and iPad only): 300 pages per hour and 1,000 pages per day per network` },
         ]}
-        privacy={`On a computer or an Android device, recognition runs in your browser with Tesseract.js and your PDF is not uploaded; the engine and language data are downloaded from cdn.jsdelivr.net the first time. On an iPhone or iPad, a page that fails, or makes no progress for ${LOCAL_OCR_LIMIT_LABEL}, and the pages after it, are recognized by our own OCR service (Tesseract on our pdf-tools server): the PDF is sent there, then deleted, and the page tells you before and after.`}
+        privacy={`On a computer or an Android device, recognition runs in your browser with Tesseract.js and your PDF is not uploaded; the engine and language data are downloaded from cdn.jsdelivr.net the first time. On an iPhone or iPad, every page is recognized by our own OCR service (Tesseract on our pdf-tools server), because the recognition did not finish on a real iPhone in our tests: the PDF is sent there, then deleted, and the page tells you before and after.`}
         faqs={[
           { q: "How accurate is the recognition?", a: `0.8% of characters were wrong in our one measured test (29 September 2026, text printed at 7 pt). Skewed, blurred or low-contrast pages give more errors, and a wrong character can look plausible, such as an 8 read as a 3, so check names and figures.` },
           { q: "Can I OCR a JPG or PNG photo directly?", a: `No. The tool opens PDF files only. Put the photos into a PDF with Image to PDF or JPG to PDF first, then run OCR on that PDF; each photo becomes one page that is recognized like a scan.` },
           { q: "Will the searchable PDF look different?", a: `No. The pages are not redrawn or recompressed: the recognized text is added as an invisible layer placed on each page as it is displayed, crop and rotation included. A page that already had at least half as much selectable text is left without a second layer.` },
-          { q: "Is the first run slower?", a: `Yes. The OCR engine and the data of each chosen language are downloaded the first time, with their own progress bar. Your browser keeps them, so later runs only download a language you have not used before.` },
-          { q: "Is there a limit on iPhone or iPad?", a: `Yes, when our service takes over: it accepts PDFs up to ${Math.floor(STAGED_MAX_BYTES / 1048576)} MB and recognizes at most 300 pages per hour and 1,000 pages per day per network. On a computer there is no fixed limit, but a step stuck for 90 seconds stops with a message.` },
+          { q: "Is the first run slower?", a: `On a computer or an Android device, yes: the OCR engine and the data of each chosen language are downloaded the first time, with their own progress bar. Your browser keeps them, so later runs only download a language you have not used before. On iPhone and iPad the OCR engine is not downloaded, since our OCR service reads the pages.` },
+          { q: "Is there a limit on iPhone or iPad?", a: `Yes. Our OCR service, which reads the pages there, accepts PDFs up to ${Math.floor(STAGED_MAX_BYTES / 1048576)} MB and recognizes at most 300 pages per hour and 1,000 pages per day per network. On a computer there is no fixed limit, but a step stuck for 90 seconds stops with a message.` },
         ]}
         tips={[
           `If letters come out wrong, check the language first: a page written in two languages reads better with both selected.`,

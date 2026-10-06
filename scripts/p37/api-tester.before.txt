@@ -1,0 +1,23 @@
+FAIL refused: "/api/users" -- fetch would go to https://www.onlineconvertools.com/api/users
+FAIL refused: "api.example.com/users" -- fetch would go to https://www.onlineconvertools.com/tools/developer-tools/api.example.com/users
+FAIL refused: "127.0.0.1:8080/x" -- fetch would go to https://www.onlineconvertools.com/tools/developer-tools/127.0.0.1:8080/x
+FAIL refused: "localhost:3000/api" -- fetch would go to localhost:3000/api
+FAIL refused: "ftp://example.com/f" -- fetch would go to ftp://example.com/f
+FAIL refused: "  " -- fetch would go to https://www.onlineconvertools.com/tools/developer-tools/api-tester
+PASS accepted: "https://api.example.com/users?a=1" -- https://api.example.com/users?a=1
+PASS accepted: "http://localhost:3000/api" -- http://localhost:3000/api
+FAIL accepted: " https://x.test/a " --  https://x.test/a 
+PASS user Content-Type replaces the default -- sent: text/plain
+FAIL user content-type replaces the default -- sent: application/json, text/plain
+FAIL user CONTENT-TYPE replaces the default -- sent: application/json, text/plain
+FAIL user content-Type replaces the default -- sent: application/json, text/plain
+PASS body without header: application/json
+PASS GET: no body, no Content-Type, user header kept
+PASS DELETE without body: no Content-Type
+FAIL headers [["a","b"]] refused -- accepted
+FAIL headers null refused -- accepted
+FAIL headers "x" refused -- accepted
+FAIL headers 42 refused -- accepted
+PASS invalid JSON headers refused with the parser message -- Expected property name or '}' in JSON at position 1 (line 1 column 2)
+
+14 FAILED

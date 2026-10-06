@@ -1,0 +1,6 @@
+mode: AFTER the fix (app/lib/epubChapters.js)
+PASS  intact book: 3 chapters, none said missing  -- Chapter 1 | Chapter 2 | Chapter 3 ; counter: 0 chapter(s) said missing
+PASS  chapter 2 file missing: no blank page, 1 chapter said missing  -- Chapter 1 | Chapter 3 ; counter: 1 chapter(s) said missing
+PASS  chapter 2 damaged in the ZIP: the other chapters printed, 1 said missing  -- Chapter 1 | Chapter 3 ; counter: 1 chapter(s) said missing
+
+ALL PASS

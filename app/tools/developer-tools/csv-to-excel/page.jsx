@@ -137,7 +137,7 @@ export default function CsvToExcelPage() {
     setProgress(0);
     setPhase('');
     clearResult();
-    setStatus('Cancelled.');
+    setStatus('Canceled.');
   };
 
   const convert = () => {
@@ -275,7 +275,7 @@ export default function CsvToExcelPage() {
           { label: "Input", value: `.csv file up to ${MAX_FILE_SIZE_LABEL}, or pasted CSV text` },
           { label: "Output", value: "XLSX (Excel 2007+) or XLS (Excel 97-2003), one sheet named Sheet1" },
           { label: "Rows on a computer", value: `${MAX_ROWS.toLocaleString('en-US')}, header row included` },
-          { label: "Rows on phones, iPhone and iPad", value: `${MOBILE_MAX_ROWS.toLocaleString('en-US')}, header row included` },
+          { label: "Rows on phones and tablets", value: `${MOBILE_MAX_ROWS.toLocaleString('en-US')}, header row included` },
           { label: "Excel limits checked", value: ".xls holds 65,536 rows and 256 columns; any cell holds 32,767 characters" },
         ]}
         privacy={"The CSV is read and the workbook is written by a background worker inside your browser; the file you choose and the text you paste are not uploaded. When something goes wrong, we receive an error report: the error text with file names and quoted text removed, the tool name, and your browser name and version."}
@@ -283,7 +283,7 @@ export default function CsvToExcelPage() {
           { q: "Can I open a semicolon CSV saved by Excel in Europe?", a: "Yes. The separator is detected from the first lines, so a file such as Name;Price keeps its columns, and a decimal comma like 12,5 becomes the number 12.5 in its cell. If a column is split in the wrong place, choose the separator yourself in \"Delimiter:\"." },
           { q: "Will accents from an Excel CSV come out right?", a: "Yes, in most cases. A file in UTF-8, or one with a byte order mark, is recognized; otherwise the tool assumes the Windows code page of your browser language, which is what Excel uses when it saves CSV. If accents still look wrong, pick another code page under \"Encoding:\" and convert again." },
           { q: "Are numbers turned into real number cells?", a: "Yes, for columns where every value is a number. A column with a code that starts with zero, such as 007 or 02134, or a value with more than 15 significant digits stays text so nothing is lost. Untick \"Numbers as number cells\" to keep every cell as text." },
-          { q: "How many rows can I convert?", a: `${MAX_ROWS.toLocaleString('en-US')} rows on a computer and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} on phones, iPhone and iPad, counting the header row; a file can be up to ${MAX_FILE_SIZE_LABEL}, and pasted text has the same row limit. The .xls format stops at 65,536 rows and 256 columns, so choose .xlsx for larger sheets.` },
+          { q: "How many rows can I convert?", a: `${MAX_ROWS.toLocaleString('en-US')} rows on a computer and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} on phones and tablets, counting the header row; a file can be up to ${MAX_FILE_SIZE_LABEL}, and pasted text has the same row limit. The .xls format stops at 65,536 rows and 256 columns, so choose .xlsx for larger sheets.` },
         ]}
         tips={[
           "A cell longer than 32,767 characters stops the conversion with its row and column named; shorten that value and convert again.",

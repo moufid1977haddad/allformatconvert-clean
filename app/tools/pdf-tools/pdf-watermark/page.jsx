@@ -162,7 +162,7 @@ export default function PdfWatermarkPage() {
               <label className="block"><span className="block text-neutral-500 mb-1">Font size: {fontSize > 0 ? `${fontSize} pt` : 'automatic'}</span>
                 <input id="wm-size" aria-label="Font size" type="range" min="0" max="150" step="2" value={fontSize} onChange={e => setFontSize(Number(e.target.value))} className="w-full" /></label>
               <div className="flex items-center justify-between gap-2">
-                <label className="flex items-center gap-2 text-neutral-500">Colour <input id="wm-color" type="color" value={color} onChange={e => setColor(e.target.value)} /></label>
+                <label className="flex items-center gap-2 text-neutral-500">Color <input id="wm-color" type="color" value={color} onChange={e => setColor(e.target.value)} /></label>
                 <label className="flex items-center gap-2"><input id="wm-bold" type="checkbox" checked={bold} onChange={e => setBold(e.target.checked)} /> Bold</label>
               </div>
             </div>

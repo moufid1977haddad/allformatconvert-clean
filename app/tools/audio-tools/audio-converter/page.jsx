@@ -177,9 +177,9 @@ export default function AudioConverterPage() {
           `Play the result, then click "Download" to save it under your file name with the new extension.`,
         ]}
         specs={[
-          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AC3, AIFF, AIF, AMR, MKA, WEBA, CAF` },
           { label: `Output formats`, value: `MP3, WAV, AAC, FLAC, OGG (Vorbis), M4A, Opus, WMA, AIFF, ALAC, AC3, M4R, M4B, MP2, WV (WavPack), CAF, AU, MKA` },
-          { label: `Quality`, value: `128, 192 (default), 256 or 320 kbps for MP3, AAC, M4A, M4R, M4B, OGG, WMA, AC3 and MP2; AC3 and MP2 are never written below 192 kbps. Opus: 128 kbit/s.` },
+          { label: `Quality`, value: `128, 192 (default), 256 or 320 kbps for MP3, AAC, M4A, M4R, M4B, OGG, WMA, AC3 and MP2, written as chosen. Opus: 128 kbit/s.` },
           { label: `Sample rate and channels`, value: `Keep the original, or 48 down to 8 kHz (OGG, AC3 and MP2: 48, 44.1 or 32 kHz only); mono or stereo. Not offered for Opus.` },
           { label: `Files at once`, value: `One` },
           { label: `Usage limits`, value: `Opus target: our media service counts conversions per connection per hour and per day, and refuses files over its maximum size or length.` },

@@ -1,0 +1,15 @@
+page formula: (1 - progress) x video length
+FAIL  60 s 1080p, Chrome, 10 % done: real 200 s left  (shown 54 s)
+FAIL  60 s 1080p, Chrome, 25 % done: real 167 s left  (shown 45 s)
+FAIL  60 s 1080p, Chrome, 50 % done: real 111 s left  (shown 30 s)
+FAIL  60 s 1080p, Chrome, 75 % done: real 56 s left  (shown 15 s)
+FAIL  60 s 1080p, Firefox, 10 % done: real 1566 s left  (shown 54 s)
+FAIL  60 s 1080p, Firefox, 25 % done: real 1305 s left  (shown 45 s)
+FAIL  60 s 1080p, Firefox, 50 % done: real 870 s left  (shown 30 s)
+FAIL  60 s 1080p, Firefox, 75 % done: real 435 s left  (shown 15 s)
+FAIL  120 s 360p, fast, 10 % done: real 86 s left  (shown 108 s)
+FAIL  120 s 360p, fast, 25 % done: real 72 s left  (shown 90 s)
+FAIL  120 s 360p, fast, 50 % done: real 48 s left  (shown 60 s)
+FAIL  120 s 360p, fast, 75 % done: real 24 s left  (shown 30 s)
+
+video-watermark [rev HEAD]: 12 FAIL

@@ -1,0 +1,8 @@
+mode: BEFORE the fix (book handed to the parser as is)
+PASS  intact book: 3 chapters, none said missing  -- Chapter 1 | Chapter 2 | Chapter 3 ; counter: 0 chapter(s) said missing
+FAIL  itemref to an unknown id: 3 chapters printed, 1 said missing  -- ERROR "Cannot read properties of undefined (reading 'href')" (no PDF)
+FAIL  two unknown ids (one written <itemref></itemref>): 3 chapters printed, 2 said missing  -- ERROR "Cannot read properties of undefined (reading 'href')" (no PDF)
+FAIL  itemref to a manifest item without media-type (skipped by the parser): 2 printed, 1 said missing  -- ERROR "Cannot read properties of undefined (reading 'href')" (no PDF)
+FAIL  every itemref unknown: the page says no readable chapters  -- ERROR "Cannot read properties of undefined (reading 'href')" (no PDF)
+
+4 FAILED

@@ -1,0 +1,7 @@
+  PASS object with a big id: Usage decodes with JSON_BIGINT_AS_STRING
+  PASS array of objects with a big number nested deep: same flag in the array_map Usage
+  PASS big number: a comment says why the property is a string
+  PASS PHP_INT_MAX itself fits: int, plain Usage, no comment
+  PASS a big number inside a string is not a number: plain Usage
+  PASS PHP array mode unchanged (string literal and its comment)
+6 passed, 0 failed

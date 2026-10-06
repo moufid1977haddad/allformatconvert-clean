@@ -255,7 +255,7 @@ export function encryptedMusicMessage(fileName) {
 }
 
 export const AUDIO_ACCEPT =
-  'audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.aiff,.aif,.amr,.mka,.weba,.caf';
+  'audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.opus,.wma,.ac3,.aiff,.aif,.amr,.mka,.weba,.caf';
 
 // ---------------------------------------------------------------------------
 // Video frame / GIF output guards

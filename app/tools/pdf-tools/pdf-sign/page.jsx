@@ -27,7 +27,7 @@ const INK = '#1e1b4b';
 // 30/09 (known gap of 29/09): free placement, as Smallpdf, iLovePDF and Sejda -- the page is shown and the signature is
 // dragged and resized on it. The position is kept as fractions of the page as seen (left, top, width), so it lands in
 // the same place on each chosen page even when their sizes differ.
-const CORNERS = [['custom', 'Where I drag it on the page'], ['bottom-right', 'Bottom right'], ['bottom-left', 'Bottom left'], ['bottom-center', 'Bottom centre'], ['top-right', 'Top right']];
+const CORNERS = [['custom', 'Where I drag it on the page'], ['bottom-right', 'Bottom right'], ['bottom-left', 'Bottom left'], ['bottom-center', 'Bottom center'], ['top-right', 'Top right']];
 
 export default function Page() {
   const [file, setFile] = useState(null);

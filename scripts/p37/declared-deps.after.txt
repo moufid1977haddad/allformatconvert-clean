@@ -1,0 +1,3 @@
+794 files, 771 bare imports read in app/ and lib/
+
+ALL PASS: every bare import is declared in dependencies

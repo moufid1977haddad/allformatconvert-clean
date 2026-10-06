@@ -32,7 +32,7 @@
     {
       "claim": "10 characters",
       "file": "app/tools/qr-barcodes-tools/barcode-generator/symbologies.js",
-      "pattern": "and K over 10 characters"
+      "pattern": "and K from 10 characters"
     },
     {
       "claim": "5 MB",

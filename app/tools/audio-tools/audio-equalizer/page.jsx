@@ -172,7 +172,7 @@ export default function AudioEqualizerPage() {
             {[['bass', 'Bass', 200], ['mid', 'Mid', 1000], ['treble', 'Treble', 3000]].map(([key, label]) => (
               <div key={key} className="text-center">
                 <label className="block text-sm font-medium text-neutral-700 mb-2">{label}: {bands[key]} dB</label>
-                <input aria-label=": dB" type="range" min={-12} max={12} value={bands[key]} onChange={e => updateBand(key, Number(e.target.value))} className="w-full" />
+                <input aria-label={`${label} gain (dB)`} type="range" min={-12} max={12} value={bands[key]} onChange={e => updateBand(key, Number(e.target.value))} className="w-full" />
                 <div className="flex justify-between text-xs text-neutral-400 mt-1"><span>-12</span><span>+12</span></div>
               </div>
             ))}
@@ -201,7 +201,7 @@ export default function AudioEqualizerPage() {
           `Listen to the result, then click "Download" to save equalized_ followed by your file name, as WAV.`,
         ]}
         specs={[
-          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AC3, AIFF, AIF, AMR, MKA, WEBA, CAF` },
           { label: `Output format`, value: `WAV, 16-bit PCM, at the sample rate your browser decodes at` },
           { label: `Bands`, value: `Bass: low shelf at 200 Hz · Mid: peak at 1 kHz · Treble: high shelf at 3 kHz · each from -12 to +12 dB` },
           { label: `File size`, value: `Set by your device's memory: the whole file is decoded before export.` },

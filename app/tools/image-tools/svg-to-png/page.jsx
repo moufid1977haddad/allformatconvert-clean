@@ -104,15 +104,15 @@ export default function SvgToPngPage() {
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <span className="text-neutral-500">Background</span>
             <label className="flex items-center gap-1"><input type="radio" name="svg-bg" checked={!bg} onChange={() => { setBg(''); setResult(null); }} /> Transparent</label>
-            <label className="flex items-center gap-1"><input type="radio" name="svg-bg" checked={!!bg} onChange={() => { setBg('#ffffff'); setResult(null); }} /> Colour</label>
-            {bg && <input id="svg-bg-color" type="color" value={bg} onChange={(e) => { setBg(e.target.value); setResult(null); }} aria-label="Background colour" />}
+            <label className="flex items-center gap-1"><input type="radio" name="svg-bg" checked={!!bg} onChange={() => { setBg('#ffffff'); setResult(null); }} /> Color</label>
+            {bg && <input id="svg-bg-color" type="color" value={bg} onChange={(e) => { setBg(e.target.value); setResult(null); }} aria-label="Background color" />}
             {[1, 2, 4].map((k) => <button key={k} type="button" onClick={() => { const w0 = Math.round(512 * k); setWidth(w0); setHeight(Math.round(w0 / ratio)); setResult(null); }} className="px-2 py-1 rounded bg-neutral-100 hover:bg-neutral-200">{512 * k} px wide</button>)}
           </div>
           <button onClick={convert} disabled={!file || !dimsValid} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert to PNG</button>
           {status && <p role="status" className="text-center text-yellow-400 text-sm">{status}</p>}
           {result && (
             <div className="space-y-2">
-              <img alt="Preview of your image" src={result} className="max-h-48 mx-auto rounded" />
+              <img alt="Preview of your image" src={result.url} className="max-h-48 mx-auto rounded" />
               <FileDownload href={result.url} name={result.name} />
             </div>
           )}
@@ -125,8 +125,8 @@ export default function SvgToPngPage() {
         howTo={[
           `Pick an .svg file in the upload area; the size boxes fill in from the drawing.`,
           `Type a value in "Width (px)" or "Height (px)", or click one of the 512, 1024 or 2048 px wide buttons.`,
-          `Under "Background", keep "Transparent" or choose "Colour" and pick it.`,
-          `Click "Convert to PNG", then "Download".`
+          `Under "Background", keep "Transparent" or choose "Color" and pick it.`,
+          `Click "Convert to PNG", check the preview of the PNG, then click "Download".`
         ]}
         specs={[
           { label: 'Input format', value: `SVG (.svg), one file` },
@@ -137,7 +137,7 @@ export default function SvgToPngPage() {
         privacy={`The SVG is loaded as an image by your browser and painted onto a canvas here, so the drawing is not uploaded. If drawing or encoding the PNG fails, the cleaned error, the tool's name and your browser's name and version are sent to our error log; the SVG and its name are not included.`}
         faqs={[
           { q: "Can I set a DPI for printing?", a: `No. The size is set in pixels. For print, multiply the printed width in inches by the dots per inch you need and type the result in "Width (px)".` },
-          { q: "Will the PNG keep the transparent background?", a: `Yes, when "Transparent" is selected under "Background", which is the starting choice. Select "Colour" to fill the transparent parts, for example with white for a document.` },
+          { q: "Will the PNG keep the transparent background?", a: `Yes, when "Transparent" is selected under "Background", which is the starting choice. Select "Color" to fill the transparent parts, for example with white for a document.` },
           { q: "Can I change the width without changing the height?", a: `Yes. Untick "Keep the SVG's proportions", then type both values; the drawing is stretched to fill them. With the box ticked, one side follows the other.` }
         ]}
         tips={[

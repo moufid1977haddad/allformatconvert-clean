@@ -1,0 +1,6 @@
+mode: BEFORE the fix (page loop as it was)
+PASS  intact book: 3 chapters, none said missing  -- Chapter 1 | Chapter 2 | Chapter 3 ; counter: 0 chapter(s) said missing
+FAIL  chapter 2 file missing: no blank page, 1 chapter said missing  -- Chapter 1 | BLANK PAGE | Chapter 3 ; counter: 0 chapter(s) said missing
+FAIL  chapter 2 damaged in the ZIP: the other chapters printed, 1 said missing  -- ERROR "Bug : uncompressed data size mismatch" (no PDF)
+
+2 FAILED

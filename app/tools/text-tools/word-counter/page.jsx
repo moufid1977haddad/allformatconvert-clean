@@ -67,7 +67,7 @@ export default function WordCounterPage() {
           { q: "How is reading time calculated?", a: "200 words a minute, rounded up: \"Min Read\" is the word count divided by 200, so any text up to 200 words shows 1. The speaking time under the counts uses 130 words a minute, rounded up the same way." },
           { q: "Is a number or a hyphenated word counted as one word?", a: "Yes for numbers: 3.50 is one word. Hyphenated words follow the Unicode word rules of your browser, which split well-known into two words. A symbol such as $ or & alone is not a word." },
           { q: "Can I see keyword density?", a: "Yes. The table below the counts lists up to 15 words or phrases with the number of uses and their share of all words. Two- and three-word phrases appear only when used more than once, and the, and, of and similar words can be left out." },
-          { q: "Does it count the same way in every browser?", a: "No. Firefox before version 125 has no Intl.Segmenter, so there a run of Chinese, Japanese or Thai text counts as one word and 3.50 ends a sentence. Current Chrome, Edge, Safari and Firefox give the counts described here." }
+          { q: "Does it count the same way in every browser?", a: "No. Firefox before version 125 has no Intl.Segmenter, so there a run of Chinese, Japanese or Thai text counts as one word and an emoji with a skin tone counts as two characters. Current Chrome, Edge, Safari and Firefox give the counts described here." }
         ]}
       />
     </div>

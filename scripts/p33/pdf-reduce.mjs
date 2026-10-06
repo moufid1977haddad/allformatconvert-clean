@@ -65,7 +65,7 @@ for (const slug of slugs) {
     const t0 = Date.now();
     if (c.over) {
       check(`${name}: named at selection, limit 48 MP, reducible to 12,220 × 3,927, "Reduce to 48 MP then convert to PDF"`,
-        /14,000 × 4,500 pixels \(63 megapixels\): on a phone the limit is 48 megapixels/.test(text) && /reduced to 12,220 × 3,927 \(48 MP, the size of a 48 MP phone photo\) first/.test(text)
+        /14,000 × 4,500 pixels \(63 megapixels\): on a phone or tablet the limit is 48 megapixels/.test(text) && /reduced to 12,220 × 3,927 \(48 MP, the size of a 48 MP phone photo\) first/.test(text)
         && (await p.locator('[data-reduce-then-convert]').innerText().catch(() => '')) === 'Reduce to 48 MP then convert to PDF', text);
       await p.locator('[data-reduce-then-convert]').click();
     } else {

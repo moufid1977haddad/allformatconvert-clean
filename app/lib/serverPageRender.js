@@ -73,7 +73,7 @@ export class ServerPageRenderer {
       }
     } catch (e) {
       if (e instanceof ServerRenderError) throw e;
-      if (e && e.name === 'AbortError') throw new ServerRenderError('Cancelled.');
+      if (e && e.name === 'AbortError') throw new ServerRenderError('Canceled.');
       throw new ServerRenderError((e && e.message) || 'Could not reach our PDF service. Check your connection and try again.');
     }
     if (!res.ok) {

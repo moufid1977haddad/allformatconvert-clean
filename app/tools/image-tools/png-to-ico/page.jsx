@@ -139,7 +139,7 @@ export default function PngToIcoPage() {
             </div>
           </div>
           <label className="block text-sm"><span className="block text-neutral-500 mb-1">Image that is not square</span>
-            <select id="ico-fit" value={fill ? 'fill' : 'fit'} onChange={(e) => { setFill(e.target.value === 'fill'); setResult(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2"><option value="fit">Fit (whole image, transparent margins)</option><option value="fill">Fill (cropped to the square, centred)</option></select></label>
+            <select id="ico-fit" value={fill ? 'fill' : 'fit'} onChange={(e) => { setFill(e.target.value === 'fill'); setResult(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2"><option value="fit">Fit (whole image, transparent margins)</option><option value="fill">Fill (cropped to the square, centered)</option></select></label>
           <button onClick={convert} disabled={!file || sizes.length === 0} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert to ICO</button>
           {status && <p className="text-center text-neutral-500 text-sm">{status}</p>}
           {error && <p role="alert" className="text-center text-red-600 text-sm">{error}</p>}

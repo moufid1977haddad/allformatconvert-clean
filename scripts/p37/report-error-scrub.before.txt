@@ -1,0 +1,85 @@
+FAIL  V8 JSON excerpt of a pasted header
+      got:  Unexpected token '[text]', ..."ization": Bearer sk_"... is not valid JSON
+      want: Unexpected token '[text]', "[text]" is not valid JSON
+FAIL  V8 JSON excerpt of an API key
+      got:  Unexpected token '[text]', ...""apiKey": sk-proj-Ab"... is not valid JSON
+      want: Unexpected token '[text]', "[text]" is not valid JSON
+FAIL  bare JWT
+      got:  Token rejected: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      want: Token rejected: [secret]
+FAIL  Authorization header
+      got:  Request failed with header Authorization: Bearer abc123.def456-ghi
+      want: Request failed with header Authorization: [secret]
+FAIL  Bearer token in brackets
+      got:  401 Unauthorized (Bearer 9f8e7d6c5b4a)
+      want: 401 Unauthorized (Bearer [secret])
+FAIL  OpenAI-style key
+      got:  Invalid API key: sk-proj-AbCdEf[number]XyZ
+      want: Invalid API key: [secret]
+FAIL  Stripe-style key
+      got:  Stripe error for sk_live_51HxYzAbCdEfGh
+      want: Stripe error for [secret]
+FAIL  GitHub token
+      got:  GitHub token ghp_[number]abcdefghijABCDEFGHIJklmnop expired
+      want: GitHub token [secret] expired
+FAIL  AWS access key id
+      got:  AWS key AKIAIOSFODNN7EXAMPLE denied
+      want: AWS key [secret] denied
+FAIL  long hex string
+      got:  Checksum mismatch: 9e107d9d372bb6826bd81d3542a419d6
+      want: Checksum mismatch: [secret]
+FAIL  long base64 string
+      got:  Bad input dGhpcyBpcyBhIHNlY3JldCBwYXNzd29yZA== in field
+      want: Bad input [secret] in field
+FAIL  UUID
+      got:  Session 123e4567-e89b-12d3-a[number] not found
+      want: Session [secret] not found
+FAIL  password in a query
+      got:  Login failed: password=hunter2
+      want: Login failed: password=[secret]
+FAIL  password in JSON
+      got:  Bad body {"password":"hunter2"}
+      want: Bad body {"password":"[secret]"}
+FAIL  token in a query string
+      got:  Bad parameter ?token=abc123XYZ&lang=en
+      want: Bad parameter ?token=[secret]&lang=en
+FAIL  URL without scheme, with a token
+      got:  Could not load www.example.com/api?access_token=abc123
+      want: Could not load [url]
+PASS  URL with scheme and token
+PASS  e-mail with plus and capitals
+FAIL  URL-encoded e-mail
+      got:  Bad recipient [file]
+      want: Bad recipient [email]
+FAIL  regex with named groups
+      got:  Invalid regular expression: /(?<n>x)(?<n>y)/g: Duplicate capture group name
+      want: Invalid regular expression: /[pattern]/g: Duplicate capture group name
+FAIL  regex with a double quote
+      got:  Invalid regular expression: /a"b(/g: Unterminated group
+      want: Invalid regular expression: /[pattern]/g: Unterminated group
+FAIL  regex with slashes
+      got:  Invalid regular expression: [path]
+      want: Invalid regular expression: /[pattern]/g: Unterminated group
+FAIL  regex with angle brackets
+      got:  Invalid regular expression: /<tag>(/g: Unterminated group
+      want: Invalid regular expression: /[pattern]/g: Unterminated group
+FAIL  regex, lower-case reason
+      got:  Invalid regular expression: [path]
+      want: Invalid regular expression: /[pattern]/g: numbers out of order in {} quantifier
+PASS  plain message
+PASS  Safari regex message
+PASS  error code
+FAIL  short hex code
+      got:  Decoder failed with code 0x[number]
+      want: Decoder failed with code 0x80004005
+PASS  long API name
+PASS  the word token
+PASS  the word Bearer
+PASS  JSON position
+FAIL  undefined is not JSON
+      got:  "[text]" is not valid JSON
+      want: "undefined" is not valid JSON
+PASS  existing: unix path
+PASS  no slow regex on 2000 hostile characters (1 ms)
+
+11/35 passed

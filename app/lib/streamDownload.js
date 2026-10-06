@@ -47,14 +47,14 @@ export async function streamToDownload(readable, name) {
   const stop = () => { clearInterval(keepAlive); setTimeout(() => frame.remove(), 60000); };
   port1.onmessage = async ({ data }) => {
     if (!data) return;
-    if (data.type === 'cancel') { cancelled = true; reader.cancel().catch(() => {}); stop(); fail(new Error('The download was cancelled in the browser.')); return; }
+    if (data.type === 'cancel') { cancelled = true; reader.cancel().catch(() => {}); stop(); fail(new Error('The download was canceled in the browser.')); return; }
     if (data.type !== 'pull') return;
     pulled = true;
     // After a cancel or an error, never answer "end": the file would be saved as complete.
-    if (cancelled) { port1.postMessage({ type: 'error', message: 'Cancelled.' }); return; }
+    if (cancelled) { port1.postMessage({ type: 'error', message: 'Canceled.' }); return; }
     try {
       const { done: end, value } = await reader.read();
-      if (cancelled) { port1.postMessage({ type: 'error', message: 'Cancelled.' }); return; } // cancelled while reading
+      if (cancelled) { port1.postMessage({ type: 'error', message: 'Canceled.' }); return; } // cancelled while reading
       if (end) { port1.postMessage({ type: 'end' }); stop(); finish(); return; }
       const copy = value.slice(); // a chunk may be a view into a larger buffer: send an exact copy
       port1.postMessage({ type: 'chunk', chunk: copy.buffer }, [copy.buffer]);
@@ -67,7 +67,7 @@ export async function streamToDownload(readable, name) {
   frame.hidden = true;
   frame.src = `${SCOPE}${id}/${encodeURIComponent(name)}`;
   document.body.appendChild(frame);
-  const cancel = () => { if (cancelled) return; cancelled = true; reader.cancel().catch(() => {}); port1.postMessage({ type: 'error', message: 'Cancelled.' }); stop(); };
+  const cancel = () => { if (cancelled) return; cancelled = true; reader.cancel().catch(() => {}); port1.postMessage({ type: 'error', message: 'Canceled.' }); stop(); };
   // The browser never asked for the file (worker stopped, download blocked): say so instead of waiting forever.
   setTimeout(() => { if (!pulled && !cancelled) { cancel(); fail(new Error('The download did not start in this browser.')); } }, 20000);
   return { done, cancel };

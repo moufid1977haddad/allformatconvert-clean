@@ -44,7 +44,7 @@ function runHash(blob, algorithms, hmacKey, onProgress, workersRef) {
   const workers = groups.map(() => new Worker(new URL('./hash.worker.js', import.meta.url), { type: 'module' }));
   const stop = () => { workers.forEach((w) => w.terminate()); if (workersRef.current?.workers === workers) workersRef.current = null; };
   let abort;
-  const aborted = new Promise((_, reject) => { abort = () => { stop(); reject(new Error('Cancelled.')); }; });
+  const aborted = new Promise((_, reject) => { abort = () => { stop(); reject(new Error('Canceled.')); }; });
   workersRef.current = { workers, abort };
   return Promise.race([aborted, Promise.all(groups.map((ids, i) => new Promise((resolve, reject) => {
     const w = workers[i];
@@ -129,7 +129,7 @@ export default function HashGeneratorPage() {
     }
     setBusy(false); setProgress(null);
   };
-  const cancel = () => { cancelled.current = true; workerRef.current?.abort(); setBusy(false); setProgress(null); setError('Cancelled. Files finished before the cancel are listed below.'); };
+  const cancel = () => { cancelled.current = true; workerRef.current?.abort(); setBusy(false); setProgress(null); setError('Canceled. Files finished before the cancel are listed below.'); };
 
   const show = (bytes) => (format === 'base64' ? toBase64(bytes) : toHex(bytes, format === 'HEX'));
   const want = parseExpected(expected);
@@ -300,13 +300,13 @@ export default function HashGeneratorPage() {
           { label: "Algorithms", value: `${HASH_ALGORITHMS.length}: MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-512, Keccak-256, BLAKE2b-512, BLAKE3, RIPEMD-160, CRC32, CRC32C, xxHash64, XXH3-64, XXH128` },
           { label: "Output format", value: "Hex lowercase, hex uppercase or Base64 on screen; checksums.txt always uses lowercase hex" },
           { label: "File size", value: "The tool sets no cap: files are streamed in 8 MiB pieces" },
-          { label: "Web Crypto path", value: "SHA-1, SHA-256, SHA-384 and SHA-512 use your browser's native code for files up to 700 MiB on a computer and 100 MiB on phones, iPhone and iPad; everything else goes through hash-wasm" },
+          { label: "Web Crypto path", value: "SHA-1, SHA-256, SHA-384 and SHA-512 use your browser's native code for files up to 700 MiB on a computer and 100 MiB on phones and tablets; everything else goes through hash-wasm" },
           { label: "HMAC", value: "Offered for MD5, SHA-1, the SHA-2 and SHA3 variants, BLAKE2b-512 and RIPEMD-160; the others are skipped while a key is set" }
         ]}
         privacy={"Hashing runs in Web Workers inside your browser tab: your files and text are not sent to us, and the HMAC key stays in the page. If you turn on a translation in the language menu, Google receives the page's visible text, which includes the hash values shown. When the red box shows an error (a cancel excepted), we receive that error, the tool's name and your browser's name and version."}
         faqs={[
           { q: "Which hash should I use: MD5, SHA-1 or SHA-256?", a: "Use the one the publisher lists, since a checksum can only be compared with the same algorithm. For new uses pick SHA-256: practical collisions are known for MD5 and SHA-1, not for SHA-256. MD5 and CRC32 still catch accidental corruption of a copy." },
-          { q: "Is there a file size limit?", a: "No. The tool sets no cap: files are read in 8 MiB pieces by background workers. Files up to 700 MiB (100 MiB on phones, iPhone and iPad) are also loaded whole once, so SHA-1 and SHA-256/384/512 can use the faster Web Crypto. Speed depends on your device." },
+          { q: "Is there a file size limit?", a: "No. The tool sets no cap: files are read in 8 MiB pieces by background workers. Files up to 700 MiB (100 MiB on phones and tablets) are also loaded whole once, so SHA-1 and SHA-256/384/512 can use the faster Web Crypto. Speed depends on your device." },
           { q: "How do I verify a downloaded file?", a: "Choose \"Files\", add the file, and paste the publisher's checksum, in hex or Base64, into \"Expected hash, to verify (optional)\". After hashing, the matching algorithm turns green if it is ticked; if none matches, the tool names the algorithms that give a hash of that length." },
           { q: "Can sha256sum -c check the checksums.txt file?", a: "Yes for its SHA256 lines, and md5sum -c reads the MD5 lines. Each command checks only its own algorithm, so lines for CRC32, xxHash, BLAKE3, Keccak-256 or an HMAC are for reading. Tick only SHA-256 to get a file that sha256sum -c reads completely." },
           { q: "What does the HMAC key do?", a: "With a key, each eligible algorithm computes an HMAC, such as HMAC-SHA256, the keyed hash used to sign API requests and webhooks. Keccak-256, BLAKE3, CRC32, CRC32C and the xxHash family are not offered with a key and are skipped until you clear it." },

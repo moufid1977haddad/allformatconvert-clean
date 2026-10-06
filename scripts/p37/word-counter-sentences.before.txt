@@ -1,0 +1,15 @@
+FAIL  period + space + lower case  got 1, want 2  ("hello world. this is")
+FAIL  three lower-case sentences  got 1, want 3  ("one. two. three.")
+FAIL  after a closing bracket  got 1, want 2  ("it ended (really.) then more")
+PASS  abbreviation e.g.
+PASS  abbreviation etc.
+PASS  title Mr.
+PASS  Mr. before a capital
+PASS  initial
+FAIL  decimal  got 1, want 2  ("it costs 3.50 today. ok")
+FAIL  URL  got 1, want 2  ("see example.com/a.b now. done")
+PASS  ellipsis
+PASS  p.m.
+PASS  page example
+
+8/13 passed

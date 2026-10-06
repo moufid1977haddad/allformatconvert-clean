@@ -69,13 +69,55 @@ export function parseBrowserLabel(userAgent) {
 // leak; (2) a generic sweep for path-shaped and filename-shaped substrings,
 // as defense in depth against library-internal temp paths or anything the
 // exact-match pass missed.
+// P37 (06/10): secrets and typed patterns. P36 found that a pasted header ("Authorization: Bearer sk_live_…"), quoted
+// by V8's JSON error, and a regular expression typed in Regex Tester went out in clear or cut in two (the path sweep
+// redacted "/secret/path/" and sent the rest). These run first, so each secret goes whole, with its key kept for
+// debugging ("password=[secret]"). Over-redacting stays the safe direction.
+const SECRET = '[secret]';
+// A run of letters, digits and base64/URL-safe signs that is a key, a hash or an encoded blob, not a word or an error
+// code (ERR_INSUFFICIENT_RESOURCES and AudioWorkletProcessor have no digit and stay).
+function looksLikeToken(t) {
+  const core = t.replace(/=+$/, '');
+  const digit = /\d/.test(core), lower = /[a-z]/.test(core), upper = /[A-Z]/.test(core), letter = lower || upper;
+  if (core.includes('/')) return core.length >= 24 && digit && lower && upper; // otherwise a path, swept below
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(core)) return true; // UUID
+  if (/^[0-9a-fA-F]+$/.test(core)) return core.length >= 16 && digit && letter; // hash, hex id
+  if (core.length < t.length && core.length >= 16) return true; // base64 padding
+  return (core.length >= 24 && digit && letter) || (core.length >= 32 && lower && upper);
+}
+const credential = (v) => v.length >= 8 && (/\d/.test(v) || /=$/.test(v) || v.length >= 20);
+function scrubSecrets(text) {
+  let out = text;
+  // V8 quotes the start of the text JSON.parse refused, cut anywhere ('Unexpected token 'B', ..."ization": Bearer
+  // sk_"... is not valid JSON'): the whole excerpt goes. Not "undefined" or "[object Object]": a bug, not your text.
+  if (out.includes(' is not valid JSON')) {
+    out = out.replace(/(^|[\s,:])((?:\.\.\.)?)"([^\r\n]*?)"((?:\.\.\.)?)(?= is not valid JSON)/g, (m, pre, a, inner, b) =>
+      (!a && !b && /^(undefined|null|NaN|\[object Object\])$/.test(inner) ? m : `${pre}"[text]"`));
+  }
+  return out
+    // V8's RegExp error repeats the pattern ("Invalid regular expression: /a"b(/g: Unterminated group"); the pattern
+    // may hold slashes, quotes or brackets, so everything up to the last "/flags: " is the pattern.
+    .replace(/(Invalid regular expression: )\/[^\r\n]*\/([dgimsuvy]*): /gi, '$1/[pattern]/$2: ')
+    // key = value, key: value, "key": "value" (headers, query strings, JSON); the key is kept for debugging
+    .replace(/(\b(?:proxy-authorization|authorization|x-api-key|api[ _-]?key|apikey|access[ _-]?token|refresh[ _-]?token|id[_-]token|auth[_-]?token|client[_-]?secret|secret|password|passwd|pwd|passphrase|private[_-]?key|session[_-]?id|set-cookie|cookie)["']?\s*[:=]\s*["']?)(?:(?:bearer|basic|token|digest)\s+)?[^\s"'&,;)}\]]+/gi, `$1${SECRET}`)
+    // words that are also plain English ("the access token expired") only with "=" or as a quoted JSON key
+    .replace(/(\b(?:token|key|sig|signature|auth|sid|session|code_verifier)(?:=|["']\s*:\s*["']?))[^\s"'&,;)}\]]+/gi, `$1${SECRET}`)
+    .replace(/\b(Bearer|Basic)\s+([A-Za-z0-9._~+/=-]+)/gi, (m, k, v) => (credential(v) ? `${k} ${SECRET}` : m))
+    .replace(/\beyJ[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}(?:\.[A-Za-z0-9_-]*)?/g, SECRET) // JWT
+    // keys with a published prefix: OpenAI/Stripe sk-/sk_, pk_, rk_, GitHub, GitLab, Slack, AWS, Google, Hugging Face
+    .replace(/\b(?:sk|pk|rk)[-_][A-Za-z0-9_-]{6,}|\bgh[pousr]_[A-Za-z0-9]{20,}|\bgithub_pat_[A-Za-z0-9_]{20,}|\bglpat-[A-Za-z0-9_-]{20,}|\bxox[abposr]-[A-Za-z0-9-]{10,}|\b(?:AKIA|ASIA)[0-9A-Z]{16}\b|\bAIza[0-9A-Za-z_-]{30,}|\bhf_[A-Za-z0-9]{20,}/g, SECRET);
+}
+
 export function sanitizeErrorMessage(message, fileName) {
   if (typeof message !== 'string' || !message) return '';
   let out = message.slice(0, 2000); // cheap upfront cap before any regex work
+  out = scrubSecrets(out);
   // P25: URLs and e-mail addresses first, before the path sweep below turns "https://host/a/b" into "https:[path]".
   out = out
     .replace(/\b[a-z][a-z0-9+.-]{1,20}:\/\/[^\s"'<>]+/gi, '[url]')
-    .replace(/[^\s"'<>()@]{1,64}@[^\s"'<>()@]{1,255}\.[a-z]{2,}/gi, '[email]');
+    // P37: an address without its scheme (www.example.com/api?access_token=…), whole
+    .replace(/(^|[\s"'(<=:,])(?:[a-z0-9-]+\.)+[a-z]{2,}(?::\d{2,5})?\/[^\s"'<>]*/gi, '$1[url]')
+    .replace(/[^\s"'<>()@]{1,64}(?:@|%40)[^\s"'<>()@%]{1,255}\.[a-z]{2,}/gi, '[email]');
 
   if (fileName && typeof fileName === 'string') {
     const stem = fileName.replace(/\.[^./\\]+$/, '');
@@ -87,6 +129,8 @@ export function sanitizeErrorMessage(message, fileName) {
   }
 
   out = out
+    // P37: keys, hashes and encoded blobs with no recognizable prefix (not one that starts a path: swept below)
+    .replace(/(?<![\w/\\.+=%-])[A-Za-z0-9+/_=-]{16,}/g, (t) => (looksLikeToken(t) ? SECRET : t))
     // Windows/unix-ish paths: deliberately do NOT stop at a plain space --
     // real paths routinely contain them ("C:\Users\John Doe\...",
     // "/Users/John Doe/..."), and a naive \s-excluding class only redacts
@@ -94,7 +138,7 @@ export function sanitizeErrorMessage(message, fileName) {
     // stop at a quote/bracket/newline (a real delimiter) or end of string;
     // over-redacting the rest of the message is the safe direction here.
     .replace(/[A-Za-z]:\\[^\r\n"'<>]+/g, '[path]') // Windows paths
-    .replace(/(?:\.{1,2}\/|\/)[^\r\n"'<>]*\/[^\r\n"'<>]*/g, '[path]') // unix-ish paths
+    .replace(/(?:\.{1,2}\/|\/)(?!\[pattern\]\/)[^\r\n"'<>]*\/[^\r\n"'<>]*/g, '[path]') // unix-ish paths, not "/[pattern]/g"
     // Filename-shaped tokens: bounded by whitespace/quotes/brackets/string
     // edges rather than \b, which is defined via ASCII \w and silently
     // fails to bound a filename that starts with a non-Latin character
@@ -113,8 +157,8 @@ export function sanitizeErrorMessage(message, fileName) {
     // a diagnostic message is the safe direction. A quote opens only after a separator and closes before one, so a
     // contraction ("isn't", "it's") is not mistaken for a quote. Placeholders already written are kept.
     .replace(/(^|[\s(\[:,=])(["'`‘“«])([^\r\n]{0,200}?)(["'`’”»])(?=$|[\s).,:;\]!?])/g,
-      (m, pre, open, inner, close) => (/^\[(file|path|url|email|text|number)\]$/.test(inner) ? m : `${pre}${open}[text]${close}`))
-    .replace(/\d[\d\s.-]{5,}\d/g, (m) => (m.replace(/\D/g, '').length >= 7 ? '[number]' : m))
+      (m, pre, open, inner, close) => (/^(\[(file|path|url|email|text|number|secret|pattern)\]|undefined|null|NaN|\[object Object\])$/.test(inner) ? m : `${pre}${open}[text]${close}`))
+    .replace(/(?<!0[xX][\da-fA-F]*)\d[\d\s.-]{5,}\d/g, (m) => (m.replace(/\D/g, '').length >= 7 ? '[number]' : m))
     .replace(/\s+/g, ' ')
     .trim();
 

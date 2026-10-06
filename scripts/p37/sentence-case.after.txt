@@ -1,0 +1,18 @@
+PASS  period + space + lower case
+PASS  P36 example
+PASS  several sentences
+PASS  after a closing quote or bracket
+PASS  before an opening quote (after ? ICU always starts a sentence, as before)
+PASS  no space: word.word
+PASS  decimal
+PASS  URL and file name
+PASS  abbreviation e.g.
+PASS  abbreviation etc.
+PASS  title Mr.
+PASS  initial
+PASS  ellipsis
+PASS  newline
+PASS  shouting kept as before
+PASS  pronoun I
+
+16/16 passed

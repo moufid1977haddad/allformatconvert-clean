@@ -106,7 +106,7 @@ export default function PdfSplitPage() {
     }
     setLoading(false);
     setProgress(0);
-    setStatus('Cancelled.');
+    setStatus('Canceled.');
   };
 
   const split = () => {
@@ -234,7 +234,7 @@ export default function PdfSplitPage() {
           { label: 'Modes', value: `Custom ranges, Every N pages, Every page, Select pages, Odd / even pages, By bookmarks` },
           { label: 'Part names', value: `Your file name plus the pages (report_1-3.pdf), plus odd or even, or plus a number and the bookmark title` },
           { label: 'Several parts', value: `One ZIP built in your browser` },
-          { label: 'Size limit', value: `Shown under the title before you choose a file; smaller on phones, iPhone and iPad` },
+          { label: 'Size limit', value: `Shown under the title before you choose a file; smaller on phones and tablets` },
         ]}
         privacy={`Splitting happens in a Web Worker inside your browser, and the ZIP of all the parts is assembled there too; your PDF is not uploaded to our servers. A PDF with print or copy restrictions is decrypted there first, and one that asks for a password to open is refused with a pointer to PDF Unlock.`}
         faqs={[

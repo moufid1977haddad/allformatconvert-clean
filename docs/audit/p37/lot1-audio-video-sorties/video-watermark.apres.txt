@@ -1,0 +1,18 @@
+PASS  page uses encodeSecondsLeft from ./encodeEta
+page formula: elapsed x (1 - progress) / progress
+PASS  60 s 1080p, Chrome, 10 % done: real 200 s left  (shown 200 s)
+PASS  60 s 1080p, Chrome, 25 % done: real 167 s left  (shown 167 s)
+PASS  60 s 1080p, Chrome, 50 % done: real 111 s left  (shown 111 s)
+PASS  60 s 1080p, Chrome, 75 % done: real 56 s left  (shown 56 s)
+PASS  60 s 1080p, Firefox, 10 % done: real 1566 s left  (shown 1566 s)
+PASS  60 s 1080p, Firefox, 25 % done: real 1305 s left  (shown 1305 s)
+PASS  60 s 1080p, Firefox, 50 % done: real 870 s left  (shown 870 s)
+PASS  60 s 1080p, Firefox, 75 % done: real 435 s left  (shown 435 s)
+PASS  120 s 360p, fast, 10 % done: real 86 s left  (shown 86 s)
+PASS  120 s 360p, fast, 25 % done: real 72 s left  (shown 72 s)
+PASS  120 s 360p, fast, 50 % done: real 48 s left  (shown 48 s)
+PASS  120 s 360p, fast, 75 % done: real 24 s left  (shown 24 s)
+PASS  nothing shown before 3 % / 3 s (no guessed figure)
+PASS  labels  (about 45 s left | about 3 min 20 s left | about 2 min left | almost done)
+
+video-watermark [working tree]: all PASS

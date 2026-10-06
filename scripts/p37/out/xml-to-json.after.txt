@@ -1,0 +1,6 @@
+  PASS bad character: line and column given
+  PASS attribute without value: line and column
+  PASS mismatched closing tag: position of the closing tag added
+  PASS no column known: line only
+  PASS valid XML: no message
+5 passed, 0 failed

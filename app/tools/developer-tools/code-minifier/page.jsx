@@ -1,7 +1,7 @@
 ﻿'use client';
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
-import { minifyJs, minifyCss, typescriptToJs } from '../../../lib/codeTools';
+import { minifyJs, minifyCss, minifyTypescript } from '../../../lib/codeTools';
 import { minify as minifyHtmlDoc } from '../../../lib/htmlMinify';
 import { TextDownload } from '../../../components/FileDownload';
 import { reportShownMessage } from '../../../lib/useToolError';
@@ -15,7 +15,7 @@ export default function CodeMinifierPage() {
     try {
       let result;
       if (lang === 'js') result = await minifyJs(input);
-      else if (lang === 'ts') result = await minifyJs(await typescriptToJs(input));
+      else if (lang === 'ts') result = await minifyTypescript(input); // the TypeScript to JS page's conversion, then Terser (P37)
       else if (lang === 'css') result = await minifyCss(input);
       else result = minifyHtmlDoc(input);
       setOutput(result);
@@ -60,14 +60,14 @@ export default function CodeMinifierPage() {
         specs={[
           { label: "Input languages", value: "JavaScript, TypeScript without JSX, CSS, HTML" },
           { label: "Engines", value: "Terser (JavaScript and TypeScript), Sucrase (TypeScript types), CSSO (CSS), the site's own minifier (HTML)" },
-          { label: "Errors", value: "JavaScript and TypeScript syntax errors are shown as Error: plus the engine's message; CSS and HTML are never rejected" },
+          { label: "Errors", value: "JavaScript and TypeScript syntax errors are shown as Error: plus the engine's message; TSX and namespaces that hold code are refused with a message saying why; CSS and HTML are never rejected" },
           { label: "File name", value: "minified plus the mode: .js, .css or .html; in TS mode the file is named .ts although it holds JavaScript" },
         ]}
         privacyTitle={"Where your code is processed"}
         privacy={"All four minifiers run on your device; Terser, Sucrase or CSSO is downloaded the first time its mode is used, and the code you paste is not uploaded. If a JavaScript or TypeScript error is displayed, its message, cleaned of quoted text, long numbers and addresses, is reported to our error log together with the tool name and your browser's name and version."}
         faqs={[
           { q: "Will minified JavaScript behave the same?", a: "Yes. Terser parses the code before compressing it, so code without semicolons, a return followed by a line break and expressions like a - -b keep their meaning. Code that does not parse gets an error instead of a broken file." },
-          { q: "Does TS mode handle TSX or namespaces?", a: "No. TS mode strips types without JSX support, so TSX fails with a syntax error, and a namespace is removed with everything inside it. Move namespace code out first, and minify TSX in your own build." },
+          { q: "Does TS mode handle TSX or namespaces?", a: "Not fully. A namespace that holds only types is removed, as tsc does; one that holds code is refused with a message giving its name and line, because removing types cannot turn it into JavaScript, so move that code out first. TSX is refused with a message saying that Terser cannot read JSX: compile it in your own build first." },
           { q: "Does HTML mode delete all spaces between tags?", a: "No. A space between inline elements can be visible: two bold words separated only by a line break would run together without it. So each run of spaces and line breaks becomes one space instead of disappearing." },
           { q: "Does CSS mode check my CSS?", a: "No. CSSO repairs or skips what it cannot read without a message: a missing closing brace is added, and text that is not CSS can disappear from the output. Check the result of a stylesheet you are unsure about." },
         ]}

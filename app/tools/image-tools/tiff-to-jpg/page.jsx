@@ -149,7 +149,7 @@ export default function TiffToJpgPage() {
             <input ref={inputRef} type="file" accept=".tiff,.tif" className="hidden" onChange={handleFile} />
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Quality: {quality}%</label><input aria-label="Quality (%)" type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" /></div>
-          <label className="flex items-center gap-2 text-sm text-neutral-600">Transparent areas become <input id="jpg-background" type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="w-10 h-8" aria-label="Background colour" /></label>
+          <label className="flex items-center gap-2 text-sm text-neutral-600">Transparent areas become <input id="jpg-background" type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="w-10 h-8" aria-label="Background color" /></label>
           {loading ? (
             <div className="space-y-2">
               <button disabled className="w-full bg-neutral-200 text-gray-600 rounded-xl py-3 font-semibold">Converting…</button>
@@ -171,7 +171,7 @@ export default function TiffToJpgPage() {
               <label>Page <input type="number" min="1" max={pageInfo.count} value={page} onChange={(e) => setPage(Math.max(1, Math.min(pageInfo.count, Number(e.target.value) || 1)))} className="w-16 border border-amber-300 rounded px-1" aria-label="Page to convert" /></label> — then convert again.
             </div>
           )}
-          {result && pageInfo?.icc && <p className="text-xs text-neutral-500" data-tiff-icc>This TIFF carries a colour profile (for example Adobe RGB), which is not applied here: colours may look less saturated than in a colour-managed viewer.</p>}
+          {result && pageInfo?.icc && <p className="text-xs text-neutral-500" data-tiff-icc>This TIFF carries a color profile (for example Adobe RGB), which is not applied here: colors may look less saturated than in a color-managed viewer.</p>}
           {result && <div className="space-y-2"><img alt="Preview of your image" src={result} className="max-h-48 mx-auto rounded" /><FileDownload href={result} name={file ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : 'converted.jpg'} /></div>}
         </div>
       </div>
@@ -192,10 +192,10 @@ export default function TiffToJpgPage() {
           { label: 'Not supported', value: `Planar color storage, and CMYK other than 8 bits per channel: refused with a message` },
           { label: 'Time limit', value: `Decoding stops after ${TIFF_DECODE_TIMEOUT_MS / 1000} seconds with an explanation; encoding gets more time for large images` }
         ]}
-        privacy={`The TIFF is copied into a Web Worker inside your browser, decoded there with UTIF.js and written as a JPG, by the browser or by MozJPEG in WebAssembly for images over ${Math.floor(CANVAS_MAX_PIXELS / 1e5) / 10} megapixels. The file is not uploaded. Failures send a report: the cleaned error text, extension, size range, tool name and your browser's name and version.`}
+        privacy={`The TIFF is copied into a Web Worker inside your browser, decoded there with UTIF.js and written as a JPG, by the browser or by MozJPEG in WebAssembly for images over ${Math.floor(CANVAS_MAX_PIXELS / 1e5) / 10} megapixels and in browsers whose workers cannot draw images. The file is not uploaded. Failures send a report: the cleaned error text, extension, size range, tool name and your browser's name and version.`}
         faqs={[
           { q: "Can I convert a page other than the first one?", a: `Yes. After the first conversion of a multi-page TIFF, the page says how many pages it has and shows a "Page" box. Type the page number, then click "Convert to JPG" again; reduced-size thumbnails stored in the file are not counted as pages.` },
-          { q: "Is the TIFF's colour profile applied?", a: `No. A profile such as Adobe RGB is not applied, so colors can look duller than in a color-managed editor; the page says so under the result. Convert the image to sRGB in your editor first for faithful colors.` },
+          { q: "Is the TIFF's color profile applied?", a: `No. A profile such as Adobe RGB is not applied, so colors can look duller than in a color-managed editor; the page says so under the result. Convert the image to sRGB in your editor first for faithful colors.` },
           { q: "Can I convert a 16-bit TIFF?", a: `Yes. It is converted to 8 bits per channel, the depth of a JPG. The darkest and brightest values actually present are stretched to black and white, so scientific or scanner files that use only part of the 16-bit range do not come out near-black.` },
           { q: "Why did the conversion stop?", a: `The decoder went ${TIFF_DECODE_TIMEOUT_MS / 1000} seconds without finishing, far longer than a normal TIFF needs, which usually means a non-standard LZW variant. The message suggests re-saving the file with Deflate/ZIP or no compression.` }
         ]}

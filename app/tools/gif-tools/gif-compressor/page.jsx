@@ -61,7 +61,7 @@ export default function GifCompressorPage() {
           </div>
           <div><label className="block text-sm text-neutral-500 mb-1">Quality: {quality}%</label><input aria-label="Quality (%)" type="range" min="10" max="100" value={quality} onChange={e => setQuality(parseInt(e.target.value))} className="w-full" /></div>
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <label className="block"><span className="block text-neutral-500 mb-1">Colours</span>
+            <label className="block"><span className="block text-neutral-500 mb-1">Colors</span>
               <select id="gc-colors" value={colors} onChange={e => { setColors(Number(e.target.value)); setResult(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2">{[256, 128, 64, 32, 16].map(n => <option key={n} value={n}>{n === 256 ? 'Keep (up to 256)' : n}</option>)}</select></label>
             <label className="block"><span className="block text-neutral-500 mb-1">Size</span>
               <select id="gc-scale" value={scale} onChange={e => { setScale(Number(e.target.value)); setResult(null); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2">{[100, 75, 50, 33, 25].map(n => <option key={n} value={n}>{n === 100 ? 'Keep' : n + '%'}</option>)}</select></label>
@@ -79,7 +79,7 @@ export default function GifCompressorPage() {
               </div>
               {result.newSize >= result.originalSize && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-900" data-larger>
-                  <p className="font-semibold">Your GIF is already well optimised.</p>
+                  <p className="font-semibold">Your GIF is already well optimized.</p>
                   <p>At this quality the result is {formatSize(result.newSize)}, not smaller than your {formatSize(result.originalSize)}: keep your original, or lower the quality and try again.</p>
                 </div>
               )}
@@ -90,7 +90,7 @@ export default function GifCompressorPage() {
       </div>
       <SeoContent
         title="GIF Compressor"
-        description="GIF Compressor makes an animated GIF lighter with gifsicle, compiled to WebAssembly and run on this page. Three settings combine: the quality slider sets the lossy level of gifsicle, Colours reduces the palette, and Size scales every frame down. The animation, its frames and its timing are kept. The result shows the size before and after; when it is not smaller, the page says so and suggests keeping your original. Only GIF files are accepted: for PNG, JPG or WebP pictures, use Image Compressor."
+        description="GIF Compressor makes an animated GIF lighter with gifsicle, compiled to WebAssembly and run on this page. Three settings combine: the quality slider sets the lossy level of gifsicle, Colors reduces the palette, and Size scales every frame down. The animation, its frames and its timing are kept. The result shows the size before and after; when it is not smaller, the page says so and suggests keeping your original. Only GIF files are accepted: for PNG, JPG or WebP pictures, use Image Compressor."
         howToTitle="How to compress a GIF"
         howTo={[
           "Choose the .gif to shrink; it plays above the settings.",
@@ -103,7 +103,7 @@ export default function GifCompressorPage() {
           { label: "Input", value: "GIF only (.gif)" },
           { label: "Output", value: "GIF, saved as compressed.gif" },
           { label: "Quality", value: "A slider from 10 to 100: at 100, lossless optimization only; at 10, the strongest lossy level" },
-          { label: "Colours", value: "Keep (up to 256), 128, 64, 32 or 16" },
+          { label: "Colors", value: "Keep (up to 256), 128, 64, 32 or 16" },
           { label: "Size", value: "Keep, 75%, 50%, 33% or 25% of the width and height" },
           { label: "Picture size", value: `Up to ${OPENABLE_PIXELS / 1e6} megapixels (width × height of the GIF)` }
         ]}

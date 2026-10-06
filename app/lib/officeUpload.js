@@ -50,7 +50,7 @@ export async function convertOffice({ file, endpoint, fields, onStage, signal, a
       const r = await runStagedConversion({ file, endpoint, fields, onStage: stage, signal });
       return { blob: r.blob, detectedFonts: r.detectedFonts, docTextBoxes: r.docTextBoxes || 0, docFallback: !!r.docFallback, engineFallback: r.engineFallback || null };
     } catch (e) {
-      if (e instanceof MediaJobError && e.code === 'cancelled') throw new Error('Cancelled.');
+      if (e instanceof MediaJobError && e.code === 'cancelled') throw new Error('Canceled.');
       throw e;
     }
   }

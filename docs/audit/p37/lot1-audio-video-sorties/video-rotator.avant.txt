@@ -1,0 +1,8 @@
+page: mode kept across picks
+FAIL  MP4 + lossless, then a WebM: turned on the video service  (refused: hidden "Instant, lossless" on a file without rotation setting)
+FAIL  MOV + lossless, then an MKV: turned on the video service  (refused: hidden "Instant, lossless" on a file without rotation setting)
+PASS  MP4 + lossless, then another MP4 (choice visible, kept): lossless in the browser  (lossless in the browser)
+PASS  WebM alone: turned on the video service  (turned on the video service)
+PASS  MP4 + lossless: lossless in the browser  (lossless in the browser)
+
+video-rotator [rev HEAD]: 2 FAIL

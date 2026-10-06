@@ -166,7 +166,7 @@ export default function TiffToPngPage() {
               <label>Page <input type="number" min="1" max={pageInfo.count} value={page} onChange={(e) => setPage(Math.max(1, Math.min(pageInfo.count, Number(e.target.value) || 1)))} className="w-16 border border-amber-300 rounded px-1" aria-label="Page to convert" /></label> — then convert again.
             </div>
           )}
-          {result && pageInfo?.icc && <p className="text-xs text-neutral-500" data-tiff-icc>This TIFF carries a colour profile (for example Adobe RGB), which is not applied here: colours may look less saturated than in a colour-managed viewer.</p>}
+          {result && pageInfo?.icc && <p className="text-xs text-neutral-500" data-tiff-icc>This TIFF carries a color profile (for example Adobe RGB), which is not applied here: colors may look less saturated than in a color-managed viewer.</p>}
           {result && <div className="space-y-2"><img alt="Preview of your image" src={result} className="max-h-48 mx-auto rounded" /><FileDownload href={result} name={file ? file.name.replace(/\.[^.]+$/, '') + '.png' : 'converted.png'} /></div>}
         </div>
       </div>

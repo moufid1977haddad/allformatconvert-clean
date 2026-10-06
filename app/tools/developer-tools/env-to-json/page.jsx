@@ -5,6 +5,7 @@ import { dotenvToJson, jsonToDotenv } from '../../../lib/dotenv';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import TextArea from '@/app/components/TextArea';
+import { downloadName } from './downloadName';
 export default function EnvToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -12,15 +13,18 @@ export default function EnvToJsonPage() {
   const [note, setNote] = useState('');
   const [types, setTypes] = useState(false);
   const [expandVars, setExpandVars] = useState(false);
+  const [direction, setDirection] = useState('json'); // what the output holds: names the downloaded file (P37)
   const toJson = () => {
     const { json, ignored, count } = dotenvToJson(input, { types, expandVars });
     setOutput(json);
+    setDirection('json');
     setError('');
     setNote(`${count} variable${count === 1 ? '' : 's'}` + (ignored.length ? ` — line${ignored.length === 1 ? '' : 's'} ${ignored.join(', ')} ${ignored.length === 1 ? 'is' : 'are'} not KEY=value and ${ignored.length === 1 ? 'was' : 'were'} skipped` : ''));
   };
   const toEnv = () => {
     try {
       setOutput(jsonToDotenv(input));
+      setDirection('env');
       setError('');
       setNote('');
     } catch(e) { setOutput(''); setNote(''); setError(e instanceof SyntaxError ? 'Invalid JSON: ' + e.message : e.message); }
@@ -34,7 +38,7 @@ export default function EnvToJsonPage() {
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm text-neutral-500 mb-1">Input</label><TextArea className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" placeholder="KEY=value..." value={input} onChange={e => setInput(e.target.value)} /></div>
             <div><label className="block text-sm text-neutral-500 mb-1">Output</label><TextArea aria-label="Output" className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm h-48 resize-none font-mono" value={output} readOnly />
-            <TextDownload text={output} name="env.json" /></div>
+            <TextDownload text={output} name={downloadName(direction)} /></div>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
             <label className="flex items-center gap-2"><input type="checkbox" checked={types} onChange={e => setTypes(e.target.checked)} /> Convert numbers, true/false and null to JSON types</label>
@@ -58,7 +62,7 @@ export default function EnvToJsonPage() {
           "Paste your .env content, or a JSON object, into \"Input\".",
           "Tick \"Convert numbers, true/false and null to JSON types\" or \"Expand ${VAR} references\" if you need them.",
           "Click \".env to JSON\", or \"JSON to .env\" for the other direction.",
-          "Click \"Copy\", or \"Download\": the file is named env.json in both directions.",
+          "Click \"Copy\", or \"Download\": env.json for JSON, variables.env for .env lines (rename it to .env).",
         ]}
         specs={[
           { label: "Input", value: ".env text, or a JSON object" },

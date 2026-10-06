@@ -10,10 +10,16 @@
 
 export const IOS_CANVAS_MAX_PIXELS = 16_777_216;
 
+/** The same check on a given navigator-like object {userAgent, platform, maxTouchPoints} (pure, tested in node). */
+export function appleTouchFrom(nav) {
+  if (!nav) return false;
+  const ua = nav.userAgent || '';
+  return /iPhone|iPad|iPod/.test(ua) || ((/Macintosh/.test(ua) || nav.platform === 'MacIntel') && nav.maxTouchPoints > 1);
+}
+
 export function isAppleTouchDevice() {
   if (typeof navigator === 'undefined') return false;
-  const ua = navigator.userAgent || '';
-  return /iPhone|iPad|iPod/.test(ua) || ((/Macintosh/.test(ua) || navigator.platform === 'MacIntel') && navigator.maxTouchPoints > 1);
+  return appleTouchFrom(navigator);
 }
 
 /** The largest canvas area (pixels) this device draws reliably. Tests set self.__forceSafariCanvasCap. */

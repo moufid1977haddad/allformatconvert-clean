@@ -46,7 +46,7 @@ export function whyLarger({ from, to, inBytes, outBytes, kind = 'image' }) {
   const smallerChoice = kind === 'image' ? 'JPG, WebP or AVIF' : kind === 'audio' ? 'MP3, M4A or Opus' : 'MP4 with a lower quality or resolution';
   if (b === 'gif') {
     return kind === 'image'
-      ? `GIF is an old format: even with only 256 colours it compresses photos far less than ${A}. For a smaller file, convert to JPG, WebP or AVIF.`
+      ? `GIF is an old format: even with only 256 colors it compresses photos far less than ${A}. For a smaller file, convert to JPG, WebP or AVIF.`
       : 'Normal for GIF: it stores every frame as a separate picture with no video compression. For a smaller animation, lower the width or frame rate, or keep a video (MP4).';
   }
   if (b === 'ico') return 'Normal for ICO: one file holds the icon at several sizes. It is meant for website and app icons, not for saving space.';

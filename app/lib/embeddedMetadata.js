@@ -7,9 +7,50 @@ const clean = (v) => (v === undefined || v === null ? '' : String(v).replace(/\s
 const dateText = (d) => (d instanceof Date && !Number.isNaN(d.getTime()) ? d.toISOString().replace('.000Z', 'Z').replace('T', ' ') : clean(d));
 const rows = (pairs) => pairs.map(([k, v]) => [k, v instanceof Date ? dateText(v) : clean(v)]).filter(([, v]) => v);
 
-async function imageGroups(file) {
-  const exifr = (await import('exifr')).default;
-  const t = await exifr.parse(file, { tiff: true, exif: true, gps: true, xmp: true, iptc: true, ifd1: false, translateValues: true, reviveValues: true }).catch(() => null);
+const IMAGE_OPTIONS = { tiff: true, exif: true, gps: true, xmp: true, iptc: true, ifd1: false, translateValues: true, reviveValues: true };
+
+// P37 follow-up (06/10): exifr has no WebP reader. exifr.parse threw "Unknown file format", the error was caught as
+// "no metadata", and a WebP carrying a GPS position was said to hold none. Its EXIF, XMP and ICC chunks are now taken
+// out by lib/webpMetadata.js (the module Image Metadata Viewer uses) and read by exifr's own parsers; the groups are
+// then merged into one object, the form exifr.parse gives by default. A WebP cut short throws: readEmbedded says so.
+// The file is not loaded whole: its chunk headers are walked, and only the RIFF header and the metadata chunks are
+// read, so a WebP of any size is read (a chunk that runs past the end of the file is kept as a bare header, which
+// webpMetadataChunks reports as a file cut short, as it would on the whole file).
+const u32le = (b, o) => (b[o] | (b[o + 1] << 8) | (b[o + 2] << 16) | (b[o + 3] << 24)) >>> 0;
+const fourcc = (b, o) => String.fromCharCode(b[o], b[o + 1], b[o + 2], b[o + 3]);
+async function webpMetadataBytes(file) {
+  const read = async (from, to) => new Uint8Array(await file.slice(from, to).arrayBuffer());
+  const head = await read(0, 12);
+  const riffEnd = Math.min(file.size, 8 + u32le(head, 4));
+  const parts = [head];
+  let i = 12;
+  while (i + 8 <= riffEnd) {
+    const h = await read(i, i + 8);
+    const len = u32le(h, 4), end = i + 8 + len;
+    if (['EXIF', 'XMP ', 'ICCP'].includes(fourcc(h, 0))) parts.push(await read(i, end + (len & 1)));
+    else if (end > file.size) parts.push(h);
+    if (end > file.size) break;
+    i = end + (len & 1);
+  }
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let at = 0;
+  for (const p of parts) { out.set(p, at); at += p.length; }
+  const size = out.length - 8; // the RIFF size of the shortened file
+  out[4] = size & 0xff; out[5] = (size >>> 8) & 0xff; out[6] = (size >>> 16) & 0xff; out[7] = (size >>> 24) & 0xff;
+  return out;
+}
+
+async function webpTags(file, exifrModule) {
+  const { parseWebpMetadata } = await import('./webpMetadata');
+  const groups = await parseWebpMetadata(exifrModule, await webpMetadataBytes(file), { ...IMAGE_OPTIONS, mergeOutput: false });
+  if (!groups) return null;
+  return Object.assign({}, ...Object.values(groups).filter((g) => g && typeof g === 'object' && !ArrayBuffer.isView(g)));
+}
+
+async function imageGroups(file, webp) {
+  const exifrModule = await import('exifr');
+  const exifr = exifrModule.default;
+  const t = webp ? await webpTags(file, exifrModule) : await exifr.parse(file, IMAGE_OPTIONS).catch(() => null);
   if (!t) return [];
   const out = [];
   const camera = rows([['Camera make', t.Make], ['Camera model', t.Model], ['Lens', t.LensModel], ['Taken', t.DateTimeOriginal || t.CreateDate],
@@ -100,7 +141,7 @@ export async function readEmbedded(file, sig) {
   if (!sig || !file.size) return [];
   const label = sig.label;
   try {
-    if (/JPEG|PNG|WebP|TIFF|HEIC|AVIF/.test(label)) return await imageGroups(file);
+    if (/JPEG|PNG|WebP|TIFF|HEIC|AVIF/.test(label)) return await imageGroups(file, /WebP/.test(label));
     if (/^PDF/.test(label)) return await pdfGroups(file);
     if (/^ZIP/.test(label)) return await zipGroups(file);
     if (/^MP3/.test(label)) return await id3Groups(file);

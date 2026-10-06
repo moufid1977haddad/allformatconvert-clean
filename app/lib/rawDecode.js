@@ -61,7 +61,7 @@ function isoBmffCutShort(bytes) {
 export async function decodeRaw(bytes, name, { checkSize = () => {}, onLong = () => {} } = {}) {
   // Measured 02/10 on real files: LibRaw's Foveon development gives wrong colours (green leaves brown, red tulips pink,
   // next to the camera's own JPEG). A wrong-coloured photo is not given as a result.
-  if (extOf(name) === 'x3f') throw new Error(`"${name}" is a Sigma X3F (Foveon sensor) file: this tool cannot develop it with correct colours. Export a TIFF or JPG from Sigma Photo Pro, then convert that`);
+  if (extOf(name) === 'x3f') throw new Error(`"${name}" is a Sigma X3F (Foveon sensor) file: this tool cannot develop it with correct colors. Export a TIFF or JPG from Sigma Photo Pro, then convert that`);
   if (isoBmffCutShort(bytes)) throw new Error(explain(-100008, name));
   const m = await loadLibRaw();
   let ptr = 0;

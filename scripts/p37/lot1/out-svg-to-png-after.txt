@@ -1,0 +1,2 @@
+preview src expression: {result.url} -> "blob:http://localhost/1234"
+PASS  the preview points to the PNG

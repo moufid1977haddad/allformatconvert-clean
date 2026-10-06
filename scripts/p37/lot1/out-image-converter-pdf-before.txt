@@ -1,0 +1,10 @@
+FAIL  quality 10 %: the JPEG in the PDF is MozJPEG's at 10 %  -- PDF 4130 bytes, JPEG inside 3193 bytes, MozJPEG at 10 %: 846 bytes
+FAIL  quality 20 %: the JPEG in the PDF is MozJPEG's at 20 %  -- PDF 4130 bytes, JPEG inside 3193 bytes, MozJPEG at 20 %: 1069 bytes
+FAIL  quality 30 %: the JPEG in the PDF is MozJPEG's at 30 %  -- PDF 4130 bytes, JPEG inside 3193 bytes, MozJPEG at 30 %: 1715 bytes
+FAIL  quality 49 %: the JPEG in the PDF is MozJPEG's at 49 %  -- PDF 4130 bytes, JPEG inside 3193 bytes, MozJPEG at 49 %: 3125 bytes
+PASS  quality 50 %: the JPEG in the PDF is MozJPEG's at 50 %  -- PDF 4130 bytes, JPEG inside 3193 bytes, MozJPEG at 50 %: 3193 bytes
+PASS  quality 80 %: the JPEG in the PDF is MozJPEG's at 80 %  -- PDF 15644 bytes, JPEG inside 14705 bytes, MozJPEG at 80 %: 14705 bytes
+PASS  quality 100 %: the JPEG in the PDF is MozJPEG's at 100 %  -- PDF 152149 bytes, JPEG inside 151204 bytes, MozJPEG at 100 %: 151204 bytes
+FAIL  a lower quality gives a smaller PDF (10 < 20 < 30 < 49 < 50)  -- {"10":4130,"20":4130,"30":4130,"49":4130,"50":4130,"80":15644,"100":152149}
+
+5 FAILED

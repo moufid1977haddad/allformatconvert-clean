@@ -26,7 +26,7 @@ export class MediaJobError extends Error {
 
 const sleep = (ms, signal) => new Promise((resolve, reject) => {
   const t = setTimeout(resolve, ms);
-  if (signal) signal.addEventListener('abort', () => { clearTimeout(t); reject(new MediaJobError('Cancelled.', 'cancelled')); }, { once: true });
+  if (signal) signal.addEventListener('abort', () => { clearTimeout(t); reject(new MediaJobError('Canceled.', 'cancelled')); }, { once: true });
 });
 
 async function api(path, { method = 'GET', ticket, body, signal } = {}) {
@@ -39,7 +39,7 @@ async function api(path, { method = 'GET', ticket, body, signal } = {}) {
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch (e) {
-    if (e && e.name === 'AbortError') throw new MediaJobError('Cancelled.', 'cancelled');
+    if (e && e.name === 'AbortError') throw new MediaJobError('Canceled.', 'cancelled');
     throw new MediaJobError('Could not reach the conversion service. Check your connection and try again.', 'network');
   }
   let json = {};
@@ -66,7 +66,7 @@ async function putChunk(url, ticket, blob, onBytes, signal) {
     xhr.onload = () => resolve({ status: xhr.status, text: xhr.responseText });
     xhr.onerror = () => reject(new MediaJobError('Network error during upload.', 'network'));
     xhr.ontimeout = () => reject(new MediaJobError('Upload timed out.', 'network'));
-    if (signal) signal.addEventListener('abort', () => { xhr.abort(); reject(new MediaJobError('Cancelled.', 'cancelled')); }, { once: true });
+    if (signal) signal.addEventListener('abort', () => { xhr.abort(); reject(new MediaJobError('Canceled.', 'cancelled')); }, { once: true });
     xhr.send(data);
   });
 }
@@ -81,7 +81,7 @@ async function openAndUpload({ file, op, params, purpose, onStage, signal }) {
   try {
     tres = await fetch('/api/media/ticket', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(purpose ? { op, size: file.size, purpose } : { op, size: file.size }), signal });
   } catch (e) {
-    if (e && e.name === 'AbortError') throw new MediaJobError('Cancelled.', 'cancelled');
+    if (e && e.name === 'AbortError') throw new MediaJobError('Canceled.', 'cancelled');
     throw new MediaJobError('Could not reach the site. Check your connection and try again.', 'network');
   }
   const tj = await tres.json().catch(() => ({}));
@@ -132,7 +132,7 @@ async function downloadResult({ jid, ticket, expected, onStage, signal }) {
   onStage({ stage: 'download', pct: 0 });
   let res;
   try { res = await fetch(`${MEDIA_SERVICE_URL}/v1/jobs/${jid}/result`, { headers: { Authorization: 'Bearer ' + ticket }, signal }); }
-  catch (e) { throw new MediaJobError(e && e.name === 'AbortError' ? 'Cancelled.' : 'The download was interrupted. Please try again.', e && e.name === 'AbortError' ? 'cancelled' : 'network'); }
+  catch (e) { throw new MediaJobError(e && e.name === 'AbortError' ? 'Canceled.' : 'The download was interrupted. Please try again.', e && e.name === 'AbortError' ? 'cancelled' : 'network'); }
   if (!res.ok) throw new MediaJobError('The result could not be downloaded.', 'download');
   const reader = res.body.getReader();
   const parts = [];
@@ -239,7 +239,7 @@ async function stagedCall({ file, endpoint, fields, purpose, onStage, signal }) 
     try {
       res = await fetch(endpoint, { method: 'POST', signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...(fields || {}), jid, ticket, filename: file.name }) });
     } catch (e) {
-      if (e && e.name === 'AbortError') throw new MediaJobError('Cancelled.', 'cancelled');
+      if (e && e.name === 'AbortError') throw new MediaJobError('Canceled.', 'cancelled');
       throw new MediaJobError('Could not reach the site. Check your connection and try again.', 'network');
     }
     const json = await res.json().catch(() => ({}));

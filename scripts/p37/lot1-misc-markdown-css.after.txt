@@ -1,0 +1,2 @@
+PASS light: {"base":"15px","h1":"30px","h2":"22.5px","ul":"disc","ol":"decimal","td":"1px","code":"color(srgb 0.0901961 0.0901961 0.0901961 / 0.1)","quote":"3px","a":"rgb(37, 99, 235)"}
+PASS dark: {"base":"15px","h1":"30px","h2":"22.5px","ul":"disc","ol":"decimal","td":"1px","code":"color(srgb 0.929412 0.929412 0.929412 / 0.1)","quote":"3px","a":"rgb(138, 180, 248)"}

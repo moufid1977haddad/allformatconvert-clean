@@ -1,0 +1,7 @@
+  PASS top level: name, 10, 2 in source order, numeric keys quoted
+  PASS nested and inside arrays
+  PASS round trip: js-yaml reads back the same data
+  PASS repeated key: last value, first position
+  PASS unchanged: exact numbers, quoted strings, "__proto__" key
+  PASS a key that looks like a big number or a negative is not reordered either
+6 passed, 0 failed

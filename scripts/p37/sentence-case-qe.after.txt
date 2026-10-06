@@ -1,0 +1,15 @@
+PASS  ? glued to a word
+PASS  ! glued to a word
+PASS  URL query string
+PASS  brand name
+PASS  ? then space still starts a sentence
+PASS  ! then space still starts a sentence
+PASS  ?! then space
+PASS  ? then closing quote then space
+PASS  ? then line break
+PASS  Japanese full-width marks unchanged
+PASS  count: what?ok is one sentence
+PASS  count: URL query is one sentence
+PASS  count: what? ok is two
+
+13/13 passed

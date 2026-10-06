@@ -111,7 +111,7 @@ export default function MediaPlayerPage() {
           `Click "Save this frame", then "Download" to save the picture as a PNG.`,
         ]}
         specs={[
-          { label: `Input formats`, value: `Audio: MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF. Video: MP4, M4V, MOV, QT, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS. Playback depends on your browser.` },
+          { label: `Input formats`, value: `Audio: MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AC3, AIFF, AIF, AMR, MKA, WEBA, CAF. Video: MP4, M4V, MOV, QT, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS. Playback depends on your browser.` },
           { label: `Subtitles`, value: `SRT or WebVTT, for videos` },
           { label: `Saved frame`, value: `PNG at the video's size; on iPhone and iPad, scaled down to fit 16.7 megapixels` },
         ]}
@@ -123,7 +123,7 @@ export default function MediaPlayerPage() {
           { q: `Can I play several files in a row?`, a: `No. The player holds one file at a time; choosing another file replaces it and clears the subtitles and the saved frame of the previous one. To hear several tracks back to back, join them first with Audio Merger.` },
         ]}
         tips={[
-          `Tick "Loop" and choose 0.75× to practise a passage of music or a dance step.`,
+          `Tick "Loop" and choose 0.75× to practice a passage of music or a dance step.`,
           `Load the .srt you made in Subtitle Generator here to check its timings against the video.`,
         ]}
       />

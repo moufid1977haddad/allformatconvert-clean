@@ -3,11 +3,11 @@ import ToolSeo from '@/app/components/ToolSeo';
 
 export const metadata: Metadata = {
   title: { absolute: "Color Picker — HEX to RGB with Your Browser’s Picker" },
-  description: "Pick a color with your browser’s own color picker or type a 6-digit HEX code, then copy the HEX value or the RGB value written as rgb(r,g,b).",
+  description: "Pick a color with your browser’s color picker or type a HEX code, with or without #, in 3, 4, 6 or 8 digits, then copy it as HEX or as rgb(r,g,b).",
   alternates: { canonical: "https://www.onlineconvertools.com/tools/developer-tools/color-picker" },
   openGraph: {
     title: "Color Picker — HEX to RGB with Your Browser’s Picker",
-    description: "Pick a color with your browser’s own color picker or type a 6-digit HEX code, then copy the HEX value or the RGB value written as rgb(r,g,b).",
+    description: "Pick a color with your browser’s color picker or type a HEX code, with or without #, in 3, 4, 6 or 8 digits, then copy it as HEX or as rgb(r,g,b).",
     url: "https://www.onlineconvertools.com/tools/developer-tools/color-picker",
   },
 };

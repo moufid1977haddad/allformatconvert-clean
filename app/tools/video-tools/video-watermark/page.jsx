@@ -9,6 +9,7 @@ import { FileDownload } from '../../../components/FileDownload';
 import { videoFileProblem, unreadableVideoMessage } from '../../../lib/fileChecks';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { encodeSecondsLeft, formatSecondsLeft } from './encodeEta';
 
 const MAX_DURATION = 120;
 
@@ -294,10 +295,12 @@ export default function VideoWatermarkPage() {
         logLines.push(message);
         console.log('[ffmpeg]', message);
       });
+      // P37: the time left is measured from this tab's own speed once the watermark encode has started (./encodeEta.js)
+      let encodeStart = null;
       ffmpeg.on('progress', ({ progress: p }) => {
         const clamped = Math.min(1, Math.max(0, p));
         setProgress(Math.round(clamped * 100));
-        setEta(Math.max(0, Math.round((1 - clamped) * duration)));
+        if (encodeStart !== null) setEta(encodeSecondsLeft(clamped, (performance.now() - encodeStart) / 1000));
       });
       await ffmpeg.load();
 
@@ -394,6 +397,7 @@ export default function VideoWatermarkPage() {
       const margin = Math.round(Math.min(videoWidth, videoHeight) * WATERMARK_MARGIN_RATIO);
       const { x, y } = computeOverlayXY(position, videoWidth, videoHeight, wmWidth, wmHeight, margin);
 
+      encodeStart = performance.now();
       await ffmpeg.exec([
         '-i', inputName,
         '-i', 'watermark.png',
@@ -520,7 +524,7 @@ export default function VideoWatermarkPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <label className="block"><span className="block text-neutral-500 mb-1">Size: {sizePct}% of the video width</span>
               <input id="vwm-size" aria-label="Size (% of the video width)" type="range" min="5" max="60" value={sizePct} onChange={(e) => setSizePct(Number(e.target.value))} className="w-full" /></label>
-            {watermarkType === 'text' && <label className="flex items-center gap-2"><span className="text-neutral-500">Text colour</span><input id="vwm-color" type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} /></label>}
+            {watermarkType === 'text' && <label className="flex items-center gap-2"><span className="text-neutral-500">Text color</span><input id="vwm-color" type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} /></label>}
           </div>
           <div>
             <label className="block text-sm text-neutral-500 mb-1">Opacity: {Math.round(opacity * 100)}%</label>
@@ -538,7 +542,7 @@ export default function VideoWatermarkPage() {
 
           {loading ? (
             <div className="space-y-3">
-              <ProgressBar pct={progress} label={eta !== null ? `Encoding... (${eta}s of video left to encode)` : 'Encoding...'} />
+              <ProgressBar pct={progress} label={eta !== null ? `Encoding... (${formatSecondsLeft(eta)})` : 'Encoding...'} />
               <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
             </div>
           ) : (
@@ -577,7 +581,7 @@ export default function VideoWatermarkPage() {
         privacy="The video and the watermark image are read and encoded by ffmpeg.wasm in this tab and are not uploaded; the engine itself, about 10 MB, comes from unpkg.com, a public code host. A failed run sends us a report: the cleaned message, the error type, the tool, your browser and version, the file type and a size range; never the video."
         faqs={[
           { q: "Why is there a 2-minute limit?", a: `The whole video is held in the browser tab's memory and encoded by ffmpeg.wasm on your device, which takes time. Videos over ${MAX_DURATION / 60} minutes are refused before any encoding starts; cut them first with Video Trimmer.` },
-          { q: "How long does watermarking take?", a: "Several times the length of the video for 1080p footage: when we measured this browser engine on 28 September, re-encoding 1080p took about 3.7 seconds per second of video in Chrome and about 29 seconds in Firefox. Smaller videos go faster. The seconds shown next to the progress bar count the video still to encode, not the waiting time." },
+          { q: "How long does watermarking take?", a: "Several times the length of the video for 1080p footage: when we measured this browser engine on 28 September, re-encoding 1080p took about 3.7 seconds per second of video in Chrome and about 29 seconds in Firefox. Smaller videos go faster. After the first few seconds, the page shows the time left next to the progress bar, worked out from the speed measured in your browser." },
           { q: "Which videos are refused?", a: "Videos over the length limit, files your browser cannot play (often AVI and some MOV or MKV files), and videos in another codec than H.264, HEVC, VP8, VP9, Theora or ProRes, AV1 included. Convert them to MP4 with Video Converter first." },
           { q: "Is the sound kept?", a: "Yes. Every audio track is encoded again as AAC next to the watermarked picture. A video without sound gives a silent MP4 rather than an error." },
           { q: "Can I use a transparent PNG logo?", a: "Yes. The image is drawn with its transparency, then scaled to the size you choose and given the opacity you set. A very large image is first reduced to 2048 pixels on its longer side." }

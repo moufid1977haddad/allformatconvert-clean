@@ -1,0 +1,5 @@
+  PASS .env to JSON: env.json, and the content is JSON
+  PASS JSON to .env: a .env file name, not env.json
+  PASS the page passes the current direction to the name (no fixed name left)
+  PASS an unknown direction throws (no silent default)
+4 passed, 0 failed

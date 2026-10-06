@@ -142,7 +142,7 @@ export default function PdfNumberPagesPage() {
               </select></label>
             <label className="block"><span className="block text-neutral-500 mb-1">Font size: {fontSize} pt</span>
               <input id="pn-size" type="range" min="6" max="36" value={fontSize} onChange={(e) => setFontSize(Number(e.target.value))} className="w-full" /></label>
-            <label className="flex items-center justify-between gap-2"><span className="text-neutral-500">Colour</span>
+            <label className="flex items-center justify-between gap-2"><span className="text-neutral-500">Color</span>
               <input id="pn-color" type="color" value={color} onChange={(e) => setColor(e.target.value)} /></label>
           </div>
           <label className="flex items-center gap-2 text-sm"><input id="pn-skip" type="checkbox" checked={skipCover} onChange={(e) => setSkipCover(e.target.checked)} /> Skip the first page (cover)</label>
@@ -167,7 +167,7 @@ export default function PdfNumberPagesPage() {
         howTo={[
           `Choose the PDF.`,
           `Pick a position button and a format in "Number format".`,
-          `Optionally set "First number", "From page", "To page (empty = last)", "Margin", the font size slider and "Colour".`,
+          `Optionally set "First number", "From page", "To page (empty = last)", "Margin", the font size slider and "Color".`,
           `Click "Add Page Numbers", then "Download" to save the -numbered.pdf file.`,
         ]}
         specs={[

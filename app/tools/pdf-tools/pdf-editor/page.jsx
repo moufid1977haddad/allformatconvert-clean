@@ -315,7 +315,7 @@ export default function PdfEditorPage() {
 
   const cancel = () => {
     if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
-    setLoading(false); setProgress(0); setPhase(''); setStatus('Cancelled.');
+    setLoading(false); setProgress(0); setPhase(''); setStatus('Canceled.');
   };
 
   const runWorker = (payload) => {
@@ -425,12 +425,12 @@ export default function PdfEditorPage() {
                 ))}
                 {tool === 'pen' && (
                   <>
-                    <input aria-label="Pen colour" type="color" value={`#${penColor.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setPenColor([1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)))} className="w-8 h-8 rounded" />
+                    <input aria-label="Pen color" type="color" value={`#${penColor.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setPenColor([1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)))} className="w-8 h-8 rounded" />
                     <input aria-label="Pen width" type="range" min="1" max="10" value={penWidth} onChange={(e) => setPenWidth(Number(e.target.value))} className="w-24" />
                   </>
                 )}
                 {tool === 'highlight' && (
-                  <input aria-label="Highlight colour" type="color" value={`#${highlightColor.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setHighlightColor([1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)))} className="w-8 h-8 rounded" />
+                  <input aria-label="Highlight color" type="color" value={`#${highlightColor.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setHighlightColor([1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)))} className="w-8 h-8 rounded" />
                 )}
                 {movingItem && <span className="text-xs text-indigo-600 self-center">Click the page to place it there…</span>}
               </div>
@@ -455,7 +455,7 @@ export default function PdfEditorPage() {
                     <div key={t.id} className="flex items-center gap-2">
                       <input aria-label="Text to add" value={t.text} onChange={(e) => setTextItems((p) => p.map((x) => (x.id === t.id ? { ...x, text: e.target.value } : x)))} className="flex-1 text-sm border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 rounded px-2 py-1" />
                       <input aria-label="Text size" type="number" min="6" max="72" value={t.fontSize} onChange={(e) => setTextItems((p) => p.map((x) => (x.id === t.id ? { ...x, fontSize: Number(e.target.value) } : x)))} className="w-16 text-sm border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 rounded px-2 py-1" />
-                      <input aria-label="Text colour" type="color" value={`#${t.color.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setTextItems((p) => p.map((x) => (x.id === t.id ? { ...x, color: [1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)) } : x)))} className="w-8 h-8 rounded" />
+                      <input aria-label="Text color" type="color" value={`#${t.color.map((c) => c.toString(16).padStart(2, '0')).join('')}`} onChange={(e) => setTextItems((p) => p.map((x) => (x.id === t.id ? { ...x, color: [1, 3, 5].map((i) => parseInt(e.target.value.slice(i, i + 2), 16)) } : x)))} className="w-8 h-8 rounded" />
                       <button onClick={() => setMovingItem({ kind: 'text', id: t.id })} className="text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 rounded">Move</button>
                       <button onClick={() => setTextItems((p) => p.filter((x) => x.id !== t.id))} className="text-xs px-2 py-1 bg-red-100 dark:bg-red-950 text-red-600 rounded">✕</button>
                     </div>
@@ -527,7 +527,7 @@ export default function PdfEditorPage() {
           { label: 'Added text', value: `Helvetica, Latin characters only, at the size you type in its size field` },
           { label: 'Page actions', value: `Move up or down, rotate, delete, extract the ticked pages` },
           { label: 'Extract Selected', value: `Copies the original pages, without added items or rotations` },
-          { label: 'Size limits', value: `The editor's page and file caps are printed above the upload area, and are lower on phones, iPhone and iPad` },
+          { label: 'Size limits', value: `The editor's page and file caps are printed above the upload area, and are lower on phones and tablets` },
         ]}
         privacy={`Everything happens in this browser tab: PDF.js draws the pages, and a background worker running pdf-lib builds the new file. Your PDF and the pictures you add are not uploaded. A JPEG photo stored sideways by a phone is turned upright in the browser before it is placed.`}
         faqs={[

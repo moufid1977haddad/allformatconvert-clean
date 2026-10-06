@@ -1,0 +1,28 @@
+mode: before
+FAIL  ff0000 without #
+      got:  {"preview":"unchanged","swatch":"#000000","rgb":"rgb(255,0,0)"}
+      want: {"preview":"#ff0000","swatch":"#ff0000","rgb":"rgb(255,0,0)"}
+FAIL  f00 without #
+      got:  {"preview":"unchanged","swatch":"#000000","rgb":""}
+      want: {"preview":"#ff0000","swatch":"#ff0000","rgb":"rgb(255,0,0)"}
+FAIL  #f80 shorthand
+      got:  {"preview":"#f80","swatch":"#000000","rgb":""}
+      want: {"preview":"#ff8800","swatch":"#ff8800","rgb":"rgb(255,136,0)"}
+FAIL  8 digits with alpha
+      got:  {"preview":"#ff000080","swatch":"#000000","rgb":""}
+      want: {"preview":"#ff000080","swatch":"#ff0000","rgb":"rgba(255,0,0,0.502)"}
+FAIL  4 digits with alpha, no #
+      got:  {"preview":"unchanged","swatch":"#000000","rgb":""}
+      want: {"preview":"#ff000088","swatch":"#ff0000","rgb":"rgba(255,0,0,0.533)"}
+FAIL  upper case and spaces
+      got:  {"preview":"unchanged","swatch":"#000000","rgb":""}
+      want: {"preview":"#ff8800","swatch":"#ff8800","rgb":"rgb(255,136,0)"}
+PASS  full code with #
+FAIL  invalid: 5 digits
+      got:  {"preview":"unchanged","swatch":"#000000","rgb":""}
+      want: {"preview":"unchanged","swatch":"unchanged","rgb":"error shown"}
+FAIL  invalid: not hex
+      got:  {"preview":"unchanged","swatch":"#000000","rgb":""}
+      want: {"preview":"unchanged","swatch":"unchanged","rgb":"error shown"}
+
+1/9 passed

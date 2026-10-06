@@ -1,0 +1,17 @@
+mode: AFTER the fix (app/lib/webpMetadata.js)
+chunks libvips: VP8X:10 ICCP:480 VP8 :14914 EXIF:336 XMP :367 | hand: VP8X:10 XMP :367 VP8 :15422 EXIF:187 (sharp reads it: webp 800x600)
+PASS  JPEG with GPS (regression)  -- LOCATION(2) IFD0(2) GPS(6)
+PASS  WebP by libvips (Exif header, XMP, ICC): GPS shown first  -- LOCATION(2) IFD0(6) EXIF(5) GPS(6) XMP(1) DC(1) ICC(22)
+PASS  WebP by libvips (Exif header, XMP, ICC): camera make/model  -- Make=OnlineConvertToolsCam
+PASS  WebP by libvips (Exif header, XMP, ICC): XMP  -- CreatorTool=P37Test
+PASS  WebP by libvips (Exif header, XMP, ICC): ICC profile  -- ICC ColorSpaceData=RGB
+PASS  WebP by libvips (Exif header, XMP, ICC): GPS group equals the JPEG's
+PASS  WebP built by hand (raw TIFF, odd XMP before the image): GPS shown first  -- LOCATION(2) IFD0(2) GPS(6) XMP(1) DC(1)
+PASS  WebP built by hand (raw TIFF, odd XMP before the image): camera make/model  -- Make=OnlineConvertToolsCam
+PASS  WebP built by hand (raw TIFF, odd XMP before the image): XMP  -- CreatorTool=P37Hand
+PASS  WebP built by hand (raw TIFF, odd XMP before the image): GPS group equals the JPEG's
+PASS  WebP without metadata: "none found", no error  -- no metadata (page: "No embedded metadata ... found")
+PASS  WebP cut short: the "damaged or cut short" message  -- ERROR "The embedded metadata could not be read: the file may be damaged or cut short."
+PASS  Remove metadata on the WebP: no GPS, camera or XMP left; ICC kept; still a valid picture  -- removed: EXIF (camera, date, GPS position…) + XMP; left: ICC(22); webp 800x600
+
+ALL PASS

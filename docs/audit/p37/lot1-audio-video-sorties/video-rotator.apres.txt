@@ -1,0 +1,9 @@
+page: mode reset on pick and checked at rotate time
+PASS  MP4 + lossless, then a WebM: turned on the video service  (turned on the video service)
+PASS  MOV + lossless, then an MKV: turned on the video service  (turned on the video service)
+PASS  MP4 + lossless, then another MP4 (choice visible, kept): lossless in the browser  (lossless in the browser)
+PASS  WebM alone: turned on the video service  (turned on the video service)
+PASS  MP4 + lossless: lossless in the browser  (lossless in the browser)
+PASS  state after a WebM pick is "compatible" (the radio group hidden for it says nothing else)
+
+video-rotator [working tree]: all PASS

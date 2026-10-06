@@ -59,14 +59,14 @@ export default function JsonToPhpPage() {
           { label: "Output modes", value: "PHP array (default) or PHP classes" },
           { label: "Input", value: "JSON text; class mode needs an object or an array of objects" },
           { label: "PHP version", value: "Array: 5.4 or later. Classes: 8.0 or later (constructor promotion, named arguments, mixed)" },
-          { label: "Large integers", value: "PHP array: values above PHP_INT_MAX are written as strings, with a comment. PHP classes: typed string, no comment; the json_decode call shown in the Usage line needs JSON_BIGINT_AS_STRING to keep the digits" },
+          { label: "Large integers", value: "PHP array: values above PHP_INT_MAX are written as strings, with a comment. PHP classes: typed string, with a comment, and the Usage line decodes with JSON_BIGINT_AS_STRING so the digits are kept" },
         ]}
         privacyTitle={"Where your JSON is processed"}
         privacy={"This converter is plain JavaScript executed by your browser, with no library to download, and the JSON never leaves your computer. If a message such as Invalid JSON or the class-mode warning is displayed, that message, stripped of quoted text, long numbers and addresses, is reported to our error log, along with the tool's name and your browser's name and version."}
         faqs={[
           { q: "Can I get a PHP array with my actual data?", a: "Yes. Keep \"PHP array\" selected: the output is $data = [ 'key' => value, ... ]; with nested arrays for nested objects. For a config file that must return an array, replace $data = with return." },
           { q: "Which PHP version do the classes need?", a: "8.0 or later. They use constructor property promotion, named arguments in fromArray() and the mixed type, all introduced in PHP 8.0. The array output only needs short array syntax, available since PHP 5.4." },
-          { q: "What happens to very large integers?", a: "In the PHP array output they become strings: a JSON integer above PHP_INT_MAX would lose digits as a PHP float, so it is written in quotes, as json_decode does with JSON_BIGINT_AS_STRING, and a comment says so. In class mode the property is typed string with no comment; decode with JSON_BIGINT_AS_STRING to keep the digits." },
+          { q: "What happens to very large integers?", a: "In the PHP array output they become strings: a JSON integer above PHP_INT_MAX would lose digits as a PHP float, so it is written in quotes, as json_decode does with JSON_BIGINT_AS_STRING, and a comment says so. In class mode the property is typed string, a comment says so, and the Usage line calls json_decode with JSON_BIGINT_AS_STRING to keep the digits." },
           { q: "Can class mode convert a list of numbers?", a: "No. Classes need an object or an array of objects. For a list of numbers or strings, or a single value, the page shows a message asking you to use the array output instead." },
         ]}
         tips={[

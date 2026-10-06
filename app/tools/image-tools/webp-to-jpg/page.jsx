@@ -55,7 +55,7 @@ export default function WebPtoJPGPage() {
               <input id="jpg-quality" type="range" min="10" max="100" value={quality} onChange={(e) => setQuality(e.target.value)} className="w-full" />
             </label>
             <label className="text-neutral-600 flex items-center gap-2">Transparent areas become
-              <input id="jpg-background" type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="w-10 h-8" aria-label="Background colour" />
+              <input id="jpg-background" type="color" value={background} onChange={(e) => setBackground(e.target.value)} className="w-10 h-8" aria-label="Background color" />
             </label>
           </div>
           <button onClick={convert} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Convert</button>
@@ -83,7 +83,7 @@ export default function WebPtoJPGPage() {
         privacy={`The WebP is opened by your browser and re-encoded as a JPG without leaving the device; we do not receive the image. If an error appears on screen, we log its cleaned wording with the tool's name and your browser's name and version (no file name, no image data) to find and fix the problem.`}
         faqs={[
           { q: "Can I choose the JPG quality?", a: `Yes. The "JPG quality" slider goes from 10 to 100 and starts at 92. Lower values give a smaller file with more visible compression; set it before clicking "Convert", and convert again to try another value.` },
-          { q: "Can I pick the colour of a transparent background?", a: `Yes. Transparent areas are filled with the color picked next to "Transparent areas become", white by default, because a JPG cannot store transparency. Pick black or any other color to match where the picture will be used.` },
+          { q: "Can I pick the color of a transparent background?", a: `Yes. Transparent areas are filled with the color picked next to "Transparent areas become", white by default, because a JPG cannot store transparency. Pick black or any other color to match where the picture will be used.` },
           { q: "Does the JPG keep an animated WebP's motion?", a: `No. Only the first frame is kept, since JPG holds one still picture. The page warns you when the WebP is animated; to keep the motion, convert it to a GIF instead.` }
         ]}
         tips={[

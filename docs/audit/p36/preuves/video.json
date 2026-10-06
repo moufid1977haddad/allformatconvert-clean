@@ -195,11 +195,6 @@
    "pattern": "\\[128, .*\\[192, .*\\[256, .*\\[320, "
   },
   {
-   "claim": "at least 192 kbps",
-   "file": "app/lib/audioFormats.js",
-   "pattern": "Math\\.max\\(kbps, 192\\)"
-  },
-  {
    "claim": "about 10 MB",
    "file": "docs/audit/RAPPORT-formats-navigateurs.md",
    "pattern": "~10,2 Mo sur le réseau"

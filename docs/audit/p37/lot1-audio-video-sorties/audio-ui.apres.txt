@@ -1,0 +1,6 @@
+PASS  Audio Compressor 5.2 MB -> 1.2 MB: every size has one unit  (Original 5.2 MB | Compressed 1.2 MB | Re-encoding it gives 1.2 MB, not less than your 5.2 MB: keep your original. The re-encoded file is below only if you need this format.)
+PASS  Audio Compressor 800 KB -> 500 KB: every size has one unit  (Original 800 KB | Compressed 500 KB | Re-encoding it gives 500 KB, not less than your 800 KB: keep your original. The re-encoded file is below only if you need this format.)
+PASS  Audio Equalizer: 3 sliders named after their band  (Bass gain (dB) | Mid gain (dB) | Treble gain (dB))
+PASS  Video Trimmer: Start / End sliders have a full name  (Start (seconds) | End (seconds))
+
+audio-ui [working tree]: all PASS

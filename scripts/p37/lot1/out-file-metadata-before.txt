@@ -1,0 +1,10 @@
+mode: BEFORE the fix (exifr.parse only)
+PASS  JPEG with GPS (regression): same groups as before the fix  -- Camera (EXIF): Camera make=OnlineConvertToolsCam, Camera model=Test Model 1 | Location (GPS): Latitude=48.858400, Longitude=2.294500
+FAIL  WebP with EXIF + GPS: Location (GPS) shown, same as the source JPEG  -- nothing (page: "No metadata found inside this file")
+FAIL  WebP with EXIF: camera make and model of the source JPEG  -- Camera make=undefined
+FAIL  WebP with XMP: Authoring shows the XMP creator tool and author  -- Authoring: undefined
+FAIL  WebP: every group and row identical to a JPEG carrying the same metadata  -- JPEG twin: Camera (EXIF): Camera make=OnlineConvertToolsCam, Camera model=Test Model 1, Orientation=Horizontal (normal) | Authoring: Software=P37Test, Artist=Jane Doe | Location (GPS): Latitude=48.858400, Longitude=2.294500
+PASS  WebP without metadata: nothing listed, no error note  -- nothing (page: "No metadata found inside this file")
+FAIL  WebP cut short: the "damaged or cut short" note  -- nothing (page: "No metadata found inside this file")
+
+5 FAILED

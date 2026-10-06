@@ -54,7 +54,7 @@ export default function AudioMetadataPage() {
           `For a tag-free copy of the song, press "Remove the metadata (no re-encoding)" and save what appears.`,
         ]}
         specs={[
-          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AC3, AIFF, AIF, AMR, MKA, WEBA, CAF` },
           { label: `Report`, value: `Shown in sections, with every field ffprobe returns available as JSON` },
           { label: `Clean copy output`, value: `Same format as the source, audio streams only, without tags, chapters or cover picture` },
           { label: `Maximum file size`, value: `Report: set by your browser, since the file is read from disk in pieces. Clean copy: 2 GB.` },

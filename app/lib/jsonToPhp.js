@@ -119,6 +119,14 @@ function addSample(shape, v) {
   }
 }
 
+// Does the JSON hold a whole number that a PHP int cannot hold?
+function hasBigInt(v) {
+  if (v instanceof LosslessNumber) return v.isInteger && (BigInt(v.source) > PHP_INT_MAX || BigInt(v.source) < -PHP_INT_MAX - 1n);
+  if (Array.isArray(v)) return v.some(hasBigInt);
+  if (v && typeof v === 'object') return Object.keys(v).some((k) => hasBigInt(v[k]));
+  return false;
+}
+
 function kinds(shape) {
   return ['bool', 'int', 'float', 'string'].filter((k) => shape[k]).concat(shape.array ? ['array'] : [], shape.object ? ['object'] : []);
 }
@@ -195,8 +203,15 @@ export function jsonToPhpClass(text, rootName = 'Root') {
   emitClass(root.object, rootName);
   // Nested classes are emitted before their parent; show the root first.
   const ordered = [classes[classes.length - 1], ...classes.slice(0, -1)];
+  // P37 (06/10): a whole number beyond PHP_INT_MAX is typed string above, but json_decode($json, true) alone turns it
+  // into a float (1.2345678901235E+19) before fromArray() sees it: its digits are gone. The Usage line then passes
+  // JSON_BIGINT_AS_STRING, which gives the original digits as a string, and a comment says why.
+  const big = hasBigInt(value);
+  const decode = big ? 'json_decode($json, true, flags: JSON_BIGINT_AS_STRING)' : 'json_decode($json, true)';
   const usage = Array.isArray(value)
-    ? `// Usage: $items = array_map(fn (array $a) => ${used.values().next().value}::fromArray($a), json_decode($json, true));`
-    : `// Usage: $root = ${used.values().next().value}::fromArray(json_decode($json, true));`;
-  return ['<?php', '', '// Requires PHP 8.0+ (constructor promotion, named arguments).', usage, '', ordered.join('\n\n'), ''].join('\n');
+    ? `// Usage: $items = array_map(fn (array $a) => ${used.values().next().value}::fromArray($a), ${decode});`
+    : `// Usage: $root = ${used.values().next().value}::fromArray(${decode});`;
+  const head = ['<?php', '', '// Requires PHP 8.0+ (constructor promotion, named arguments).'];
+  if (big) head.push('// Integers beyond PHP_INT_MAX are typed string: decode with JSON_BIGINT_AS_STRING, or they become floats and lose digits.');
+  return [...head, usage, '', ordered.join('\n\n'), ''].join('\n');
 }

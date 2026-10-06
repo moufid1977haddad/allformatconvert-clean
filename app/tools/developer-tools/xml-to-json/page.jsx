@@ -4,6 +4,7 @@ import SeoContent from '../../../components/SeoContent';
 import { TextDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import TextArea from '@/app/components/TextArea';
+import { xmlErrorMessage, validateXml } from './xmlError';
 export default function XmlToJsonPage() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -18,9 +19,9 @@ export default function XmlToJsonPage() {
       // visitor actually clicks Convert, so it doesn't add to the page's
       // initial JS payload.
       const { XMLParser, XMLValidator } = await import('fast-xml-parser');
-      const validation = XMLValidator.validate(input);
+      const validation = validateXml(XMLValidator.validate, input); // also refuses a second root element (P37)
       if (validation !== true) {
-        throw new Error(validation?.err?.msg || 'Invalid XML');
+        throw new Error(xmlErrorMessage(validation)); // with the line and column of the error (P37)
       }
       const parser = new XMLParser({
         ignoreAttributes: false, // keep attributes -- previously silently dropped
@@ -68,7 +69,7 @@ export default function XmlToJsonPage() {
       </div>
       <SeoContent
         title="XML to JSON"
-        description={"XML to JSON checks pasted XML and converts it with the fast-xml-parser library. Each element becomes a key; repeated sibling elements become an array; attributes become keys prefixed with @_; text that shares an element with attributes or children goes under #text. Every value stays a string exactly as written, so leading zeros and trailing decimals survive. The XML declaration is dropped. Malformed XML is reported with the parser's message, which gives the position for a mismatched closing tag, instead of a partial result. fast-xml-parser does the parsing inside your browser tab."}
+        description={"XML to JSON checks pasted XML and converts it with the fast-xml-parser library. Each element becomes a key; repeated sibling elements become an array; attributes become keys prefixed with @_; text that shares an element with attributes or children goes under #text. Every value stays a string exactly as written, so leading zeros and trailing decimals survive. The XML declaration is dropped. Malformed XML, a second root element included, is reported with a message that gives the line and column of the error, instead of a partial result. fast-xml-parser does the parsing inside your browser tab."}
         example={{"caption":"Two person elements with an id attribute and phone numbers starting with 0, and the JSON the tool returns:","inputLabel":"XML","input":"<?xml version=\"1.0\"?>\n<contacts>\n  <person id=\"1\"><name>Ann</name><phone>0612345678</phone></person>\n  <person id=\"2\"><name>Bo</name><phone>0698765432</phone></person>\n</contacts>","outputLabel":"JSON","output":"{\n  \"contacts\": {\n    \"person\": [\n      {\n        \"name\": \"Ann\",\n        \"phone\": \"0612345678\",\n        \"@_id\": \"1\"\n      },\n      {\n        \"name\": \"Bo\",\n        \"phone\": \"0698765432\",\n        \"@_id\": \"2\"\n      }\n    ]\n  }\n}"}}
         howToTitle="How to convert XML to JSON"
         howTo={[
@@ -88,7 +89,7 @@ export default function XmlToJsonPage() {
           { q: "Are XML attributes kept?", a: "Yes. Each attribute becomes a key prefixed with @_ on the element's object, next to its children, so a person element with id 1 gets @_id holding the string 1." },
           { q: "Are numbers converted to JSON numbers?", a: "No. Every value stays text exactly as written, so the phone number 0612345678 keeps its zero and a version 1.10 is not shortened. Convert the values you need in your own code." },
           { q: "Is text mixed with tags kept in place?", a: "No. In <p>Hello <b>world</b> again</p>, the text parts are joined under #text without their position among the tags, and the page shows a note naming such elements. The tool suits data files better than documents." },
-          { q: "Will invalid XML be detected?", a: "Yes. The XML is validated first; a mismatched tag gives a message such as Expected closing tag 'b' (opened in line 1, col 4) instead of closing tag 'a'." },
+          { q: "Will invalid XML be detected?", a: "Yes. The XML is validated first, and the message ends with the line and column of the error, as in char '&' is not expected. (line 2, column 6). A second root element, as in <a></a><c/>, is refused too, because XML allows only one." },
         ]}
         tips={[
           "To write JSON as XML, with @_ keys turned into attributes, use JSON to XML.",

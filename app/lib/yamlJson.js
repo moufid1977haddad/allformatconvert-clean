@@ -43,11 +43,31 @@ function mapNumbers(v, fn) {
   return v;
 }
 
+// P37 (06/10): keys in the order of the JSON. A JavaScript object lists keys that are whole numbers ("2", "10") first,
+// so js-yaml wrote them first. The parse keeps each object as a Map in source order; a key that an object would move
+// (an array index: 0 to 4294967294, no leading zero) is given to js-yaml as a placeholder, then replaced by the key as
+// js-yaml writes it alone ('10'), so its quoting is js-yaml's own.
+const ARRAY_INDEX = /^(?:0|[1-9]\d{0,9})$/;
+function toDumpable(v, numPh, keyPh) {
+  if (v instanceof LosslessNumber) return numPh.put(v.source);
+  if (Array.isArray(v)) return v.map((x) => toDumpable(x, numPh, keyPh));
+  if (v instanceof Map) {
+    const out = {};
+    for (const [k, x] of v) {
+      const key = ARRAY_INDEX.test(k) && Number(k) < 4294967295 ? keyPh.put(yaml.dump({ [k]: 0 }, { lineWidth: -1 }).replace(/: 0\n$/, '')) : k;
+      Object.defineProperty(out, key, { value: toDumpable(x, numPh, keyPh), enumerable: true, writable: true, configurable: true });
+    }
+    return out;
+  }
+  return v;
+}
+
 export function jsonToYaml(text) {
-  const value = parseJsonLossless(text);
+  const value = parseJsonLossless(text, { keyOrder: true });
   const ph = placeholderSet(text);
-  const withPh = mapNumbers(value, (n) => ph.put(n.source));
-  return ph.restore(yaml.dump(withPh, { lineWidth: -1, noRefs: true }), false);
+  const keyPh = placeholderSet(text);
+  const withPh = toDumpable(value, ph, keyPh);
+  return keyPh.restore(ph.restore(yaml.dump(withPh, { lineWidth: -1, noRefs: true }), false), false);
 }
 
 // YAML 1.2 core integers, kept exact beyond 2^53 (0x, 0o, 0b and _ included).

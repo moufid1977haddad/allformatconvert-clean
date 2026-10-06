@@ -182,8 +182,8 @@ export default function AudioWaveformPage() {
             <div className="col-span-2 grid grid-cols-2 sm:grid-cols-5 gap-2 text-sm text-neutral-600" data-wave-options>
               <label>Width<select id="wf-w" value={out.w} onChange={(e) => setOut({ ...out, w: Number(e.target.value) })} className="w-full border border-neutral-200 rounded px-1 py-1 bg-white">{[800, 1200, 1920, 3000].map((v) => <option key={v} value={v}>{v} px</option>)}</select></label>
               <label>Height<select id="wf-h" value={out.h} onChange={(e) => setOut({ ...out, h: Number(e.target.value) })} className="w-full border border-neutral-200 rounded px-1 py-1 bg-white">{[150, 200, 300, 500, 800].map((v) => <option key={v} value={v}>{v} px</option>)}</select></label>
-              <label>Wave<input type="color" value={out.wave} onChange={(e) => setOut({ ...out, wave: e.target.value })} className="w-full h-8" aria-label="Wave colour" /></label>
-              <label>Background<input type="color" value={out.bg} onChange={(e) => setOut({ ...out, bg: e.target.value, transparent: false })} className="w-full h-8" aria-label="Background colour" /></label>
+              <label>Wave<input type="color" value={out.wave} onChange={(e) => setOut({ ...out, wave: e.target.value })} className="w-full h-8" aria-label="Wave color" /></label>
+              <label>Background<input type="color" value={out.bg} onChange={(e) => setOut({ ...out, bg: e.target.value, transparent: false })} className="w-full h-8" aria-label="Background color" /></label>
               <label className="flex items-center gap-1 sm:pt-5"><input id="wf-transparent" type="checkbox" checked={out.transparent} onChange={(e) => setOut({ ...out, transparent: e.target.checked })} /> Transparent</label>
             </div>
             <div className="col-span-2 grid grid-cols-2 gap-3">
@@ -207,7 +207,7 @@ export default function AudioWaveformPage() {
           `Click "Download PNG" to save the visible part; "Reset Zoom" brings back the whole file.`,
         ]}
         specs={[
-          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AC3, AIFF, AIF, AMR, MKA, WEBA, CAF` },
           { label: `Output format`, value: `PNG` },
           { label: `Image size`, value: `Width 800, 1200, 1920 or 3000 px; height 150, 200, 300, 500 or 800 px` },
           { label: `Zoom`, value: `${MIN_ZOOM}x to ${MAX_ZOOM}x; the scroll wheel zooms around the pointer, the buttons from the left edge of the view` },

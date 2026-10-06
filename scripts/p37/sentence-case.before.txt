@@ -1,0 +1,32 @@
+FAIL  period + space + lower case
+      got:  "Hello world. this is it"
+      want: "Hello world. This is it"
+FAIL  P36 example
+      got:  "End. next"
+      want: "End. Next"
+FAIL  several sentences
+      got:  "One. two. three."
+      want: "One. Two. Three."
+FAIL  after a closing quote or bracket
+      got:  "He said \"stop.\" then left. (really.) yes"
+      want: "He said \"stop.\" Then left. (Really.) Yes"
+FAIL  before an opening quote (after ? ICU always starts a sentence, as before)
+      got:  "It ended. \"then what?\" She asked"
+      want: "It ended. \"Then what?\" She asked"
+PASS  no space: word.word
+FAIL  decimal
+      got:  "Pi is 3.14 today. ok"
+      want: "Pi is 3.14 today. Ok"
+FAIL  URL and file name
+      got:  "See example.com/a.b or read me.txt. done"
+      want: "See example.com/a.b or read me.txt. Done"
+PASS  abbreviation e.g.
+PASS  abbreviation etc.
+PASS  title Mr.
+PASS  initial
+PASS  ellipsis
+PASS  newline
+PASS  shouting kept as before
+PASS  pronoun I
+
+9/16 passed

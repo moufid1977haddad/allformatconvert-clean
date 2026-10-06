@@ -2,19 +2,17 @@
 //
 // Real iPhone pass of 04/10 (iOS 26, Safari): PDF OCR, kit-iphone-p21/pdf-avec-images.pdf, English — the page stayed
 // on "Page 1 of 3, Recognizing text… 0 %". Playwright's WebKit recognizes the same three pages in about 4 s, so the
-// cause is not reproduced. Whatever it is, the visitor must get the text: on iOS / iPadOS ONLY, a page whose
-// recognition fails or makes no progress for LOCAL_OCR_LIMIT_MS is recognized by /api/pdf-ocr (Tesseract on our
-// pdf-tools service, same languages, same page), and the page says so before and after (the PDF is sent, then
-// deleted). Same transport as the page drawings of P32 (app/lib/serverPageRender.js): the PDF is posted with each page
-// up to DIRECT_MAX_BYTES, or uploaded once to the media service above it; close() deletes it.
+// cause is not reproduced. Whatever it is, the visitor must get the text: on iOS / iPadOS ONLY, the pages are
+// recognized by /api/pdf-ocr (Tesseract on our pdf-tools service, same languages, same page), and the page says so
+// before and after (the PDF is sent, then deleted). P33 first tried the device and waited 20 s without progress; a
+// second real iPhone pass (06/10) showed the device never finishes, so since P37 the pages go to the service from the
+// start on iPhone / iPad (app/lib/ocrFirstStep.js). Same transport as the page drawings of P32
+// (app/lib/serverPageRender.js): the PDF is posted with each page up to DIRECT_MAX_BYTES, or uploaded once to the
+// media service above it; close() deletes it.
 import { stageForRoute, mediaServiceConfigured } from './mediaJob';
 import { DIRECT_MAX_BYTES, STAGED_MAX_BYTES, ServerRenderError } from './serverPageRender';
 
 const MIB = 1024 * 1024;
-
-/** How long recognition may go without any progress on the device before our service takes over (tests shorten it). */
-export const LOCAL_OCR_LIMIT_MS = () => (typeof window !== 'undefined' && window.__localOcrLimitMs) || 20000;
-export const LOCAL_OCR_LIMIT_LABEL = '20 seconds';
 
 const fromBase64 = (b64) => {
   const bin = atob(b64);
@@ -54,12 +52,20 @@ export class ServerPageOcr {
     this.staged = null; // {jid, ticket, cleanup}
   }
 
-  async #stage(signal) {
-    if (this.staged) return this.staged;
+  /** P37: the reason our service cannot take this PDF (its size), or null — checked before anything is sent. */
+  tooLarge() {
+    if (this.file.size <= DIRECT_MAX_BYTES) return null;
     if (this.file.size > STAGED_MAX_BYTES || !mediaServiceConfigured()) {
       const max = mediaServiceConfigured() ? STAGED_MAX_BYTES : DIRECT_MAX_BYTES;
-      throw new ServerRenderError(`This PDF is ${(this.file.size / MIB).toFixed(1)} MB; our OCR service takes files up to ${Math.floor(max / MIB)} MB.`);
+      return `This PDF is ${(this.file.size / MIB).toFixed(1)} MB; our OCR service takes files up to ${Math.floor(max / MIB)} MB.`;
     }
+    return null;
+  }
+
+  async #stage(signal) {
+    if (this.staged) return this.staged;
+    const refused = this.tooLarge();
+    if (refused) throw new ServerRenderError(refused);
     this.staged = await stageForRoute({ file: this.file, purpose: 'pdf-ocr', onStage: this.onStage, signal });
     return this.staged;
   }
@@ -95,7 +101,7 @@ export class ServerPageOcr {
       else { try { body = await res.json(); } catch { /* not JSON */ } }
     } catch (e) {
       if (e instanceof ServerRenderError) throw e;
-      if (e && e.name === 'AbortError') throw new ServerRenderError('Cancelled.');
+      if (e && e.name === 'AbortError') throw new ServerRenderError('Canceled.');
       throw new ServerRenderError((e && e.message) || 'Could not reach our OCR service. Check your connection and try again.');
     }
     if (!res.ok || !body || body.ok !== true) throw new ServerRenderError((body && body.error) || 'Our OCR service could not recognize this page.');

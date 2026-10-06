@@ -30,7 +30,7 @@ const STAGE_LABEL = {
   download: 'Downloading the result',
 };
 
-export default function MediaServiceTool({ op, title, subtitle, buttonLabel, controls, initialParams, buildParams, outName, seo, tool, previewStyle, extra, postProcess }) {
+export default function MediaServiceTool({ op, title, subtitle, buttonLabel, controls, initialParams, buildParams, outName, seo, tool, previewStyle, extra, postProcess, problem }) {
   const [file, setFile] = useState(null);
   const [params, setParams] = useState(initialParams);
   const [stage, setStage] = useState(null); // {stage, pct, position}
@@ -45,6 +45,9 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
   const inputRef = useRef();
   const abortRef = useRef(null);
   const busy = stage !== null;
+  // P37: a settings combination the service refuses is said before the upload, and "Convert" stays off (Video Converter:
+  // a "Resolution" limit with a speed or a mirror). `problem(params)` returns that sentence, or null.
+  const blocked = file && problem ? problem(params) : null;
 
   useEffect(() => () => { abortRef.current?.abort(); }, []);
   useEffect(() => {
@@ -82,7 +85,7 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
   };
 
   const run = async () => {
-    if (!file || busy) return;
+    if (!file || busy || blocked) return;
     setError('');
     setResult(null);
     setNotSmaller(null);
@@ -147,11 +150,12 @@ export default function MediaServiceTool({ op, title, subtitle, buttonLabel, con
               {pct === null && <p className="text-xs text-neutral-400 text-center">{label}</p>}
             </div>
           )}
+          {blocked && !busy && <p role="alert" className="text-amber-800 text-center text-sm" data-settings-problem>{blocked}</p>}
           {error && <p role="alert" className="text-red-500 text-center text-sm">{error}</p>}
           {busy ? (
             <button onClick={cancel} className="w-full bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl py-3 font-semibold transition">Cancel</button>
           ) : (
-            <button onClick={run} disabled={!file} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{buttonLabel}</button>
+            <button onClick={run} disabled={!file || !!blocked} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">{buttonLabel}</button>
           )}
           {notSmaller && (
             <div role="status" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-neutral-800 space-y-1">

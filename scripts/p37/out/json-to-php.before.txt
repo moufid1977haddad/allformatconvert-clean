@@ -1,0 +1,13 @@
+  FAIL object with a big id: Usage decodes with JSON_BIGINT_AS_STRING 
+    // Usage: $root = Root::fromArray(json_decode($json, true));
+  FAIL array of objects with a big number nested deep: same flag in the array_map Usage 
+    // Usage: $items = array_map(fn (array $a) => Root::fromArray($a), json_decode($json, true));
+  FAIL big number: a comment says why the property is a string 
+    <?php
+    
+    // Requires PHP 8.0+ (constructor promotion, named arguments).
+    // Usage: $root = Root::fromArray(json_decode($json, true));
+  PASS PHP_INT_MAX itself fits: int, plain Usage, no comment
+  PASS a big number inside a string is not a number: plain Usage
+  PASS PHP array mode unchanged (string literal and its comment)
+3 passed, 3 failed

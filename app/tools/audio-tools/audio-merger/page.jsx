@@ -421,7 +421,7 @@ export default function AudioMergerPage() {
           `Click "Merge Audio Files", then "Download" to save merged_audio in the chosen format.`,
         ]}
         specs={[
-          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AC3, AIFF, AIF, AMR, MKA, WEBA, CAF` },
           { label: `Output formats`, value: `Lossless: FLAC, WAV, AIFF, ALAC, CAF, W64. Compressed: MP3, M4A, AAC, M4R, OGG, Opus, WMA, AC3.` },
           { label: `Bitrate`, value: `MP3, M4A, AAC, M4R and OGG: 64 to 320 kbps. Opus: 64 to 256. WMA: 64 to 256 requested, shown with the rate really written. AC3: 192 to 640.` },
           { label: `Files`, value: `Two or more, with no maximum count; all are held in browser memory` },

@@ -69,7 +69,9 @@ export async function jsonToCode(text, target, rootName = 'Root') {
     inferBooleanStrings: false,
   });
   const code = result.lines.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
-  if (!beyond) return code;
+  // P37 (06/10): never for Python. Its int has no size limit and json.loads keeps every digit, so the field typed int
+  // is right there; the note was also a "//" line, a SyntaxError in model.py.
+  if (!beyond || target === 'python') return code;
   const note = `// Note: ${beyond} whole number${beyond > 1 ? 's are' : ' is'} beyond 64 bits; typed as a float here, so its last digits would be lost — read it as a string or a big-number type.\n`;
   return code.startsWith('<?php') ? code.replace(/^<\?php\n?/, (m) => m + note) : note + code; // after <?php, never printed as text
 }

@@ -133,7 +133,7 @@ export default function CsvToSqlPage() {
     setProgress(0);
     setPhase('');
     clearResult();
-    setStatus('Cancelled.');
+    setStatus('Canceled.');
   };
 
   const convert = () => {
@@ -290,7 +290,7 @@ export default function CsvToSqlPage() {
           { label: "Input", value: `a .csv file (up to ${MAX_FILE_SIZE_LABEL}) or CSV text pasted in the page` },
           { label: "Output", value: "SQL text: CREATE TABLE plus one INSERT per row" },
           { label: "Databases", value: "Standard SQL (PostgreSQL, SQLite), MySQL / MariaDB, SQL Server" },
-          { label: "Rows from a file", value: `${MAX_ROWS.toLocaleString('en-US')} on a computer, ${MOBILE_MAX_ROWS.toLocaleString('en-US')} on phones, iPhone and iPad, header row included` },
+          { label: "Rows from a file", value: `${MAX_ROWS.toLocaleString('en-US')} on a computer, ${MOBILE_MAX_ROWS.toLocaleString('en-US')} on phones and tablets, header row included` },
           { label: "Rows of pasted text", value: `${PASTE_MAX_ROWS.toLocaleString('en-US')} on every device` },
         ]}
         privacy={"The CSV is parsed and the SQL is written in a background worker in your browser; your file and pasted data are not uploaded, and no database is contacted. If an error occurs, its wording, cleaned of file names and quoted text, is reported to us with the tool name and your browser version."}
@@ -298,7 +298,7 @@ export default function CsvToSqlPage() {
           { q: "Are the column types sized from the data?", a: "Yes. Whole numbers of up to 9 digits give INTEGER, of 10 to 15 digits BIGINT, and decimals DECIMAL with exactly the digits they need. A value with more than 15 significant digits or an exponent makes its column text: VARCHAR (NVARCHAR on SQL Server) as long as the longest value, or TEXT, LONGTEXT or NVARCHAR(MAX) beyond the limit. Untick \"Numeric columns as INTEGER / DECIMAL\" for text columns only." },
           { q: "Are names with spaces or reserved words safe?", a: "Yes. Every table and column name is quoted for the chosen database: double quotes in Standard SQL, backticks in MySQL / MariaDB, square brackets in SQL Server, with a quote character inside a name doubled. A header such as unit price or order therefore still gives valid SQL." },
           { q: "Are apostrophes in values escaped?", a: "Yes. An apostrophe is doubled, so O'Brien is written 'O''Brien'; MySQL / MariaDB also doubles backslashes, and SQL Server strings get the N prefix. An empty cell becomes NULL in a numeric column and an empty string in a text column." },
-          { q: "Is pasted CSV limited to fewer rows than a file?", a: `Yes, on a computer: pasted text stops at ${PASTE_MAX_ROWS.toLocaleString('en-US')} rows because it lives in the page, while a file can have ${MAX_ROWS.toLocaleString('en-US')} rows and be up to ${MAX_FILE_SIZE_LABEL}. On phones, iPhone and iPad both limits are ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows, header row included.` },
+          { q: "Is pasted CSV limited to fewer rows than a file?", a: `Yes, on a computer: pasted text stops at ${PASTE_MAX_ROWS.toLocaleString('en-US')} rows because it lives in the page, while a file can have ${MAX_ROWS.toLocaleString('en-US')} rows and be up to ${MAX_FILE_SIZE_LABEL}. On phones and tablets both limits are ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows, header row included.` },
         ]}
         tips={[
           "Dates are not detected: change their VARCHAR or NVARCHAR type to DATE or TIMESTAMP in the CREATE TABLE statement before running it.",

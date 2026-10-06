@@ -1,0 +1,20 @@
+  FAIL namespace with code: refused, the message names it 
+    The input did not match the regular expression /namespace "A" \(line 1\) contains code/. Input:
+    
+    'NO ERROR, output: console.log(A.x,A.f());'
+    
+  FAIL nested namespace with code: refused with its full name 
+    The input did not match the regular expression /namespace "Outer\.Inner" \(line 2\)/. Input:
+    
+    'NO ERROR, output: const k=1;console.log(Outer.Inner.v+1);'
+    
+  PASS namespace with types only, and declare namespace: removed, output runs like tsc
+  FAIL TSX: clear message about JSX, not a bare Unexpected token 
+    The input did not match the regular expression /JSX/. Input:
+    
+    'Unexpected token, expected ";" (1:30)'
+    
+  PASS old-style casts <number>x still minified, same output as tsc
+  PASS plain TypeScript: interfaces, generics, enum, same output as tsc
+  PASS syntax error: still an error
+4 passed, 3 failed

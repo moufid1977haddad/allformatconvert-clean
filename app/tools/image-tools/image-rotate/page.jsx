@@ -53,8 +53,8 @@ export default function ImageRotatePage() {
               <input id="rot-angle" type="number" min="-360" max="360" step="0.5" value={angle} onChange={e => { const v = Number(e.target.value); if (Number.isFinite(v)) setAngle(((v % 360) + 360) % 360); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2" /></label>
             <label className="block"><span className="block text-neutral-500 mb-1">Background (any angle other than 90° steps)</span>
               <span className="flex gap-2 items-center">
-                <select id="rot-bg" value={bg} onChange={e => setBg(e.target.value)} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg p-2"><option value="transparent">Transparent (PNG)</option><option value="color">Colour (fills the corners and any transparency; JPG, PNG and WebP keep their format)</option></select>
-                {bg === 'color' && <input id="rot-bg-color" type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} aria-label="Corner colour" />}
+                <select id="rot-bg" value={bg} onChange={e => setBg(e.target.value)} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg p-2"><option value="transparent">Transparent (PNG)</option><option value="color">Color (fills the corners and any transparency; JPG, PNG and WebP keep their format)</option></select>
+                {bg === 'color' && <input id="rot-bg-color" type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} aria-label="Corner color" />}
               </span></label>
           </div>
           <button onClick={rotate} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Rotate</button>
@@ -70,7 +70,7 @@ export default function ImageRotatePage() {
         howTo={[
           "Click the upload box and pick the photo you want to straighten or turn.",
           "Click a preset (90, 180 or 270 degrees), move \"Custom angle\", or type the value in \"Angle (degrees, clockwise)\".",
-          "For an angle that is not a quarter turn, set \"Background\" to transparent or to a colour.",
+          "For an angle that is not a quarter turn, set \"Background\" to transparent or to a color.",
           "Click \"Rotate\", then click \"Download\".",
         ]}
         specs={[

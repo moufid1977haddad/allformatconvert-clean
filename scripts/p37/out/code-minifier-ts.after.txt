@@ -1,0 +1,8 @@
+  PASS namespace with code: refused, the message names it
+  PASS nested namespace with code: refused with its full name
+  PASS namespace with types only, and declare namespace: removed, output runs like tsc
+  PASS TSX: clear message about JSX, not a bare Unexpected token
+  PASS old-style casts <number>x still minified, same output as tsc
+  PASS plain TypeScript: interfaces, generics, enum, same output as tsc
+  PASS syntax error: still an error
+7 passed, 0 failed

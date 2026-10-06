@@ -34,7 +34,10 @@ function numberFrom(src) {
 
 const NUMBER = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
 
-export function parseJsonLossless(input) {
+// { keyOrder: true } (P37, 06/10): each object is returned as a Map, in the order its keys are written. A plain object
+// lists keys that are whole numbers ("2", "10") first, in numeric order, whatever the source order; JSON to CSV and
+// JSON to YAML put them first that way. A repeated key keeps its first position and its last value, as JSON.parse.
+export function parseJsonLossless(input, { keyOrder = false } = {}) {
   const text = stripBom(input);
   JSON.parse(text); // validator: throws the browser's own message on bad JSON
   let i = 0;
@@ -53,7 +56,7 @@ export function parseJsonLossless(input) {
     const c = text[i];
     if (c === '{') {
       i++;
-      const obj = {};
+      const obj = keyOrder ? new Map() : {};
       ws();
       if (text[i] === '}') { i++; return obj; }
       for (;;) {
@@ -63,7 +66,8 @@ export function parseJsonLossless(input) {
         i++; // ':'
         const v = value();
         // defineProperty so a "__proto__" key stays an ordinary key
-        Object.defineProperty(obj, k, { value: v, enumerable: true, writable: true, configurable: true });
+        if (keyOrder) obj.set(k, v);
+        else Object.defineProperty(obj, k, { value: v, enumerable: true, writable: true, configurable: true });
         ws();
         if (text[i] === ',') { i++; continue; }
         i++; // '}'

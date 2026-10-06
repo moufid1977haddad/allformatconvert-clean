@@ -15,14 +15,16 @@ function flatten(value, prefix, out) {
     out.set(prefix, value);
     return;
   }
-  const keys = Array.isArray(value) ? value.map((_, i) => String(i)) : Object.keys(value);
+  // Objects are Maps in source key order (P37: a plain object put keys such as "2" or "10" first).
+  const isMap = value instanceof Map;
+  const keys = Array.isArray(value) ? value.map((_, i) => String(i)) : isMap ? [...value.keys()] : Object.keys(value);
   if (keys.length === 0) {
     if (prefix === '') return; // a row that is just {}
     // An empty {} or [] still gets its column, written as the JSON text.
     out.set(prefix, Array.isArray(value) ? '[]' : '{}');
     return;
   }
-  for (const k of keys) flatten(value[k], prefix === '' ? k : `${prefix}.${k}`, out);
+  for (const k of keys) flatten(isMap ? value.get(k) : value[k], prefix === '' ? k : `${prefix}.${k}`, out);
 }
 
 function field(v, delimiter) {
@@ -33,7 +35,7 @@ function field(v, delimiter) {
 }
 
 export function jsonToCsv(text, { delimiter = ',', eol = '\n' } = {}) {
-  const data = parseJsonLossless(text);
+  const data = parseJsonLossless(text, { keyOrder: true });
   let rows;
   if (Array.isArray(data)) rows = data;
   else if (data !== null && typeof data === 'object' && !(data instanceof LosslessNumber)) rows = [data];

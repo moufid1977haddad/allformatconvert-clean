@@ -1,0 +1,2 @@
+FAIL light: {"base":"16px","h1":"16px","h2":"16px","ul":"none","ol":"none","td":"0px","code":"rgba(0, 0, 0, 0)","quote":"0px","a":"rgb(23, 23, 23)"}
+FAIL dark: {"base":"16px","h1":"16px","h2":"16px","ul":"none","ol":"none","td":"0px","code":"rgba(0, 0, 0, 0)","quote":"0px","a":"rgb(23, 23, 23)"}

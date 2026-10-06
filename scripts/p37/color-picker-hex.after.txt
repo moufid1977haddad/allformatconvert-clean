@@ -1,0 +1,12 @@
+mode: after
+PASS  ff0000 without #
+PASS  f00 without #
+PASS  #f80 shorthand
+PASS  8 digits with alpha
+PASS  4 digits with alpha, no #
+PASS  upper case and spaces
+PASS  full code with #
+PASS  invalid: 5 digits
+PASS  invalid: not hex
+
+9/9 passed

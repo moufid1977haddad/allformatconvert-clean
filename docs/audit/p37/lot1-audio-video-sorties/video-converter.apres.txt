@@ -1,0 +1,13 @@
+PASS  service rule still present (filters and max_h -> refused)
+PASS  page refuses before upload (problem prop wired, run() and button gated)
+PASS  720p + 2x speed (MP4): service refuses -> page blocks before upload  (A "Resolution" limit cannot be combined with a speed. Set "Resolution" to "Keep original resolution", or set "Speed" to "Normal speed" and "Mirror" to "None".)
+PASS  1080p + mirror (MOV): service refuses -> page blocks before upload  (A "Resolution" limit cannot be combined with a mirror. Set "Resolution" to "Keep original resolution", or set "Speed" to "Normal speed" and "Mirror" to "None".)
+PASS  480p + speed + mirror (H.265): service refuses -> page blocks before upload  (A "Resolution" limit cannot be combined with a speed and a mirror. Set "Resolution" to "Keep original resolution", or set "Speed" to "Normal speed" and "Mirror" to "None".)
+PASS  720p + fades + volume (MP4): service accepts -> page lets it go  ({"target":"mp4","quality":"medium","maxHeight":720,"volume":1.5,"fadeIn":2,"fadeOut":2,"fadeVideo":true})
+PASS  720p + exact CRF (AV1): service accepts -> page lets it go  ({"target":"mp4","quality":"medium","maxHeight":720,"codec":"av1","crf":30})
+PASS  720p alone (MKV): service accepts -> page lets it go  ({"target":"mkv","quality":"medium","maxHeight":720})
+PASS  720p + speed left set, then MKV chosen (no edits sent): service accepts -> page lets it go  ({"target":"mkv","quality":"medium","maxHeight":720})
+PASS  MP3 + resolution + speed left set (audio: no height, no edits): service accepts -> page lets it go  ({"target":"mp3","quality":"medium"})
+PASS  2x speed alone (MP4): service accepts -> page lets it go  ({"target":"mp4","quality":"medium","speed":2})
+
+video-converter [working tree]: all PASS

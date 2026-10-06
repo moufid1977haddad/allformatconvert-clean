@@ -53,7 +53,7 @@ export default function Page() {
         <Link href="/tools/pdf-tools" className="text-indigo-600 text-sm hover:underline mb-6 inline-block">Back to PDF Tools</Link>
         <h1 className="text-3xl font-bold text-center mb-2 text-neutral-800">JPG to PDF</h1>
         <p className="text-neutral-500 text-center mb-2">Put a batch of photos in one PDF without recompressing the JPEGs</p>
-        <p className="text-neutral-500 text-xs text-center mb-8">JPEG photos, measured up to 200 megapixels, are placed in the PDF without being decoded unless they are mirrored. Other formats: up to {MAX_DECODED_MP_COMPUTER} megapixels on a computer and {PHONE_MAX_MP} on phones, iPhone and iPad, where all but a TIFF can be reduced first.</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">JPEG photos, measured up to 200 megapixels, are placed in the PDF without being decoded unless they are mirrored. Other formats: up to {MAX_DECODED_MP_COMPUTER} megapixels on a computer and {PHONE_MAX_MP} on phones and tablets, where all but a TIFF can be reduced first.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div onClick={() => fileRef.current.click()} className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 transition">
             {files.length > 0 ? <p className="text-neutral-700 font-medium">{files.length} image(s) selected</p> : <p className="text-neutral-500 text-sm"><UploadPrompt what="images" /> (JPG, PNG, HEIC, WebP, GIF, BMP, TIFF, AVIF)</p>}
@@ -87,14 +87,14 @@ export default function Page() {
           { label: 'Input formats', value: `JPG, JPEG, JFIF, PNG, HEIC, HEIF, WebP, GIF, BMP, AVIF, TIFF` },
           { label: 'Output', value: `One PDF, one page per photo` },
           { label: 'JPEG photos', value: `Not decoded (mirrored photos excepted), so not limited by pixels; tested up to 200 megapixels in Safari's engine` },
-          { label: 'Other formats', value: `${MAX_DECODED_MP_COMPUTER} MP on a computer or an Android tablet, ${PHONE_MAX_MP} MP on phones, iPhone and iPad` },
+          { label: 'Other formats', value: `${MAX_DECODED_MP_COMPUTER} MP on a computer, ${PHONE_MAX_MP} MP on phones and tablets` },
           { label: 'Selection', value: `One selection at a time; choosing files again replaces the list` },
         ]}
         privacy={`The photos remain on your device. The PDF is put together by pdf-lib in this browser tab, HEIC photos are decoded by heic2any when the browser has no HEIC decoder of its own, and the result exists only in the tab until you download it.`}
         faqs={[
           { q: `Can I combine several JPGs into one PDF?`, a: `Yes. Select all of them in the file picker at once; each becomes one page, in the order listed under the upload area. Choosing files again starts a new selection, so pick the whole set in one go, or use Image to PDF to add photos in several rounds.` },
           { q: `Are my photos recompressed?`, a: `No. A JPEG is copied into the PDF as it is, and a photo with an EXIF rotation is turned on the page instead of being redrawn. Only mirrored JPEGs and WebP, GIF, BMP or AVIF pictures, plus HEIC in Safari, are drawn again; PNG and TIFF keep their pixels.` },
-          { q: `Can I convert iPhone HEIC photos?`, a: `Yes. HEIC and HEIF photos are read in the browser and placed upright. On phones, iPhone and iPad, a picture above ${PHONE_MAX_MP} megapixels has to be reduced first; the page names it and offers to reduce it in the same step as the conversion.` },
+          { q: `Can I convert iPhone HEIC photos?`, a: `Yes. HEIC and HEIF photos are read in the browser and placed upright. On phones and tablets, a picture above ${PHONE_MAX_MP} megapixels has to be reduced first; the page names it and offers to reduce it in the same step as the conversion.` },
           { q: `Can I set the page size and margins?`, a: `Yes. Choose A4, US Letter, US Legal or A5 with automatic, portrait or landscape orientation and a margin of None, Small or Big, or keep "Fit to each picture", where a page matches its photo, scaled down only beyond ${MAX_PAGE_POINTS.toLocaleString('en-US')} points per side.` },
         ]}
         tips={[

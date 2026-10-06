@@ -1,0 +1,23 @@
+FAIL  ? glued to a word
+      got:  "What?Ok"
+      want: "What?ok"
+FAIL  ! glued to a word
+      got:  "Wow!Great"
+      want: "Wow!great"
+FAIL  URL query string
+      got:  "See example.com/page?Q=test now"
+      want: "See example.com/page?q=test now"
+FAIL  brand name
+      got:  "Yahoo!Mail is old. It works"
+      want: "Yahoo!mail is old. It works"
+PASS  ? then space still starts a sentence
+PASS  ! then space still starts a sentence
+PASS  ?! then space
+PASS  ? then closing quote then space
+PASS  ? then line break
+PASS  Japanese full-width marks unchanged
+FAIL  count: what?ok is one sentence  got 2, want 1
+FAIL  count: URL query is one sentence  got 2, want 1
+PASS  count: what? ok is two
+
+7/13 passed

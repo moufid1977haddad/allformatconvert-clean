@@ -1,0 +1,16 @@
+mode: BEFORE the fix (exifr.parse only)
+chunks libvips: VP8X:10 ICCP:480 VP8 :14914 EXIF:336 XMP :367 | hand: VP8X:10 XMP :367 VP8 :15422 EXIF:187 (sharp reads it: webp 800x600)
+PASS  JPEG with GPS (regression)  -- LOCATION(2) IFD0(2) GPS(6)
+FAIL  WebP by libvips (Exif header, XMP, ICC): GPS shown first  -- no metadata (page: "No embedded metadata ... found") [exifr: Unknown file format]
+FAIL  WebP by libvips (Exif header, XMP, ICC): camera make/model  -- Make=undefined
+FAIL  WebP by libvips (Exif header, XMP, ICC): XMP  -- CreatorTool=undefined
+FAIL  WebP by libvips (Exif header, XMP, ICC): ICC profile  -- ICC ColorSpaceData=undefined
+FAIL  WebP by libvips (Exif header, XMP, ICC): GPS group equals the JPEG's
+FAIL  WebP built by hand (raw TIFF, odd XMP before the image): GPS shown first  -- no metadata (page: "No embedded metadata ... found") [exifr: Unknown file format]
+FAIL  WebP built by hand (raw TIFF, odd XMP before the image): camera make/model  -- Make=undefined
+FAIL  WebP built by hand (raw TIFF, odd XMP before the image): XMP  -- CreatorTool=undefined
+FAIL  WebP built by hand (raw TIFF, odd XMP before the image): GPS group equals the JPEG's
+PASS  WebP without metadata: "none found", no error  -- no metadata (page: "No embedded metadata ... found") [exifr: Unknown file format]
+FAIL  WebP cut short: the "damaged or cut short" message  -- no metadata (page: "No embedded metadata ... found") [exifr: Unknown file format]
+
+10 FAILED

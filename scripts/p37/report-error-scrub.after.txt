@@ -1,0 +1,38 @@
+PASS  V8 JSON excerpt of a pasted header
+PASS  V8 JSON excerpt of an API key
+PASS  bare JWT
+PASS  Authorization header
+PASS  Bearer token in brackets
+PASS  OpenAI-style key
+PASS  Stripe-style key
+PASS  GitHub token
+PASS  AWS access key id
+PASS  long hex string
+PASS  long base64 string
+PASS  UUID
+PASS  password in a query
+PASS  password in JSON
+PASS  token in a query string
+PASS  URL without scheme, with a token
+PASS  URL with scheme and token
+PASS  e-mail with plus and capitals
+PASS  URL-encoded e-mail
+PASS  regex with named groups
+PASS  regex with a double quote
+PASS  regex with slashes
+PASS  regex with angle brackets
+PASS  regex, lower-case reason
+PASS  barcode batch values
+PASS  plain message
+PASS  Safari regex message
+PASS  error code
+PASS  short hex code
+PASS  long API name
+PASS  the word token
+PASS  the word Bearer
+PASS  JSON position
+PASS  undefined is not JSON
+PASS  existing: unix path
+PASS  no slow regex on 2000 hostile characters (1 ms)
+
+36/36 passed

@@ -1,0 +1,23 @@
+PASS refused: "/api/users" -- Type the full address of the API, starting with https:// or http:// (for example https://api.example.com/users). The request was not sent.
+PASS refused: "api.example.com/users" -- Type the full address of the API, starting with https:// or http:// (for example https://api.example.com/users). The request was not sent.
+PASS refused: "127.0.0.1:8080/x" -- Type the full address of the API, starting with https:// or http:// (for example https://api.example.com/users). The request was not sent.
+PASS refused: "localhost:3000/api" -- Type the full address of the API, starting with https:// or http:// (for example https://api.example.com/users). The request was not sent.
+PASS refused: "ftp://example.com/f" -- Type the full address of the API, starting with https:// or http:// (for example https://api.example.com/users). The request was not sent.
+PASS refused: "  " -- Type the full address of the API, starting with https:// or http:// (for example https://api.example.com/users). The request was not sent.
+PASS accepted: "https://api.example.com/users?a=1" -- https://api.example.com/users?a=1
+PASS accepted: "http://localhost:3000/api" -- http://localhost:3000/api
+PASS accepted: " https://x.test/a " -- https://x.test/a
+PASS user Content-Type replaces the default -- sent: text/plain
+PASS user content-type replaces the default -- sent: text/plain
+PASS user CONTENT-TYPE replaces the default -- sent: text/plain
+PASS user content-Type replaces the default -- sent: text/plain
+PASS body without header: application/json
+PASS GET: no body, no Content-Type, user header kept
+PASS DELETE without body: no Content-Type
+PASS headers [["a","b"]] refused -- Headers must be a JSON object, for example {"Authorization": "Bearer token"}. The request was not sent.
+PASS headers null refused -- Headers must be a JSON object, for example {"Authorization": "Bearer token"}. The request was not sent.
+PASS headers "x" refused -- Headers must be a JSON object, for example {"Authorization": "Bearer token"}. The request was not sent.
+PASS headers 42 refused -- Headers must be a JSON object, for example {"Authorization": "Bearer token"}. The request was not sent.
+PASS invalid JSON headers refused with the parser message -- Expected property name or '}' in JSON at position 1 (line 1 column 2)
+
+ALL PASS

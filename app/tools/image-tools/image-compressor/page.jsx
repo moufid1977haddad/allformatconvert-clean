@@ -159,7 +159,7 @@ export default function ImageCompressorPage() {
       return;
     }
     if (isMobileDevice() && overPhoneBound(size.width, size.height)) {
-      update(it.id, { status: 'error', message: `This image is ${Math.round(mp)} megapixels: on a phone the limit is ${PHONE_MAX_MP} megapixels, because compressing it would need more memory than a phone browser gives a page (it would reload). Use a computer, or a smaller version of the image.` });
+      update(it.id, { status: 'error', message: `This image is ${Math.round(mp)} megapixels: on a phone or tablet the limit is ${PHONE_MAX_MP} megapixels, because compressing it would need more memory than a phone browser gives a page (it would reload). Use a computer, or a smaller version of the image.` });
       return;
     }
     return runInWorker(worker, it, mp);
@@ -263,7 +263,7 @@ export default function ImageCompressorPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">Image Compressor</h1>
         <p className="text-neutral-500 text-center mb-2">Compress JPG, PNG, WebP, AVIF and SVG in your browser — the format is kept, your images never leave your device</p>
-        <p className="text-neutral-500 text-xs text-center mb-8">Up to {MAX_FILES} images at a time, each up to {MAX_MP} megapixels on a computer and {PHONE_MAX_MP} on a phone (48 MP phone photos fit; a larger image can be reduced to {PHONE_REDUCE_MP} MP first).</p>
+        <p className="text-neutral-500 text-xs text-center mb-8">Up to {MAX_FILES} images at a time, each up to {MAX_MP} megapixels on a computer and {PHONE_MAX_MP} on a phone or tablet (48 MP phone photos fit; a larger image can be reduced to {PHONE_REDUCE_MP} MP first).</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <IosOriginalNote kind="photo" />
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !busy && inputRef.current.click()}>
@@ -285,7 +285,7 @@ export default function ImageCompressorPage() {
             <div role="alert" data-over-limit className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 space-y-2">
               {overLimit.map((it) => {
                 const mp = (it.size.width * it.size.height) / 1e6, r = reducedSize(it.size.width, it.size.height, reduceMp());
-                return <p key={it.id}><span className="font-semibold break-all">{it.file.name}</span> is {it.size.width.toLocaleString('en-US')} × {it.size.height.toLocaleString('en-US')} pixels ({Math.round(mp)} megapixels): {isMobileDevice() ? `on a phone the limit is ${PHONE_MAX_MP} megapixels, because compressing more would need more memory than a phone browser gives a page.` : `more than the ${MAX_MP} megapixels this in-browser compressor can hold in memory.`} It can be reduced to {r.width.toLocaleString('en-US')} × {r.height.toLocaleString('en-US')} ({Math.round((r.width * r.height) / 1e6 * 10) / 10} MP{isMobileDevice() ? ', the size of a 48 MP phone photo' : ''}) first.</p>;
+                return <p key={it.id}><span className="font-semibold break-all">{it.file.name}</span> is {it.size.width.toLocaleString('en-US')} × {it.size.height.toLocaleString('en-US')} pixels ({Math.round(mp)} megapixels): {isMobileDevice() ? `on a phone or tablet the limit is ${PHONE_MAX_MP} megapixels, because compressing more would need more memory than a phone browser gives a page.` : `more than the ${MAX_MP} megapixels this in-browser compressor can hold in memory.`} It can be reduced to {r.width.toLocaleString('en-US')} × {r.height.toLocaleString('en-US')} ({Math.round((r.width * r.height) / 1e6 * 10) / 10} MP{isMobileDevice() ? ', the size of a 48 MP phone photo' : ''}) first.</p>;
               })}
               <button type="button" onClick={reduceThenCompress} data-reduce-then-compress className="w-full min-h-[44px] rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold px-4 py-2">
                 Reduce to {reduceMp()} MP then compress
@@ -312,7 +312,7 @@ export default function ImageCompressorPage() {
                     )}
                     {it.status === 'notSmaller' && it.sentTargetKb && it.file.size <= it.sentTargetKb * 1024 && <p className="text-amber-800" data-under-target>This image is already {formatSize(it.file.size)}, under the {it.sentTargetKb} KB asked: nothing to compress.</p>}
                     {it.status === 'notSmaller' && !(it.sentTargetKb && it.file.size <= it.sentTargetKb * 1024) && <p className="text-amber-800">Already well compressed: at {it.sentQuality ?? quality}% the result would be {formatSize(it.outSize)}, not smaller than {formatSize(it.file.size)}. Nothing to download — lower the quality to shrink it further.</p>}
-                    {it.status === 'svgMinimal' && <p className="text-amber-800">This SVG is already optimised: nothing could be removed from it. Nothing to download — your file is already the best version.</p>}
+                    {it.status === 'svgMinimal' && <p className="text-amber-800">This SVG is already optimized: nothing could be removed from it. Nothing to download — your file is already the best version.</p>}
                     {it.status === 'svgKept' && <p className="text-amber-800">This SVG could not be made smaller without changing how it looks, so we kept it as it is. Nothing to download — your file is already the best version.</p>}
                     {it.status === 'error' && <p className="text-red-600">{it.message}</p>}
                   </div>
@@ -344,7 +344,7 @@ export default function ImageCompressorPage() {
         specs={[
           { label: 'Input formats', value: `JPG, PNG, WebP, AVIF, SVG; other browser-readable images become JPG` },
           { label: 'Images at once', value: `Up to ${MAX_FILES}` },
-          { label: 'Largest image', value: `${MAX_MP} megapixels on a computer, ${PHONE_MAX_MP} on phones, iPhone and iPad; a larger one can be reduced first in the same step` },
+          { label: 'Largest image', value: `${MAX_MP} megapixels on a computer, ${PHONE_MAX_MP} on phones and tablets; a larger one can be reduced first in the same step` },
           { label: 'Refused', value: `Animated GIF, animated PNG and animated WebP, with a message pointing to GIF Compressor` }
         ]}
         privacy={`Compression runs in a background worker of your browser, with encoders (MozJPEG, OxiPNG, libwebp, libavif) downloaded from our site the first time they are needed. Your images are not uploaded. The messages shown next to each image are not reported; a page-level error (too many files, the engine stopping) or a crash sends a cleaned report with the tool's name and your browser's name and version.`}
@@ -352,7 +352,7 @@ export default function ImageCompressorPage() {
           { q: "Can I compress an image to a size like 100 KB?", a: `Yes. Choose "To a size of", type 100 in the KB box and compress. For JPG, WebP and AVIF the highest quality between 10 and 95 that fits is found automatically, without shrinking the picture; if even quality 10 is too big, the result says so and suggests Image Resizer. A PNG uses the slider instead.` },
           { q: "Does compression lower the image quality?", a: `Yes for JPG, WebP and AVIF, at every setting: they are always re-encoded with loss, slightly at high values. A PNG at quality 100 is repacked without any loss, and so is a PNG for which no palette reaches the chosen quality.` },
           { q: "Does an SVG stay a vector file?", a: `Yes. SVGO removes editor metadata, shortens numbers and ids and merges what it can. Both versions are then drawn and compared, with small anti-aliasing differences tolerated; if the drawing changed, a more cautious setting is tried, and if that changes it too, your original is kept.` },
-          { q: "Is there a limit on image size?", a: `Yes. Up to ${MAX_MP} megapixels on a computer and ${PHONE_MAX_MP} on a phone, iPhone or iPad, where a page that needs more memory gets reloaded. A larger image is named as soon as you choose it, and a button reduces it and compresses it in one step.` },
+          { q: "Is there a limit on image size?", a: `Yes. Up to ${MAX_MP} megapixels on a computer and ${PHONE_MAX_MP} on a phone or tablet, where a page that needs more memory gets reloaded. A larger image is named as soon as you choose it, and a button reduces it and compresses it in one step.` },
           { q: "Does it keep transparency and photo orientation?", a: `Yes. PNG, WebP, AVIF and SVG keep their transparency; images converted to JPG get a white background. Photos stay the right way up, while their EXIF details, such as GPS location and camera model, are removed.` }
         ]}
         tips={[

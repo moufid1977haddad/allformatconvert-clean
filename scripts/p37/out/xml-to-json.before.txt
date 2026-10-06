@@ -1,0 +1,35 @@
+  (module missing before the fix: ERR_MODULE_NOT_FOUND)
+  FAIL bad character: line and column given 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + "char '&' is not expected."
+    - "char '&' is not expected. (line 2, column 6)"
+                                ^
+  FAIL attribute without value: line and column 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + "Attribute 'x' is without value."
+    - "Attribute 'x' is without value. (line 2, column 6)"
+    
+  FAIL mismatched closing tag: position of the closing tag added 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + "Expected closing tag 'b' (opened in line 1, col 4) instead of closing tag 'a'."
+    - "Expected closing tag 'b' (opened in line 1, col 4) instead of closing tag 'a'. (line 1, column 7)"
+    
+  FAIL no column known: line only 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'Start tag expected.'
+    - 'Start tag expected. (line 1)'
+                          ^
+  FAIL valid XML: no message 
+    Expected values to be strictly equal:
+    
+    'Invalid XML' !== ''
+    
+0 passed, 5 failed

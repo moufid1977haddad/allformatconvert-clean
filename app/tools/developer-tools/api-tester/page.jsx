@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { reformatJson } from '../../../lib/jsonText';
+import { buildApiRequest } from '../../../lib/apiTesterRequest';
 import { reportShownMessage } from '../../../lib/useToolError';
 import TextArea from '@/app/components/TextArea';
 export default function ApiTesterPage() {
@@ -17,11 +18,10 @@ export default function ApiTesterPage() {
       // Content-Type is sent only with a body (29/09): forcing it on every GET
       // made the browser send a CORS preflight, so APIs that allow simple
       // cross-origin GETs but not preflights failed here and nowhere else.
-      const extra = headers ? JSON.parse(headers) : {};
-      const hasBody = body && method !== 'GET' && method !== 'HEAD';
-      const opts = { method, headers: hasBody ? { 'Content-Type': 'application/json', ...extra } : extra };
-      if (hasBody) opts.body = body;
-      const res = await fetch(url, opts);
+      // P37: a relative address is refused, and a typed Content-Type replaces
+      // the default in any capitalization (app/lib/apiTesterRequest.js).
+      const req = buildApiRequest({ url, method, headersText: headers, body });
+      const res = await fetch(req.url, req.init);
       const text = await res.text();
       // The body is shown as received (re-indented when it is JSON), so a
       // 64-bit id is not rounded by JSON.parse + stringify.
@@ -61,24 +61,26 @@ export default function ApiTesterPage() {
         }}
         howToTitle={"How to send an API request from your browser"}
         howTo={[
-          "Pick the method in the list (GET, POST, PUT, DELETE or PATCH) and type the full URL of the endpoint, starting with https:// (without it, the request usually goes to this site instead, or fails).",
+          "Pick the method in the list (GET, POST, PUT, DELETE or PATCH) and type the full URL of the endpoint, starting with https:// or http://; any other address is refused and nothing is sent.",
           "Optionally fill \"Headers (JSON)\" with an object, for example {\"Authorization\": \"Bearer token\"}.",
-          "For any method other than GET, type the request in \"Body\"; it is sent as application/json unless your headers set Content-Type written with that exact capitalization.",
+          "For any method other than GET, type the request in \"Body\"; it is sent as application/json unless your headers set Content-Type, in any capitalization.",
           "Click \"Send Request\": the status appears in green below 400, in yellow from 400, or in red if the request failed, with the body underneath.",
         ]}
         specs={[
           { label: "Methods", value: "GET, POST, PUT, DELETE and PATCH (HEAD and OPTIONS are not offered)" },
-          { label: "Request headers", value: "A JSON object; if it is not valid JSON, the request is not sent and the parser’s message is shown" },
-          { label: "Request body", value: "Any text, for every method except GET; Content-Type: application/json is added; a Content-Type key in your headers replaces it, but a lowercase content-type is sent alongside it" },
+          { label: "Address", value: "An absolute http:// or https:// URL; a relative address such as /api/users, or one typed without http:// or https://, is refused before sending" },
+          { label: "Request headers", value: "A JSON object; if it is not valid JSON, or not an object, the request is not sent and a message says why" },
+          { label: "Request body", value: "Any text, for every method except GET; Content-Type: application/json is added; a Content-Type key in your headers replaces it, whatever its capitalization" },
           { label: "Response shown", value: "Status code and status text, then the body (JSON re-indented, other text as received); response headers are not shown" },
           { label: "Timeout", value: "None: the page waits until the server answers or the browser gives up" },
         ]}
         privacyTitle={"Where your request goes"}
-        privacy={"When the address starts with http:// or https://, the request goes from your browser straight to that API, not through our servers. Without it, the address is usually read as a page of this site (localhost:3000/api fails instead), so the request, headers and body included, reaches our server. A shown error’s cleaned message goes to our error log with the tool’s name and your browser’s name and version; URLs, quoted text and long numbers are removed, but a few characters of a mistyped header can remain."}
+        privacy={"The request goes from your browser straight to the http:// or https:// address you type, not through our servers; an address without one of them is refused before anything is sent. A shown error’s cleaned message goes to our error log with the tool’s name and your browser’s name and version; URLs, quoted text and long numbers are removed, but a few characters of a mistyped header can remain."}
         faqs={[
           { q: "Can I call an API that does not allow cross-origin requests?", a: "No. The request runs in your browser, so the browser applies the API’s CORS rules: if the API does not allow this site, the response is blocked and only the browser’s network error message appears. Desktop clients such as curl or Postman are not subject to that check." },
           { q: "Does it show the response headers?", a: "No. The result shows the status code, the status text and the body only. To read a header such as a rate-limit counter, open your browser’s developer tools, where the network panel lists every header of the same request." },
-          { q: "Is a Content-Type header added automatically?", a: "Yes, but only when a body is sent: POST, PUT, DELETE and PATCH requests with a body get Content-Type: application/json, and a key written exactly Content-Type in your headers replaces it; written content-type, both values are sent together. GET requests carry no Content-Type, so they do not trigger an extra CORS preflight." },
+          { q: "Is a Content-Type header added automatically?", a: "Yes, but only when a body is sent: POST, PUT, DELETE and PATCH requests with a body get Content-Type: application/json, and a Content-Type key in your headers replaces it, written in any capitalization, so only one value is sent. GET requests carry no Content-Type, so they do not trigger an extra CORS preflight." },
+          { q: "Why is my address refused?", a: "It does not start with https:// or http://. A browser reads an address such as /api/users or api.example.com/users as a page of the site you are on, so the request would reach this site with your headers. The tool stops instead; add the scheme and send again." },
           { q: "Will large numbers in a JSON response be rounded?", a: "No. The body is re-indented from the exact text received instead of being parsed and rewritten, so an id such as 9007199254740993 or a price written 1.10 is shown exactly as the API sent it." },
         ]}
         tips={[

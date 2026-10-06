@@ -72,6 +72,17 @@ export default function ExcelToCsvPage() {
     setIsMobile(isMobileDevice());
   }, []);
 
+  // P37 (06/10): an option changed after the file was chosen converts the file again with it. Before, the CSV on
+  // offer kept the old separator, decimal mark or BOM. The options are disabled while a conversion runs.
+  const optionsRef = useRef({ delimiter, bom, decimalComma });
+  useEffect(() => {
+    const prev = optionsRef.current;
+    optionsRef.current = { delimiter, bom, decimalComma };
+    if (prev.delimiter === delimiter && prev.bom === bom && prev.decimalComma === decimalComma) return;
+    if (file && !workerRef.current) convertFile(file);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs on an option change only; convertFile reads the new options
+  }, [delimiter, bom, decimalComma]);
+
   const maxRows = isMobile ? MOBILE_MAX_ROWS : MAX_ROWS;
   const maxRowsLabel = isMobile ? MOBILE_MAX_ROWS_LABEL : MAX_ROWS_LABEL;
   const maxFileBytes = isMobile ? MOBILE_MAX_FILE_SIZE_BYTES : MAX_FILE_SIZE_BYTES;
@@ -109,7 +120,7 @@ export default function ExcelToCsvPage() {
     setProgress(0);
     setPhase('');
     clearResult();
-    setStatus('Cancelled.');
+    setStatus('Canceled.');
   };
 
   const convertFile = (f) => {
@@ -206,7 +217,7 @@ export default function ExcelToCsvPage() {
         example={{"caption":"A one-sheet workbook with date cells and formulas, converted with \"Separator\" set to semicolon and \"Decimal comma\" ticked:","inputLabel":"Workbook","input":"Sheet Prices:\nItem | Price | Sold on | Total\nTea | 12.5 | 2024-01-15 (date cell) | =B2*2 → 25\nCoffee, ground | 1234.5 | 2024-02-15 (date cell) | =B3*2 → 2469","outputLabel":"CSV","output":"Item;Price;Sold on;Total\nTea;12,5;2024-01-15;25\nCoffee, ground;1234,5;2024-02-15;2469"}}
         howToTitle="How to convert Excel to CSV"
         howTo={[
-          "Set \"Separator\" first, and tick \"Decimal comma\" or \"Add a UTF-8 BOM\" if you need them: they apply to the next file you choose.",
+          "Set \"Separator\", and tick \"Decimal comma\" or \"Add a UTF-8 BOM\" if you need them; changing one after choosing the file converts it again.",
           "Choose an .xlsx, .xls or .ods file in the upload area; the conversion starts at once and \"Cancel\" stops it.",
           "If the workbook has several sheets, their names are listed while it is read.",
           "Click \"Download\" to save converted.csv, or converted.zip with one .csv per sheet.",
@@ -215,16 +226,16 @@ export default function ExcelToCsvPage() {
           { label: "Input", value: "XLSX, XLS or ODS workbook" },
           { label: "Output", value: "CSV for one sheet, ZIP of CSV files for several" },
           { label: "On a computer", value: `up to ${MAX_FILE_SIZE_LABEL} and ${MAX_ROWS.toLocaleString('en-US')} rows, all sheets together` },
-          { label: "On phones, iPhone and iPad", value: `up to ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows, all sheets together` },
+          { label: "On phones and tablets", value: `up to ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows, all sheets together` },
           { label: "Separators", value: "comma, semicolon, tab or pipe" },
         ]}
         privacy={"The workbook is opened and converted by a background worker in your browser, with the SheetJS library; it is not uploaded, and the CSV or ZIP is created in the page. Should an error happen, we get its text without the file name or quoted content, along with the tool name and the browser name and version."}
         faqs={[
           { q: "Do formulas come out as their results?", a: "Yes. Each formula cell is written with the result saved in the workbook, so =B2*2 gives 25 in the CSV, not the formula text. Colors, fonts and comments are dropped, but a number format such as a percentage or a currency is kept in the text." },
-          { q: "Can I make a CSV for Excel in France or Germany?", a: "Yes. Choose \"Semicolon\" in \"Separator\", tick \"Decimal comma\" so numbers read 12,5, and tick \"Add a UTF-8 BOM\" so Excel opens accents correctly. Set these before choosing the file, because the conversion starts as soon as the file is picked." },
+          { q: "Can I make a CSV for Excel in France or Germany?", a: "Yes. Choose \"Semicolon\" in \"Separator\", tick \"Decimal comma\" so numbers read 12,5, and tick \"Add a UTF-8 BOM\" so Excel opens accents correctly. Changing them after choosing the file converts it again with the new settings." },
           { q: "Are all sheets converted?", a: "Yes, hidden sheets included. With more than one sheet you download converted.zip, holding one .csv per sheet named after it; characters a file name cannot hold, such as < > | or a double quote, become underscores, and a repeated name gets (2)." },
           { q: "Are dates written as numbers?", a: "No. A cell formatted as a date is written as ISO 8601 text, 2024-01-15, or 2024-02-29T13:45:00 when it has a time, also for workbooks on the 1904 date system of old Mac Excel." },
-          { q: "How large can the workbook be?", a: `${MAX_FILE_SIZE_LABEL} and ${MAX_ROWS.toLocaleString('en-US')} rows across all sheets on a computer, ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows on phones, iPhone and iPad. A workbook has to be read whole before any row exists, so split a bigger one into several files first.` },
+          { q: "How large can the workbook be?", a: `${MAX_FILE_SIZE_LABEL} and ${MAX_ROWS.toLocaleString('en-US')} rows across all sheets on a computer, ${MOBILE_MAX_FILE_SIZE_LABEL} and ${MOBILE_MAX_ROWS.toLocaleString('en-US')} rows on phones and tablets. A workbook has to be read whole before any row exists, so split a bigger one into several files first.` },
         ]}
         tips={[
           "To get JSON instead, with one array of rows per sheet, use Excel to JSON.",

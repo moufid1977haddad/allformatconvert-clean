@@ -1,0 +1,7 @@
+worker messages: decoded, done
+PASS  the worker finishes without OffscreenCanvas
+PASS  a JPEG of the same size  -- jpeg 64x48, 392 bytes
+PASS  transparent part on the chosen background (green)  -- pixel (2,20) = 0,255,1
+PASS  opaque part keeps its color (200,100,60)  -- pixel (50,20) = 199,100,59
+
+ALL PASS

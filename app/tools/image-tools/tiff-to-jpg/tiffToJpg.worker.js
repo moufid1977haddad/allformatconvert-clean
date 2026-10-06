@@ -35,7 +35,10 @@ self.onmessage = async (e) => {
     self.postMessage({ type: 'decoded', pixels: w * h });
     const rgba = flattenedOnWhite(new Uint8ClampedArray(decoded.rgba), hexToRgb(background)); // P24: chosen background
     let blob;
-    if (w * h <= CANVAS_MAX_PIXELS) {
+    // P37: no OffscreenCanvas in this worker (Safari before 16.4, some WebKit builds): the JPEG is written by MozJPEG
+    // from the pixels, as past 16.7 MP -- the same rule as TIFF to PNG's worker. It used to fail with
+    // "OffscreenCanvas is not defined", shown as an unreadable TIFF.
+    if (typeof OffscreenCanvas !== 'undefined' && w * h <= CANVAS_MAX_PIXELS) {
       const canvas = new OffscreenCanvas(w, h);
       canvas.getContext('2d').putImageData(new ImageData(rgba, w, h), 0, 0);
       blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: quality / 100 });

@@ -1,0 +1,11 @@
+  PASS beyond 64 bits: model.py compiles (py_compile)
+  PASS beyond 64 bits: no // comment and no false "typed as a float" note
+  PASS Python keeps the digits: json.loads gives an exact int (why int is right)
+  PASS the dataclass built from json.loads holds the exact value
+  PASS other languages keep their note (C-style comment, Go/TS/Rust/C#)
+  PASS no big number: output unchanged and compiles
+6 passed, 0 failed
+(node:19336) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/moufi/Desktop/onlineconvertools/app/lib/jsonCodegen.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\moufi\Desktop\onlineconvertools\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)

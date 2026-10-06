@@ -101,7 +101,7 @@ export default function ScreenRecorderPage() {
       if (preview.current) preview.current.srcObject = null;
       setRecording(false);
       clearInterval(timer.current);
-      setError(err?.name === 'NotAllowedError' ? 'Screen share was cancelled.' : 'Recording failed: ' + (err?.message || 'unknown error'));
+      setError(err?.name === 'NotAllowedError' ? 'Screen share was canceled.' : 'Recording failed: ' + (err?.message || 'unknown error'));
     }
   };
 

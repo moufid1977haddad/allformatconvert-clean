@@ -259,8 +259,8 @@ export default function VideoTrimmerPage() {
           {file && noPreview && !error && <p role="status" className="text-sm text-neutral-600 text-center">{duration > 0 ? 'This browser cannot play this format, so there is no preview; cutting works the same.' : 'Reading the file…'}</p>}
           {duration > 0 && (
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="block text-sm text-neutral-500 mb-1">Start: {start}s</label><input aria-label="Start: s" type="range" min="0" step="0.1" max={Math.max(0, duration - 0.1)} value={start} onChange={e => { const v = Math.round(parseFloat(e.target.value) * 10) / 10; setStart(v); if (v >= end) setEnd(Math.min(duration, v + 1)); }} className="w-full" /></div>
-              <div><label className="block text-sm text-neutral-500 mb-1">End: {end}s</label><input aria-label="End: s" type="range" min="0.1" step="0.1" max={duration} value={end} onChange={e => { const v = Math.round(parseFloat(e.target.value) * 10) / 10; setEnd(v); if (v <= start) setStart(Math.max(0, v - 1)); }} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">Start: {start}s</label><input aria-label="Start (seconds)" type="range" min="0" step="0.1" max={Math.max(0, duration - 0.1)} value={start} onChange={e => { const v = Math.round(parseFloat(e.target.value) * 10) / 10; setStart(v); if (v >= end) setEnd(Math.min(duration, v + 1)); }} className="w-full" /></div>
+              <div><label className="block text-sm text-neutral-500 mb-1">End: {end}s</label><input aria-label="End (seconds)" type="range" min="0.1" step="0.1" max={duration} value={end} onChange={e => { const v = Math.round(parseFloat(e.target.value) * 10) / 10; setEnd(v); if (v <= start) setStart(Math.max(0, v - 1)); }} className="w-full" /></div>
             </div>
           )}
           {duration > 0 && (
@@ -292,7 +292,7 @@ export default function VideoTrimmerPage() {
         description={`Video Trimmer keeps the part of a video between a start point and an end point. In default mode it copies that part without re-encoding, with ffmpeg.wasm in your browser: the format, codecs and quality stay those of your file, and the clip begins on the keyframe at or before your start, which can be a little early on phone videos. Tick "Precise cut" to begin on the exact frame: the clip is then re-encoded to an MP4 with H.264 and AAC, in your browser when the page estimates that takes under about 45 seconds or when the video has an odd width or height, otherwise on our video service.`}
         howToTitle="How to trim a video"
         howTo={[
-          `Choose or drop a video file of up to ${MAX_MB_DESKTOP} MB on a computer, or ${MAX_MB_MOBILE} MB on phones, iPhone and iPad.`,
+          `Choose or drop a video file of up to ${MAX_MB_DESKTOP} MB on a computer, or ${MAX_MB_MOBILE} MB on phones and tablets.`,
           "Move the \"Start\" and \"End\" sliders to the part you want to keep.",
           "Leave \"Precise cut\" unticked for a lossless copy, or tick it to begin on the exact frame.",
           "Click \"Trim Video\"; the first run also loads the ffmpeg.wasm engine, about 10 MB.",
@@ -301,7 +301,7 @@ export default function VideoTrimmerPage() {
         specs={[
           { label: 'Input formats', value: "MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS" },
           { label: 'Output', value: "Default cut: the source's own format (MP4, MOV, WebM, MKV and others), every audio track kept. Precise cut: MP4 with H.264 and AAC" },
-          { label: 'Maximum file size', value: `${MAX_MB_DESKTOP} MB on a computer; ${MAX_MB_MOBILE} MB on phones, iPhone and iPad` },
+          { label: 'Maximum file size', value: `${MAX_MB_DESKTOP} MB on a computer; ${MAX_MB_MOBILE} MB on phones and tablets` },
           { label: 'Cut points', value: "Set in steps of 0.1 seconds; the default cut starts on the keyframe at or before the start, a Precise cut on the exact frame" },
           { label: 'Usage limits', value: "Only a Precise cut sent to our video service counts toward the hourly and daily limit of your internet connection" }
         ]}
@@ -310,7 +310,7 @@ export default function VideoTrimmerPage() {
           { q: "Why does my clip start earlier than I chose?", a: "The default cut copies the video without re-encoding, and a copy can only begin on a keyframe: the clip starts at the keyframe at or before your start point. The page shows the real length of the result. Tick \"Precise cut\" to begin on the exact frame." },
           { q: "Is the video re-encoded?", a: "No, not by default: the selected part is copied as it is, so quality and format do not change. With \"Precise cut\", yes: the clip is encoded again to MP4 with H.264 picture and AAC sound." },
           { q: "What format do I get?", a: "The same as your file with the default cut: an MP4 stays MP4, a MOV stays MOV, a WebM stays WebM, an MKV stays MKV. All audio tracks are kept, and subtitles in MKV and WebM. With \"Precise cut\", always an MP4." },
-          { q: "What is the file size limit?", a: `${MAX_MB_DESKTOP} MB on a computer and ${MAX_MB_MOBILE} MB on phones, iPhone and iPad. The whole video is held in the browser tab's memory while it is cut, so the limit is checked as soon as you pick the file.` },
+          { q: "What is the file size limit?", a: `${MAX_MB_DESKTOP} MB on a computer and ${MAX_MB_MOBILE} MB on phones and tablets. The whole video is held in the browser tab's memory while it is cut, so the limit is checked as soon as you pick the file.` },
           { q: "Is my video uploaded for a Precise cut?", a: "No, unless the page estimates that re-encoding in your browser would take over about 45 seconds, which is common in Firefox and Safari and for longer clips; videos with an odd width or height always stay on your device. Then the piece from the keyframe before your start to just after your end goes to our video service, or the whole file when no keyframe can be found." }
         ]}
         tips={[

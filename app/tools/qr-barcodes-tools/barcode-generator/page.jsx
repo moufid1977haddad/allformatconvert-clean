@@ -194,7 +194,7 @@ export default function BarcodeGeneratorPage() {
   // The codes that were made (and read back) placed on label sheets; lines refused are listed, not placed.
   const finishLabels = async (values, results, t0) => {
     const failed = []; const codes = []; let skipped = 0;
-    results.forEach((r, i) => { if (r.error) failed.push(`line ${i + 1}: ${values[i]} — ${r.error}`); else { codes.push(r.bytes); if (r.skipped) skipped++; } });
+    results.forEach((r, i) => { if (r.error) failed.push(`line ${i + 1}: “${values[i]}” — ${r.error}`); else { codes.push(r.bytes); if (r.skipped) skipped++; } });
     if (!codes.length) { setError('No code could be made: ' + failed.slice(0, 3).join(' · ')); return; }
     const pdf = await labelPdf(codes, labels);
     const pdfBlob = new Blob([pdf.bytes], { type: 'application/pdf' });
@@ -235,7 +235,7 @@ export default function BarcodeGeneratorPage() {
           tick(++done); if (done % 10 === 0) await new Promise((r) => setTimeout(r, 0));
         }
       }
-      if (cancelRef.current) { setError('Cancelled.'); return; }
+      if (cancelRef.current) { setError('Canceled.'); return; }
       if (batchFormat === 'labels') { await finishLabels(values, results, t0); return; }
       const failed = []; const entries = []; let skipped = 0;
       results.forEach((r, i) => {
@@ -370,14 +370,14 @@ export default function BarcodeGeneratorPage() {
           </details>
 
           <details className="border border-neutral-200 rounded-lg p-3">
-            <summary className="cursor-pointer text-sm font-semibold text-neutral-700">Text and colours{sym.checkOption || sym.msi || sym.twoD ? ' · options for this type' : ''}</summary>
+            <summary className="cursor-pointer text-sm font-semibold text-neutral-700">Text and colors{sym.checkOption || sym.msi || sym.twoD ? ' · options for this type' : ''}</summary>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 text-sm">
               {!twoD && <label className="flex items-center gap-2"><input id="bc-show-text" type="checkbox" checked={ui.showText} onChange={set('showText')} /> Show the value under the bars</label>}
               {!twoD && ui.showText && mode === 'single' && <label className="block sm:col-span-2"><span className="block text-neutral-500 mb-1">Text under the bars (leave empty to print the value)</span><input id="bc-caption" type="text" value={ui.caption} onChange={set('caption')} placeholder="e.g. Blue T-shirt, size M — 12.99" className={input} /></label>}
               {!twoD && ui.showText && <label className="flex items-center justify-between gap-2">Text size (pt) <input id="bc-text-pt" type="number" min="4" max="36" value={ui.textPt} onChange={set('textPt')} className="w-20 bg-neutral-50 border border-neutral-200 rounded-lg p-1" /></label>}
-              <label className="flex items-center justify-between gap-2">Bar colour <input id="bc-bar-color" type="color" value={ui.barColor} onChange={set('barColor')} aria-label="Bar colour" /></label>
-              <label className="flex items-center justify-between gap-2">Background <input id="bc-bg-color" type="color" value={ui.bgColor} onChange={set('bgColor')} disabled={ui.transparent} aria-label="Background colour" /></label>
-              {!twoD && ui.showText && <label className="flex items-center justify-between gap-2">Text colour <input id="bc-text-color" type="color" value={ui.textColor} onChange={set('textColor')} aria-label="Text colour" /></label>}
+              <label className="flex items-center justify-between gap-2">Bar color <input id="bc-bar-color" type="color" value={ui.barColor} onChange={set('barColor')} aria-label="Bar color" /></label>
+              <label className="flex items-center justify-between gap-2">Background <input id="bc-bg-color" type="color" value={ui.bgColor} onChange={set('bgColor')} disabled={ui.transparent} aria-label="Background color" /></label>
+              {!twoD && ui.showText && <label className="flex items-center justify-between gap-2">Text color <input id="bc-text-color" type="color" value={ui.textColor} onChange={set('textColor')} aria-label="Text color" /></label>}
               <label className="flex items-center gap-2"><input id="bc-transparent" type="checkbox" checked={ui.transparent} onChange={set('transparent')} /> Transparent background (PNG, GIF, SVG, PDF, EPS)</label>
               {sym.checkOption && <label className="flex items-center gap-2"><input id="bc-check" type="checkbox" checked={ui.checkDigit} onChange={set('checkDigit')} /> Add the optional check digit</label>}
               {sym.msi && <label className="block"><span className="block text-neutral-500 mb-1">Check digit scheme</span><select id="bc-msi" value={ui.msiCheck} onChange={set('msiCheck')} className={input}>{MSI_CHECKS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>}
@@ -449,7 +449,7 @@ export default function BarcodeGeneratorPage() {
         howTo={[
           `Choose the type in "Barcode type"; the hint under it says what the value must look like.`,
           `In "One barcode", type the value or click "Use the example"; for many codes, switch to "Many (ZIP or labels)" and paste a list, set up "A numbered series" or use "Import CSV / TSV…".`,
-          `Under "Size", set "Module width", "Resolution (dpi)", "Bar height" and "Rotation"; colors and the text line are under "Text and colours".`,
+          `Under "Size", set "Module width", "Resolution (dpi)", "Bar height" and "Rotation"; colors and the text line are under "Text and colors".`,
           `Click "Generate Barcode" (or "Generate all as ZIP" or "Generate label sheets (PDF)"), then "Download" one file or "Download all" for a ZIP of the six formats.`,
         ]}
         specs={[
@@ -460,9 +460,9 @@ export default function BarcodeGeneratorPage() {
           { label: 'Label stock', value: 'Avery A4 and US Letter sheets, plain paper to cut, thermal rolls from 40 by 30 mm to 4 by 6 in, or your own layout' },
         ]}
         privacyTitle="Where your barcodes are made"
-        privacy="Codes are drawn by bwip-js and checked by zxing-cpp inside your browser, and the decoder file comes from this site, not from an outside CDN. Your values and imported files are not uploaded. One exception: when an error is shown, its text goes, cleaned, to our error log with the tool's name and your browser's name and major version, and the message of a batch where every line failed can quote a few of your values."
+        privacy="Codes are drawn by bwip-js and checked by zxing-cpp inside your browser, and the decoder file comes from this site, not from an outside CDN. Your values and imported files are not uploaded. One exception: when an error is shown, its text goes, cleaned, to our error log with the tool's name and your browser's name and major version, and the values quoted in the message of a batch where every line failed are removed from it first."
         faqs={[
-          { q: 'Does it add the check digit?', a: 'Yes, for EAN-13, EAN-8, UPC-A, UPC-E, ITF-14 and PZN8: type the number without its last digit and it is calculated, or in full and it is verified. Code 93 always gets its two check characters; Code 39 and Interleaved 2 of 5 can add an optional check digit, Code 11 its C check digit (and K over 10 characters), and MSI Plessey offers several Mod 10 and Mod 11 schemes.' },
+          { q: 'Does it add the check digit?', a: 'Yes, for EAN-13, EAN-8, UPC-A, UPC-E, ITF-14 and PZN8: type the number without its last digit and it is calculated, or in full and it is verified. Code 93 always gets its two check characters; Code 39 and Interleaved 2 of 5 can add an optional check digit, Code 11 its C check digit (and K from 10 characters), and MSI Plessey offers several Mod 10 and Mod 11 schemes; a number whose Mod 11 check value would be 10 is refused with a message suggesting Mod 10.' },
           { q: 'Is each barcode checked before download?', a: `Yes, for ${ALL.filter((s) => s.zxing).length} of the ${ALL.length} types: zxing-cpp, a reader separate from the engine that drew the code, must find your value, check digits included, or no file is offered. MSI Plessey, Pharmacode, Code 11 and standalone EAN-5 or EAN-2 are marked as not scanned back, and with the optional Code 39 or ITF check digit only the type is confirmed.` },
           { q: 'What module width should I use for retail EAN and UPC?', a: '0.33 mm, the default here, is the nominal size, and the page warns below the GS1 minimum of 0.264 mm. PNG, JPG and GIF need a whole number of pixels per module, so the page shows the closest width at your resolution, while SVG, PDF and EPS keep the exact width you typed.' },
           { q: 'Can I make many barcodes at once?', a: `Yes. In "Many (ZIP or labels)", paste one value per line, import a CSV or TSV file, or number a series with a prefix, a step, zero padding and a suffix. Every code is drawn and, where a reader exists, checked; any value that could not be encoded is listed in errors.txt inside the ZIP.` },

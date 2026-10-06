@@ -127,7 +127,7 @@ export default function AudioBoosterPage() {
           `Listen to the result and click "Download" to save it as boosted_ followed by your file name.`,
         ]}
         specs={[
-          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AC3, AIFF, AIF, AMR, MKA, WEBA, CAF` },
           { label: `Output formats`, value: `MP3, WAV, AAC, FLAC, OGG (Vorbis), M4A, Opus, WMA, AIFF, ALAC, AC3, M4R, M4B, MP2, WV (WavPack), CAF, AU, MKA` },
           { label: `Volume`, value: `0.25x to 5x in steps of 0.25x, or loudness normalization to -16 LUFS (true peak -1.5 dB)` },
           { label: `Maximum file size`, value: `Not set by the tool for the formats made on the page; the whole file is held in memory. For Opus, the lossless FLAC sent to our media service must fit its maximum size and length.` },

@@ -19,7 +19,7 @@ const SERVER_MAX_LABEL = `${Math.round(MAX_PDF_COMPRESS_STAGED_BYTES / MIB)} MB`
 const LEVELS = [
   { id: 'extreme', title: 'Extreme', note: 'Smallest file. Larger images reduced to 72 dpi and saved as JPEG.' },
   { id: 'recommended', title: 'Recommended', note: 'Larger images resampled to 150 dpi and saved as JPEG.' },
-  { id: 'low', title: 'Lossless', note: 'Identical look, images untouched. Fonts and structure optimised.' },
+  { id: 'low', title: 'Lossless', note: 'Identical look, images untouched. Fonts and structure optimized.' },
 ];
 
 export default function PdfCompressPage() {
@@ -71,7 +71,7 @@ export default function PdfCompressPage() {
     if (abortRef.current) abortRef.current.abort();
     setLoading(false);
     setProgress(0);
-    setStatus('Cancelled.');
+    setStatus('Canceled.');
   };
 
   const finish = (blob, stats) => {
@@ -85,7 +85,7 @@ export default function PdfCompressPage() {
     setLoading(false);
     setStatus(level === 'extreme'
       ? 'This PDF is already as small as we can make it — no smaller file could be produced, so nothing was changed.'
-      : `This PDF is already well optimised: the "${LEVELS.find((l) => l.id === level).title}" level could not make it smaller, so nothing was changed. Try a stronger level.`);
+      : `This PDF is already well optimized: the "${LEVELS.find((l) => l.id === level).title}" level could not make it smaller, so nothing was changed. Try a stronger level.`);
   };
 
   const compressOnServer = async () => {
@@ -129,7 +129,7 @@ export default function PdfCompressPage() {
   };
 
   const compressInBrowser = () => {
-    setPhase('Optimising in your browser…');
+    setPhase('Optimizing in your browser…');
     const worker = new Worker(new URL('./pdfCompress.worker.js', import.meta.url), { type: 'module' });
     workerRef.current = worker;
     worker.onmessage = (e) => {
@@ -176,7 +176,7 @@ export default function PdfCompressPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">PDF Compression</h1>
         <p className="text-neutral-500 text-center mb-2">Reduce PDF file size at the level you choose</p>
-        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Files up to {SERVER_MAX_LABEL} are compressed with our full engine (images, fonts and structure).{isMobile ? ' Larger files cannot be compressed on this device.' : ` Larger files, up to ${browserMaxLabel}, get a lighter in-browser optimisation (structure only).`}</p>
+        <p className="text-neutral-500 text-xs text-center mb-8 min-h-[3rem]">Files up to {SERVER_MAX_LABEL} are compressed with our full engine (images, fonts and structure).{isMobile ? ' Larger files cannot be compressed on this device.' : ` Larger files, up to ${browserMaxLabel}, get a lighter in-browser optimization (structure only).`}</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="border-2 border-dashed border-neutral-200 rounded-xl p-10 text-center cursor-pointer hover:border-indigo-500 transition" onClick={() => !loading && inputRef.current.click()}>
             <p className="text-neutral-500">{file ? file.name : <UploadPrompt what="a PDF" />}</p>
@@ -184,7 +184,7 @@ export default function PdfCompressPage() {
             <input ref={inputRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleFile} disabled={loading} />
           </div>
           {inBrowser ? (
-            <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">This file is over {SERVER_MAX_LABEL}, so it will be optimised in your browser: structure only, images and fonts untouched, smaller savings. Split it with PDF Split to use the full engine on each part.</p>
+            <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">This file is over {SERVER_MAX_LABEL}, so it will be optimized in your browser: structure only, images and fonts untouched, smaller savings. Split it with PDF Split to use the full engine on each part.</p>
           ) : (
             <fieldset className="grid grid-cols-1 sm:grid-cols-3 gap-3" disabled={loading}>
               <legend className="sr-only">Compression level</legend>
@@ -222,7 +222,7 @@ export default function PdfCompressPage() {
               {result.stats && (result.stats.reencoded > 0 || result.stats.fonts_converted > 0 || result.stats.truetype_merged > 0) && (
                 <p className="text-xs text-neutral-500">
                   {[result.stats.reencoded > 0 && `${result.stats.reencoded} image${result.stats.reencoded > 1 ? 's' : ''} recompressed`,
-                    (result.stats.fonts_converted || 0) + (result.stats.truetype_merged || 0) > 0 && `${(result.stats.fonts_converted || 0) + (result.stats.truetype_merged || 0)} font${(result.stats.fonts_converted || 0) + (result.stats.truetype_merged || 0) > 1 ? 's' : ''} optimised`]
+                    (result.stats.fonts_converted || 0) + (result.stats.truetype_merged || 0) > 0 && `${(result.stats.fonts_converted || 0) + (result.stats.truetype_merged || 0)} font${(result.stats.fonts_converted || 0) + (result.stats.truetype_merged || 0) > 1 ? 's' : ''} optimized`]
                     .filter(Boolean).join(' · ')}
                 </p>
               )}
@@ -245,7 +245,7 @@ export default function PdfCompressPage() {
           { label: 'Input', value: `PDF` },
           { label: 'Levels', value: `Extreme (pictures at 72 dpi), Recommended (150 dpi), Lossless (pictures untouched)` },
           { label: 'Full engine', value: `Files up to ${SERVER_MAX_LABEL}, on our pdf-tools server` },
-          { label: 'Larger files', value: `Files over ${SERVER_MAX_LABEL}: refused on phones, iPhone and iPad; on a computer, only a lighter structure-only optimization runs, in your browser, within the limit shown on the page` },
+          { label: 'Larger files', value: `Files over ${SERVER_MAX_LABEL}: refused on phones and tablets; on a computer, only a lighter structure-only optimization runs, in your browser, within the limit shown on the page` },
           { label: 'Usage limits', value: `Files over ${Math.round(OFFICE_STAGED_THRESHOLD_BYTES / MIB)} MB are uploaded in chunks; each network may start a limited number of those uploads per hour and per day` },
           { label: 'No gain', value: `If no smaller file can be made, nothing is offered for download` },
         ]}

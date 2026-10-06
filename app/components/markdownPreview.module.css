@@ -1,0 +1,50 @@
+/* P37 (06/10): the rendered pane of Markdown Editor and Markdown Previewer. Tailwind's reset (preflight) removes the
+   browser's own heading sizes, list bullets, table borders and code styling, and the "prose" classes the Editor used
+   come from @tailwindcss/typography, which this site does not install: headings, lists and tables showed as plain
+   text. Scoped here, in the spirit of GitHub's README rendering (the reference for GitHub Flavored Markdown).
+   Colors follow the text color (currentColor), so the pane reads in light and dark mode. */
+.preview {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+}
+.preview > :first-child { margin-top: 0; }
+.preview > :last-child { margin-bottom: 0; }
+.preview :is(p, ul, ol, blockquote, pre, table, hr, dl) { margin: 0 0 1em; }
+.preview :is(h1, h2, h3, h4, h5, h6) { font-weight: 600; line-height: 1.25; margin: 1.5em 0 0.6em; }
+.preview h1 { font-size: 2em; padding-bottom: 0.3em; border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent); }
+.preview h2 { font-size: 1.5em; padding-bottom: 0.3em; border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent); }
+.preview h3 { font-size: 1.25em; }
+.preview h4 { font-size: 1em; }
+.preview h5 { font-size: 0.875em; }
+.preview h6 { font-size: 0.85em; opacity: 0.75; }
+.preview :is(ul, ol) { padding-left: 2em; }
+.preview ul { list-style: disc; }
+.preview ol { list-style: decimal; }
+.preview :is(ul, ol) :is(ul, ol) { margin: 0.25em 0 0; }
+.preview ul ul { list-style: circle; }
+.preview li + li { margin-top: 0.25em; }
+/* GitHub task lists: marked writes <li><input type="checkbox" disabled> text</li> without a class */
+.preview li:has(> input[type="checkbox"]) { list-style: none; }
+.preview li > input[type="checkbox"] { margin: 0 0.4em 0.2em -1.4em; vertical-align: middle; }
+.preview a { color: #2563eb; text-decoration: underline; }
+:global(.dark) .preview a { color: #8ab4f8; }
+.preview strong { font-weight: 600; }
+.preview em { font-style: italic; }
+.preview del { text-decoration: line-through; }
+.preview blockquote { padding: 0 1em; border-left: 0.25em solid color-mix(in srgb, currentColor 30%, transparent); opacity: 0.85; }
+.preview code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+.preview pre { padding: 0.9em 1em; overflow-x: auto; border-radius: 6px; background: color-mix(in srgb, currentColor 8%, transparent); line-height: 1.45; }
+.preview pre code { padding: 0; background: none; font-size: 0.85em; }
+.preview hr { border: 0; height: 2px; background: color-mix(in srgb, currentColor 20%, transparent); }
+.preview table { display: block; width: max-content; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
+.preview :is(th, td) { padding: 0.4em 0.8em; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); }
+.preview th { font-weight: 600; }
+.preview tr:nth-child(2n) td { background: color-mix(in srgb, currentColor 4%, transparent); }
+.preview img { max-width: 100%; height: auto; }

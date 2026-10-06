@@ -1,0 +1,8 @@
+mode: AFTER the fix (app/lib/epubChapters.js)
+PASS  intact book: 3 chapters, none said missing  -- Chapter 1 | Chapter 2 | Chapter 3 ; counter: 0 chapter(s) said missing
+PASS  itemref to an unknown id: 3 chapters printed, 1 said missing  -- Chapter 1 | Chapter 2 | Chapter 3 ; counter: 1 chapter(s) said missing
+PASS  two unknown ids (one written <itemref></itemref>): 3 chapters printed, 2 said missing  -- Chapter 1 | Chapter 2 | Chapter 3 ; counter: 2 chapter(s) said missing
+PASS  itemref to a manifest item without media-type (skipped by the parser): 2 printed, 1 said missing  -- Chapter 1 | Chapter 2 ; counter: 1 chapter(s) said missing
+PASS  every itemref unknown: the page says no readable chapters  -- ERROR "No readable chapters found in this file." (no PDF)
+
+ALL PASS

@@ -12,6 +12,7 @@ import { formatBytes } from '../../../lib/formatBytes';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { ISO_BMFF, rotateModeFor } from './rotateMode';
 
 // 30/09 (owner's iPhone): the rotator replayed the video in a <canvas> and recorded it with MediaRecorder -- in real
 // time, with the source playing full screen on iPhone, a WebM that Photos cannot open, heavier than the original.
@@ -25,7 +26,6 @@ import UploadPrompt from '@/app/components/UploadPrompt';
 // before rotating: "Compatible everywhere" (default: the picture itself is turned, on our service, at full resolution)
 // or "Instant, lossless" (the rotation setting only, in the browser).
 const MAX_SERVICE_BYTES = 1024 * 1024 * 1024;
-const ISO_BMFF = /\.(mp4|mov|m4v|3gp|3g2)$/i;
 
 export default function VideoRotatorPage() {
   const [file, setFile] = useState(null);
@@ -48,21 +48,22 @@ export default function VideoRotatorPage() {
     return () => URL.revokeObjectURL(u);
   }, [file]);
 
-  const pick = (e) => { const f = e.target.files[0]; if (!f) return; setFile(f); setResult(null); setError(''); };
+  const pick = (e) => { const f = e.target.files[0]; if (!f) return; setFile(f); setMode((m) => rotateModeFor(f.name, m)); setResult(null); setError(''); };
   const base = (name) => name.replace(/\.[^.]+$/, '');
 
   const rotate = async () => {
     if (!file || stage) return;
     setError(''); setResult(null);
+    const how = rotateModeFor(file.name, mode); // P37: never a hidden "Instant, lossless" left from a previous file
     try {
       setStage({ label: 'Rotating…' });
       // P24 review (03/10): "Instant, lossless" promises that nothing is uploaded — when it cannot be done (a WebM, or an
       // MP4 whose rotation field cannot be rewritten) the page now says so instead of sending the file to the service
       if (!angle && !flip) throw new Error('Choose a rotation or a mirror first.');
-      if (flip && mode === 'lossless') throw new Error('"Instant, lossless" only changes the rotation setting; a mirror turns the picture itself. Choose "Compatible everywhere" to mirror the video. Nothing was uploaded.');
-      if (mode === 'lossless' && !ISO_BMFF.test(file.name)) throw new Error('"Instant, lossless" works for MP4, MOV, M4V and 3GP only; this format has no rotation setting. Nothing was uploaded. Choose "Compatible everywhere" to turn it on our video service.');
+      if (flip && how === 'lossless') throw new Error('"Instant, lossless" only changes the rotation setting; a mirror turns the picture itself. Choose "Compatible everywhere" to mirror the video. Nothing was uploaded.');
+      if (how === 'lossless' && !ISO_BMFF.test(file.name)) throw new Error('"Instant, lossless" works for MP4, MOV, M4V and 3GP only; this format has no rotation setting. Nothing was uploaded. Choose "Compatible everywhere" to turn it on our video service.');
       let fast = null;
-      if (mode === 'lossless') {
+      if (how === 'lossless') {
         try { fast = await rotateIsoBmff(file, angle); } catch (e) { fast = null; var why = e?.message; }
         if (!fast) throw new Error(`"Instant, lossless" could not change the rotation setting of this file${why ? ` (${why})` : ''}. Nothing was uploaded. Choose "Compatible everywhere" to turn the picture itself on our video service.`);
       }

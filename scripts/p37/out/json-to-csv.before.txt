@@ -1,0 +1,30 @@
+  FAIL flat row: "name","2024","10","2" stay in source order 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '2,10,2024,name'
+    - 'name,2024,10,2'
+    
+  FAIL several rows: first-seen order across rows, integer keys included 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '1,b,0,a'
+    - 'b,1,0,a'
+    
+  FAIL nested object with integer keys flattened in source order 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'id,scores.1,scores.3,scores.z'
+    - 'id,scores.z,scores.3,scores.1'
+                 ^
+  FAIL repeated key: last value, first position (as JSON.parse and json.loads) 
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '5,a\n2,3'
+    - 'a,5\n3,2'
+    
+  PASS unchanged: exact numbers, arrays, empty {} column, plain values
+1 passed, 4 failed

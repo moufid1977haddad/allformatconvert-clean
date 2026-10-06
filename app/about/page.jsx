@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { getToolCounts } from '@/lib/toolCounts';
 import { SITE_CATEGORIES } from '@/app/lib/siteCategories';
 // Measured from the code at every build by scripts/content-checks/privacy-claims.mjs, which stops the build when these
-// figures no longer match the tools (P36): tools that send data in at least one case, and those that only do so when an
-// iPhone or iPad cannot finish the work itself.
+// figures no longer match the tools (P36): tools that send data in at least one case, and those that only do so on an
+// iPhone or iPad (when the device cannot finish the work itself, or, for PDF OCR since P37, always there).
 import SERVER_TOOLS from '@/app/lib/serverToolCount.json';
 
 const SITE = 'https://www.onlineconvertools.com';
@@ -96,8 +96,8 @@ export default function AboutPage() {
             read and converted on your device and is not sent to us. The other {SERVER_TOOLS.server} send your file or text to a server in at
             least one case: to our own processing servers, or to a provider named in our{' '}
             <Link href="/privacy" className={a}>privacy policy</Link> (ConvertAPI, OpenAI, Pangram Labs, Google). For{' '}
-            {SERVER_TOOLS.iosFallbackOnly} of them this happens only when an iPhone or iPad cannot finish the work itself,
-            and the page says so. The privacy policy lists every one of these tools by name.
+            {SERVER_TOOLS.iosFallbackOnly} of them this happens only on an iPhone or iPad, and the page says so. The
+            privacy policy lists every one of these tools by name.
           </p>
         </div>
 

@@ -23,6 +23,20 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
+## 🚧 P37 — 07/10 : bugs P36, iPhone, orthographe, test arabe — **INTERROMPU (limite d'usage), branche `p37` locale, NON poussée, NON construite, rien en production** (repère `restauration-avant-p37-07-10` = `a0754be4`)
+
+Fait et testé (tests node avant échec → après succès, contrôles content-verify / instructions / privacy-claims à 0 par chaque agent) — rapports `docs/audit/p37/` :
+- Lot 1 dev-data (6), dev-code (3 : TS to JS, API Tester, dépendances csso/fflate/dompurify déclarées), audio/vidéo (8, dont tablettes Android = mobile), image/fichier (5), divers (5 : nettoyeur d'erreurs, Sentence case, Markdown, Color Picker, Barcode +3 défauts), suites 1 (XML deux racines, Code Minifier TS).
+- Lot 2 point 1 OCR iPhone/iPad direct au serveur (`app/lib/ocrFirstStep.js`, 16/16).
+- Lot 3 orthographe : 122 littéraux visibles réécrits (`scripts/p37/uk-spelling-scan.mjs --write`, codes `'cancelled'` gardés) ; reste : « specialised » (privacy, terms), « Millimetres » (barcode) — la règle est dans le script mais le motif n'a pas pris ; relancer le scan.
+
+**INACHEVÉ, commité tel quel, NON VÉRIFIÉ — à reprendre avant tout déploiement** :
+- Lot 2 points 2-3 Redact (rectangle ajusté : test 15/15 ; couche arabe : non finie ; banc des 31 PDF piégés NON relancé ; relecture indépendante NON faite).
+- Suites 2 (EPUB itemref, File Metadata WebP) et 3 (Sentence case ?/!, Word Counter phrases) : arrêtées en cours.
+- Lot 4 arabe : corpus en cours dans `scripts/audit/results/arabe-corpus/` (ignoré par git), section 11 de l'étude non écrite.
+- Reste du contrôleur : `npm run build` complet, scripts navigateur `scripts/p37/*browser*.mjs`, `lot1/lot1-browser.pw.mjs`, `excel-to-csv-reconvert.mjs`, `audio-bitrate-browser.mjs`, banc Redact Chromium+WebKit, une préversion, rapport `docs/audit/RAPPORT-p37-bugs-iphone-arabe-07-10.md`, puis `git push origin p37:master` par le propriétaire.
+- Reportés chiffrés (rapports p37) : service vidéo taille+vitesse (1 h + Railway), compiler les namespaces TS (0,5-1 j), MP2 mono 256/320 (1 h), extensions audio .mp2/.m4b/.m4r/.wv/.au (1 h), aria-label image-rotate (5 min), messages non cités d'autres outils (~15 min × 5).
+
 ## 📝 P36 — 06/10 : certificat HTTPS, contenu exact des 225 pages, pages légales, À propos (`docs/audit/RAPPORT-p36-contenu-pages-06-10.md`, repère `restauration-avant-p36-06-10` = `f7f0601e`) — **EN PRODUCTION le 06/10 : Vercel `onlineconvertools-90t9u2hxi` = `d854b0f0`, www-light 29/29, JSON-LD des 225 pages ALL PASS sur www ; retour arrière : `onlineconvertools-gbnnrjftd`**
 
 | Lot | État |

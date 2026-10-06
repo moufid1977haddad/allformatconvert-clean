@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import SeoContent from '../../../components/SeoContent';
 import { buildChapterHtml, firstPageShowsCover } from '../../../lib/ebookHtml';
+import { dropUnknownSpineItems, loadReadableChapters, zipNameSet } from '../../../lib/epubChapters';
 import DownloadReady, { useDownloadable } from '../../../components/DownloadReady';
 import { MAX_HTML_STAGED_BYTES, OFFICE_STAGED_THRESHOLD_BYTES } from '@/lib/quota/limits';
 import { convertOffice, checkOfficeSize, officeMaxBytes, officeMaxLabel, officeStageLabel } from '../../../lib/officeUpload';
@@ -45,9 +46,8 @@ function resolveEpubPath(basePath, relativeHref) {
 // convention, and the <guide> reference — unwrapping an XHTML wrapper page
 // to find the <img> it displays if the resolved target isn't already an
 // image.
-async function extractCoverImage(file, JSZip) {
+async function extractCoverImage(zip) {
   try {
-    const zip = await JSZip.loadAsync(await file.arrayBuffer());
     const opfPath = Object.keys(zip.files).find(f => f.toLowerCase().endsWith('.opf'));
     if (!opfPath) return null;
 
@@ -171,9 +171,16 @@ export default function EpubToPdfPage() {
       if (!file.size) throw new Error('This file is empty (0 bytes). Choose the EPUB again.');
       const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());
       if (!(head[0] === 0x50 && head[1] === 0x4b && head[2] === 0x03 && head[3] === 0x04)) throw new Error('This is not an EPUB book: an EPUB is a ZIP package, and this file is not one. It may be damaged, or another kind of file renamed .epub.');
+      // P37 follow-up: spine entries naming no manifest item stopped the parser with a raw TypeError; they are taken
+      // out of the package first and counted with the other missing chapters (app/lib/epubChapters.js).
+      const JSZip = (await import('jszip')).default;
+      const zip = await JSZip.loadAsync(await file.arrayBuffer()).catch(() => { throw new Error('This EPUB could not be read (its contents are damaged or not standard).'); });
+      const unknownItems = await dropUnknownSpineItems(zip);
+      if (unknownItems.removed && !unknownItems.kept) throw new Error('No readable chapters found in this file.');
+      const bookFile = unknownItems.removed ? new File([await zip.generateAsync({ type: 'uint8array' })], file.name, { type: 'application/epub+zip' }) : file;
       const { initEpubFile } = await import('@lingo-reader/epub-parser');
       ebook = await Promise.race([
-        initEpubFile(file),
+        initEpubFile(bookFile),
         new Promise((_, reject) => setTimeout(() => reject(new Error('This EPUB could not be read (its contents are damaged or not standard).')), 60000)),
       ]);
 
@@ -181,23 +188,24 @@ export default function EpubToPdfPage() {
       const spine = ebook.getSpine();
       if (!spine.length) throw new Error('No readable chapters found in this file.');
 
+      // P37: a chapter file missing from the book (it came out as a blank page) or that cannot be read (it stopped the
+      // whole book) is left out and counted; the page then says how many are missing (app/lib/epubChapters.js).
       const cache = new Map();
-      const chaptersHtml = [];
-      let skippedCount = 0;
-      for (let i = 0; i < spine.length; i++) {
-        const chapter = await ebook.loadChapter(spine[i].id);
-        if (!chapter) { skippedCount++; continue; }
-        chaptersHtml.push(await buildChapterHtml({
+      const { chaptersHtml, skipped: unreadable } = await loadReadableChapters({
+        ebook,
+        spine,
+        zipNames: zipNameSet(Object.keys(zip.files)),
+        build: (chapter) => buildChapterHtml({
           bodyHtml: chapter.html,
           cssHrefs: (chapter.css || []).map(c => c.href),
           cache
-        }));
-      }
+        }),
+      });
       if (!chaptersHtml.length) throw new Error('No readable chapters found in this file.');
+      const skippedCount = unreadable + unknownItems.removed;
 
       let coverDataUri = null;
-      const JSZip = (await import('jszip')).default;
-      const coverBlob = await extractCoverImage(file, JSZip);
+      const coverBlob = await extractCoverImage(zip);
       if (coverBlob) coverDataUri = await blobToDataUri(coverBlob);
 
       // The book's own first page already shows the cover (an EPUB cover page): not added a second time.
@@ -277,7 +285,7 @@ export default function EpubToPdfPage() {
         faqs={[
           { q: `Can I convert an EPUB with DRM?`, a: `No. The chapters of a DRM-protected book are encrypted, and this tool has no way to decrypt them. Books without DRM, such as public-domain titles or files you exported yourself, convert as described above.` },
           { q: `Will the images and the cover be in the PDF?`, a: `Yes. Chapter images, pictures set in style sheets and SVG cover pages are embedded in the HTML before printing. The cover is added as the first page unless the book's first page already shows the same cover image.` },
-          { q: `Does the PDF include every chapter?`, a: `Yes, when the book is intact. A chapter file missing from the book comes out as an empty page, and a damaged book stops with an error message instead of a PDF.` },
+          { q: `Does the PDF include every chapter?`, a: `Yes, when the book is intact. A chapter whose file is missing or damaged, or whose entry in the reading order points to nothing in the book, is left out, and the page then says how many chapters are missing from the PDF. A book whose package cannot be opened stops with an error message instead.` },
           { q: `Is there a size limit?`, a: `${officeMaxLabel(MAX_HTML_STAGED_BYTES)} of prepared content. Images are counted after they are embedded in the HTML, so an image-heavy book can reach the limit even when the .epub is much smaller; the page then states the prepared size.` },
         ]}
         tips={[

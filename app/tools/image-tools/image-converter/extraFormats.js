@@ -156,7 +156,8 @@ async function encodePdf(raster, rgba, w, h, quality, onProgress) {
   const { PDFDocument } = await import('pdf-lib');
   const doc = await PDFDocument.create();
   let img;
-  const q = Math.max(0.5, quality / 100);
+  // P37: the slider's value as it is (10 % to 100 %); it used to be raised to 50 % without a word (Math.max(0.5, …)).
+  const q = quality / 100;
   if (hasAlpha(rgba)) img = await doc.embedPng(await u8(raster.canvas ? await checkedBlob(raster.canvas, 'image/png') : await encodePngRGBA(rgba, w, h, onProgress)));
   else img = await doc.embedJpg(await u8(raster.canvas ? await checkedBlob(raster.canvas, 'image/jpeg', q) : await encodeJpegWasm(rgba, w, h, Math.round(q * 100))));
   const page = doc.addPage([w, h]); // 1 px = 1 pt: the page is the image, at 72 dpi

@@ -51,7 +51,7 @@ export default function ZipCreatorPage() {
     }
     setLoading(false);
     setProgress(0);
-    setStatus('Cancelled.');
+    setStatus('Canceled.');
   };
 
   const createZip = () => {
@@ -171,7 +171,7 @@ export default function ZipCreatorPage() {
         ]}
         specs={[
           { label: "Total size on a computer", value: `Up to ${MAX_TOTAL_SIZE_LABEL} for all files together` },
-          { label: "On phones, iPhone and iPad", value: `Up to ${MOBILE_MAX_TOTAL_SIZE_LABEL} in total` },
+          { label: "On phones and tablets", value: `Up to ${MOBILE_MAX_TOTAL_SIZE_LABEL} in total` },
           { label: "Compression", value: "Store only, or DEFLATE at level 1, 6 (the default) or 9" },
           { label: "Encryption", value: "Optional AES-256 in the WinZip AE-2 format; file names are not encrypted" },
           { label: "Output", value: "archive.zip, with every file at its root" }
@@ -179,7 +179,7 @@ export default function ZipCreatorPage() {
         privacy="The archive is built in a Web Worker in your browser, with JSZip, or with zip.js when a password is set; the files are not uploaded. The password is used inside that worker and not stored, so a lost password cannot be recovered. A failed archive leaves one cleaned error line in our log, naming the tool and your browser; the files themselves never travel."
         faqs={[
           { q: "Can other programs open a password-protected ZIP made here?", a: "Yes, programs that read AES-encrypted ZIP files in the WinZip AE-2 format can. In our test, bsdtar (libarchive) extracted such an archive byte for byte and refused a wrong password. Accented passwords may be read differently by some programs, so letters, digits and English punctuation are the safest." },
-          { q: "Is there a size limit?", a: `Yes: ${MAX_TOTAL_SIZE_LABEL} in total on a computer and ${MOBILE_MAX_TOTAL_SIZE_LABEL} on phones, iPhone and iPad. The archive is built in the memory of the browser tab, and these caps keep the tab from running out of it.` },
+          { q: "Is there a size limit?", a: `Yes: ${MAX_TOTAL_SIZE_LABEL} in total on a computer and ${MOBILE_MAX_TOTAL_SIZE_LABEL} on phones and tablets. The archive is built in the memory of the browser tab, and these caps keep the tab from running out of it.` },
           { q: "Does compression help for photos and videos?", a: "No, very little: JPG, MP4 and ZIP files are already compressed, so the store-only level is quicker and the archive barely grows. Text, CSV files and uncompressed images shrink much more at the stronger levels." },
           { q: "Can I add folders?", a: "No. Files are added one by one and stored at the root of the archive under their own names. Rename files that share a name before adding them, so each one keeps its own entry." }
         ]}

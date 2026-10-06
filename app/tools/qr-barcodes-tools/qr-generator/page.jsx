@@ -78,8 +78,8 @@ export default function QrGeneratorPage() {
     const built = buildPayload(type, fields);
     if (built.error) { setError(built.error); return; }
     const ct = contrast(fg, bg);
-    if (!ct.darkOnLight) { setError('The code must be darker than its background: most phone cameras cannot read a light code on a dark background. Swap the two colours.'); return; }
-    if (ct.ratio < 3) { setError(`These two colours are too close (contrast ${ct.ratio.toFixed(1)}:1, at least 3:1 is needed to scan reliably). Pick a darker code colour or a lighter background.`); return; }
+    if (!ct.darkOnLight) { setError('The code must be darker than its background: most phone cameras cannot read a light code on a dark background. Swap the two colors.'); return; }
+    if (ct.ratio < 3) { setError(`These two colors are too close (contrast ${ct.ratio.toFixed(1)}:1, at least 3:1 is needed to scan reliably). Pick a darker code color or a lighter background.`); return; }
     setBusy(true); setError('');
     try {
       let m;
@@ -90,7 +90,7 @@ export default function QrGeneratorPage() {
       if (!(await readsBackAs(canvas, built.payload))) {
         throw new Error(logo
           ? 'With this logo the code no longer scans reliably. Try a simpler or smaller logo, or remove it.'
-          : 'This code did not scan back correctly with these settings. Try the "Squares" shape or stronger colours.');
+          : 'This code did not scan back correctly with these settings. Try the "Squares" shape or stronger colors.');
       }
       const png = await new Promise((ok) => canvas.toBlob(ok, 'image/png'));
       if (!png || png.size === 0) throw new Error('Your browser could not create the PNG image.');
@@ -108,7 +108,7 @@ export default function QrGeneratorPage() {
     <div className="min-h-screen bg-neutral-100 p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-2">QR Code Generator</h1>
-        <p className="text-neutral-500 text-center mb-8">Links, Wi-Fi, contacts and more — colours, logo, up to 2000 px, PNG, SVG or PDF. The PNG drawing is scanned back before you can download the files.</p>
+        <p className="text-neutral-500 text-center mb-8">Links, Wi-Fi, contacts and more — colors, logo, up to 2000 px, PNG, SVG or PDF. The PNG drawing is scanned back before you can download the files.</p>
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label="Content type">
             {QR_TYPES.map((t) => (
@@ -139,8 +139,8 @@ export default function QrGeneratorPage() {
           <details className="border border-neutral-200 rounded-lg p-3" open>
             <summary className="cursor-pointer text-sm font-semibold text-neutral-700">Design</summary>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 text-sm">
-              <label className="flex items-center justify-between gap-2">Code colour <input type="color" value={fg} onChange={(e) => setFg(e.target.value)} aria-label="Code colour" /></label>
-              <label className="flex items-center justify-between gap-2">Background <input type="color" value={bg} onChange={(e) => setBg(e.target.value)} aria-label="Background colour" /></label>
+              <label className="flex items-center justify-between gap-2">Code color <input type="color" value={fg} onChange={(e) => setFg(e.target.value)} aria-label="Code color" /></label>
+              <label className="flex items-center justify-between gap-2">Background <input type="color" value={bg} onChange={(e) => setBg(e.target.value)} aria-label="Background color" /></label>
               <div>
                 <span className="block text-neutral-500 mb-1">Shape</span>
                 <div className="flex gap-2">{SHAPES.map((s) => (
@@ -196,7 +196,7 @@ export default function QrGeneratorPage() {
         howToTitle="How to create a QR code"
         howTo={[
           `Pick what the code should hold — "URL", "Wi-Fi", "Contact (vCard)", "Location" or one of the four other types — and fill in its fields.`,
-          `Under "Design", set "Code colour", "Background", the "Shape" and the "Error correction" level, and move the "PNG size" slider.`,
+          `Under "Design", set "Code color", "Background", the "Shape" and the "Error correction" level, and move the "PNG size" slider.`,
           `Optionally click "Add a logo (optional)" and choose a PNG, JPG, GIF, WebP or SVG image of up to ${MAX_LOGO_BYTES / 1024 / 1024} MB.`,
           `Click "Generate QR Code"; once "Scanned back successfully" appears, use "Download" for PNG, SVG or PDF, or "Download all" for a ZIP of the three.`,
         ]}

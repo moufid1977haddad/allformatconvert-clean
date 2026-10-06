@@ -1,0 +1,15 @@
+PASS  period + space + lower case
+PASS  three lower-case sentences
+PASS  after a closing bracket
+PASS  abbreviation e.g.
+PASS  abbreviation etc.
+PASS  title Mr.
+PASS  Mr. before a capital
+PASS  initial
+PASS  decimal
+PASS  URL
+PASS  ellipsis
+PASS  p.m.
+PASS  page example
+
+13/13 passed

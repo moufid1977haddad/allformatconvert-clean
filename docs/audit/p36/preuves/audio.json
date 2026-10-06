@@ -60,11 +60,6 @@
       "pattern": "\\[320, '[A-Za-z]+ — 320 kbps'\\]"
     },
     {
-      "claim": "192 kbps",
-      "file": "app/lib/audioFormats.js",
-      "pattern": "fmt\\.value === 'ac3' \\|\\| fmt\\.value === 'mp2' \\? Math\\.max\\(kbps, 192\\)"
-    },
-    {
       "claim": "48 kHz",
       "file": "app/lib/audioFormats.js",
       "pattern": "\\[48000, '48 kHz \\(video\\)'\\]"

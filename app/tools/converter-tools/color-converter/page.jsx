@@ -91,7 +91,7 @@ export default function ColorConverterPage() {
     setHexText(val); setEditing(null);
     const c = hexToRgb(val);
     if (c) { const { a, ...opaque } = c; setRgb(opaque); setAlpha(a ?? 1); setHexError(''); }
-    else setHexError(val.trim() ? `"${val.trim()}" is not a HEX colour: use 3, 4, 6 or 8 digits 0-9 / A-F, like #3b82f6, #fff or #3b82f680 (with transparency). The fields below still show ${rgbToHex(rgb)}.` : 'Type a HEX colour, like #3b82f6.');
+    else setHexError(val.trim() ? `"${val.trim()}" is not a HEX color: use 3, 4, 6 or 8 digits 0-9 / A-F, like #3b82f6, #fff or #3b82f680 (with transparency). The fields below still show ${rgbToHex(rgb)}.` : 'Type a HEX color, like #3b82f6.');
   };
   const handleRgb = (key, val) => { setEditing(null); setFromRgb({ ...rgb, [key]: Math.max(0, Math.min(255, parseInt(val) || 0)) }); };
   const handleSpace = (sp, key, max, val) => {
@@ -124,7 +124,7 @@ export default function ColorConverterPage() {
           <div>
             <label htmlFor="cc-hex" className="block text-sm text-neutral-500 mb-1">HEX</label>
             <div className="flex gap-2">
-              <input type="color" value={hex} onChange={e => { setEditing(null); setFromRgb(hexToRgb(e.target.value)); }} aria-label="Colour picker" className="w-12 h-12 rounded-lg cursor-pointer bg-neutral-50 border border-neutral-200" />
+              <input type="color" value={hex} onChange={e => { setEditing(null); setFromRgb(hexToRgb(e.target.value)); }} aria-label="Color picker" className="w-12 h-12 rounded-lg cursor-pointer bg-neutral-50 border border-neutral-200" />
               <input id="cc-hex" type="text" value={hexText} onChange={e => handleHex(e.target.value)} aria-invalid={!!hexError} className="flex-1 bg-neutral-50 border border-neutral-200 rounded-lg p-3 font-mono" />
             </div>
             {hexError && <p className="text-sm text-red-600 mt-1" role="alert">{hexError}</p>}
@@ -172,7 +172,7 @@ export default function ColorConverterPage() {
             <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#fff', color: hexA }}><b>Text on white</b><div style={{ color: '#404040' }}>{ratio(onWhite)}:1 — {grade(onWhite)}</div></div>
             <div className="rounded-lg p-3 border border-neutral-200" style={{ background: '#000', color: hexA }}><b>Text on black</b><div style={{ color: '#e5e5e5' }}>{ratio(onBlack)}:1 — {grade(onBlack)}</div></div>
           </div>
-          <p className="text-xs text-neutral-500">WCAG 2 contrast of the colour as it appears on each background (transparency included): 4.5:1 is the AA minimum for body text, 3:1 for large text, 7:1 is AAA.</p>
+          <p className="text-xs text-neutral-500">WCAG 2 contrast of the color as it appears on each background (transparency included): 4.5:1 is the AA minimum for body text, 3:1 for large text, 7:1 is AAA.</p>
           <button onClick={() => copy(hexA)} className="w-full bg-green-600 hover:bg-green-500 rounded-xl py-2 font-semibold transition text-white">Copy HEX</button>
         </div>
       </div>

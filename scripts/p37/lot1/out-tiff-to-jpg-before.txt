@@ -1,0 +1,4 @@
+worker messages: decoded, error "OffscreenCanvas is not defined"
+FAIL  the worker finishes without OffscreenCanvas  -- OffscreenCanvas is not defined
+
+1 FAILED

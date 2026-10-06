@@ -147,7 +147,7 @@ export default function GifMakerPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <label className="block"><span className="block text-neutral-500 mb-1">Frames of another shape</span>
               <select id="gm-fit" value={fit} onChange={e => { setFit(e.target.value); setResult(null); }} className={input}>{FITS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>
-            {fit === 'fit' && <label className="flex items-center justify-between gap-2 sm:mt-6">Background <input id="gm-bg" type="color" value={bg} onChange={e => { setBg(e.target.value); setResult(null); }} aria-label="Background colour" /></label>}
+            {fit === 'fit' && <label className="flex items-center justify-between gap-2 sm:mt-6">Background <input id="gm-bg" type="color" value={bg} onChange={e => { setBg(e.target.value); setResult(null); }} aria-label="Background color" /></label>}
             <label className="block"><span className="block text-neutral-500 mb-1">Output size</span>
               <select id="gm-size" value={sizeMode} onChange={e => { setSizeMode(e.target.value); setResult(null); }} className={input}>
                 <option value="largest">Largest width and height (no frame shrunk)</option><option value="first">Same as the first image</option><option value="custom">Custom…</option>

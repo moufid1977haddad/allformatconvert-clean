@@ -1,0 +1,23 @@
+FAIL JSX: arrow without return -- Unexpected token, expected ";" (1:30)
+FAIL JSX: JSX in a variable -- Unexpected token, expected ">" (1:31)
+FAIL JSX: fragment as an argument -- Unexpected token (1:9)
+FAIL JSX: generic arrow + JSX -- Unexpected token, expected ";" (2:14)
+PASS JSX: return (<div>) still works -- "function C() { return (<div>ok</div>); }"
+PASS cast without JSX: "const z: unknown = \"5\";\nconst y = <number>(<any>z) * 2;\nconsole.log(y);" -- 10
+PASS cast without JSX: "const a = <string>\"x\"; console.log(a.length);" -- 1
+FAIL namespace with values: "namespace A { export const x = 1; export function f() { return x + 1; } }\nconsole.log(A.x,…" -- ours THROWS ReferenceError: A is not defined / tsc 1 2
+FAIL namespace with values: "namespace Outer.Inner { export const v = 2; }\nconsole.log(Outer.Inner.v);" -- ours THROWS ReferenceError: Outer is not defined / tsc 2
+FAIL namespace with values: "module M { export let q = 3; }\nconsole.log(M.q);" -- ours THROWS ReferenceError: M is not defined / tsc 3
+FAIL namespace with values: "namespace T { export interface I { a: number } }\nnamespace V { export enum E { A } }\nconso…" -- ours THROWS ReferenceError: V is not defined / tsc 0
+FAIL namespace with values: "declare namespace D { const y: number }\nnamespace W { console.log(\"side effect\"); }" -- ours  / tsc side effect
+PASS type-only namespace kept out: "namespace T { export interface I { a: number } export type U = string; }\nconst v: T.I = { …" -- 1
+PASS type-only namespace kept out: "declare namespace D { const x: number; namespace E { const y: string } }\nconsole.log(1);" -- 1
+PASS type-only namespace kept out: "declare module \"m\" { namespace Q { const z: 1 } }\nconsole.log(2);" -- 2
+PASS type-only namespace kept out: "declare global { namespace NodeJS { interface ProcessEnv { A: string } } }\nexport {};\ncons…" -- 3
+PASS type-only namespace kept out: "export declare namespace X { function f(): void }\nconsole.log(4);" -- 4
+PASS type-only namespace kept out: "namespace Empty {}\nnamespace Nested { export namespace Deeper { export type K = 1 } }\ncons…" -- 5
+PASS namespace/module as identifiers -- 1 2
+PASS enum, parameter properties, satisfies, optional chaining -- 1 5 B 5 d / tsc 1 5 B 5 d
+PASS syntax error reports line:column -- Unexpected token (2:10)
+
+9 FAILED

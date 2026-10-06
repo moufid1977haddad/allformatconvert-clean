@@ -69,7 +69,7 @@ export default function RoundCornersPage() {
           <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-600">
             <label className="flex items-center gap-1"><input type="radio" name="rc-fill" checked={fill === 'transparent'} onChange={() => setFill('transparent')} /> Transparent corners (PNG)</label>
             <label className="flex items-center gap-1"><input id="rc-fill-colour" type="radio" name="rc-fill" checked={fill === 'colour'} onChange={() => setFill('colour')} /> Corners in</label>
-            <input type="color" value={fillColour} onChange={(e) => { setFillColour(e.target.value); setFill('colour'); }} aria-label="Corner colour" className="w-10 h-8" />
+            <input type="color" value={fillColour} onChange={(e) => { setFillColour(e.target.value); setFill('colour'); }} aria-label="Corner color" className="w-10 h-8" />
             <span className="text-xs text-neutral-500">(a JPG then stays a JPG)</span>
           </div>
           <button onClick={apply} disabled={!image || busy} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-3 font-semibold transition text-white">Apply Round Corners</button>

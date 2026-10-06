@@ -45,7 +45,7 @@ export default function StickyNotesPage() {
           <div className="flex flex-wrap gap-3 items-center">
             <div className="flex flex-wrap gap-2">
               {COLORS.map(c => (
-                <button key={c} onClick={() => setColor(c)} aria-label={'Note colour: ' + c.replace('bg-', '').replace('-300', '')} aria-pressed={color === c} className={c + ' w-8 h-8 rounded-full ' + (color === c ? 'ring-2 ring-white' : '')} />
+                <button key={c} onClick={() => setColor(c)} aria-label={'Note color: ' + c.replace('bg-', '').replace('-300', '')} aria-pressed={color === c} className={c + ' w-8 h-8 rounded-full ' + (color === c ? 'ring-2 ring-white' : '')} />
               ))}
             </div>
             <button onClick={addNote} disabled={!text.trim()} className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-200 disabled:text-gray-600 rounded-xl py-2 font-semibold transition text-white">Add Note</button>

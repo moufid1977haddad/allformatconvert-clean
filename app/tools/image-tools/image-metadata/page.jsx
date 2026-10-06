@@ -6,9 +6,11 @@ import { stripMetadata } from '../../../lib/stripMetadata';
 import { FileDownload } from '../../../components/FileDownload';
 import { useToolError } from '../../../lib/useToolError';
 import UploadPrompt from '@/app/components/UploadPrompt';
+import { isWebp, parseWebpMetadata } from '../../../lib/webpMetadata';
 // The page promised "View image metadata and EXIF data" but read only the
 // browser's file properties (29/09). exifr (MIT, used by metadata viewers)
-// reads EXIF, GPS, IPTC, XMP and ICC from JPEG, HEIC, TIFF, PNG, WebP and AVIF.
+// reads EXIF, GPS, IPTC, XMP and ICC from JPEG, HEIC, TIFF, PNG and AVIF; it has no WebP reader, so a WebP's
+// EXIF, XMP and ICC chunks are taken out by app/lib/webpMetadata.js and given to exifr's own parsers (P37).
 const fmt = (v) => {
   if (v instanceof Date) return v.toISOString().replace('.000Z', 'Z');
   if (v instanceof Uint8Array || v instanceof ArrayBuffer) return `(${v.byteLength} bytes of binary data)`;
@@ -45,16 +47,19 @@ export default function ImageMetadataPage() {
     // P23: an empty file made exifr throw a raw "undefined is not an object (evaluating 'this.dataView.getUint16')" (WebKit)
     if (!file.size) { setEmbedded([]); setError('This file is empty (0 bytes): it holds no picture and no metadata.'); return; }
     try {
-      const exifr = (await import('exifr')).default;
-      const tags = await exifr.parse(file, { tiff: true, exif: true, gps: true, iptc: true, xmp: true, icc: true, interop: true, ifd1: false, mergeOutput: false, translateValues: true, reviveValues: true });
+      const exifrModule = await import('exifr');
+      const exifr = exifrModule.default;
+      const options = { tiff: true, exif: true, gps: true, iptc: true, xmp: true, icc: true, interop: true, ifd1: false, mergeOutput: false, translateValues: true, reviveValues: true };
+      const webp = isWebp(new Uint8Array(await file.slice(0, 12).arrayBuffer()));
+      const tags = webp ? await parseWebpMetadata(exifrModule, new Uint8Array(await file.arrayBuffer()), options) : await exifr.parse(file, options);
       const groups = [];
       for (const [group, values] of Object.entries(tags || {})) {
         if (!values || typeof values !== 'object') continue;
         const rows = Object.entries(values).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => [k, fmt(v)]);
         if (rows.length) groups.push([group.toUpperCase(), rows]);
       }
-      const gps = await exifr.gps(file).catch(() => null);
-      if (gps && Number.isFinite(gps.latitude)) groups.unshift(['LOCATION', [['Latitude', gps.latitude.toFixed(6)], ['Longitude', gps.longitude.toFixed(6)]]]);
+      const gps = webp ? tags?.gps : await exifr.gps(file).catch(() => null);
+      if (gps && Number.isFinite(gps.latitude) && Number.isFinite(gps.longitude)) groups.unshift(['LOCATION', [['Latitude', gps.latitude.toFixed(6)], ['Longitude', gps.longitude.toFixed(6)]]]);
       setEmbedded(groups);
     } catch (err) {
       setEmbedded([]);
@@ -77,13 +82,13 @@ export default function ImageMetadataPage() {
           )}
           {clean && (
             <div className="space-y-2 bg-green-50 border border-green-200 rounded-xl p-3 text-sm">
-              <p data-removed>Removed: {clean.removed.length ? clean.removed.join(', ') : 'nothing to remove'}. The picture itself is unchanged (not re-encoded); its colour profile and orientation are kept.</p>
+              <p data-removed>Removed: {clean.removed.length ? clean.removed.join(', ') : 'nothing to remove'}. The picture itself is unchanged (not re-encoded); its color profile and orientation are kept.</p>
               <FileDownload href={clean.url} name={clean.name} />
             </div>
           )}
           {metadata && <div className="space-y-2">{Object.entries(metadata).map(([k,v]) => <div key={k} className="flex justify-between bg-neutral-50 rounded-lg border border-neutral-200 p-3"><span className="text-neutral-500 capitalize">{k}</span><span className="text-indigo-400 font-mono">{v}</span></div>)}</div>}
           {embedded && (embedded.length === 0
-            ? <p className="text-neutral-500 text-sm text-center">No embedded metadata (EXIF, GPS, IPTC, XMP, ICC) found in this file. The metadata of WebP files is not read here.</p>
+            ? <p className="text-neutral-500 text-sm text-center">No embedded metadata (EXIF, GPS, IPTC, XMP, ICC) found in this file.</p>
             : embedded.map(([group, rows]) => (
               <div key={group} className="space-y-1">
                 <div className="text-sm font-semibold text-neutral-600 mt-3">{group === 'LOCATION' ? 'GPS location — visible to anyone you send this file to' : group}</div>
@@ -94,7 +99,7 @@ export default function ImageMetadataPage() {
       </div>
       <SeoContent
         title={"Image Metadata Viewer"}
-        description={"Image Metadata Viewer shows what a picture carries besides its pixels: camera and lens, exposure, ISO, date taken, orientation, GPS position, IPTC caption and copyright, XMP and the ICC color profile. It reads JPEG, HEIC/HEIF, TIFF, PNG and AVIF files with the exifr library; WebP metadata is not read, so a WebP is shown as having none. It gives the name, size and type of any image, plus the pixel size and last-modified date when the browser can display it. A GPS position is listed first. For JPG and PNG, Remove metadata makes a copy without that data and with the same pixels."}
+        description={"Image Metadata Viewer shows what a picture carries besides its pixels: camera and lens, exposure, ISO, date taken, orientation, GPS position, IPTC caption and copyright, XMP and the ICC color profile. It reads JPEG, HEIC/HEIF, TIFF, PNG, AVIF and WebP files with the exifr library; for a WebP, the page first takes the EXIF, XMP and ICC blocks out of the file. It gives the name, size and type of any image, plus the pixel size and last-modified date when the browser can display it. A GPS position is listed first. For JPG, PNG and WebP, Remove metadata makes a copy without that data and with the same pixels."}
         howToTitle={"How to view and remove photo metadata"}
         howTo={[
           "Click the upload box and choose a photo; reading starts at once.",
@@ -104,17 +109,17 @@ export default function ImageMetadataPage() {
         ]}
         specs={[
           { label: "Metadata read from", value: "JPEG, HEIC/HEIF, TIFF, PNG and AVIF: EXIF, GPS, IPTC, XMP, ICC" },
-          { label: "WebP files", value: "Their metadata is not read: the page says the file has none, even if it holds camera or GPS data" },
-          { label: "Removal", value: "JPG and PNG; EXIF, GPS, XMP, IPTC and comments go, the color profile and orientation stay" },
+          { label: "WebP files", value: "EXIF (with GPS), XMP and the ICC color profile are read" },
+          { label: "Removal", value: "JPG, PNG and WebP; EXIF, GPS, XMP, IPTC and comments go, the color profile and orientation stay" },
           { label: "Not shown", value: "The embedded thumbnail (IFD1) and its tags" },
           { label: "Basic properties", value: "Name, size and type of any image; width, height and last-modified date when the browser can display it" },
         ]}
         privacyTitle="Where your image is processed"
-        privacy={"The exifr library reads the file inside this page, and the cleaned copy is assembled from its bytes in the same tab; no part of the photo, its GPS position or its metadata is sent to a server. Any error message on screen is sent to us in cleaned form, labelled with this tool and with your browser and its version; the photo and its metadata never are."}
+        privacy={"The exifr library reads the file inside this page, and the cleaned copy is assembled from its bytes in the same tab; no part of the photo, its GPS position or its metadata is sent to a server. Any error message on screen is sent to us in cleaned form, labeled with this tool and with your browser and its version; the photo and its metadata never are."}
         faqs={[
           { q: "Does it show where a photo was taken?", a: "Yes, when the file contains GPS coordinates. Latitude and longitude are shown first, to six decimals, under a heading warning that anyone you send the file to can read them." },
           { q: "Does removing metadata change the picture?", a: "No. The image data is copied byte for byte, not re-encoded, so the picture stays pixel-for-pixel identical. The color profile and the orientation are kept on purpose, so it looks the same and stays upright; camera, date, GPS, XMP, IPTC and comments are removed." },
-          { q: "Can it remove metadata from HEIC, TIFF or WebP?", a: "No. Removal works on JPG and PNG only. A HEIC or TIFF file is refused with a message, and a WebP never shows the \"Remove metadata\" button, because its metadata is not read here. Convert the photo to JPG with Image Converter first." },
+          { q: "Can it remove metadata from HEIC, TIFF or WebP?", a: "Yes for WebP, no for HEIC and TIFF. Removal works on JPG, PNG and WebP. A HEIC or TIFF file is refused with a message: convert the photo to JPG with Image Converter first, then check the copy here." },
           { q: "Is the last-modified date the day I took the photo?", a: "No, not necessarily. The last-modified line in the file properties is the date the file was last saved on your device. The moment of the shot is the DateTimeOriginal entry in the EXIF group, when the camera recorded one." },
         ]}
         tips={[

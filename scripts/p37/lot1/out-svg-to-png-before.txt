@@ -1,0 +1,2 @@
+preview src expression: {result} -> "[object Object]"
+FAIL  the preview points to the PNG

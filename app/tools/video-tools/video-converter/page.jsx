@@ -2,6 +2,7 @@
 import LegacyVideoConverter from './LegacyPage';
 import MediaServiceTool from '../../../components/MediaServiceTool';
 import { mediaServiceConfigured } from '../../../lib/mediaJob';
+import { AUDIO_TARGETS, EDITABLE, buildConvertParams, editConflict } from './convertParams';
 
 // Deployment switch, not a silent fallback: see video-compressor/page.jsx.
 
@@ -13,31 +14,13 @@ const VIDEO_TARGETS = [
   ['3gp', '3GP'], ['3g2', '3G2'], ['m4v', 'M4V'], ['ogv', 'OGV (Theora)'],
 ];
 const OTHER_TARGETS = [['gif', 'Animated GIF']];
-const AUDIO_TARGETS = [
-  ['mp3', 'MP3'], ['m4a', 'M4A (AAC)'], ['aac', 'AAC'], ['wav', 'WAV'], ['aiff', 'AIFF'], ['ogg', 'OGG (Vorbis)'], ['opus', 'Opus'],
-  ['flac', 'FLAC'], ['wma', 'WMA'], ['ac3', 'AC3'], ['amr', 'AMR (voice, 8 kHz mono)'],
-];
 // Formats whose file extension does not say which codec is inside: the name says it.
 const NAME_TAG = { h265: '-h265', av1: '-av1', xvid: '-xvid', mts: '', asf: '' };
 const QUALITIES = [['high', 'High quality'], ['medium', 'Balanced'], ['low', 'Small file']];
 // P24 (03/10): 123apps' converter offers a full resolution menu; the service accepts any limit from 144 to 4320 px
-// P25 (03/10, E5): FreeConvert's "advanced settings" and 123apps' editors — mirror, speed, volume, fades and an exact
-// CRF — for the video outputs the service edits (MP4 in H.264 / H.265 / AV1, MOV, M4V). Nothing sent when left as is:
-// the request (and the service's command) is then exactly the one of before.
-const EDITABLE = ['mp4', 'h265', 'av1', 'mov', 'm4v'];
+// Speed, mirror, volume, fades and CRF (P25), and the request itself: ./convertParams.js
 const SPEEDS = [['0.25', '0.25× (slow motion)'], ['0.5', '0.5×'], ['0.75', '0.75×'], ['1', 'Normal speed'], ['1.25', '1.25×'], ['1.5', '1.5×'], ['2', '2×'], ['3', '3×'], ['4', '4× (time-lapse)']];
 const CRF_MAX = { h265: 51, av1: 63 };
-function advancedParams(p) {
-  const out = {};
-  if (p.flip) out.flip = p.flip;
-  if (p.speed && p.speed !== '1') out.speed = Number(p.speed);
-  if (p.volume !== '' && Number(p.volume) !== 100) out.volume = Math.round(Number(p.volume)) / 100;
-  if (Number(p.fadeIn) > 0) out.fadeIn = Number(p.fadeIn);
-  if (Number(p.fadeOut) > 0) out.fadeOut = Number(p.fadeOut);
-  if ((out.fadeIn || out.fadeOut) && p.fadeVideo) out.fadeVideo = true;
-  if (p.crf !== '') out.crf = Math.round(Number(p.crf));
-  return out;
-}
 const HEIGHTS = [['', 'Keep original resolution'], ['2160', 'Limit to 2160p (4K)'], ['1440', 'Limit to 1440p'], ['1080', 'Limit to 1080p'], ['720', 'Limit to 720p'], ['480', 'Limit to 480p'], ['360', 'Limit to 360p'], ['240', 'Limit to 240p'], ['144', 'Limit to 144p']];
 
 const seo = {
@@ -47,7 +30,7 @@ const seo = {
   howTo: [
     `Choose or drop a video file: MP4, MOV, MKV, WebM, AVI or another video type.`,
     `Pick the target in "Convert to": a video format, "Animated GIF", or a format under "Audio only".`,
-    `Set "Quality" and, for video, an optional "Resolution" limit; for MP4, H.265, AV1, MOV or M4V, "More options: speed, mirror, volume, fades, exact quality" adds edits, but our video service refuses a "Resolution" limit combined with a speed or a mirror.`,
+    `Set "Quality" and, for video, an optional "Resolution" limit; for MP4, H.265, AV1, MOV or M4V, "More options: speed, mirror, volume, fades, exact quality" adds edits. A "Resolution" limit cannot be combined with a speed or a mirror: the page says so, and "Convert" stays off, before anything is uploaded.`,
     `Click "Convert" and follow the upload, the waiting line and the conversion percentage.`,
     `Click "Download": the file name ends with the real extension, plus a tag such as -h265 or -av1 when the extension alone does not show the codec.`,
   ],
@@ -82,13 +65,8 @@ export default function VideoConverterPage() {
       subtitle="Convert video to MP4, MOV, MKV, WebM, AVI, GIF, MP3 and more — on our video service, up to 1 GB"
       buttonLabel="Convert"
       initialParams={{ target: 'mp4', quality: 'medium', maxHeight: '', flip: '', speed: '1', volume: '100', fadeIn: '0', fadeOut: '0', fadeVideo: false, crf: '' }}
-      buildParams={(p) => {
-        const base = { target: p.target, quality: p.quality, ...(p.maxHeight && !AUDIO_TARGETS.some(([v]) => v === p.target) ? { maxHeight: Number(p.maxHeight) } : {}) };
-        const adv = EDITABLE.includes(p.target) ? advancedParams(p) : {};
-        if (!Object.keys(adv).length) return base;
-        // H.265 / AV1 with edits: an MP4 with that codec (the same file the h265 / av1 targets give)
-        return p.target === 'h265' || p.target === 'av1' ? { ...base, target: 'mp4', codec: p.target, ...adv } : { ...base, ...adv };
-      }}
+      buildParams={buildConvertParams}
+      problem={editConflict}
       outName={(name, ext, params) => {
         const base = name.replace(/\.[^.]+$/, '');
         const tag = NAME_TAG[params && params.target] || '';

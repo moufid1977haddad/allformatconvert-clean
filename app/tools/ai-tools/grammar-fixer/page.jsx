@@ -140,7 +140,7 @@ export default function GrammarFixerPage() {
           { q: "How reliable is it in other languages?", a: "29 of 40 learner sentences were corrected exactly in Portuguese and 16 to 17 in German, but 11 in Spanish, 9 in Italian and 6 in Arabic. Japanese, Chinese, Russian, Hindi and Turkish texts get a notice on the page that corrections are less reliable." }
         ]}
         tips={[
-          "Undo any change the tool made to a name, a brand or a technical term it did not recognise.",
+          "Undo any change the tool made to a name, a brand or a technical term it did not recognize.",
           "If you want new wording rather than corrections, use AI Paraphraser instead."
         ]}
       />

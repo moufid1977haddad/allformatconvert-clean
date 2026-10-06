@@ -1,0 +1,13 @@
+  PASS <a></a><c/>: refused at the second root (line 1, column 8)
+  PASS <a/>
+<b/>: refused (line 2, column 1)
+  PASS <a/><b></b>: refused (line 1, column 5)
+  PASS <a></a><b></b>: same message as the other cases, at the < of <b>
+  PASS attribute value holding > does not hide the second root
+  PASS text after a self-closed root: refused
+  PASS entity after a self-closed root: refused
+  PASS CDATA after the root: refused
+  PASS valid: declaration, DOCTYPE, comments and PI around one root
+  PASS valid: nested self-closed and paired tags
+  PASS other errors keep the validator message
+11 passed, 0 failed

@@ -41,7 +41,7 @@ else {
   await box.waitFor({ timeout: 5000 }).catch(() => {});
   const shownMs = Date.now() - t0;
   const text = (await box.count()) ? await box.innerText() : '';
-  check(`63 MP panorama: message at selection in ${shownMs} ms, before any click ("${text.split('\n')[0].slice(0, 120)}…")`, /14,000 × 4,500/.test(text) && /63 megapixels/.test(text) && /on a phone the limit is 48 megapixels/.test(text) && shownMs < 5000, text);
+  check(`63 MP panorama: message at selection in ${shownMs} ms, before any click ("${text.split('\n')[0].slice(0, 120)}…")`, /14,000 × 4,500/.test(text) && /63 megapixels/.test(text) && /on a phone or tablet the limit is 48 megapixels/.test(text) && shownMs < 5000, text);
   const above = await p.evaluate(() => { const a = document.querySelector('[data-over-limit]'), c = [...document.querySelectorAll('button')].find((x) => /^Compress/.test(x.textContent)); return !!(a && c && (a.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_FOLLOWING)); });
   check('the message stands above the Compress button', above);
   const btnText = (await p.locator('[data-reduce-then-compress]').count()) ? await p.locator('[data-reduce-then-compress]').innerText() : '';
@@ -69,7 +69,7 @@ if (fs.existsSync(PHOTO48)) {
   await p.locator('input[type=file]').first().setInputFiles(PHOTO48);
   await p.waitForTimeout(2500);
   check('48 MP photo (8064 × 6048): no size message, no Reduce button', (await p.locator('[data-over-limit]').count()) === 0 && (await p.locator('[data-reduce-then-compress]').count()) === 0);
-  const line = await p.locator('p', { hasText: 'Up to 20 images at a time, each up to 140 megapixels on a computer and 48 on a phone (48 MP phone photos fit' }).count(); // the line under the title (the FAQ says it too)
+  const line = await p.locator('p', { hasText: 'Up to 20 images at a time, each up to 140 megapixels on a computer and 48 on a phone or tablet (48 MP phone photos fit' }).count(); // the line under the title (the FAQ says it too)
   check('the page says 48 on a phone', line === 1);
   await p.close();
 } else check('kit 48 MP photo present', false, PHOTO48);
@@ -83,7 +83,7 @@ for (const slug of ['pdf-tools/jpg-to-pdf', 'pdf-tools/image-to-pdf']) {
   const text = (await box.count()) ? await box.innerText() : '';
   // P33 (05/10): phone bound 48 MP (was 90), and the same one-gesture Reduce as Image Compressor
   const btn = (await p.locator('[data-reduce-then-convert]').count()) ? await p.locator('[data-reduce-then-convert]').innerText() : '';
-  check(`${slug}: a 100 MP PNG is named at selection (phone bound 48 MP) with "${btn}"`, /10,000 × 10,000/.test(text) && /on a phone the limit is 48 megapixels/.test(text) && /reduced to 6,928 × 6,928 \(48 MP, the size of a 48 MP phone photo\)/.test(text) && btn === 'Reduce to 48 MP then convert to PDF', text);
+  check(`${slug}: a 100 MP PNG is named at selection (phone bound 48 MP) with "${btn}"`, /10,000 × 10,000/.test(text) && /on a phone or tablet the limit is 48 megapixels/.test(text) && /reduced to 6,928 × 6,928 \(48 MP, the size of a 48 MP phone photo\)/.test(text) && btn === 'Reduce to 48 MP then convert to PDF', text);
   await p.close();
 }
 await b.close();

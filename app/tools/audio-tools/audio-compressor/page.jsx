@@ -123,15 +123,15 @@ export default function AudioCompressorPage() {
           {result && (
             <div className="space-y-3">
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200"><div className="text-xs text-neutral-500">Original</div><div className="font-bold text-sm">{result.originalSize} MB</div></div>
-                <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200"><div className="text-xs text-neutral-500">Compressed</div><div className="font-bold text-sm text-indigo-600">{result.newSize} MB</div></div>
+                <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200"><div className="text-xs text-neutral-500">Original</div><div className="font-bold text-sm">{result.originalSize}</div></div>
+                <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200"><div className="text-xs text-neutral-500">Compressed</div><div className="font-bold text-sm text-indigo-600">{result.newSize}</div></div>
                 <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200"><div className="text-xs text-neutral-500">{result.larger ? 'Larger by' : 'Saved'}</div><div className={`font-bold text-sm ${result.larger ? 'text-amber-700' : 'text-green-600'}`} data-saved>{result.larger ? `${Math.abs(result.reduction)}%` : `${result.reduction}%`}</div></div>
               </div>
               {result.kbps < result.asked && <p className="text-xs text-neutral-600 text-center" data-capped>Your file is already at about {Math.round(result.srcKbps)} kbps, so it was encoded at {result.kbps} kbps instead of {result.asked} — a higher bitrate would only make it bigger.</p>}
               {result.larger ? (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-900 space-y-1" data-larger>
                   <p className="font-semibold">Your file is already well compressed.</p>
-                  <p>Re-encoding it gives {result.newSize} MB, not less than your {result.originalSize} MB: keep your original. The re-encoded file is below only if you need this format.</p>
+                  <p>Re-encoding it gives {result.newSize}, not less than your {result.originalSize}: keep your original. The re-encoded file is below only if you need this format.</p>
                 </div>
               ) : null}
               <PlayablePreview src={result.url} name={result.name} />
@@ -152,7 +152,7 @@ export default function AudioCompressorPage() {
           `Compare the "Original" and "Compressed" sizes, then click "Download".`,
         ]}
         specs={[
-          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AIFF, AIF, AMR, MKA, WEBA, CAF` },
+          { label: `Input formats`, value: `MP3, WAV, M4A, AAC, FLAC, OGG, OGA, Opus, WMA, AC3, AIFF, AIF, AMR, MKA, WEBA, CAF` },
           { label: `Output formats`, value: `MP3, AAC, OGG (Vorbis), M4A, Opus, WMA, AC3, M4B, MP2` },
           { label: `Bitrate`, value: `64, 96, 128, 192, 256 or 320 kbps, lowered to the source's own bitrate when ffmpeg can read it and it is lower (never under 8 kbps)` },
           { label: `Sample rate`, value: `Keep the original, or 48, 44.1, 32, 22.05, 16 or 8 kHz; OGG, AC3 and MP2 take only 48, 44.1 or 32 kHz. Mono and sample rate are not offered for Opus.` },

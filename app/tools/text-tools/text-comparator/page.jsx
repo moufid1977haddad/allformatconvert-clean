@@ -81,7 +81,7 @@ export default function TextComparatorPage() {
           "Put the older wording in \"Text 1\" and the newer one in \"Text 2\".",
           "Tick \"Ignore case\" when one version was retyped with other capitals, or \"Ignore spaces\" when only the spacing changed.",
           "Click \"Compare\"; the button works once both boxes hold text.",
-          "Read the number of differences, then the rows: dark grey rows match, red-tinted rows differ, with changed words marked."
+          "Read the number of differences, then the rows: dark gray rows match, red-tinted rows differ, with changed words marked."
         ]}
         specs={[
           { label: "Input", value: "Two pasted texts; Windows, Mac and Unix line breaks compare as equal" },

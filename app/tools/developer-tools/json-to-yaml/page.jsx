@@ -47,7 +47,7 @@ export default function JsonToYamlPage() {
         specs={[
           { label: "Input", value: "JSON text" },
           { label: "Output", value: "YAML in block style, two-space indentation, file data.yaml" },
-          { label: "Key order", value: "as in the JSON, except keys that are whole numbers, which come first" },
+          { label: "Key order", value: "as in the JSON, keys such as 10 included" },
         ]}
         privacy={"js-yaml converts your JSON inside the browser tab, and the pasted text is not uploaded; the YAML exists only on this page until you copy or download it. An error, such as a JSON parse error, is reported to us as text with quoted fragments replaced, together with the tool name and your browser version."}
         faqs={[

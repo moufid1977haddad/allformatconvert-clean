@@ -1,0 +1,6 @@
+788 files, 770 bare imports read in app/ and lib/
+FAIL csso is imported but not declared in dependencies; installed 5.0.5; app/lib/codeTools.js
+FAIL fflate is imported but not declared in dependencies; installed 0.8.3; app/lib/xlsxSupplementaryChars.js, app/tools/image-tools/gif-to-png/page.jsx
+FAIL dompurify is imported but not declared in dependencies; installed 3.4.7; app/tools/developer-tools/markdown-editor/page.jsx, app/tools/developer-tools/markdown-previewer/page.jsx, app/tools/pdf-tools/markdown-to-pdf/page.jsx
+
+3 undeclared package(s)

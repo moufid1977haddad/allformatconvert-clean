@@ -76,7 +76,7 @@ export default function VideoMergerPage() {
     const ac = new AbortController(); abortRef.current = ac;
     let ffmpeg = null;
     try {
-      if (total > maxTotal) throw new Error(`These videos add up to ${formatBytes(total)}; up to ${formatBytes(maxTotal)} can be joined${mobile ? ' on a phone' : ''}. Trim or compress them first.`);
+      if (total > maxTotal) throw new Error(`These videos add up to ${formatBytes(total)}; up to ${formatBytes(maxTotal)} can be joined${mobile ? ' on a phone or tablet' : ''}. Trim or compress them first.`);
       setStage({ label: 'Loading the video engine (about 10 MB the first time)…' });
       const { FFmpeg } = await import('@ffmpeg/ffmpeg');
       ffmpeg = new FFmpeg(); ffRef.current = ffmpeg;
@@ -196,7 +196,7 @@ export default function VideoMergerPage() {
         specs={[
           { label: 'Input formats', value: `MP4, M4V, MOV, WebM, MKV, AVI, WMV, FLV, OGV, 3GP, 3G2, MPG, MPEG, TS, MTS, M2TS; at least two files` },
           { label: 'Output', value: `One MP4: H.264 or HEVC copied as is when the clips are alike, H.264 with AAC sound when they had to be matched` },
-          { label: 'Maximum total size', value: `2 GB on a computer, 700 MB on phones, iPhone and iPad; clips sent for matching also face our video service's own size limit` },
+          { label: 'Maximum total size', value: `2 GB on a computer, 700 MB on phones and tablets; clips sent for matching also face our video service's own size limit` },
           { label: 'Frame rate', value: `The first clip's when clips are matched, at most 60 frames per second` },
           { label: 'Usage limits', value: `None when the clips are alike; otherwise each clip counts as one job in the hourly and daily limit of your internet connection on our video service` },
         ]}
@@ -205,7 +205,7 @@ export default function VideoMergerPage() {
           { q: "Can I merge videos from different phones or cameras?", a: `Yes. Clips that differ in size, frame rate or format are matched to the first clip on our video service: same size with black bars where the shape differs, same frame rate, stereo sound, and silence added to a silent clip. They are then joined without a second re-encoding.` },
           { q: "Does merging lose quality?", a: `No, when the clips are alike: they are copied, not re-encoded, and nothing is uploaded. Yes, slightly, when they differ: each clip is encoded once in H.264 before the join, at the service's high-quality setting or, if that would make it larger than the original, with stronger compression; its sound becomes stereo AAC.` },
           { q: "Which video sets the size of the result?", a: `The first one in the list. Its width, height and frame rate are applied to the others; a clip of another shape gets black bars and is never stretched. Move the clip you want as the reference to the top with the ↑ button.` },
-          { q: "How large can the videos be?", a: `2 GB in total on a computer and 700 MB on phones, iPhone and iPad, because the merged file is built in the browser tab's memory before you save it. Clips that must be matched also go through the size limit of our video service.` },
+          { q: "How large can the videos be?", a: `2 GB in total on a computer and 700 MB on phones and tablets, because the merged file is built in the browser tab's memory before you save it. Clips that must be matched also go through the size limit of our video service.` },
         ]}
         tips={[
           `On iPhone, pick the clips in the Files app rather than the Photos library: iOS shrinks videos picked from Photos before the page receives them.`,

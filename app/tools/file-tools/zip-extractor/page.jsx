@@ -233,11 +233,11 @@ export default function ZipExtractorPage() {
   const cancel = async () => {
     cancelledRef.current = true;
     workerRef.current?.terminate(); workerRef.current = null;
-    pendingAskRef.current?.({ type: 'error', message: 'Cancelled.' }); pendingAskRef.current = null;
+    pendingAskRef.current?.({ type: 'error', message: 'Canceled.' }); pendingAskRef.current = null;
     setProgress(null); setRowBusy('');
-    if (phase === 'opening') { setPhase('idle'); setError('Cancelled.'); return; }
+    if (phase === 'opening') { setPhase('idle'); setError('Canceled.'); return; }
     await openArchive(archive, pwRef.current); // a fresh engine needs the archive opened again (quick: listing only)
-    setError('Cancelled.');
+    setError('Canceled.');
   };
 
   const busy = phase === 'opening' || phase === 'busy';
@@ -324,7 +324,7 @@ export default function ZipExtractorPage() {
         specs={[
           { label: "Formats tested here", value: "ZIP, RAR, RAR5, 7Z (also split), CAB, LZH" },
           { label: "Other formats", value: "TAR, GZ, BZ2, XZ, ZST and the other archive types 7-Zip 24.09 reads" },
-          { label: "Per extracted file", value: `Up to ${MAX_FILE_LABEL} on a computer, ${MOBILE_MAX_FILE_LABEL} on phones, iPhone and iPad` },
+          { label: "Per extracted file", value: `Up to ${MAX_FILE_LABEL} on a computer, ${MOBILE_MAX_FILE_LABEL} on phones and tablets` },
           { label: "Compressed TAR", value: "A .tar.gz, .tgz, .tar.bz2, .tar.xz or .tar.zst unpacks its inner .tar in memory, with the same per-file limit" },
           { label: "Archive size", value: "No cap for other archives: they are read from disk in pieces" },
           { label: "\"Download all as ZIP\"", value: `Streamed to disk in Chrome and Edge on a computer; elsewhere built in memory up to ${ZIP_IN_MEMORY_LABEL}, then streamed through a service worker` }
@@ -333,7 +333,7 @@ export default function ZipExtractorPage() {
         faqs={[
           { q: "Can it open password-protected archives?", a: "Yes: ZIP with AES or the older ZipCrypto, RAR and 7Z, including archives whose file names are encrypted. Type the password when asked and click \"Unlock\"; it is used only inside this tab, and a wrong one shows \"Wrong password — try again\"." },
           { q: "Can it open a split (multi-part) archive?", a: "Yes. Select every part at once, for example name.part1.rar and name.part2.rar, name.7z.001 and name.7z.002, or name.z01, name.z02 and name.zip. The tool starts from the first part and reads the others; a missing part is reported." },
-          { q: "Is there a size limit?", a: `Yes, per extracted file: ${MAX_FILE_LABEL} on a computer and ${MOBILE_MAX_FILE_LABEL} on phones, iPhone and iPad. Archives themselves have no cap, except compressed TAR files such as .tar.gz, whose inner .tar must be unpacked in memory first and has the same limit.` },
+          { q: "Is there a size limit?", a: `Yes, per extracted file: ${MAX_FILE_LABEL} on a computer and ${MOBILE_MAX_FILE_LABEL} on phones and tablets. Archives themselves have no cap, except compressed TAR files such as .tar.gz, whose inner .tar must be unpacked in memory first and has the same limit.` },
           { q: "Can I extract just one file?", a: "Yes. Click its \"Download\": only that file is extracted, so a large archive is not unpacked whole. \"Open\" shows images, PDFs, text, audio and video in a new tab instead of saving them." },
           { q: "Are accented ZIP file names shown correctly?", a: "Yes. zip.js reads names as UTF-8 when they are valid UTF-8, and otherwise as IBM code page 437, as the ZIP specification says, so names written by older tools come out right." }
         ]}

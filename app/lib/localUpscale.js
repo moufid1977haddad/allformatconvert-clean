@@ -122,7 +122,7 @@ export async function upscaleInBrowser(img, scale, { onProgress, onPhase, signal
   onPhase?.('Upscaling on this device');
   const times = [];
   for (let i = 0; i < tiles.length; i++) {
-    if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
+    if (signal?.aborted) throw new DOMException('Canceled', 'AbortError');
     const [x0, y0] = tiles[i];
     const t0 = performance.now();
     const x1 = Math.min(w, x0 + TILE), y1 = Math.min(h, y0 + TILE);
@@ -228,7 +228,7 @@ export async function upscaleOnServerInParts(file, scale, runPart, { signal } = 
   }
   try {
     for (let i = 0; i < count; i++) {
-      if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
+      if (signal?.aborted) throw new DOMException('Canceled', 'AbortError');
       const y0 = i * rows, y1 = Math.min(h, y0 + rows);
       const py0 = Math.max(0, y0 - OVERLAP), py1 = Math.min(h, y1 + OVERLAP);
       const band = document.createElement('canvas');
