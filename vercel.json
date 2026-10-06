@@ -10,5 +10,5 @@
       "schedule": "17 9 1 1 *"
     }
   ],
-  "ignoreCommand": "git diff --quiet ${VERCEL_GIT_PREVIOUS_SHA:-HEAD^} HEAD -- . ':(exclude)docs/**' ':(exclude)**/*.md' ':(exclude)README*'"
+  "ignoreCommand": "if git cat-file -e \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}^{commit}\" 2>/dev/null; then git diff --quiet \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}\" HEAD -- . ':(exclude)docs/**' ':(exclude)**/*.md' ':(exclude)README*'; else exit 1; fi"
 }

@@ -58,7 +58,7 @@ le texte de la page concernée doit suivre** (il décrit le comportement actuel)
 (`LegacyPage`) : relire le texte servi sur www, ou construire avec la valeur publique de www (lue dans son JavaScript) ;
 (2) `next start` sur un port déjà pris échoue en silence et l'ancien serveur répond (déjà noté P33) : tuer le PID ; (3)
 heredoc bash avec apostrophes : écrire par l'outil d'écriture ; (4) le « Vercel Security Checkpoint » refuse les
-scanners tiers venant de centres de données (webbkoll) ; (5) l'outil `seo-audit.mjs` compte les entités HTML
+scanners tiers venant de centres de données (webbkoll) ; (6) **la production `d3113100` a échoué à la construction** : l'`ignoreCommand` de `vercel.json` comparait avec le dernier commit déployé (`206684a1`), absent du clone de profondeur 10 de Vercel (« fatal: bad object ») — corrigé : si ce commit est absent, Vercel construit (`git cat-file -e … || exit 1`) ; (5) l'outil `seo-audit.mjs` compte les entités HTML
 (`&#x27;`) dans la longueur des titres : 3 faux dépassements.
 
 **Prochain chantier technique après P36 (demande du propriétaire du 06/10, rien changé en ligne dans P36)** :
