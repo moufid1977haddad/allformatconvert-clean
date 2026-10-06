@@ -1,0 +1,7 @@
+# P37 review n4 (fourth review F1): lam-alef term mixed with digits or wrapped, for scripts/p37/review/real-page-terms.mjs
+# (several terms, "|" separated) — pdf TAB terms; root %TEMP%\p37-review-redact
+ar3/mixed.pdf	مارس|السلام 2025
+ar3/mixed2.pdf	السلام 2025
+ar3/wrap15.pdf	مارس|السلام عليكم
+ar3/salam.pdf	سلام
+ar3/one.pdf	رب

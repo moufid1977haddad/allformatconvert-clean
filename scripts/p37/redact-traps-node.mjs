@@ -5,6 +5,7 @@
 // paints them on PDF.js's picture) and Tesseract reads it: the term must not be read there ("ocr"); the same picture
 // without the boxes is read too, to show the term was readable before ("ocr-before": yes / no).
 // Known false positive of "raw" (P33 report §7): a term that is part of a font's /Registry (Adobe) (r2/g5).
+// A line may give several terms, separated by "|" (fourth review: a leak seen only with two terms).
 //   node scripts/p37/redact-traps-node.mjs --list=scripts/p35/traps.txt --root=%TEMP%\p33-review-redact [--ocr]
 import fs from 'node:fs';
 import os from 'node:os';
@@ -53,32 +54,34 @@ const tally = {};
 for (const { pdf, term } of jobs) {
   const name = path.relative(arg('root', '.'), pdf);
   let r;
-  try { r = await redact(pdf, [term]); } catch (e) { tally.ERROR = (tally.ERROR || 0) + 1; console.log(`${name} [${term}] ERROR ${e.message}`); continue; }
+  const terms = term.split('|').filter(Boolean);
+  const has = (s) => terms.some((x) => norm(s).includes(norm(x)));
+  try { r = await redact(pdf, terms); } catch (e) { tally.ERROR = (tally.ERROR || 0) + 1; console.log(`${name} [${term}] ERROR ${e.message}`); continue; }
   tally[r.status] = (tally[r.status] || 0) + 1;
   const L = [], notes = [];
   if (r.bytes) {
     const out = path.join(OUT, name.replace(/[\\/]/g, '_'));
     fs.writeFileSync(out, r.bytes);
-    if (norm(pdftotext(out)).includes(norm(term))) L.push('pdftotext');
-    if (rawHit(r.bytes, term)) L.push('raw');
+    if (has(pdftotext(out))) L.push('pdftotext');
+    if (terms.some((x) => rawHit(r.bytes, x))) L.push('raw');
     const d = await pdfjs.getDocument({ data: new Uint8Array(r.bytes), standardFontDataUrl: SFD, verbosity: 0 }).promise;
     let s = '';
     for (let i = 1; i <= d.numPages; i++) { const pg = await d.getPage(i); s += (await pg.getTextContent()).items.map((x) => x.str).join(' ') + ' ' + (await pg.getAnnotations()).map((a) => [a.fieldValue, a.contentsObj?.str, a.url].filter(Boolean).join(' ')).join(' '); }
     await d.destroy();
-    if (norm(s).includes(norm(term))) L.push('pdfjs');
+    if (has(s)) L.push('pdfjs');
     if (ocr) {
       const src = await pdfjs.getDocument({ data: new Uint8Array(fs.readFileSync(pdf)), standardFontDataUrl: SFD, verbosity: 0 }).promise;
       for (const pg of r.hits) {
         const base = path.join(OUT, `ocr-${name.replace(/[\\/]/g, '_')}-p${pg}`);
         execFileSync('pdftoppm', ['-r', '144', '-gray', '-singlefile', '-f', String(pg), '-l', String(pg), pdf, base], { stdio: 'ignore' });
-        const before = norm(tess(`${base}.pgm`)).includes(norm(term));
+        const before = has(tess(`${base}.pgm`));
         const img = readPgm(`${base}.pgm`);
         const page = await src.getPage(pg);
         const vp = page.getViewport({ scale: 2, rotation: page.rotate });
         const quads = r.quads[pg] || [];
         for (let j = 0; j < img.h; j++) for (let i = 0; i < img.w; i++) { const p = vp.convertToPdfPoint(i + 0.5, j + 0.5); if (quads.some((q) => inside(q, p))) img.px[j * img.w + i] = 0; }
         fs.writeFileSync(`${base}-boxes.pgm`, Buffer.concat([img.head, img.px]));
-        if (norm(tess(`${base}-boxes.pgm`)).includes(norm(term))) L.push(`ocr-p${pg}`);
+        if (has(tess(`${base}-boxes.pgm`))) L.push(`ocr-p${pg}`);
         notes.push(`ocr-before p${pg}: ${before ? 'yes' : 'no'}`);
       }
       await src.destroy();

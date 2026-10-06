@@ -204,3 +204,50 @@ Aucune fuite trouvée : ni texte, ni pixel, ni couche invisible. N1 à N5 sont c
 - `real-page-review.mjs` : **Chromium 21/21, WebKit iPhone 21/21** (avant : 18/21 dans chaque moteur). OCR sous l'image et `ca 0` : 0 px non noir.
 - `redact-bench.mjs traps-r2.txt` (Chromium) : 3 ok, 0 fuite (« السلام » ; la phrase « وبركاته لا إله إلا الله », avant « No match found » ; OCR sous l'image).
 - `redact-bench.mjs traps-r3.txt` (Chromium) : salam.pdf REFUSED (R2) ; rab.pdf et one.pdf « ok » avec un faux noircissement (R1). 0 fuite.
+
+---
+
+# Relecture n° 4 — commit 3ad97d78 (corrections R1-R3, décision du contrôleur)
+
+Date : 06/10/2026. Même rôle, mêmes règles. Vraie page : build de production de 3ad97d78 sur http://localhost:3137 (servi par le contrôleur).
+Nouveaux scripts : `scripts/p37/review/real-page-terms.mjs` (plusieurs termes sur la vraie page). Fixtures : `%TEMP%\p37-review-redact\ar3\mixed.pdf`, `mixed2.pdf`, `wrap15.pdf` (faites par `make-arabic-pages.mjs`).
+
+## Verdict : NO-GO en l'état
+
+Il y a une fuite silencieuse, nouvelle par rapport à 00184b46. Elle vient du contrôle final rétréci (R2). Le correctif est petit (§3).
+
+## 1. Ce qui est corrigé et tient
+- R1 : « رب » ne noircit plus le « بر » de « وبركاته » (one.pdf : « nomatch », juste). Une ligature latine n'est plus inversée.
+- R2 : salam.pdf est « ok », « سالم » reste visible.
+- R3 : `page.cleanup()` après la passe 1 pour les pages sans correspondance.
+- Décision du contrôleur : le terme exact trouvé dans le texte de PDF.js est toujours noirci et toujours contrôlé. Vérifié (rab.pdf : pages 1 et 2 noircies).
+- Suites Node, toutes sans fuite :
+  - 31 pièges avec `--ocr` : 31 ok (seul signal : r2/g5, connu).
+  - `review-traps` 5/5 ok ; `traps-r2` 3/3 ok ; `traps-r3` : 2 ok, 1 nomatch (juste).
+  - `fit-adversarial` 19/19 ; `ocr-scan` 4/4 à 100 % ; `ocr-variants` 2/2 à 100 %.
+  - box-fit 15/15 ; arabe 4/4 ; `redact-review-fixes` et `redact-review2` : tout PASS.
+
+## 2. Défaut F1 — ÉLEVÉE, régression de 00184b46 → 3ad97d78 : fuite silencieuse d'un terme arabe avec lam-alef que les glyphes ne trouvent pas
+Le contrôle final ne cherche plus les formes permutées dans le texte de PDF.js : seulement le terme exact, plus les glyphes. Or la recherche par glyphes ne trouve pas deux cas courants :
+- **Terme mêlé de chiffres ou de latin** : « السلام 2025 ». `glyphTermMatches` inverse tout le terme, chiffres compris (« 5202… »). Or les chiffres sont dessinés de gauche à droite.
+- **Phrase coupée en fin de ligne** : « السلام عليكم » sur deux lignes. Dans l'ordre du dessin, les deux morceaux ne se suivent pas.
+
+Dans les deux cas, PDF.js lit « السالم » (lam-alef inversé). Le terme exact n'est donc pas dans le texte, et seule une forme permutée le trouverait. En 00184b46, le contrôle final cherchait toutes les formes et refusait le fichier.
+
+Mesures :
+| Fixture | Exact (texte) | Toutes les formes (texte) | Glyphes |
+|---|---|---|---|
+| mixed.pdf p. 2, « السلام 2025 » | 0 | 2 | 0 |
+| wrap15.pdf p. 2, « السلام عليكم » (coupé en fin de ligne) | 0 | 2 | 0 |
+
+Repro, **vraie page Chromium** (`real-page-terms.mjs`) :
+- `mixed.pdf`, termes « مارس » et « السلام 2025 » : « Blacked out 1 occurrence (page 1: 1) », fichier livré, **pdftotext lit « السلام 2025 »**.
+- `wrap15.pdf`, termes « مارس » et « السلام عليكم » : idem, **pdftotext lit « السلام عليكم »**.
+- `mixed2.pdf`, « السلام 2025 » seul : « No match found ». C'est faux aussi : le terme est dans le fichier, et l'utilisateur peut croire qu'il n'y est pas.
+- Même résultat en Node (`arabic-terms.mjs`).
+
+## 3. Correctif proposé (sans rouvrir R2)
+1. Au contrôle final ET en passe 1, accepter une forme permutée trouvée dans le texte de PDF.js quand la page dessine un glyphe à plusieurs caractères de droite à gauche (« لا », « الله ») à cet endroit. Version simple : le run de PDF.js qui porte la correspondance contient un tel glyphe (`itemGeometry` / `glyphs` de la page). « سالم » (sans ligature) ne déclenche rien, donc R2 reste corrigé. « السالم » (ligature inversée) est noirci en passe 1, ou refusé au contrôle.
+2. Dans `glyphTermMatches`, construire la forme dessinée d'un terme RTL avec `bidiReorder` (chiffres et latin gardent leur ordre) au lieu d'un simple envers.
+3. Ajouter `mixed.pdf` et `wrap15.pdf` (avec « مارس ») aux tests (`redact-review2.test.mjs`) et au banc vraie page. Le banc à un seul terme ne voit pas la fuite : il faut deux termes.
+

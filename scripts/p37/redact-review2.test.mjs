@@ -10,7 +10,10 @@
 //      scripts/p37/review/make-arabic-pages.mjs, %TEMP%\p37-review-redact\ar3);
 //   controller decision (06/10): the term as typed, found in PDF.js's text, is ALWAYS redacted or refused, even where the
 //      glyphs do not read it: rab.pdf page 2 (« البريد », which PDF.js reads with a piece « رب ») alone, as a PDF of its
-//      own — never delivered with « رب » in its text (accepted: page 2 of rab.pdf is blacked out, over-redaction).
+//      own — never delivered with « رب » in its text (accepted: page 2 of rab.pdf is blacked out, over-redaction);
+//   fourth review F1: a lam-alef term mixed with digits (« السلام 2025 », mixed.pdf with « مارس », mixed2.pdf alone) or
+//      wrapped onto the next line (« السلام عليكم », wrap15.pdf with « مارس ») is found and gone from the file (pdftotext),
+//      or the file refused — never delivered with it, never "no match".
 // Fixtures: node scripts/p37/review/make-arabic-two-pages.mjs (%TEMP%\p37-review-redact\ar2) and
 // node scripts/p37/make-arabic-fixtures.mjs (%TEMP%\p37-arabic\lo-Arial-names.pdf).
 //   node scripts/p37/redact-review2.test.mjs [--harness=<harness.mjs>] [--impl=<pdfRedact.js>]
@@ -99,6 +102,14 @@ if (fs.existsSync(path.join(AR3, 'one.pdf'))) {
   check('decision: text holds « رب », glyphs do not read it → redacted or refused, never delivered with it', N(before).includes(N('رب')) && (mis.status === 'REFUSED' || (mis.status === 'ok' && !N(after).includes(N('رب')))), `PDF.js text before: ${N(before).includes(N('رب')) ? 'holds it' : 'does not hold it'}; status ${mis.status}; after: ${mis.bytes ? (N(after).includes(N('رب')) ? 'STILL HOLDS IT' : 'clean') : '-'}`);
   const salam = await redact(path.join(AR3, 'salam.pdf'), ['سلام']);
   check('R2 « سلام » with « سالم » on page 2 is redacted, not refused (salam.pdf)', salam.status === 'ok' && !N(text(salam.bytes)).includes(N('سلام')) && N(text(salam.bytes)).includes(N('سالم')), `status ${salam.status}${salam.reason ? ` (${salam.reason})` : ''}`);
+  // F1
+  for (const [file, terms, term] of [['mixed.pdf', ['مارس', 'السلام 2025'], 'السلام 2025'], ['mixed2.pdf', ['السلام 2025'], 'السلام 2025'], ['wrap15.pdf', ['مارس', 'السلام عليكم'], 'السلام عليكم']]) {
+    const fp = path.join(AR3, file);
+    if (!fs.existsSync(fp)) { check(`F1 ${file}`, false, 'missing (scripts/p37/review/make-arabic-pages.mjs)'); continue; }
+    const r = await redact(fp, terms);
+    const out = r.bytes ? N(text(r.bytes)) : '';
+    check(`F1 ${file} [${terms.join(' + ')}]: never delivered with « ${term} », never "no match"`, r.status === 'REFUSED' || (r.status === 'ok' && !out.includes(N(term))), `status ${r.status}${r.reason ? ` (${r.reason})` : ''}, pdftotext ${r.bytes ? (out.includes(N(term)) ? 'STILL HOLDS IT' : 'clean') : '-'}`);
+  }
 } else check('R1/R2 fixtures', false, `missing ${AR3}: run scripts/p37/review/make-arabic-pages.mjs`);
 console.log(`\n${fails ? `${fails} FAIL` : 'all PASS'}`);
 process.exit(fails ? 1 : 0);

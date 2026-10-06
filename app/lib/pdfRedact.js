@@ -18,7 +18,7 @@ const norm = (s) => s.normalize('NFKD').replace(/[\p{M}¨´ˆ-˝`¯¸]/gu, '').t
 // phrase with many lam-alef had more than 64 forms, and the one PDF.js reads was cut off); at most 64 forms.
 const RTL_SWAP = /الله|لا/g;
 const SWAPPED = { 'الله': 'هللا', 'لا': 'ال' };
-export function termVariants(keyword) {
+export function termVariants(keyword, { reversed = true } = {}) {
   const needle = norm(keyword);
   if (!needle) return [];
   if (!isRtlText(needle)) return [needle];
@@ -26,9 +26,10 @@ export function termVariants(keyword) {
   const occ = [...needle.matchAll(RTL_SWAP)].map((m) => [m.index, m[0]]);
   const build = (mask) => { let s = '', at = 0; occ.forEach(([i, w], n) => { s += needle.slice(at, i) + ((mask >> n) & 1 ? SWAPPED[w] : w); at = i + w.length; }); return s + needle.slice(at); };
   const all = build((1 << occ.length) - 1);
-  const out = [needle, all, rev(needle), rev(all)];
+  // reversed: false → only the lam-alef forms (fourth review F1: what a ligature read reversed gives, in reading order)
+  const out = reversed ? [needle, all, rev(needle), rev(all)] : [needle, all];
   const n = Math.min(occ.length, 5);
-  for (let mask = 1; mask < (1 << n) - 1 && out.length < 64; mask++) { const s = build(mask); out.push(s, rev(s)); }
+  for (let mask = 1; mask < (1 << n) - 1 && out.length < 64; mask++) { const s = build(mask); out.push(...(reversed ? [s, rev(s)] : [s])); }
   return [...new Set(out)].slice(0, 64);
 }
 
@@ -37,7 +38,8 @@ export function termVariants(keyword) {
 // term as typed: what is blacked out from the text; second review N5 — "سلام" must not black out "سالم", another name;
 // the forms PDF.js misreads are found in the glyphs instead, glyphTermMatches, where the drawing shows them).
 export function matchSpans(strs, keyword, { forms = 'all' } = {}) {
-  const needles = forms === 'exact' ? [norm(keyword)].filter(Boolean) : termVariants(keyword);
+  // forms: 'all', 'exact', or 'ligature' (the term and its lam-alef forms, not reversed: confirmedTermSpans)
+  const needles = forms === 'exact' ? [norm(keyword)].filter(Boolean) : termVariants(keyword, { reversed: forms !== 'ligature' });
   if (!needles.length) return [];
   let hay = '';
   const at = []; // at[j] = [item, char] of hay[j]
@@ -464,7 +466,8 @@ export function glyphTermMatches(glyphs, terms) {
     const nd0 = norm(term);
     if (!nd0) continue;
     const rtl = isRtlText(nd0);
-    const reversed = Array.from(nd0).reverse().join('');
+    // fourth review (F1): the drawn order of a right-to-left term keeps digits and Latin in their own order
+    const reversed = bidiReorder(Array.from(nd0)).join('');
     // third review (R1): the reading order must agree with the real drawing direction. A left-to-right term: as typed,
     // glyphs as given. A right-to-left term drawn left to right (the usual order of the glyphs in a PDF): reversed, in
     // the text where right-to-left glyphs are reversed; drawn right to left (or one glyph): as typed, glyphs as given.
@@ -494,12 +497,41 @@ export function glyphTermMatches(glyphs, terms) {
  * typed (matchSpans 'exact'), with the match id of the page ("t<term>:<offset>"). The typed form found in PDF.js's text
  * is ALWAYS redacted and ALWAYS checked in the final check, with no glyph confirmation: a silent leak is worse than
  * blacking out too much or refusing (PDF.js reading a piece "رب" inside "البريد" makes it blacked out: over-redaction,
- * as before P37). Only the PERMUTED forms (lam-alef, reversed readings) need the glyphs: they are found in the glyphs
- * drawn, with the drawing direction (glyphTermMatches), never in the text (a third argument, the glyphs, is ignored).
+ * as before P37). The PERMUTED forms (lam-alef, reversed readings) need the glyphs: found in the glyphs drawn, with the
+ * drawing direction (glyphTermMatches), or in the text where the run draws a multi-character right-to-left glyph (F1).
  */
-export function confirmedTermSpans(items, terms) {
+export function confirmedTermSpans(items, terms, glyphs = null) {
   const strs = items.map((it) => it.str);
-  return terms.flatMap((term, ti) => matchSpans(strs, term, { forms: 'exact' }).map((sp) => ({ ...sp, m: `t${ti}:${sp.m}` })));
+  // fourth review (F1): a PERMUTED form found in PDF.js's text is accepted where the run concerned draws a glyph that
+  // carries several right-to-left characters (a lam-alef "لا", the "الله" ligature): PDF.js reads that glyph reversed
+  // ("السلام" read "السالم"), and a term mixed with digits ("السلام 2025") or wrapped onto the next line ("السلام" /
+  // "عليكم") is not found in the glyphs. "سالم" (no ligature) triggers nothing: R2 stays fixed. Glyphs not known: every
+  // permuted form is accepted (the safe side).
+  const inQuad = (q, [x, y]) => { let s = 0; for (let i = 0; i < 4; i++) { const [x1, y1] = q[i], [x2, y2] = q[(i + 1) % 4]; const c = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1); if (c !== 0) { if (s && Math.sign(c) !== s) return false; s = Math.sign(c); } } return true; };
+  const ligatures = glyphs ? glyphs.filter((g) => g.M && Array.from(norm(g.u)).length > 1 && isRtlText(g.u)).map((g) => apply(g.M, (g.x0 + g.x1) / 2, 0.3 * g.size)) : null;
+  const ligatureIn = new Map(); // item → draws a multi-character right-to-left glyph?
+  const drawsLigature = (k) => {
+    if (!ligatures) return true;
+    if (!ligatureIn.has(k)) {
+      const it = items[k];
+      let yes = false;
+      if (Array.isArray(it.transform) && it.width > 0) { const g = runGeom(it); const q = quadOf(g, -0.15 * g.fs, it.width + 0.15 * g.fs, -0.3 * g.fs, 1.05 * g.fs); yes = ligatures.some((p) => inQuad(q, p)); }
+      ligatureIn.set(k, yes);
+    }
+    return ligatureIn.get(k);
+  };
+  return terms.flatMap((term, ti) => {
+    const exact = matchSpans(strs, term, { forms: 'exact' }).map((sp) => ({ ...sp, m: `t${ti}:${sp.m}` }));
+    if (!isRtlText(norm(term))) return exact;
+    const seen = new Set(exact.map((sp) => `${sp.k}:${sp.c0}:${sp.c1}`));
+    // only the lam-alef forms: a fully reversed reading is a drawing-order reading, found in the glyphs (R1: « رب » must
+    // not take the « بر » of « وبركاته »)
+    const all = matchSpans(strs, term, { forms: 'ligature' }).map((sp) => ({ ...sp, m: `t${ti}:${sp.m}` })).filter((sp) => !seen.has(`${sp.k}:${sp.c0}:${sp.c1}`));
+    const byMatch = new Map();
+    for (const sp of all) { if (!byMatch.has(sp.m)) byMatch.set(sp.m, []); byMatch.get(sp.m).push(sp); }
+    const permuted = [...byMatch.values()].filter((sps) => sps.some((sp) => drawsLigature(sp.k))).flat();
+    return [...exact, ...permuted];
+  });
 }
 
 export function glyphTermQuads(glyphs, terms, inkOf = () => null, px = 0.5) {

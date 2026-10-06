@@ -201,3 +201,45 @@ Les PDF arabes faits par Chrome sont maintenant noircis : la recherche par glyph
 ### Commandes pour le contrôleur (après rebuild)
 - `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p37/review/traps-r3.txt --root=%TEMP%\p37-review-redact --browser=chromium` (puis webkit) : attendu salam ok, one nomatch, rab ok (pages 1 et 2), 0 fuite.
 - `node scripts/p37/review/real-page-review.mjs <origin> --browser=chromium` et `--browser=webkit --device=iphone` : 21/21. Puis les commandes des §6, §8 et §9.
+
+## 11. Relecture n° 4 (3ad97d78 : NO-GO) — F1, fuite silencieuse d'un terme lam-alef mêlé de chiffres ou coupé en fin de ligne
+
+### Défaut
+- Le terme « السلام 2025 » (mêlé de chiffres) ou « السلام عليكم » (coupé en fin de ligne) : PDF.js lit « السالم ». Le terme exact n'est donc pas dans le texte, et les glyphes ne le trouvaient pas non plus (chiffres inversés ; deux morceaux non contigus). Le contrôle final, rétréci par R2, ne le voyait pas davantage.
+- Résultat : avec « مارس » en plus, le fichier était livré et pdftotext lisait encore le terme. Seul, l'outil disait « No match found ».
+
+### Correction (`app/lib/pdfRedact.js`), comme proposé par la relecture
+1. `confirmedTermSpans` (passe 1 ET contrôle final) accepte aussi une forme lam-alef trouvée dans le texte de PDF.js, mais seulement si le run concerné dessine un glyphe à plusieurs caractères de droite à gauche (« لا », ligature « الله »). « سالم », sans ligature, ne déclenche rien, donc R2 reste corrigé. Si les glyphes de la page n'ont pas pu être lus, toutes ces formes sont acceptées (côté sûr).
+   - Seules les formes lam-alef servent ici (`matchSpans(…, { forms: 'ligature' })`), jamais la lecture entièrement inversée. Celle-ci reprenait le « بر » de « وبركاته » pour « رب » (R1). Une lecture dans l'ordre du dessin est trouvée par les glyphes.
+2. `glyphTermMatches` : la forme dessinée d'un terme de droite à gauche est construite avec `bidiReorder` (chiffres et latin gardent leur ordre), et non par un simple envers.
+
+### Tests (échec avant → succès après)
+- `redact-review2.test.mjs`, 3 nouveaux cas F1. Sur une copie de 3ad97d78 : **3 FAIL**. Avec la correction : **PASS**.
+
+  | Fichier | Avant | Après |
+  |---|---|---|
+  | mixed.pdf (« مارس » + « السلام 2025 ») | ok, mais pdftotext lit encore le terme | ok, absent |
+  | mixed2.pdf (« السلام 2025 » seul) | « nomatch » | ok, absent |
+  | wrap15.pdf (« مارس » + « السلام عليكم ») | ok, mais pdftotext lit encore le terme | ok, absent |
+
+- Les autres fixtures coupées de la relecture (wrap10 à wrap14, wrap16) : ok, terme absent.
+- R1 et R2 tiennent : one.pdf « رب » → nomatch ; salam.pdf ok, « سالم » visible (N5 et R2 PASS).
+- Nouvelle liste `scripts/p37/traps-r4.txt` (plusieurs termes par ligne, séparés par « | »). `redact-traps-node.mjs` accepte maintenant ce format. Node : 4 ok, 1 nomatch (one.pdf, juste), 0 fuite.
+
+### Relances, toutes sans fuite
+- `redact-review-fixes` et `redact-review2` : tout PASS. box-fit 15/15 ; fit-adversarial 19/19 ; ocr-scan 4/4 et ocr-variants 2/2 à 100 % ; arabe 4/4.
+- 31 pièges avec OCR : 31 ok (seul signal : r2/g5, connu). review-traps 5/5, traps-r2 3/3, traps-r3 2 ok + 1 nomatch : 0 fuite.
+- Navigateur (code de la page, sans build) : `redact-canvas-check --review` tout PASS en Chromium et en WebKit.
+- content-verify 0 ; instructions 0 ; privacy-claims 0 ; ESLint 0 erreur. Texte de la page inchangé.
+
+### Risque restant
+- Une page dont les glyphes ne peuvent pas être lus accepte toutes les formes lam-alef : sur-noircissement ou refus possible, jamais une fuite.
+- Un run qui contient un lam-alef ET un autre mot proche (« سالم ») : ce mot peut être noirci, ou le fichier refusé. C'est le côté sûr.
+
+### Commandes pour le contrôleur (après rebuild)
+- Le banc vraie page (`redact-bench.mjs`) ne prend qu'un terme par fichier. Pour F1, utiliser le script du relecteur, avec deux termes :
+  - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar3\mixed.pdf "مارس|السلام 2025" --browser=chromium` (puis `--browser=webkit`)
+  - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar3\wrap15.pdf "مارس|السلام عليكم" --browser=chromium` (puis webkit)
+  - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar3\mixed2.pdf "السلام 2025" --browser=chromium` (puis webkit)
+  - Attendu : fichier livré sans le terme (pdftotext) ; jamais « No match found ».
+- Puis les commandes des §6, §8, §9 et §10.
