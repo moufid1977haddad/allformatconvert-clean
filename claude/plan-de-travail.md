@@ -23,6 +23,23 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
+## 📝 P36 — 06/10 : certificat HTTPS, contenu exact des 225 pages, pages légales, À propos (`docs/audit/RAPPORT-p36-contenu-pages-06-10.md`, repère `restauration-avant-p36-06-10` = `f7f0601e`) — **EN COURS**
+
+| Lot | État |
+|---|---|
+| 0 — certificat | ✅ chaîne Let's Encrypt complète et valide (www et nu), DNS seul vers Vercel, CAA sans blocage : **rien à corriger de notre côté** (cause probable chez le visiteur : antivirus, réseau, portail Wi-Fi) ; contrôle quotidien du certificat ajouté (`lib/certCheck.js`, alerte ntfy + courriel) |
+| 1 — marché | ✅ `docs/audit/GABARIT-CONTENU-P36.md` |
+| 2 — audit des textes | ✅ `docs/audit/AUDIT-TEXTES-P36.md` : 1 435 défauts sur 225 pages |
+| 3…N — réécriture | en cours (14 lots en parallèle), puis relecture indépendante + `scripts/p36/content-verify.mjs` à zéro avant tout déploiement |
+| A2 — légal, À propos | ✅ code (commit `aa50fad6`), pas encore en ligne |
+| EU — Analytics depuis l'Europe | ❌ aucun outil gratuit utilisable d'ici : webbkoll (Suède) bloqué par le « Vercel Security Checkpoint » (403, défi anti-robot) ; pas de navigateur piloté dans cette session → **P35-3 reste au propriétaire** (VPN ou proche en Europe, 5 min) |
+| R — éditeur PDF arabe | ✅ étude `docs/audit/ETUDE-EDITEUR-PDF-ARABE.md` (rien en ligne) |
+
+**Prochain chantier technique après P36 (demande du propriétaire du 06/10, rien changé en ligne dans P36)** :
+1. **PDF OCR sur iPhone et iPad** : la passe réelle du 06/10 prouve que l'appareil ne fait pas l'OCR lui-même (« Drawing the page… 0 % », puis le serveur reconnaît les 3 pages). Sur iOS / iPadOS, aller **directement** à l'OCR serveur, avec l'avis affiché avant, au lieu d'attendre 20 s ; garder l'essai local ailleurs.
+2. **PDF Redact — rectangle trop large** : il déborde sur les caractères voisins (« : » et « .j » autour de « photo-2 », le « p » de « jpg » coupé). Ajuster le rectangle aux limites exactes du texte trouvé, marge minimale, comme Acrobat, **sans jamais réintroduire de fuite** (banc des 31 PDF piégés à 0).
+3. **PDF Redact — arabe dans la couche de texte invisible** : une page masquée ne garde pas l'arabe (police sans glyphes arabes). Ajouter Noto Naskh Arabic (OFL) à cette couche, **avant la version arabe du site (P37)**.
+
 ## ⚖️ P35 — 06/10 : décisions P33, consentement Europe, SEO S1-S3 (`docs/audit/RAPPORT-p35-decisions-consentement-seo-06-10.md`, repère `restauration-avant-p35-06-10` = `739aad96`)
 
 | Lot | État |
@@ -82,10 +99,10 @@ avant son adresse — P31 —, libellés ambigus, attentes dépassées).
 | Point | État | Reste (priorité) |
 |---|---|---|
 | 1 PDF to JPG (qui a dessiné ?) | ✅ **le téléphone** : aucune requête de rendu (Vercel + journaux pdf-tools, méthode validée sur l'appel P32 de 23 h 50) ; secours gardé tel quel | — |
-| 2 PDF Redact | corrigé, à confirmer : panne non reproduite ; progression par page, étape bloquée nommée (+ `tool_errors`), « No match found for … », résultat ramené à l'écran ; **24 fuites de vraie suppression + 1 faux refus (PDF à sommaire) trouvés par 3 relectures indépendantes, toutes présentes en production avant P33, corrigées** (source neutralisée avant copie, élagage en liste blanche, contrôle du fichier fini — sinon aucun fichier) ; 31 PDF piégés verts | **P1** propriétaire : mini-passe §6 n° 1-2 ; P2 : garder le texte sélectionnable des pages noircies (couche invisible des mots non noircis, comme Acrobat) — voir décisions ; P3 : confirmation avant envoi pour le secours de rendu (reporté de P32) |
-| 3 PDF OCR | corrigé, à confirmer : une seule liste avec recherche (1-3 langues, langue du navigateur) ; iPhone/iPad : 20 s sans progrès ou échec → `/api/pdf-ocr` (Tesseract sur pdf-tools, 102 langues, mêmes limites que P32) ; revue de sécurité GO avec conditions, appliquées (1 OCR à la fois, 12 Mpx, copies staged ≤ 4) | **P1** propriétaire : mini-passe §6 n° 3 ; P2 : décisions OCR ci-dessous ; P3 : sur un PDF qui a déjà du texte, la couche OCR double le texte copié (comportement d'avant, les deux chemins) |
+| 2 PDF Redact | ✅ **confirmé sur iPhone le 2026-10-06** (passe réelle 4/4 : « photo-2 » masqué page 2, « No match found ») ; panne non reproduite ; progression par page, étape bloquée nommée (+ `tool_errors`), « No match found for … », résultat ramené à l'écran ; **24 fuites de vraie suppression + 1 faux refus (PDF à sommaire) trouvés par 3 relectures indépendantes, toutes présentes en production avant P33, corrigées** (source neutralisée avant copie, élagage en liste blanche, contrôle du fichier fini — sinon aucun fichier) ; 31 PDF piégés verts | ~~P1 mini-passe §6 n° 1-2~~ fait le 06/10 ; P2 : garder le texte sélectionnable des pages noircies (couche invisible des mots non noircis, comme Acrobat) — voir décisions ; P3 : confirmation avant envoi pour le secours de rendu (reporté de P32) |
+| 3 PDF OCR | ✅ **confirmé sur iPhone le 2026-10-06** (une seule liste de langues ; l'appareil ne fait pas l'OCR, le serveur a reconnu les 3 pages) ; une seule liste avec recherche (1-3 langues, langue du navigateur) ; iPhone/iPad : 20 s sans progrès ou échec → `/api/pdf-ocr` (Tesseract sur pdf-tools, 102 langues, mêmes limites que P32) ; revue de sécurité GO avec conditions, appliquées (1 OCR à la fois, 12 Mpx, copies staged ≤ 4) | ~~P1 mini-passe §6 n° 3~~ fait le 06/10 ; P2 : décisions OCR ci-dessous ; P3 : sur un PDF qui a déjà du texte, la couche OCR double le texte copié (comportement d'avant, les deux chemins) |
 | 3f Autres OCR navigateur | ✅ aucun autre outil | — |
-| 4 Limites téléphone | corrigé, à confirmer : 48 Mpx partout + « Reduce to 48 MP » dans JPG/Image to PDF ; HEIC/AVIF bornés ; JPEG « measured up to 200 megapixels » | P1 : §6 n° 4 ; P3 : AVIF dans Firefox au-dessus de la référence en mémoire vive ; temps de réduction sur iPhone non mesuré |
+| 4 Limites téléphone | ✅ **confirmé sur iPhone le 2026-10-06** (Image to PDF HEIC 48 Mpx) ; 48 Mpx partout + « Reduce to 48 MP » dans JPG/Image to PDF ; HEIC/AVIF bornés ; JPEG « measured up to 200 megapixels » | ~~P1 §6 n° 4~~ fait le 06/10 ; P3 : AVIF dans Firefox au-dessus de la référence en mémoire vive ; temps de réduction sur iPhone non mesuré |
 
 **Pièges notés (P33)** : (1) `next start` lancé pendant qu'un autre écoute déjà sur le port **échoue en silence** et l'ancien serveur
 sert un `.next` à moitié reconstruit (page non hydratée, bouton inactif) — tuer le PID avant chaque relance ; (2) pdf-lib :

@@ -3,17 +3,17 @@
 Branche de travail `p33-redact-ocr`, branche publiée `p33-deploy` (même arbre, deux commits : service puis site),
 repère de restauration `restauration-avant-p33-05-10` = `57f7f977`.
 **Règle (P21, P31, P32)** : aucune des deux pannes du 4 octobre au soir n'est reproduite en WebKit simulé ; statut maximal
-**« corrigé, à confirmer sur iPhone »**.
+**« corrigé, à confirmer sur iPhone »**. **Mise à jour du 2026-10-06 : la passe iPhone réelle est à 4/4 (Redact « photo-2 » page 2, Redact « No match found », OCR une seule liste de langues, Image to PDF HEIC 48 Mpx) : points 2, 3 et 4 confirmés sur iPhone le 2026-10-06.**
 
 ## 0. Résumé
 
 | Point | Statut | Preuve principale |
 |---|---|---|
 | 1 PDF to JPG — qui a dessiné ? | **le téléphone lui-même** | aucune requête `/api/pdf-render` sur Vercel ni `/v1/render-page` sur pdf-tools pendant le test (méthode validée sur l'appel de contrôle P32 de 23 h 50) |
-| 2 PDF Redact | **corrigé, à confirmer sur iPhone** — panne non reproduite ; l'interface répond toujours ; **vraie suppression** vérifiée et **renforcée** après deux relectures indépendantes : 21 fuites prouvées sur des PDF piégés (dont plusieurs réalistes : sommaire qui pointe vers la page noircie, champ de formulaire lié, ressources partagées, lien mailto), **toutes présentes en production avant P33**, corrigées | banc `redact-truth` (pdftotext, PDF.js, octets, OCR de chaque page, pages orphelines) sur 31 PDF ; audit PDF n° 2 ; Safari 16.4 simulé |
-| 3 PDF OCR | **corrigé, à confirmer sur iPhone** — une seule liste avec recherche (1 à 3 langues, langue du navigateur) ; sur iPhone / iPad, 20 s sans progrès ou échec → OCR serveur (Tesseract sur pdf-tools), avis avant et après ; 102 langues installées en production | service 34/34, route 37/37, navigateur 21/21 (WebKit et Chromium iPhone), bureau 12/12, **préversion + pdf-tools de production 21/21** ; revue de sécurité « GO avec conditions », conditions appliquées |
+| 2 PDF Redact | **confirmé sur iPhone le 2026-10-06** (passe réelle du propriétaire : « photo-2 » masqué page 2, et « No match found ») — panne non reproduite ; l'interface répond toujours ; **vraie suppression** vérifiée et **renforcée** après deux relectures indépendantes : 21 fuites prouvées sur des PDF piégés (dont plusieurs réalistes : sommaire qui pointe vers la page noircie, champ de formulaire lié, ressources partagées, lien mailto), **toutes présentes en production avant P33**, corrigées | banc `redact-truth` (pdftotext, PDF.js, octets, OCR de chaque page, pages orphelines) sur 31 PDF ; audit PDF n° 2 ; Safari 16.4 simulé |
+| 3 PDF OCR | **confirmé sur iPhone le 2026-10-06** (passe réelle : une seule liste de langues ; l'appareil ne fait pas l'OCR lui-même, le serveur a reconnu les 3 pages) — une seule liste avec recherche (1 à 3 langues, langue du navigateur) ; sur iPhone / iPad, 20 s sans progrès ou échec → OCR serveur (Tesseract sur pdf-tools), avis avant et après ; 102 langues installées en production | service 34/34, route 37/37, navigateur 21/21 (WebKit et Chromium iPhone), bureau 12/12, **préversion + pdf-tools de production 21/21** ; revue de sécurité « GO avec conditions », conditions appliquées |
 | 3f Autres OCR dans le navigateur | **aucun** : PDF OCR est le seul (pas d'outil « Image to Text » sur le site) | recherche `tesseract` / `createWorker` / `ocr` dans `app/` |
-| 4 Limites téléphone | **48 Mpx partout** (Image Compressor, JPG to PDF, Image to PDF) avec le même « Reduce to 48 MP » ; HEIC/AVIF enfin bornés ; « JPEG photos of any size » remplacé par ce qui est mesuré (jusqu'à 200 Mpx) | mesures WebKit/Firefox/Chromium §4 |
+| 4 Limites téléphone | **confirmé sur iPhone le 2026-10-06** (Image to PDF, HEIC 48 Mpx) — **48 Mpx partout** (Image Compressor, JPG to PDF, Image to PDF) avec le même « Reduce to 48 MP » ; HEIC/AVIF enfin bornés ; « JPEG photos of any size » remplacé par ce qui est mesuré (jusqu'à 200 Mpx) | mesures WebKit/Firefox/Chromium §4 |
 
 ## 1. PDF to JPG — qui a dessiné les pages ? (test du 05/10, 00 h 30-00 h 36 UTC)
 
