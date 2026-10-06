@@ -7,7 +7,7 @@ import path from 'node:path';
 import ts from 'typescript';
 
 const ROOTS = ['app', 'lib', 'components'];
-const WORDS = /\b(colour\w*|optimis\w*|recognis\w*|normalis\w*|centre[sd]?|behaviour\w*|grey\w*|licence\w*|analys(?:e|ed|es|ing)\b|customis\w*|organis\w*|summaris\w*|visualis\w*|serialis\w*|initialis\w*|sanitis\w*|minimis\w*|maximis\w*|favourit\w*|favour\w*|honour\w*|labelled|labelling|cancelled|cancelling|modelled|modelling|travelled|synchronis\w*|prioritis\w*|utilis\w*|authoris\w*|realis(?:e|ed|es|ing)\b|standardis\w*|capitalis\w*|emphasis(?:e|ed|es|ing)\b|catalogue\w*|metres?\b|litres?\b|neighbour\w*|defence|offence|practise\w*|fulfil\b|enrol\b|aluminium|grey|stylis\w*|personalis\w*|categoris\w*|digitis\w*|finalis\w*|memoris\w*|parallelis\w*|tokenis\w*|randomis\w*|anonymis\w*|apologis\w*|criticis\w*|harmonis\w*|localis\w*|materialis\w*|minimis\w*|neutralis\w*|rasteris\w*|vectoris\w*|optimiz?ation\b(?<=s)|judgement|towards|whilst|amongst|programme\w*|dialogue\w*|travell\w*|signalled|levelled|totalled|marvellous|jewellery|cheque\w*|tonne|ageing|artefact\w*|aeroplane|mould\w*|plough|sceptic\w*|storey|tyre\w*|draught\w*|grey(?:scale|ish)?)\b/gi;
+const WORDS = /\b((?:[Mm]illi|[Cc]enti|[Kk]ilo)metres?|specialis\w*|colour\w*|optimis\w*|recognis\w*|normalis\w*|centre[sd]?|behaviour\w*|grey\w*|licence\w*|analys(?:e|ed|es|ing)\b|customis\w*|organis\w*|summaris\w*|visualis\w*|serialis\w*|initialis\w*|sanitis\w*|minimis\w*|maximis\w*|favourit\w*|favour\w*|honour\w*|labelled|labelling|cancelled|cancelling|modelled|modelling|travelled|synchronis\w*|prioritis\w*|utilis\w*|authoris\w*|realis(?:e|ed|es|ing)\b|standardis\w*|capitalis\w*|emphasis(?:e|ed|es|ing)\b|catalogue\w*|metres?\b|litres?\b|neighbour\w*|defence|offence|practise\w*|fulfil\b|enrol\b|aluminium|grey|stylis\w*|personalis\w*|categoris\w*|digitis\w*|finalis\w*|memoris\w*|parallelis\w*|tokenis\w*|randomis\w*|anonymis\w*|apologis\w*|criticis\w*|harmonis\w*|localis\w*|materialis\w*|minimis\w*|neutralis\w*|rasteris\w*|vectoris\w*|optimiz?ation\b(?<=s)|judgement|towards|whilst|amongst|programme\w*|dialogue\w*|travell\w*|signalled|levelled|totalled|marvellous|jewellery|cheque\w*|tonne|ageing|artefact\w*|aeroplane|mould\w*|plough|sceptic\w*|storey|tyre\w*|draught\w*|grey(?:scale|ish)?)\b/gi;
 const SKIP_DIR = new Set(['node_modules', '.next', 'public']);
 const hits = [];
 
@@ -59,6 +59,8 @@ const US = [
   [/\bOptimis(e|ed|es|ing|er)\b/g, (m, s) => 'Optimiz' + s], [/\boptimisation\b/g, () => 'optimization'],
   [/\bgrey\b/g, () => 'gray'], [/\bGrey\b/g, () => 'Gray'], [/\bcentred\b/g, () => 'centered'], [/\bcentre\b/g, () => 'center'],
   [/\blabelled\b/g, () => 'labeled'], [/\brecognis(e|ed|es|ing)\b/g, (m, s) => 'recogniz' + s], [/\bpractise\b/g, () => 'practice'],
+  [/\b([Mm]illi|[Cc]enti|[Kk]ilo)?metre(s)?\b/g, (m, a = '', s = '') => a + 'meter' + s], [/\bMetre(s)?\b/g, (m, s = '') => 'Meter' + s],
+  [/\bspecialis(e|ed|es|ing)\b/g, (m, s) => 'specializ' + s],
 ];
 if (process.argv.includes('--write')) {
   const byFile = new Map();

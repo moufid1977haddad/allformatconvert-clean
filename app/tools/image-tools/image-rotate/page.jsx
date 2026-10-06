@@ -47,7 +47,7 @@ export default function ImageRotatePage() {
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           </div>
           <div className="flex gap-2 justify-center">{[90,180,270].map(a => <button key={a} onClick={() => setAngle(a)} className={`px-4 py-2 rounded-lg font-semibold transition ${angle===a?'bg-indigo-600 text-white':'bg-neutral-800 text-neutral-100 hover:bg-neutral-100 hover:text-neutral-800'}`}>{a}°</button>)}</div>
-          <div><label className="block text-sm text-neutral-500 mb-1">Custom angle: {angle}°</label><input aria-label="Custom angle: °" type="range" min="0" max="360" value={angle} onChange={e => setAngle(parseInt(e.target.value))} className="w-full" /></div>
+          <div><label className="block text-sm text-neutral-500 mb-1">Custom angle: {angle}°</label><input aria-label="Custom angle (degrees)" type="range" min="0" max="360" value={angle} onChange={e => setAngle(parseInt(e.target.value))} className="w-full" /></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <label className="block"><span className="block text-neutral-500 mb-1">Angle (degrees, clockwise)</span>
               <input id="rot-angle" type="number" min="-360" max="360" step="0.5" value={angle} onChange={e => { const v = Number(e.target.value); if (Number.isFinite(v)) setAngle(((v % 360) + 360) % 360); }} className="w-full bg-neutral-50 border border-neutral-200 rounded-lg p-2" /></label>

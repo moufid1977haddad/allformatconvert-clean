@@ -50,7 +50,7 @@ export default function TermsPage() {
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">
             <h2 className="text-xl font-bold text-neutral-800 mb-3">5. Third-Party Services</h2>
-            <p className="text-neutral-600 text-sm leading-relaxed">Some tools send your file or text to a specialised provider: ConvertAPI (some Word and PDF conversions), OpenAI (AI text, image and transcription tools) and Pangram Labs (AI Detector). Each tool concerned is named in our <a href="/privacy" className="text-indigo-600 underline hover:no-underline">Privacy Policy</a>. By using those tools, you also agree not to submit content that breaks these providers' usage policies. OnlineConverTools is not responsible for the performance or availability of third-party services.</p>
+            <p className="text-neutral-600 text-sm leading-relaxed">Some tools send your file or text to a specialized provider: ConvertAPI (some Word and PDF conversions), OpenAI (AI text, image and transcription tools) and Pangram Labs (AI Detector). Each tool concerned is named in our <a href="/privacy" className="text-indigo-600 underline hover:no-underline">Privacy Policy</a>. By using those tools, you also agree not to submit content that breaks these providers' usage policies. OnlineConverTools is not responsible for the performance or availability of third-party services.</p>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-xl p-8">

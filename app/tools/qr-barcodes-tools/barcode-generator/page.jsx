@@ -342,7 +342,7 @@ export default function BarcodeGeneratorPage() {
             <summary className="cursor-pointer text-sm font-semibold text-neutral-700">Size</summary>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3 text-sm">
               <label className="block"><span className="block text-neutral-500 mb-1">Units</span>
-                <select id="bc-unit" value={ui.unit} onChange={setUnit} className={input}><option value="mm">Millimetres (print)</option><option value="mil">Mils (print)</option><option value="px">Pixels (screen)</option></select></label>
+                <select id="bc-unit" value={ui.unit} onChange={setUnit} className={input}><option value="mm">Millimeters (print)</option><option value="mil">Mils (print)</option><option value="px">Pixels (screen)</option></select></label>
               <label className="block"><span className="block text-neutral-500 mb-1">Module width ({unitLabel})</span>
                 <input id="bc-module" type="number" min="0" step={ui.unit === 'px' ? 1 : ui.unit === 'mil' ? 0.5 : 0.01} value={ui.module} onChange={set('module')} className={input} /></label>
               {ui.unit !== 'px' && <label className="block"><span className="block text-neutral-500 mb-1">Resolution (dpi)</span>

@@ -53,7 +53,7 @@ export default function PrivacyPage() {
               <li><strong>Images:</strong> Background Remover; AI Image Upscaler, except when the model runs on your device (a browser with WebGPU, an image without transparency, a result small enough for the browser) — the page always says which happened.</li>
               <li><strong>Large files on their way to a tool below:</strong> files over 4&nbsp;MB for the ConvertAPI and transcription tools transit through our own storage server, where they are deleted after processing.</li>
             </ul>
-            <p className={`${p} mt-3 mb-3`}><strong>Sent to a specialised provider</strong>, through our server (see Section 5 for each provider's policy):</p>
+            <p className={`${p} mt-3 mb-3`}><strong>Sent to a specialized provider</strong>, through our server (see Section 5 for each provider's policy):</p>
             <ul className={ul}>
               <li><strong>ConvertAPI</strong> (Lithuania): Word to PDF for .docx files (also when added to Merge PDF), PDF to Word, PDF to Excel, PDF to PowerPoint. Files are sent with storage disabled and are not kept by ConvertAPI.</li>
               <li><strong>OpenAI</strong> (USA): the text you enter in AI Chatbot, AI Writer, AI Paraphraser, AI Translator, Grammar Fixer, Text Summarizer, Keyword Extractor, Sentiment Analyzer, Data Extractor and Email Generator; the text of your PDF in PDF AI Summary and PDF Translate; your image in Image Captioner; your description in Image Generator; your audio in Audio Transcriber and Audio to Text.</li>
