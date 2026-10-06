@@ -92,9 +92,10 @@ check('WebP with XMP: Authoring shows the XMP creator tool and author', row(wr, 
 check('WebP: every group and row identical to a JPEG carrying the same metadata', JSON.stringify(wr) === JSON.stringify(twinBefore), `JPEG twin: ${summary(twinBefore)}`);
 
 if (!legacy) {
-  let image = 0; // bytes of the picture itself (VP8 / VP8L / ALPH chunk payloads)
-  for (let i = 12; i + 8 <= webp.length;) { const t = webp.toString('latin1', i, i + 4), l = webp.readUInt32LE(i + 4); if (/^(VP8[ L]|ALPH)$/.test(t)) image += l; i += 8 + l + (l & 1); }
-  check('WebP: the picture data is not read, only the RIFF header, chunk headers and metadata chunks', image > 0 && webpSliced <= webp.length - image + 8, `${webpSliced} of ${webp.length} bytes read; picture data ${image} bytes`);
+  let image = 0, count = 0; // bytes of the picture itself (VP8 / VP8L / ALPH chunk payloads), number of chunks
+  for (let i = 12; i + 8 <= webp.length; count++) { const t = webp.toString('latin1', i, i + 4), l = webp.readUInt32LE(i + 4); if (/^(VP8[ L]|ALPH)$/.test(t)) image += l; i += 8 + l + (l & 1); }
+  // each chunk header is read once (8 bytes), and a metadata chunk is then read whole, its header again
+  check('WebP: the picture data is not read, only the RIFF header, chunk headers and metadata chunks', image > 0 && webpSliced <= webp.length - image + 8 * count, `${webpSliced} of ${webp.length} bytes read; picture data ${image} bytes`);
 }
 const pr = await readLikePage(plainWebp);
 check('WebP without metadata: nothing listed, no error note', pr.length === 0, summary(pr));

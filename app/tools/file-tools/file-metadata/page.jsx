@@ -83,14 +83,14 @@ export default function FileMetadataPage() {
         ]}
         specs={[
           { label: "Format detection", value: "46 signatures: images, audio, video, documents, archives and more" },
-          { label: "Inside metadata", value: "JPEG, PNG, TIFF, HEIC and AVIF photos (EXIF, GPS), PDF, DOCX, XLSX, PPTX, OpenDocument, ZIP, MP3 (ID3); WebP photos are not read" },
+          { label: "Inside metadata", value: "JPEG, PNG, TIFF, HEIC, AVIF and WebP photos (EXIF, GPS, XMP), PDF, DOCX, XLSX, PPTX, OpenDocument, ZIP, MP3 (ID3)" },
           { label: "Not shown", value: "Pixel dimensions, duration, the properties of old .doc, .xls and .ppt files, and PDF or ZIP details of files over 300 MB" },
           { label: "Files", value: "One file per reading; choosing another replaces the result" }
         ]}
         privacy="The file is read by this page through the File API of your browser; it is not uploaded, so a GPS position or an author name found inside stays on your device. Nothing in the file is changed, and no copy of it is kept by the page once you choose another file or leave."
         faqs={[
           { q: "Can it tell if a file was renamed?", a: "Yes. When the first bytes show, say, a Windows program while the name ends in .jpg, a warning names the real format and its usual extension. The type the browser gives cannot do this, because it comes from the name only." },
-          { q: "Does it show the GPS location of a photo?", a: "Yes, when the photo stores one: a Location (GPS) group gives latitude and longitude (and altitude when stored), next to the camera, lens and date in Camera (EXIF), for JPEG, PNG, TIFF, HEIC and AVIF files (not WebP). Check it before you share a photo." },
+          { q: "Does it show the GPS location of a photo?", a: "Yes, when the photo stores one: a Location (GPS) group gives latitude and longitude (and altitude when stored), next to the camera, lens and date in Camera (EXIF), for JPEG, PNG, TIFF, HEIC, AVIF and WebP files. Check it before you share a photo." },
           { q: "Does it read Word and Excel properties?", a: "Yes. DOCX, XLSX and PPTX show title, author, last modified by, company, pages or words; OpenDocument files show title, author, dates and generator. No for the older .doc, .xls and .ppt formats: their format is recognized, but their inside properties are not read." },
           { q: "Can it show image dimensions or video length?", a: "No. This tool reads the bytes and the stored properties only. For pixel dimensions, use Image Metadata Viewer, which reads the picture itself; for duration and codecs, use Video Metadata, which reads the video or audio file." }
         ]}

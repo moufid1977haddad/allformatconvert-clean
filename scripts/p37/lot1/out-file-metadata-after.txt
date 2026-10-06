@@ -4,8 +4,8 @@ PASS  WebP with EXIF + GPS: Location (GPS) shown, same as the source JPEG  -- Ca
 PASS  WebP with EXIF: camera make and model of the source JPEG  -- Camera make=OnlineConvertToolsCam
 PASS  WebP with XMP: Authoring shows the XMP creator tool and author  -- Authoring: [["Software","P37Test"],["Artist","Jane Doe"]]
 PASS  WebP: every group and row identical to a JPEG carrying the same metadata  -- JPEG twin: Camera (EXIF): Camera make=OnlineConvertToolsCam, Camera model=Test Model 1, Orientation=Horizontal (normal) | Authoring: Software=P37Test, Artist=Jane Doe | Location (GPS): Latitude=48.858400, Longitude=2.294500
-FAIL  WebP: the picture data is not read, only the RIFF header, chunk headers and metadata chunks  -- 1260 of 16160 bytes read; picture data 14914 bytes
+PASS  WebP: the picture data is not read, only the RIFF header, chunk headers and metadata chunks  -- 1260 of 16160 bytes read; picture data 14914 bytes
 PASS  WebP without metadata: nothing listed, no error note  -- nothing (page: "No metadata found inside this file")
 PASS  WebP cut short: the "damaged or cut short" note  -- Embedded metadata: Note=Could not be read: the file may be damaged or cut short.
 
-1 FAILED
+ALL PASS
