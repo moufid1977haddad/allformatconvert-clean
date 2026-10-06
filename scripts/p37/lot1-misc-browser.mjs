@@ -59,10 +59,10 @@ for (const tool of ['markdown-editor', 'markdown-previewer']) {
 }
 
 await page.goto(`${origin}/tools/developer-tools/color-picker`, { waitUntil: 'networkidle' });
-const input = page.getByLabel('Colour value (HEX)');
-const swatch = page.getByLabel('Pick a colour');
+const input = page.getByLabel('Color value (HEX)');
+const swatch = page.getByLabel('Pick a color');
 const preview = page.locator('div.w-48.h-48');
-const bg = () => preview.evaluate((el) => getComputedStyle(el).backgroundColor);
+const bg = () => preview.evaluate((el) => { const s = getComputedStyle(el); const m = s.backgroundImage.match(/rgba?\([^)]*\)/); return m && s.backgroundColor === "rgba(0, 0, 0, 0)" ? m[0] : s.backgroundColor; }); // with alpha the color is drawn as a gradient over a checkerboard
 for (const [typed, rgb, sw] of [['ff0000', 'rgb(255, 0, 0)', '#ff0000'], ['0f0', 'rgb(0, 255, 0)', '#00ff00'], ['#0000ff80', 'rgba(0, 0, 255, 0.5', '#0000ff']]) {
   await input.fill(typed);
   const got = await bg();

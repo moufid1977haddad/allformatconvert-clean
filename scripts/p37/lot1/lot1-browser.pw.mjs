@@ -82,7 +82,7 @@ if (only.includes('tiff')) {
   await p.locator('input[type=file]').first().setInputFiles(tif);
   await p.getByRole('button', { name: /Convert to JPG/ }).click();
   const link = p.locator('a[download]').filter({ hasText: /Download/ }).first();
-  await Promise.race([link.waitFor({ timeout: 60000 }), p.getByRole('alert').first().waitFor({ timeout: 60000 }).catch(() => {})]);
+  await Promise.race([link.waitFor({ timeout: 60000 }), p.locator('p[role=alert]').first().waitFor({ timeout: 60000 }).catch(() => {})]);
   if (!(await link.count())) { check(`tiff-to-jpg (OffscreenCanvas on the page: ${offscreen})`, false, await p.locator('body').innerText().then((t) => t.slice(0, 300))); }
   else {
     const out = await download(p, link);
