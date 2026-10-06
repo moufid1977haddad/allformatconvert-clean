@@ -23,17 +23,43 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
-## 📝 P36 — 06/10 : certificat HTTPS, contenu exact des 225 pages, pages légales, À propos (`docs/audit/RAPPORT-p36-contenu-pages-06-10.md`, repère `restauration-avant-p36-06-10` = `f7f0601e`) — **EN COURS**
+## 📝 P36 — 06/10 : certificat HTTPS, contenu exact des 225 pages, pages légales, À propos (`docs/audit/RAPPORT-p36-contenu-pages-06-10.md`, repère `restauration-avant-p36-06-10` = `f7f0601e`) — **PRÊT, PAS EN PRODUCTION : branche `p36` = `2abe4e87`, préversion `onlineconvertools-4jv2udv6j` vérifiée (225 pages = construction locale, JSON-LD ALL PASS, www-light 29/29) ; mise en production refusée par le filtre de permissions → geste du propriétaire ci-dessous**
 
 | Lot | État |
 |---|---|
 | 0 — certificat | ✅ chaîne Let's Encrypt complète et valide (www et nu), DNS seul vers Vercel, CAA sans blocage : **rien à corriger de notre côté** (cause probable chez le visiteur : antivirus, réseau, portail Wi-Fi) ; contrôle quotidien du certificat ajouté (`lib/certCheck.js`, alerte ntfy + courriel) |
 | 1 — marché | ✅ `docs/audit/GABARIT-CONTENU-P36.md` |
 | 2 — audit des textes | ✅ `docs/audit/AUDIT-TEXTES-P36.md` : 1 435 défauts sur 225 pages |
-| 3…N — réécriture | en cours (14 lots en parallèle), puis relecture indépendante + `scripts/p36/content-verify.mjs` à zéro avant tout déploiement |
-| A2 — légal, À propos | ✅ code (commit `aa50fad6`), pas encore en ligne |
+| 3…N — réécriture | ✅ 225 pages d'outil + 12 pages de catégorie réécrites ; 15 réviseurs indépendants jusqu'à **0 défaut** (2 à 5 passes) ; `content-verify` (C0-C7), `instructions`, `privacy-claims` à 0 ; phrases identiques entre deux pages : max **5 %** (84 % avant) ; 0 page < 300 mots (43 avant) ; ~60 textes d'interface faux ou invérifiables corrigés ; 0 débordement à 375/390 px |
+| A2 — légal, À propos | ✅ À propos (texte du propriétaire du 06/10, aucune mention d'origine), confidentialité (responsable, publicité conditionnelle à AdSense), conditions §1/§6, ads.txt sans identifiant inventé — dans `p36`, pas encore en ligne |
 | EU — Analytics depuis l'Europe | ❌ aucun outil gratuit utilisable d'ici : webbkoll (Suède) bloqué par le « Vercel Security Checkpoint » (403, défi anti-robot) ; pas de navigateur piloté dans cette session → **P35-3 reste au propriétaire** (VPN ou proche en Europe, 5 min) |
 | R — éditeur PDF arabe | ✅ étude `docs/audit/ETUDE-EDITEUR-PDF-ARABE.md` (rien en ligne) |
+
+**Décisions / gestes du propriétaire — P36**
+
+| # | Geste | Détail |
+|---|---|---|
+| P36-1 | **Mettre P36 en production** | dans le terminal du dépôt : `git push origin p36:master` (avance rapide vérifiée : `master` = `f7f0601e` est l'ancêtre de `p36`) ; puis `node scripts/p24/www-light.mjs` ; retour arrière : promouvoir `onlineconvertools-gbnnrjftd` (= `206684a1`) |
+| P36-2 | Vérifier Analytics depuis l'Europe (= P35-3) | VPN ou proche en Europe, 5 min |
+| P36-3 | Éditeur PDF arabe : décider de tester le prototype sur ~30 vrais PDF arabes | `docs/audit/ETUDE-EDITEUR-PDF-ARABE.md` §8 ; 20-30 jours si construit |
+| P36-4 | Harmoniser l'orthographe des libellés d'interface (une vingtaine en anglais britannique : « Colour »…) avant les traductions de P37 | ≈ 1 h, technique |
+
+**Défauts de code relevés par P36 (non corrigés, contenu seul ; détail au rapport P36 § Lots 3 à N)** : nettoyeur des
+rapports d'erreur (morceaux de regex ou de jeton), Image Metadata sans WebP, aperçu SVG to PNG, worker TIFF to JPG sans
+test d'OffscreenCanvas, qualité PDF < 50 % ignorée, EPUB to PDF chapitre manquant, env-to-json `env.json`, excel-to-csv
+options, ordre des clés entières, xml-to-json position d'erreur, JSON to Python `//`, JSON to PHP classes sans
+`JSON_BIGINT_AS_STRING`, TypeScript to JS (JSX, namespaces), `csso` non déclaré, API Tester (adresse relative,
+`content-type`), Video Converter (refus après envoi), Video Watermark (estimation), Video Rotator (mode caché), Audio
+Compressor « MB MB », Audio Equalizer « : dB », AC3/MP2 128 → 192, `.ac3` non accepté, tablettes Android = ordinateurs,
+Sentence case, aperçu Markdown sans style, Color Picker sans `#`, Barcode 5 types non relus. **Quand l'un est corrigé,
+le texte de la page concernée doit suivre** (il décrit le comportement actuel).
+
+**Pièges notés (P36)** : (1) une construction locale sans `NEXT_PUBLIC_MEDIA_SERVICE_URL` sert les anciennes pages vidéo
+(`LegacyPage`) : relire le texte servi sur www, ou construire avec la valeur publique de www (lue dans son JavaScript) ;
+(2) `next start` sur un port déjà pris échoue en silence et l'ancien serveur répond (déjà noté P33) : tuer le PID ; (3)
+heredoc bash avec apostrophes : écrire par l'outil d'écriture ; (4) le « Vercel Security Checkpoint » refuse les
+scanners tiers venant de centres de données (webbkoll) ; (5) l'outil `seo-audit.mjs` compte les entités HTML
+(`&#x27;`) dans la longueur des titres : 3 faux dépassements.
 
 **Prochain chantier technique après P36 (demande du propriétaire du 06/10, rien changé en ligne dans P36)** :
 1. **PDF OCR sur iPhone et iPad** : la passe réelle du 06/10 prouve que l'appareil ne fait pas l'OCR lui-même (« Drawing the page… 0 % », puis le serveur reconnaît les 3 pages). Sur iOS / iPadOS, aller **directement** à l'OCR serveur, avec l'avis affiché avant, au lieu d'attendre 20 s ; garder l'essai local ailleurs.
