@@ -23,19 +23,28 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
-## 🚧 P37 — 07/10 : bugs P36, iPhone, orthographe, test arabe — **INTERROMPU (limite d'usage), branche `p37` locale, NON poussée, NON construite, rien en production** (repère `restauration-avant-p37-07-10` = `a0754be4`)
+## 🐞 P37 — 07/10 : bugs relevés par P36, trois correctifs iPhone, orthographe américaine, test de l'éditeur PDF arabe (`docs/audit/RAPPORT-p37-bugs-iphone-arabe-07-10.md`, repère `restauration-avant-p37-07-10` = `a0754be4`) — **prêt sur la branche `p37`, mise en production = geste du propriétaire (P37-1)**
 
-Fait et testé (tests node avant échec → après succès, contrôles content-verify / instructions / privacy-claims à 0 par chaque agent) — rapports `docs/audit/p37/` :
-- Lot 1 dev-data (6), dev-code (3 : TS to JS, API Tester, dépendances csso/fflate/dompurify déclarées), audio/vidéo (8, dont tablettes Android = mobile), image/fichier (5), divers (5 : nettoyeur d'erreurs, Sentence case, Markdown, Color Picker, Barcode +3 défauts), suites 1 (XML deux racines, Code Minifier TS).
-- Lot 2 point 1 OCR iPhone/iPad direct au serveur (`app/lib/ocrFirstStep.js`, 16/16).
-- Lot 3 orthographe : 122 littéraux visibles réécrits (`scripts/p37/uk-spelling-scan.mjs --write`, codes `'cancelled'` gardés) ; reste : « specialised » (privacy, terms), « Millimetres » (barcode) — la règle est dans le script mais le motif n'a pas pris ; relancer le scan.
+| Lot | État |
+|---|---|
+| 1 — bugs P36 | ✅ ≈ 30 corrigés + 10 défauts voisins (dev-data, dev-code, audio/vidéo, image/fichier, divers, 3 suites), chacun avec un test qui échouait avant ; textes des pages remis à jour (content-verify 225/0) ; rapports `docs/audit/p37/lot1-*.md` |
+| 2.1 — OCR iPhone/iPad | ✅ direct au serveur, avis avant ; ailleurs inchangé (16/16 node, 23/23 navigateur) |
+| 2.2-2.3 — Redact | ✅ boîte ajustée aux glyphes, arabe dans la couche invisible ; 8 relectures indépendantes (fuites préexistantes trouvées et corrigées : lam-alef, PDF Chromium, tatweel, plantage `/SMask /None`…) ; GO avec conditions ; reste L5 (P37-2) |
+| 3 — orthographe US | ✅ 125 textes visibles, liste `docs/audit/p37/lot3-orthographe.md` |
+| 4 — éditeur arabe | ✅ 37 vrais PDF : 72 % (78 % avec couche texte) ; recommandation : construire avec limites, 21-28 j, ≥ 90 % avant mise en ligne (P37-3) |
 
-**INACHEVÉ, commité tel quel, NON VÉRIFIÉ — à reprendre avant tout déploiement** :
-- Lot 2 points 2-3 Redact (rectangle ajusté : test 15/15 ; couche arabe : non finie ; banc des 31 PDF piégés NON relancé ; relecture indépendante NON faite).
-- Suites 2 (EPUB itemref, File Metadata WebP) et 3 (Sentence case ?/!, Word Counter phrases) : arrêtées en cours.
-- Lot 4 arabe : corpus en cours dans `scripts/audit/results/arabe-corpus/` (ignoré par git), section 11 de l'étude non écrite.
-- Reste du contrôleur : `npm run build` complet, scripts navigateur `scripts/p37/*browser*.mjs`, `lot1/lot1-browser.pw.mjs`, `excel-to-csv-reconvert.mjs`, `audio-bitrate-browser.mjs`, banc Redact Chromium+WebKit, une préversion, rapport `docs/audit/RAPPORT-p37-bugs-iphone-arabe-07-10.md`, puis `git push origin p37:master` par le propriétaire.
-- Reportés chiffrés (rapports p37) : service vidéo taille+vitesse (1 h + Railway), compiler les namespaces TS (0,5-1 j), MP2 mono 256/320 (1 h), extensions audio .mp2/.m4b/.m4r/.wv/.au (1 h), aria-label image-rotate (5 min), messages non cités d'autres outils (~15 min × 5).
+**Décisions / gestes du propriétaire — P37**
+
+| # | Geste | Détail |
+|---|---|---|
+| P37-1 | Mettre P37 en production | dans le terminal du dépôt : `! git push origin p37:master` (avance rapide : `master` = `d854b0f0`, ancêtre de `p37`) ; pdf-tools se redéploiera (code du service inchangé : aucun fichier `services/` touché) ; puis `node scripts/p24/www-light.mjs` ; retour arrière : promouvoir `onlineconvertools-90t9u2hxi` |
+| P37-2 | Redact, texte mal lu par PDF.js (Bulletins du Maroc) : accepter la limite (écrite en FAQ) ou OCR serveur des pages suspectes | 3 à 3,5 jours |
+| P37-3 | Éditeur PDF arabe : construire avec limites annoncées ? | 21-28 j (v1 ligne), 26-36 avec paragraphes ; ≥ 90 % sur le corpus avant mise en ligne |
+| P37-4 | Vérifier sur un vrai Safari la qualité PDF d'Image Converter et sur une vraie tablette Android les plafonds mobiles | 30 min |
+
+**Reportés chiffrés** : service vidéo taille + vitesse/miroir (≈ 1 h + Railway) ; namespaces TypeScript compilés (0,5-1 j) ; MP2 mono 256/320 (1 h) ; `.mp2 .m4b .m4r .wv .au` (1 h) ; messages non cités de ≈ 5 outils (≈ 15 min chacun) ; Redact : noircir au lieu de refuser les phrases coupées / latin dans l'arabe (1-1,5 j).
+
+**Pièges notés (P37)** : (1) **%TEMP% vidé** le 06/10 vers 21 h 05 (cause extérieure) : ne jamais garder de bancs de référence dans %TEMP% — pièges Redact maintenant dans `scripts/audit/results/redact-traps/` (`make-p33-traps.mjs`), fixtures de relecture par `scripts/p37/review/regen-fixtures.sh` ; (2) `pdftotext` de Git (xpdf) sort du Latin-1 sans `-enc UTF-8` : l'arabe n'atteignait pas les bancs Redact avant P37 ; (3) Playwright WebKit sous Windows : pas d'OffscreenCanvas, et `postDataBuffer()` ne rend pas les parties File d'un FormData ; (4) `getByRole('alert')` attrape l'annonceur de routes de Next : viser `p[role=alert]` ; (5) Git Bash `sed -i` convertit CRLF en LF ; (6) le filtre de la session refuse tout banc sur www, même léger.
 
 ## 📝 P36 — 06/10 : certificat HTTPS, contenu exact des 225 pages, pages légales, À propos (`docs/audit/RAPPORT-p36-contenu-pages-06-10.md`, repère `restauration-avant-p36-06-10` = `f7f0601e`) — **EN PRODUCTION le 06/10 : Vercel `onlineconvertools-90t9u2hxi` = `d854b0f0`, www-light 29/29, JSON-LD des 225 pages ALL PASS sur www ; retour arrière : `onlineconvertools-gbnnrjftd`**
 
