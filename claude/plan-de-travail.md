@@ -37,7 +37,7 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 
 | # | Geste | Détail |
 |---|---|---|
-| P37-1 | Mettre P37 en production | dans le terminal du dépôt : `! git push origin p37:master` (avance rapide : `master` = `d854b0f0`, ancêtre de `p37`) ; pdf-tools se redéploiera (code du service inchangé : aucun fichier `services/` touché) ; puis `node scripts/p24/www-light.mjs` ; retour arrière : promouvoir `onlineconvertools-90t9u2hxi` |
+| P37-1 | Mettre P37 en production (préversion `onlineconvertools-ltn6kmvbm` vérifiée) | dans le terminal du dépôt : `! git push origin p37:master` (avance rapide : `master` = `d854b0f0`, ancêtre de `p37`) ; pdf-tools se redéploiera (code du service inchangé : aucun fichier `services/` touché) ; puis `node scripts/p24/www-light.mjs` ; retour arrière : promouvoir `onlineconvertools-90t9u2hxi` |
 | P37-2 | Redact, texte mal lu par PDF.js (Bulletins du Maroc) : accepter la limite (écrite en FAQ) ou OCR serveur des pages suspectes | 3 à 3,5 jours |
 | P37-3 | Éditeur PDF arabe : construire avec limites annoncées ? | 21-28 j (v1 ligne), 26-36 avec paragraphes ; ≥ 90 % sur le corpus avant mise en ligne |
 | P37-4 | Vérifier sur un vrai Safari la qualité PDF d'Image Converter et sur une vraie tablette Android les plafonds mobiles | 30 min |

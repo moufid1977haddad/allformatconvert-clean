@@ -6,7 +6,19 @@ Branche `p37`, repère de restauration `restauration-avant-p37-07-10` = `a0754be
 
 ## État final — à lire d'abord
 
-<!-- ETAT -->
+- **Tout P37 est prêt et vérifié sur la branche `p37` (poussée sur GitHub), PAS ENCORE EN PRODUCTION.** Préversion
+  `onlineconvertools-ltn6kmvbm` (= `e6d778d3`, code identique à la tête de `p37` : seuls des `.md` diffèrent ensuite)
+  contrôlée par le relais local : données structurées des 225 pages ALL PASS, contrôle léger 29/29, OCR iPhone 23/23,
+  dev-code ALL PASS, divers 28/28, Redact sur la vraie page all PASS. Build local complet (`npm run build` avec ses
+  gardes) vert ; 37 tests node P37 verts ; `content-verify` 225 pages 0 défaut ; mise en page téléphone 239 pages ×
+  375/390 px : 0 débordement, 0 cible trop petite.
+- **Lot 1** : ≈ 30 bugs P36 corrigés + 10 défauts voisins, chacun avec un test. **Lot 2** : OCR iPhone direct au
+  serveur ; Redact : boîte ajustée, arabe dans la couche invisible, 8 relectures indépendantes (GO avec conditions,
+  reste L5 = décision P37-2). **Lot 3** : 125 textes en orthographe américaine. **Lot 4** : 37 vrais PDF arabes, 72 %,
+  recommandation chiffrée (P37-3).
+- **Préversion** : les deux premiers essais ont été annulés par l'`ignoreCommand` (sur une branche neuve, Vercel compare
+  au commit parent ; un dernier commit qui ne touche que des `.md` est ignoré) : préversion créée sur `e6d778d3`. La
+  production n'est pas concernée (Vercel compare au dernier commit déployé, `d854b0f0`).
 
 - **Dépense : 0 $.** Aucun appel payant ; aucune action Railway, Supabase, variables d'environnement ; www jamais
   sollicité par un banc (un essai de comparaison WebKit sur www a été refusé par le filtre de la session : abandonné).
@@ -178,7 +190,15 @@ annoncées** (pas de scans, police libre proche, pas de paragraphes justifiés e
 
 ## Mise en production
 
-<!-- PROD -->
+Le filtre de permissions de la session bloque le passage en production : **geste du propriétaire**, dans le terminal
+du dépôt :
+
+    ! git push origin p37:master
+
+Avance rapide vérifiée (`master` = `d854b0f0`, ancêtre de `p37`). **pdf-tools se redéploiera** (il le fait à chaque
+push sur `master`) mais **son code ne change pas** : P37 ne touche aucun fichier de `services/`. Après la construction
+de Vercel : `node scripts/p24/www-light.mjs` sur www. Retour arrière : promouvoir `onlineconvertools-90t9u2hxi`
+(= `d854b0f0`, P36).
 
 ## Pages dont le texte a changé
 
