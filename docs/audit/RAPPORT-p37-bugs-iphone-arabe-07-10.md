@@ -126,7 +126,23 @@ par git) — avec le code actuel 0 fuite, avec le code d'avant P33 **19 vraies f
 
 **Banc final sur la vraie page (build local, Chromium et WebKit iPhone)** :
 
-<!-- BANC -->
+Build local de `eb12175d` (code de l'application inchangé depuis), `scripts/p37/redact-final-bench.sh`, résultats
+complets dans `scripts/audit/results/p37-redact-final.txt` (dossier ignoré par git) :
+
+| Contrôle | Chromium (ordinateur) | WebKit (iPhone) |
+|---|---|---|
+| Boîte ajustée (15 PDF) + arabe dans la couche (4 PDF) | 15 + 4 PASS | 15 + 4 PASS |
+| 21 fixtures du réviseur (encre du mot couverte, voisins) | 21/21 | 21/21 |
+| 32 pièges P33 reconstruits, avec OCR | 32 ok ; 1 signal = `r2/g5-false-positive-adobe` (« Adobe » dans `/Registry (Adobe)`, faux positif voulu) | 30 ok + 2 dépassements de 30 s au clic (f5b, f12), **ok à la relance ciblée** ; même signal g5 |
+| Pièges des relectures 1 à 3 (11 PDF) | 0 fuite (1 « No match » juste : « رب » absent) | idem |
+| F1, L1, L3, R6 (arabe à deux termes, sur la vraie page) | terme absent du fichier livré, partout | idem |
+| L2, L4, S1 (latin dans l'arabe, phrase coupée, terme manqué sur une page noircie) | **refusés** (aucun fichier donné), comme prévu | idem |
+| Couche de texte invisible (P35 D3, PDF de géométrie, `SECRET-42`) | 15/15 | 15/15 |
+| Plantage `/SMask /None` (emro-rc67, « 2020 ») | 64 occurrences, livré, terme absent | idem |
+| Page illisible annoncée (wb-ok-content) | « No match found » + liste des pages | idem |
+
+Les lignes `traps-r4/r5` du banc à un seul terme donnent « nomatch » : ce banc lit « a|b » comme un seul terme ; ces
+cas sont couverts par `real-page-terms` (lignes F1 et L1-L4 ci-dessus) et par le rejeu Node (0 fuite).
 
 ## Lot 3 — orthographe américaine
 
