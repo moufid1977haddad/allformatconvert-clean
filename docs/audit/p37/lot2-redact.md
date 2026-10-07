@@ -374,3 +374,58 @@ Un terme manqué par la passe 1, sur une page noircie pour un AUTRE terme, resta
 - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar5\s-latin.pdf "مارس|شركة Microsoft"` : refusé.
 - `node scripts/p37/review/real-page-terms.mjs <origin> %TEMP%\p37-review-redact\ar3\s-lowrap.pdf "مارس|شركة Microsoft"` et `s-lolatin.pdf` : livrés, termes absents.
 - Puis les commandes des §8 à §13.
+
+## 15. PDF piégés de P33 recréés (les originaux ont été perdus avec %TEMP% le 06/10)
+
+- Nouveau `scripts/p37/make-p33-traps.mjs`. Il recrée les 31 pièges de P33 (f1 à f12, r2/g1 à g6, r3/h1 à h5) et `r6/smask-none.pdf`. Il part des descriptions du rapport P33 (§2c, §2e, §7), des commentaires de `app/lib/redactSanitize.js` et du nom de chaque piège. Les termes sont ceux de `scripts/p35/traps.txt`.
+- Les fichiers vont dans `scripts/audit/results/redact-traps/` : dossier durable, ignoré par git (`git check-ignore` : `.gitignore:50 scripts/audit/results/`).
+- Ce sont des reconstructions, pas les fichiers d'origine. Chaque piège reproduit l'attaque décrite. Sauf mention contraire, la page 2 porte le terme et la page 1 porte le piège.
+  - f1 : lien de sommaire `/Dest` vers la page noircie.
+  - f2 : ressources partagées avec une forme qui dessine le terme.
+  - f3 : `/Parent` → `/Kids` d'un champ.
+  - f4 à f4d : accents dessinés à part ; f4b avec une marque combinante, f4d à la TeX.
+  - f5 à f5c : Tc, crénage TJ, Tw.
+  - f6 : apparence d'un tampon.
+  - f7 : pièce jointe.
+  - f8 : `/RC` et `/Subj`.
+  - f9 : lien JavaScript.
+  - f10 : calque masqué.
+  - f11 : `/PieceInfo`.
+  - f12 et f12b : trait d'union, espace de largeur nulle, coupure en fin de ligne.
+  - g1 : apparence d'un champ différente de sa valeur.
+  - g1b : apparence d'un `Square`.
+  - g2 et g2b : masque doux hérité de `/Pages`, ou dans des ressources partagées.
+  - g3 : `/Properties` avec `/ActualText`.
+  - g4 : nom échappé `/Im#31`.
+  - g5 : « Adobe » et une police Type 0 portant `/Registry (Adobe)`.
+  - g6 : `/DV`.
+  - h1 : sommaire vers une page gardée.
+  - h2 : case à cocher dont l'état « On » dessine le terme.
+  - h3 : bouton dont l'état « enfoncé » dessine le terme.
+  - h4 : apparence d'un lien.
+  - h5 : motif de remplissage dans des ressources partagées. Le texte du motif est **blanc** : un texte dessiné dans un motif n'est jamais cherché (limite dite sur la page), et un texte visible resterait donc sur l'image. Le piège porte sur le retour du motif par la copie de la page 1.
+- `scripts/p37/redact-traps-node.mjs` accepte `--harness=<fichier>` (une autre version du pipeline).
+
+### Résultats (relecture Node)
+| Code | Résultat |
+|---|---|
+| Code actuel (copie de travail sur defa2f02) | 32 ok, **0 fuite**. Seul signal : g5 « raw », le faux positif connu `/Registry (Adobe)`. OCR à 300 dpi : aucune fuite. |
+| Avant P33 (281dada4, parent de a24d51a2 : copie directe des pages sans correspondance, pas de contrôle final ; relecture brute dans le scratchpad) | **20 signaux de fuite**, dont g5 (faux positif) : **19 vraies fuites**. Plus **4 « No match found »** alors que le terme est dans le fichier (f4, f4b, f4d, f12). |
+
+Détail des 19 fuites avant P33 :
+- f1, f2, f3, f7, f8, f9, f11, g2, g2b, g3, g6, h2, h3 et h5 : en brut ;
+- f4c et f12b : pdftotext et PDF.js ;
+- f6, g1b et h4 : pdftotext et brut.
+
+Les pièges qui ne fuyaient pas avant P33 :
+- f5, f5b et f5c portent sur le bord visible des lettres. Le pipeline ancien rejoué ici dessine une image blanche, donc ces trois-là ne se jugent qu'à la vraie page, avec OCR.
+- g4 et h1 portaient sur une image perdue et un faux refus, pas sur une fuite.
+- f10, g1 et r6 ne fuient pas avec ce modèle.
+
+Les pièges mordent donc toujours.
+
+### Commandes pour le contrôleur (vraie page, après rebuild)
+- `node scripts/p37/make-p33-traps.mjs` (une fois ; recrée le dossier si besoin)
+- `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p35/traps.txt --root=scripts/audit/results/redact-traps --browser=chromium --ocr`
+- `node scripts/p35/redact-bench.mjs <origin> --list=scripts/p35/traps.txt --root=scripts/audit/results/redact-traps --browser=webkit --ocr`
+- Attendu : 32 ok ; seul signal r2/g5 « raw » (faux positif connu).

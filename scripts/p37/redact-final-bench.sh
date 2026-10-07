@@ -11,7 +11,7 @@ for b in "chromium" "webkit --device=iphone"; do
   echo "== review21 $b"; node scripts/p37/review/real-page-review.mjs "$O" --browser=$b 2>&1 | grep -vE "^PASS" | tail -3
 done
 for b in chromium webkit; do
-  echo "== traps31 $b"; node scripts/p35/redact-bench.mjs "$O" --list=scripts/p35/traps.txt --root="$T\\p33-review-redact" --browser=$b --ocr 2>&1 | grep -E "PDFs|leak|ERROR|REFUSED|nomatch" | grep -vE "\] ok "
+  echo "== traps31 $b"; node scripts/p35/redact-bench.mjs "$O" --list=scripts/p35/traps.txt --root="${TRAPS_ROOT:-scripts/audit/results/redact-traps}" --browser=$b --ocr 2>&1 | grep -E "PDFs|leak|ERROR|REFUSED|nomatch" | grep -vE "\] ok "
   for l in scripts/p37/review-traps.txt scripts/p37/review/traps-r2.txt scripts/p37/review/traps-r3.txt; do
     echo "== $l $b"; node scripts/p35/redact-bench.mjs "$O" --list=$l --root="$T\\p37-review-redact" --browser=$b --ocr 2>&1 | grep -vE "^\s*$"
   done

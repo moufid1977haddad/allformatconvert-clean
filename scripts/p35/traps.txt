@@ -1,4 +1,4 @@
-# The 31 trap PDFs of the P33 reviews (rounds 1-2) and r6/smask-none.pdf (P37 sixth review C1, scripts/p37/make-smask-none.mjs), in %TEMP%\p33-review-redact: <pdf> TAB <term>
+# The 31 trap PDFs of the P33 reviews (rounds 1-3) and r6/smask-none.pdf (P37 sixth review C1): <pdf> TAB <term>. Recreated by scripts/p37/make-p33-traps.mjs into scripts/audit/results/redact-traps (git-ignored; the originals in %TEMP%\p33-review-redact were lost on 06/10)
 f1-link-dest.pdf	ZORGLUB-77
 f2-shared-resources.pdf	ZORGLUB-77
 f3-field-kids.pdf	ZORGLUB-77

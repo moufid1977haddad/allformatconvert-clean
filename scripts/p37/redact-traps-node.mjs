@@ -17,7 +17,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const from = (p) => pathToFileURL(path.join(ROOT, p)).href;
 const arg = (k, d = '') => (process.argv.find((a) => a.startsWith(`--${k}=`)) || `--${k}=${d}`).slice(k.length + 3);
-const { redact } = await import(from('scripts/p35/harness.mjs'));
+// --harness=<file>: another replay exporting redact(file, terms) (P37: an older version of the page, to show what leaked)
+const { redact } = await import(arg('harness') ? pathToFileURL(path.resolve(arg('harness'))).href : from('scripts/p35/harness.mjs'));
 const pdfjs = await import(from('node_modules/pdfjs-dist/legacy/build/pdf.mjs'));
 const SFD = path.join(ROOT, 'node_modules/pdfjs-dist/standard_fonts/').replace(/\\/g, '/');
 const TESS = process.env.TESSERACT_BIN || 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe';
