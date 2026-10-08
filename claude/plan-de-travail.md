@@ -23,6 +23,26 @@ depuis l'ouverture, dont 100 réussies et 9 échouées du 25/08 au 03/10). L'ess
 4. **Alertes fournisseurs** : ConvertAPI, OpenAI, Pangram — téléphone (ntfy) + courriel, une fois par incident, puis au
    rétablissement (`lib/providerIncident.js`). Vérifier le canal : `vercel crons run /api/cron/alert-test`.
 
+## 🌍 P38 — site en français, espagnol et arabe — **planifié, début après le 11/10/2026 à 18 h** (préparation P38-0 du 08/10 : `docs/audit/PLAN-I18N-P38.md`, rapport `docs/audit/RAPPORT-p38-0-preparation-i18n-08-10.md`, branche `p38-0`)
+
+Décision du propriétaire : `/fr/ /es/ /ar/` (remplace la piste S10 `/fr/ /es/ /de/`), adresses anglaises inchangées, socle commun
++ 20 outils d'abord, traduction relue (propriétaire : fr et ar ; espagnol : relecteur payé), widget retiré sur les pages
+traduites, hreflang réciproques, un sitemap par langue, mesure Search Console 6-8 semaines après la mise en ligne.
+**Pas de date de mise en ligne** (règle absolue) : elle suit l'audit structurel des pages traduites (lot P38-7).
+
+| Lot | Contenu | Taille |
+|---|---|---|
+| P38-1 | imports → alias, existant déplacé dans `app/(en)/` sans changement visible (texte rendu des 243 pages identique) | L |
+| P38-2 | bibliothèque i18n, racine `app/(intl)/[lang]`, table des adresses, pluriels arabes, sitemaps et hreflang | M + relecteur |
+| P38-3 | socle (menu, pied, accueil, 6 catégories, légal, messages), traduction automatique, sélecteur, widget retiré | L |
+| P38-4 | arabe de droite à gauche sur le socle | M + relecteur |
+| P38-5 / P38-6 | outils 1-10 puis 11-20 | L + L |
+| P38-7 | relectures intégrées, audit structurel, préversion ; production = geste du propriétaire | M + relecteur |
+
+Volumes : socle minimal + 20 outils = 193 883 caractères / 34 777 mots par langue ; tout le site = 1 003 946 car. / 180 643
+mots. Coûts : traduction automatique < 30 $ ; relecture espagnole ≈ 2 400-3 500 $ (0,07-0,10 $/mot). Décisions P38-D1 à
+P38-D6 au § 7 du plan i18n (adresses, chiffres arabes, service et clé de traduction, relecteur, liste des outils).
+
 ## 🐞 P37 — 07/10 : bugs relevés par P36, trois correctifs iPhone, orthographe américaine, test de l'éditeur PDF arabe (`docs/audit/RAPPORT-p37-bugs-iphone-arabe-07-10.md`, repère `restauration-avant-p37-07-10` = `a0754be4`) — **prêt sur la branche `p37`, mise en production = geste du propriétaire (P37-1)**
 
 | Lot | État |

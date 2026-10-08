@@ -1,0 +1,2723 @@
+{
+ "tools": [
+  {
+   "group": "tool:/tools/qr-barcodes-tools/barcode-generator",
+   "chars": 13858,
+   "words": 2659,
+   "strings": 339,
+   "uniq": {
+    "chars": 13230,
+    "words": 2546,
+    "strings": 319
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-redact",
+   "chars": 8110,
+   "words": 1515,
+   "strings": 98,
+   "uniq": {
+    "chars": 7651,
+    "words": 1432,
+    "strings": 86
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-compressor",
+   "chars": 7802,
+   "words": 1390,
+   "strings": 100,
+   "uniq": {
+    "chars": 7502,
+    "words": 1338,
+    "strings": 90
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-converter",
+   "chars": 7761,
+   "words": 1429,
+   "strings": 125,
+   "uniq": {
+    "chars": 7475,
+    "words": 1379,
+    "strings": 116
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/audio-merger",
+   "chars": 6947,
+   "words": 1304,
+   "strings": 106,
+   "uniq": {
+    "chars": 6708,
+    "words": 1260,
+    "strings": 98
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/hash-generator",
+   "chars": 6719,
+   "words": 1142,
+   "strings": 99,
+   "uniq": {
+    "chars": 6277,
+    "words": 1069,
+    "strings": 93
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-compressor",
+   "chars": 6357,
+   "words": 1154,
+   "strings": 92,
+   "uniq": {
+    "chars": 6130,
+    "words": 1109,
+    "strings": 88
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-rotator",
+   "chars": 6178,
+   "words": 1054,
+   "strings": 70,
+   "uniq": {
+    "chars": 5961,
+    "words": 1013,
+    "strings": 67
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-trimmer",
+   "chars": 6089,
+   "words": 1138,
+   "strings": 78,
+   "uniq": {
+    "chars": 5865,
+    "words": 1095,
+    "strings": 73
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-converter",
+   "chars": 5964,
+   "words": 1090,
+   "strings": 103,
+   "uniq": {
+    "chars": 5669,
+    "words": 1034,
+    "strings": 96
+   }
+  },
+  {
+   "group": "tool:/tools/qr-barcodes-tools/qr-generator",
+   "chars": 5894,
+   "words": 1113,
+   "strings": 101,
+   "uniq": {
+    "chars": 5557,
+    "words": 1049,
+    "strings": 93
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-watermark",
+   "chars": 5849,
+   "words": 1066,
+   "strings": 77,
+   "uniq": {
+    "chars": 5606,
+    "words": 1019,
+    "strings": 72
+   }
+  },
+  {
+   "group": "tool:/tools/converter-tools/mobi-to-epub",
+   "chars": 5612,
+   "words": 846,
+   "strings": 58,
+   "uniq": {
+    "chars": 5397,
+    "words": 804,
+    "strings": 55
+   }
+  },
+  {
+   "group": "tool:/tools/qr-barcodes-tools/qr-scanner",
+   "chars": 5379,
+   "words": 1014,
+   "strings": 69,
+   "uniq": {
+    "chars": 5165,
+    "words": 972,
+    "strings": 66
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-merge",
+   "chars": 5296,
+   "words": 970,
+   "strings": 70,
+   "uniq": {
+    "chars": 5082,
+    "words": 930,
+    "strings": 66
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/regex-tester",
+   "chars": 5286,
+   "words": 900,
+   "strings": 66,
+   "uniq": {
+    "chars": 5039,
+    "words": 863,
+    "strings": 59
+   }
+  },
+  {
+   "group": "tool:/tools/file-tools/zip-extractor",
+   "chars": 5255,
+   "words": 961,
+   "strings": 86,
+   "uniq": {
+    "chars": 4963,
+    "words": 909,
+    "strings": 77
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/jwt-decoder",
+   "chars": 5235,
+   "words": 931,
+   "strings": 64,
+   "uniq": {
+    "chars": 5027,
+    "words": 890,
+    "strings": 61
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-compress",
+   "chars": 5219,
+   "words": 911,
+   "strings": 73,
+   "uniq": {
+    "chars": 4953,
+    "words": 867,
+    "strings": 69
+   }
+  },
+  {
+   "group": "tool:/tools/converter-tools/currency-converter",
+   "chars": 5190,
+   "words": 913,
+   "strings": 76,
+   "uniq": {
+    "chars": 4892,
+    "words": 864,
+    "strings": 67
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-ocr",
+   "chars": 5185,
+   "words": 956,
+   "strings": 72,
+   "uniq": {
+    "chars": 4900,
+    "words": 908,
+    "strings": 65
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/csv-to-sql",
+   "chars": 5168,
+   "words": 920,
+   "strings": 88,
+   "uniq": {
+    "chars": 4927,
+    "words": 874,
+    "strings": 83
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-merger",
+   "chars": 5072,
+   "words": 950,
+   "strings": 62,
+   "uniq": {
+    "chars": 4855,
+    "words": 907,
+    "strings": 59
+   }
+  },
+  {
+   "group": "tool:/tools/math-tools/statistics-calculator",
+   "chars": 4954,
+   "words": 843,
+   "strings": 69,
+   "uniq": {
+    "chars": 4673,
+    "words": 799,
+    "strings": 64
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/api-tester",
+   "chars": 4909,
+   "words": 860,
+   "strings": 51,
+   "uniq": {
+    "chars": 4697,
+    "words": 820,
+    "strings": 48
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/markdown-to-pdf",
+   "chars": 4891,
+   "words": 818,
+   "strings": 43,
+   "uniq": {
+    "chars": 4685,
+    "words": 776,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/html-to-pdf",
+   "chars": 4881,
+   "words": 917,
+   "strings": 64,
+   "uniq": {
+    "chars": 4619,
+    "words": 865,
+    "strings": 59
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-to-pdfa",
+   "chars": 4840,
+   "words": 890,
+   "strings": 81,
+   "uniq": {
+    "chars": 4630,
+    "words": 848,
+    "strings": 78
+   }
+  },
+  {
+   "group": "tool:/tools/math-tools/percentage-calculator",
+   "chars": 4811,
+   "words": 931,
+   "strings": 77,
+   "uniq": {
+    "chars": 4545,
+    "words": 875,
+    "strings": 66
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/audio-booster",
+   "chars": 4795,
+   "words": 871,
+   "strings": 55,
+   "uniq": {
+    "chars": 4493,
+    "words": 816,
+    "strings": 50
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/excel-to-csv",
+   "chars": 4722,
+   "words": 854,
+   "strings": 71,
+   "uniq": {
+    "chars": 4447,
+    "words": 803,
+    "strings": 66
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/csv-to-excel",
+   "chars": 4684,
+   "words": 861,
+   "strings": 67,
+   "uniq": {
+    "chars": 4448,
+    "words": 816,
+    "strings": 63
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/csv-to-json",
+   "chars": 4679,
+   "words": 861,
+   "strings": 88,
+   "uniq": {
+    "chars": 4426,
+    "words": 812,
+    "strings": 81
+   }
+  },
+  {
+   "group": "tool:/tools/converter-tools/color-converter",
+   "chars": 4634,
+   "words": 900,
+   "strings": 63,
+   "uniq": {
+    "chars": 4407,
+    "words": 857,
+    "strings": 59
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/word-to-pdf",
+   "chars": 4631,
+   "words": 812,
+   "strings": 45,
+   "uniq": {
+    "chars": 4416,
+    "words": 773,
+    "strings": 41
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-split",
+   "chars": 4624,
+   "words": 899,
+   "strings": 91,
+   "uniq": {
+    "chars": 4385,
+    "words": 852,
+    "strings": 83
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-editor",
+   "chars": 4617,
+   "words": 816,
+   "strings": 85,
+   "uniq": {
+    "chars": 4382,
+    "words": 780,
+    "strings": 77
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/cron-expression",
+   "chars": 4607,
+   "words": 843,
+   "strings": 49,
+   "uniq": {
+    "chars": 4383,
+    "words": 802,
+    "strings": 45
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-editor",
+   "chars": 4569,
+   "words": 839,
+   "strings": 90,
+   "uniq": {
+    "chars": 4317,
+    "words": 791,
+    "strings": 82
+   }
+  },
+  {
+   "group": "tool:/tools/converter-tools/unit-converter",
+   "chars": 4539,
+   "words": 816,
+   "strings": 70,
+   "uniq": {
+    "chars": 4319,
+    "words": 782,
+    "strings": 65
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/epub-to-pdf",
+   "chars": 4514,
+   "words": 801,
+   "strings": 56,
+   "uniq": {
+    "chars": 4157,
+    "words": 735,
+    "strings": 50
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/audio-converter",
+   "chars": 4508,
+   "words": 814,
+   "strings": 56,
+   "uniq": {
+    "chars": 4277,
+    "words": 775,
+    "strings": 50
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/screen-recorder",
+   "chars": 4487,
+   "words": 820,
+   "strings": 52,
+   "uniq": {
+    "chars": 4269,
+    "words": 779,
+    "strings": 49
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/image-upscaler",
+   "chars": 4471,
+   "words": 821,
+   "strings": 68,
+   "uniq": {
+    "chars": 4232,
+    "words": 775,
+    "strings": 64
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-resizer",
+   "chars": 4468,
+   "words": 840,
+   "strings": 68,
+   "uniq": {
+    "chars": 4245,
+    "words": 795,
+    "strings": 64
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/audio-splitter",
+   "chars": 4454,
+   "words": 852,
+   "strings": 66,
+   "uniq": {
+    "chars": 4226,
+    "words": 808,
+    "strings": 62
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/ai-detector",
+   "chars": 4442,
+   "words": 809,
+   "strings": 56,
+   "uniq": {
+    "chars": 4241,
+    "words": 774,
+    "strings": 53
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/audio-compressor",
+   "chars": 4426,
+   "words": 802,
+   "strings": 59,
+   "uniq": {
+    "chars": 4188,
+    "words": 757,
+    "strings": 54
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-to-csharp",
+   "chars": 4406,
+   "words": 684,
+   "strings": 45,
+   "uniq": {
+    "chars": 4162,
+    "words": 646,
+    "strings": 39
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-to-gif",
+   "chars": 4387,
+   "words": 854,
+   "strings": 52,
+   "uniq": {
+    "chars": 4172,
+    "words": 804,
+    "strings": 49
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-repair",
+   "chars": 4371,
+   "words": 771,
+   "strings": 60,
+   "uniq": {
+    "chars": 4174,
+    "words": 733,
+    "strings": 57
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/gif-maker",
+   "chars": 4354,
+   "words": 799,
+   "strings": 82,
+   "uniq": {
+    "chars": 4139,
+    "words": 760,
+    "strings": 79
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-sign",
+   "chars": 4292,
+   "words": 805,
+   "strings": 80,
+   "uniq": {
+    "chars": 4007,
+    "words": 747,
+    "strings": 75
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/audio-trimmer",
+   "chars": 4243,
+   "words": 810,
+   "strings": 52,
+   "uniq": {
+    "chars": 4031,
+    "words": 765,
+    "strings": 49
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/background-remover",
+   "chars": 4221,
+   "words": 760,
+   "strings": 55,
+   "uniq": {
+    "chars": 3996,
+    "words": 720,
+    "strings": 52
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/base64-encoder",
+   "chars": 4218,
+   "words": 758,
+   "strings": 46,
+   "uniq": {
+    "chars": 4014,
+    "words": 723,
+    "strings": 43
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/add-text-to-image",
+   "chars": 4214,
+   "words": 769,
+   "strings": 76,
+   "uniq": {
+    "chars": 3969,
+    "words": 723,
+    "strings": 70
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/audio-to-text",
+   "chars": 4168,
+   "words": 720,
+   "strings": 53,
+   "uniq": {
+    "chars": 3944,
+    "words": 680,
+    "strings": 48
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/password-generator",
+   "chars": 4146,
+   "words": 699,
+   "strings": 65,
+   "uniq": {
+    "chars": 3917,
+    "words": 664,
+    "strings": 62
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/tiff-to-jpg",
+   "chars": 4143,
+   "words": 748,
+   "strings": 54,
+   "uniq": {
+    "chars": 3939,
+    "words": 707,
+    "strings": 51
+   }
+  },
+  {
+   "group": "tool:/tools/file-tools/file-splitter",
+   "chars": 4128,
+   "words": 794,
+   "strings": 68,
+   "uniq": {
+    "chars": 3899,
+    "words": 748,
+    "strings": 63
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/url-encoder",
+   "chars": 4125,
+   "words": 771,
+   "strings": 52,
+   "uniq": {
+    "chars": 3907,
+    "words": 733,
+    "strings": 48
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/url-encoder",
+   "chars": 4120,
+   "words": 807,
+   "strings": 55,
+   "uniq": {
+    "chars": 3917,
+    "words": 769,
+    "strings": 52
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-to-php",
+   "chars": 4116,
+   "words": 712,
+   "strings": 49,
+   "uniq": {
+    "chars": 3863,
+    "words": 662,
+    "strings": 43
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/excel-to-json",
+   "chars": 4115,
+   "words": 774,
+   "strings": 60,
+   "uniq": {
+    "chars": 3853,
+    "words": 719,
+    "strings": 55
+   }
+  },
+  {
+   "group": "tool:/tools/math-tools/fraction-calculator",
+   "chars": 4104,
+   "words": 758,
+   "strings": 46,
+   "uniq": {
+    "chars": 3838,
+    "words": 717,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/file-tools/zip-creator",
+   "chars": 4057,
+   "words": 718,
+   "strings": 65,
+   "uniq": {
+    "chars": 3791,
+    "words": 669,
+    "strings": 58
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-to-typescript",
+   "chars": 4044,
+   "words": 693,
+   "strings": 46,
+   "uniq": {
+    "chars": 3773,
+    "words": 649,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-metadata",
+   "chars": 4042,
+   "words": 733,
+   "strings": 48,
+   "uniq": {
+    "chars": 3819,
+    "words": 690,
+    "strings": 45
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/find-replace",
+   "chars": 4035,
+   "words": 720,
+   "strings": 54,
+   "uniq": {
+    "chars": 3834,
+    "words": 685,
+    "strings": 51
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/timestamp-converter",
+   "chars": 4026,
+   "words": 711,
+   "strings": 57,
+   "uniq": {
+    "chars": 3761,
+    "words": 665,
+    "strings": 50
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-to-go",
+   "chars": 4025,
+   "words": 698,
+   "strings": 47,
+   "uniq": {
+    "chars": 3770,
+    "words": 651,
+    "strings": 41
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/case-converter",
+   "chars": 4014,
+   "words": 674,
+   "strings": 54,
+   "uniq": {
+    "chars": 3798,
+    "words": 642,
+    "strings": 51
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-to-word",
+   "chars": 4007,
+   "words": 736,
+   "strings": 49,
+   "uniq": {
+    "chars": 3783,
+    "words": 694,
+    "strings": 45
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/duplicate-image-finder",
+   "chars": 4001,
+   "words": 695,
+   "strings": 53,
+   "uniq": {
+    "chars": 3739,
+    "words": 650,
+    "strings": 49
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/gif-compressor",
+   "chars": 3990,
+   "words": 725,
+   "strings": 60,
+   "uniq": {
+    "chars": 3740,
+    "words": 682,
+    "strings": 54
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/image-generator",
+   "chars": 3973,
+   "words": 686,
+   "strings": 51,
+   "uniq": {
+    "chars": 3675,
+    "words": 633,
+    "strings": 47
+   }
+  },
+  {
+   "group": "tool:/tools/math-tools/scientific-calculator",
+   "chars": 3896,
+   "words": 674,
+   "strings": 47,
+   "uniq": {
+    "chars": 3669,
+    "words": 639,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/color-picker",
+   "chars": 3881,
+   "words": 744,
+   "strings": 47,
+   "uniq": {
+    "chars": 3662,
+    "words": 698,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/math-tools/number-base-converter",
+   "chars": 3860,
+   "words": 705,
+   "strings": 37,
+   "uniq": {
+    "chars": 3636,
+    "words": 666,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/grammar-fixer",
+   "chars": 3854,
+   "words": 675,
+   "strings": 52,
+   "uniq": {
+    "chars": 3639,
+    "words": 638,
+    "strings": 48
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/cron-expression-builder",
+   "chars": 3852,
+   "words": 715,
+   "strings": 49,
+   "uniq": {
+    "chars": 3607,
+    "words": 672,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-to-audio",
+   "chars": 3843,
+   "words": 714,
+   "strings": 47,
+   "uniq": {
+    "chars": 3607,
+    "words": 668,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/diff-viewer",
+   "chars": 3831,
+   "words": 692,
+   "strings": 47,
+   "uniq": {
+    "chars": 3622,
+    "words": 657,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/code-formatter",
+   "chars": 3820,
+   "words": 633,
+   "strings": 48,
+   "uniq": {
+    "chars": 3592,
+    "words": 599,
+    "strings": 43
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-to-rust",
+   "chars": 3817,
+   "words": 620,
+   "strings": 45,
+   "uniq": {
+    "chars": 3554,
+    "words": 577,
+    "strings": 39
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/code-minifier",
+   "chars": 3808,
+   "words": 647,
+   "strings": 44,
+   "uniq": {
+    "chars": 3591,
+    "words": 610,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/excel-to-pdf",
+   "chars": 3801,
+   "words": 685,
+   "strings": 43,
+   "uniq": {
+    "chars": 3592,
+    "words": 645,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/markdown-editor",
+   "chars": 3797,
+   "words": 627,
+   "strings": 41,
+   "uniq": {
+    "chars": 3581,
+    "words": 593,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/word-counter",
+   "chars": 3789,
+   "words": 673,
+   "strings": 48,
+   "uniq": {
+    "chars": 3582,
+    "words": 642,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-to-base64",
+   "chars": 3783,
+   "words": 731,
+   "strings": 57,
+   "uniq": {
+    "chars": 3565,
+    "words": 689,
+    "strings": 54
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/text-encryptor",
+   "chars": 3779,
+   "words": 650,
+   "strings": 47,
+   "uniq": {
+    "chars": 3578,
+    "words": 620,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/image-to-pdf",
+   "chars": 3769,
+   "words": 711,
+   "strings": 42,
+   "uniq": {
+    "chars": 3549,
+    "words": 668,
+    "strings": 39
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-comparison",
+   "chars": 3761,
+   "words": 697,
+   "strings": 54,
+   "uniq": {
+    "chars": 3483,
+    "words": 648,
+    "strings": 48
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-watermark",
+   "chars": 3754,
+   "words": 701,
+   "strings": 72,
+   "uniq": {
+    "chars": 3557,
+    "words": 667,
+    "strings": 69
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-forms",
+   "chars": 3751,
+   "words": 676,
+   "strings": 45,
+   "uniq": {
+    "chars": 3548,
+    "words": 639,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-to-toml",
+   "chars": 3750,
+   "words": 672,
+   "strings": 50,
+   "uniq": {
+    "chars": 3534,
+    "words": 633,
+    "strings": 46
+   }
+  },
+  {
+   "group": "tool:/tools/file-tools/base64-encoder",
+   "chars": 3746,
+   "words": 699,
+   "strings": 49,
+   "uniq": {
+    "chars": 3511,
+    "words": 649,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-metadata",
+   "chars": 3740,
+   "words": 654,
+   "strings": 37,
+   "uniq": {
+    "chars": 3526,
+    "words": 620,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/audio-metadata",
+   "chars": 3730,
+   "words": 672,
+   "strings": 36,
+   "uniq": {
+    "chars": 3512,
+    "words": 635,
+    "strings": 33
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/typescript-to-js",
+   "chars": 3713,
+   "words": 610,
+   "strings": 44,
+   "uniq": {
+    "chars": 3438,
+    "words": 571,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-resizer",
+   "chars": 3712,
+   "words": 692,
+   "strings": 63,
+   "uniq": {
+    "chars": 3491,
+    "words": 647,
+    "strings": 59
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-filter",
+   "chars": 3698,
+   "words": 677,
+   "strings": 43,
+   "uniq": {
+    "chars": 3481,
+    "words": 640,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/xml-to-json",
+   "chars": 3696,
+   "words": 641,
+   "strings": 51,
+   "uniq": {
+    "chars": 3369,
+    "words": 578,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/number-base-converter",
+   "chars": 3694,
+   "words": 630,
+   "strings": 35,
+   "uniq": {
+    "chars": 3484,
+    "words": 594,
+    "strings": 32
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/mobi-to-pdf",
+   "chars": 3692,
+   "words": 661,
+   "strings": 46,
+   "uniq": {
+    "chars": 3439,
+    "words": 610,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/aspect-ratio",
+   "chars": 3680,
+   "words": 673,
+   "strings": 52,
+   "uniq": {
+    "chars": 3412,
+    "words": 624,
+    "strings": 45
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/env-to-json",
+   "chars": 3675,
+   "words": 640,
+   "strings": 47,
+   "uniq": {
+    "chars": 3441,
+    "words": 596,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-protect",
+   "chars": 3672,
+   "words": 627,
+   "strings": 57,
+   "uniq": {
+    "chars": 3475,
+    "words": 594,
+    "strings": 54
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/mp4-to-gif",
+   "chars": 3664,
+   "words": 701,
+   "strings": 37,
+   "uniq": {
+    "chars": 3452,
+    "words": 657,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/mov-to-gif",
+   "chars": 3653,
+   "words": 680,
+   "strings": 37,
+   "uniq": {
+    "chars": 3439,
+    "words": 640,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/file-tools/file-metadata",
+   "chars": 3644,
+   "words": 658,
+   "strings": 43,
+   "uniq": {
+    "chars": 3424,
+    "words": 617,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-to-python",
+   "chars": 3637,
+   "words": 603,
+   "strings": 45,
+   "uniq": {
+    "chars": 3374,
+    "words": 561,
+    "strings": 39
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/ascii-art",
+   "chars": 3621,
+   "words": 672,
+   "strings": 43,
+   "uniq": {
+    "chars": 3382,
+    "words": 626,
+    "strings": 39
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/video-to-gif",
+   "chars": 3606,
+   "words": 667,
+   "strings": 38,
+   "uniq": {
+    "chars": 3388,
+    "words": 624,
+    "strings": 35
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/whitespace-remover",
+   "chars": 3588,
+   "words": 620,
+   "strings": 48,
+   "uniq": {
+    "chars": 3333,
+    "words": 578,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-number-pages",
+   "chars": 3586,
+   "words": 712,
+   "strings": 73,
+   "uniq": {
+    "chars": 3369,
+    "words": 665,
+    "strings": 69
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/tiff-to-png",
+   "chars": 3578,
+   "words": 645,
+   "strings": 47,
+   "uniq": {
+    "chars": 3370,
+    "words": 607,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/audio-transcriber",
+   "chars": 3577,
+   "words": 649,
+   "strings": 46,
+   "uniq": {
+    "chars": 3346,
+    "words": 607,
+    "strings": 41
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/text-comparator",
+   "chars": 3568,
+   "words": 638,
+   "strings": 46,
+   "uniq": {
+    "chars": 3320,
+    "words": 596,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/html-entity-decoder",
+   "chars": 3566,
+   "words": 605,
+   "strings": 41,
+   "uniq": {
+    "chars": 3359,
+    "words": 573,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-translate",
+   "chars": 3566,
+   "words": 642,
+   "strings": 53,
+   "uniq": {
+    "chars": 3257,
+    "words": 588,
+    "strings": 45
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/audio-equalizer",
+   "chars": 3565,
+   "words": 674,
+   "strings": 40,
+   "uniq": {
+    "chars": 3356,
+    "words": 632,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/add-noise",
+   "chars": 3547,
+   "words": 648,
+   "strings": 42,
+   "uniq": {
+    "chars": 3298,
+    "words": 600,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/ppt-to-pdf",
+   "chars": 3534,
+   "words": 615,
+   "strings": 40,
+   "uniq": {
+    "chars": 3319,
+    "words": 576,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/sql-to-csv",
+   "chars": 3533,
+   "words": 623,
+   "strings": 51,
+   "uniq": {
+    "chars": 3316,
+    "words": 585,
+    "strings": 47
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/image-to-gif",
+   "chars": 3533,
+   "words": 646,
+   "strings": 58,
+   "uniq": {
+    "chars": 3300,
+    "words": 605,
+    "strings": 54
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-formatter",
+   "chars": 3529,
+   "words": 627,
+   "strings": 54,
+   "uniq": {
+    "chars": 3281,
+    "words": 583,
+    "strings": 46
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/add-border-to-image",
+   "chars": 3529,
+   "words": 681,
+   "strings": 46,
+   "uniq": {
+    "chars": 3282,
+    "words": 629,
+    "strings": 41
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/character-counter",
+   "chars": 3524,
+   "words": 632,
+   "strings": 48,
+   "uniq": {
+    "chars": 3301,
+    "words": 597,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/lorem-ipsum",
+   "chars": 3524,
+   "words": 608,
+   "strings": 52,
+   "uniq": {
+    "chars": 3286,
+    "words": 571,
+    "strings": 46
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/duplicate-remover",
+   "chars": 3504,
+   "words": 615,
+   "strings": 47,
+   "uniq": {
+    "chars": 3303,
+    "words": 579,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/ai-chatbot",
+   "chars": 3500,
+   "words": 621,
+   "strings": 41,
+   "uniq": {
+    "chars": 3298,
+    "words": 587,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/markdown-to-html",
+   "chars": 3498,
+   "words": 587,
+   "strings": 43,
+   "uniq": {
+    "chars": 3252,
+    "words": 548,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/file-tools/file-encryptor",
+   "chars": 3484,
+   "words": 614,
+   "strings": 43,
+   "uniq": {
+    "chars": 3261,
+    "words": 579,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/media-player",
+   "chars": 3482,
+   "words": 653,
+   "strings": 47,
+   "uniq": {
+    "chars": 3238,
+    "words": 608,
+    "strings": 41
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/text-to-pdf",
+   "chars": 3481,
+   "words": 649,
+   "strings": 52,
+   "uniq": {
+    "chars": 3251,
+    "words": 600,
+    "strings": 47
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/video-screenshot",
+   "chars": 3479,
+   "words": 664,
+   "strings": 52,
+   "uniq": {
+    "chars": 3258,
+    "words": 619,
+    "strings": 48
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/markdown-previewer",
+   "chars": 3476,
+   "words": 568,
+   "strings": 40,
+   "uniq": {
+    "chars": 3257,
+    "words": 533,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/voice-recorder",
+   "chars": 3470,
+   "words": 614,
+   "strings": 50,
+   "uniq": {
+    "chars": 3255,
+    "words": 572,
+    "strings": 47
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/xml-formatter",
+   "chars": 3464,
+   "words": 582,
+   "strings": 43,
+   "uniq": {
+    "chars": 3244,
+    "words": 545,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-compare",
+   "chars": 3459,
+   "words": 641,
+   "strings": 45,
+   "uniq": {
+    "chars": 3219,
+    "words": 599,
+    "strings": 39
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-rotate",
+   "chars": 3454,
+   "words": 625,
+   "strings": 49,
+   "uniq": {
+    "chars": 3229,
+    "words": 582,
+    "strings": 45
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/uuid-generator",
+   "chars": 3414,
+   "words": 612,
+   "strings": 47,
+   "uniq": {
+    "chars": 3189,
+    "words": 569,
+    "strings": 43
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/url-parser",
+   "chars": 3381,
+   "words": 573,
+   "strings": 41,
+   "uniq": {
+    "chars": 3169,
+    "words": 536,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/grayscale-converter",
+   "chars": 3381,
+   "words": 590,
+   "strings": 50,
+   "uniq": {
+    "chars": 3146,
+    "words": 549,
+    "strings": 45
+   }
+  },
+  {
+   "group": "tool:/tools/video-tools/subtitle-generator",
+   "chars": 3357,
+   "words": 609,
+   "strings": 45,
+   "uniq": {
+    "chars": 3105,
+    "words": 568,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/toml-to-json",
+   "chars": 3347,
+   "words": 566,
+   "strings": 49,
+   "uniq": {
+    "chars": 3126,
+    "words": 530,
+    "strings": 45
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-to-xml",
+   "chars": 3340,
+   "words": 595,
+   "strings": 43,
+   "uniq": {
+    "chars": 3113,
+    "words": 554,
+    "strings": 39
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/image-captioner",
+   "chars": 3339,
+   "words": 621,
+   "strings": 46,
+   "uniq": {
+    "chars": 3116,
+    "words": 582,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/text-sorter",
+   "chars": 3336,
+   "words": 591,
+   "strings": 48,
+   "uniq": {
+    "chars": 3124,
+    "words": 552,
+    "strings": 45
+   }
+  },
+  {
+   "group": "tool:/tools/math-tools/roman-numeral-converter",
+   "chars": 3326,
+   "words": 605,
+   "strings": 44,
+   "uniq": {
+    "chars": 3098,
+    "words": 562,
+    "strings": 41
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/brightness-contrast",
+   "chars": 3314,
+   "words": 572,
+   "strings": 46,
+   "uniq": {
+    "chars": 3076,
+    "words": 530,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/avi-to-gif",
+   "chars": 3313,
+   "words": 624,
+   "strings": 36,
+   "uniq": {
+    "chars": 3100,
+    "words": 582,
+    "strings": 33
+   }
+  },
+  {
+   "group": "tool:/tools/audio-tools/audio-waveform",
+   "chars": 3295,
+   "words": 640,
+   "strings": 53,
+   "uniq": {
+    "chars": 3087,
+    "words": 597,
+    "strings": 49
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/jpg-to-pdf",
+   "chars": 3291,
+   "words": 620,
+   "strings": 41,
+   "uniq": {
+    "chars": 3084,
+    "words": 581,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/scss-to-css",
+   "chars": 3273,
+   "words": 551,
+   "strings": 48,
+   "uniq": {
+    "chars": 3036,
+    "words": 510,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/js-minifier",
+   "chars": 3253,
+   "words": 518,
+   "strings": 44,
+   "uniq": {
+    "chars": 3008,
+    "words": 481,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/sql-formatter",
+   "chars": 3249,
+   "words": 532,
+   "strings": 44,
+   "uniq": {
+    "chars": 3033,
+    "words": 501,
+    "strings": 39
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/html-encoder",
+   "chars": 3239,
+   "words": 577,
+   "strings": 39,
+   "uniq": {
+    "chars": 3034,
+    "words": 538,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/add-vignette",
+   "chars": 3225,
+   "words": 591,
+   "strings": 44,
+   "uniq": {
+    "chars": 2985,
+    "words": 547,
+    "strings": 39
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/webm-to-gif",
+   "chars": 3203,
+   "words": 607,
+   "strings": 36,
+   "uniq": {
+    "chars": 2992,
+    "words": 564,
+    "strings": 33
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-to-image",
+   "chars": 3192,
+   "words": 609,
+   "strings": 35,
+   "uniq": {
+    "chars": 2977,
+    "words": 566,
+    "strings": 32
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/hex-to-text",
+   "chars": 3187,
+   "words": 583,
+   "strings": 39,
+   "uniq": {
+    "chars": 2970,
+    "words": 540,
+    "strings": 35
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-to-csv",
+   "chars": 3174,
+   "words": 571,
+   "strings": 40,
+   "uniq": {
+    "chars": 2955,
+    "words": 533,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/gif-to-png",
+   "chars": 3154,
+   "words": 601,
+   "strings": 41,
+   "uniq": {
+    "chars": 2925,
+    "words": 553,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/yaml-to-json",
+   "chars": 3151,
+   "words": 556,
+   "strings": 42,
+   "uniq": {
+    "chars": 2914,
+    "words": 514,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/file-tools/file-comparator",
+   "chars": 3148,
+   "words": 577,
+   "strings": 44,
+   "uniq": {
+    "chars": 2940,
+    "words": 539,
+    "strings": 41
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/csv-to-tsv",
+   "chars": 3132,
+   "words": 601,
+   "strings": 51,
+   "uniq": {
+    "chars": 2915,
+    "words": 560,
+    "strings": 47
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-to-excel",
+   "chars": 3118,
+   "words": 604,
+   "strings": 38,
+   "uniq": {
+    "chars": 2888,
+    "words": 558,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/heic-to-jpg",
+   "chars": 3105,
+   "words": 582,
+   "strings": 37,
+   "uniq": {
+    "chars": 2900,
+    "words": 542,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/round-corners",
+   "chars": 3103,
+   "words": 582,
+   "strings": 44,
+   "uniq": {
+    "chars": 2882,
+    "words": 538,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/javascript-formatter",
+   "chars": 3100,
+   "words": 507,
+   "strings": 41,
+   "uniq": {
+    "chars": 2860,
+    "words": 469,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/ai-translator",
+   "chars": 3090,
+   "words": 544,
+   "strings": 43,
+   "uniq": {
+    "chars": 2865,
+    "words": 507,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/data-extractor",
+   "chars": 3088,
+   "words": 577,
+   "strings": 39,
+   "uniq": {
+    "chars": 2876,
+    "words": 537,
+    "strings": 35
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/unicode-converter",
+   "chars": 3081,
+   "words": 539,
+   "strings": 38,
+   "uniq": {
+    "chars": 2877,
+    "words": 507,
+    "strings": 35
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-cropper",
+   "chars": 3079,
+   "words": 591,
+   "strings": 55,
+   "uniq": {
+    "chars": 2846,
+    "words": 543,
+    "strings": 47
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/png-to-webp",
+   "chars": 3077,
+   "words": 560,
+   "strings": 40,
+   "uniq": {
+    "chars": 2847,
+    "words": 516,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/ai-paraphraser",
+   "chars": 3064,
+   "words": 536,
+   "strings": 38,
+   "uniq": {
+    "chars": 2857,
+    "words": 500,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/text-truncator",
+   "chars": 3059,
+   "words": 559,
+   "strings": 48,
+   "uniq": {
+    "chars": 2842,
+    "words": 516,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/css-formatter",
+   "chars": 3045,
+   "words": 490,
+   "strings": 41,
+   "uniq": {
+    "chars": 2806,
+    "words": 452,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-flip",
+   "chars": 3036,
+   "words": 537,
+   "strings": 40,
+   "uniq": {
+    "chars": 2817,
+    "words": 496,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/png-to-ico",
+   "chars": 3024,
+   "words": 557,
+   "strings": 47,
+   "uniq": {
+    "chars": 2805,
+    "words": 518,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/file-tools/tar-extractor",
+   "chars": 3020,
+   "words": 541,
+   "strings": 37,
+   "uniq": {
+    "chars": 2807,
+    "words": 500,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/apng-to-gif",
+   "chars": 3013,
+   "words": 562,
+   "strings": 42,
+   "uniq": {
+    "chars": 2777,
+    "words": 517,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-to-jpg",
+   "chars": 3012,
+   "words": 586,
+   "strings": 33,
+   "uniq": {
+    "chars": 2809,
+    "words": 544,
+    "strings": 30
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-unlock",
+   "chars": 3010,
+   "words": 525,
+   "strings": 41,
+   "uniq": {
+    "chars": 2824,
+    "words": 491,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/gif-to-mp4",
+   "chars": 3001,
+   "words": 560,
+   "strings": 40,
+   "uniq": {
+    "chars": 2789,
+    "words": 521,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/text-reverser",
+   "chars": 2999,
+   "words": 525,
+   "strings": 42,
+   "uniq": {
+    "chars": 2756,
+    "words": 482,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/keyword-extractor",
+   "chars": 2982,
+   "words": 525,
+   "strings": 39,
+   "uniq": {
+    "chars": 2774,
+    "words": 489,
+    "strings": 35
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/sentiment-analyzer",
+   "chars": 2976,
+   "words": 507,
+   "strings": 39,
+   "uniq": {
+    "chars": 2753,
+    "words": 471,
+    "strings": 35
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/sticky-notes",
+   "chars": 2970,
+   "words": 552,
+   "strings": 39,
+   "uniq": {
+    "chars": 2763,
+    "words": 514,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/svg-to-png",
+   "chars": 2969,
+   "words": 559,
+   "strings": 45,
+   "uniq": {
+    "chars": 2741,
+    "words": 514,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/file-tools/file-converter",
+   "chars": 2959,
+   "words": 538,
+   "strings": 48,
+   "uniq": {
+    "chars": 2744,
+    "words": 496,
+    "strings": 44
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-reorder-pages",
+   "chars": 2929,
+   "words": 562,
+   "strings": 45,
+   "uniq": {
+    "chars": 2709,
+    "words": 522,
+    "strings": 42
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-extract-text",
+   "chars": 2922,
+   "words": 567,
+   "strings": 39,
+   "uniq": {
+    "chars": 2729,
+    "words": 528,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-crop",
+   "chars": 2910,
+   "words": 565,
+   "strings": 41,
+   "uniq": {
+    "chars": 2710,
+    "words": 526,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-blur",
+   "chars": 2908,
+   "words": 544,
+   "strings": 40,
+   "uniq": {
+    "chars": 2679,
+    "words": 499,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/html-formatter",
+   "chars": 2899,
+   "words": 482,
+   "strings": 40,
+   "uniq": {
+    "chars": 2666,
+    "words": 445,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/text-to-list",
+   "chars": 2894,
+   "words": 544,
+   "strings": 43,
+   "uniq": {
+    "chars": 2682,
+    "words": 504,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/ai-writer",
+   "chars": 2892,
+   "words": 522,
+   "strings": 38,
+   "uniq": {
+    "chars": 2694,
+    "words": 482,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/jpg-to-webp",
+   "chars": 2887,
+   "words": 555,
+   "strings": 40,
+   "uniq": {
+    "chars": 2670,
+    "words": 509,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/gif-tools/gif-to-apng",
+   "chars": 2883,
+   "words": 536,
+   "strings": 41,
+   "uniq": {
+    "chars": 2657,
+    "words": 492,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-organize",
+   "chars": 2862,
+   "words": 539,
+   "strings": 48,
+   "uniq": {
+    "chars": 2675,
+    "words": 506,
+    "strings": 46
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/ico-to-png",
+   "chars": 2848,
+   "words": 562,
+   "strings": 39,
+   "uniq": {
+    "chars": 2622,
+    "words": 516,
+    "strings": 35
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-ai-summary",
+   "chars": 2839,
+   "words": 536,
+   "strings": 41,
+   "uniq": {
+    "chars": 2618,
+    "words": 494,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-minifier",
+   "chars": 2825,
+   "words": 472,
+   "strings": 43,
+   "uniq": {
+    "chars": 2575,
+    "words": 432,
+    "strings": 37
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-pixelator",
+   "chars": 2825,
+   "words": 537,
+   "strings": 44,
+   "uniq": {
+    "chars": 2601,
+    "words": 494,
+    "strings": 40
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/email-generator",
+   "chars": 2808,
+   "words": 483,
+   "strings": 39,
+   "uniq": {
+    "chars": 2597,
+    "words": 449,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/tsv-to-csv",
+   "chars": 2778,
+   "words": 505,
+   "strings": 42,
+   "uniq": {
+    "chars": 2554,
+    "words": 464,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/webp-to-jpg",
+   "chars": 2772,
+   "words": 511,
+   "strings": 39,
+   "uniq": {
+    "chars": 2557,
+    "words": 470,
+    "strings": 35
+   }
+  },
+  {
+   "group": "tool:/tools/text-tools/text-repeater",
+   "chars": 2771,
+   "words": 543,
+   "strings": 52,
+   "uniq": {
+    "chars": 2557,
+    "words": 497,
+    "strings": 47
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/sepia-filter",
+   "chars": 2745,
+   "words": 516,
+   "strings": 40,
+   "uniq": {
+    "chars": 2511,
+    "words": 472,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/bmp-to-png",
+   "chars": 2742,
+   "words": 516,
+   "strings": 34,
+   "uniq": {
+    "chars": 2511,
+    "words": 472,
+    "strings": 30
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/png-to-jpg",
+   "chars": 2704,
+   "words": 489,
+   "strings": 38,
+   "uniq": {
+    "chars": 2476,
+    "words": 445,
+    "strings": 34
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/image-inverter",
+   "chars": 2689,
+   "words": 483,
+   "strings": 36,
+   "uniq": {
+    "chars": 2452,
+    "words": 441,
+    "strings": 32
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/webp-to-png",
+   "chars": 2682,
+   "words": 488,
+   "strings": 35,
+   "uniq": {
+    "chars": 2456,
+    "words": 443,
+    "strings": 31
+   }
+  },
+  {
+   "group": "tool:/tools/ai-tools/text-summarizer",
+   "chars": 2674,
+   "words": 486,
+   "strings": 36,
+   "uniq": {
+    "chars": 2477,
+    "words": 448,
+    "strings": 32
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-delete-pages",
+   "chars": 2650,
+   "words": 523,
+   "strings": 38,
+   "uniq": {
+    "chars": 2457,
+    "words": 483,
+    "strings": 36
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-rotate",
+   "chars": 2633,
+   "words": 481,
+   "strings": 40,
+   "uniq": {
+    "chars": 2437,
+    "words": 444,
+    "strings": 38
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/heic-to-png",
+   "chars": 2615,
+   "words": 491,
+   "strings": 32,
+   "uniq": {
+    "chars": 2408,
+    "words": 450,
+    "strings": 29
+   }
+  },
+  {
+   "group": "tool:/tools/image-tools/jpg-to-png",
+   "chars": 2552,
+   "words": 490,
+   "strings": 34,
+   "uniq": {
+    "chars": 2326,
+    "words": 444,
+    "strings": 30
+   }
+  },
+  {
+   "group": "tool:/tools/developer-tools/json-to-yaml",
+   "chars": 2531,
+   "words": 463,
+   "strings": 36,
+   "uniq": {
+    "chars": 2312,
+    "words": 422,
+    "strings": 32
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-to-html",
+   "chars": 2529,
+   "words": 443,
+   "strings": 36,
+   "uniq": {
+    "chars": 2318,
+    "words": 399,
+    "strings": 33
+   }
+  },
+  {
+   "group": "tool:/tools/pdf-tools/pdf-to-ppt",
+   "chars": 2521,
+   "words": 462,
+   "strings": 35,
+   "uniq": {
+    "chars": 2287,
+    "words": 418,
+    "strings": 31
+   }
+  }
+ ],
+ "common": [
+  {
+   "group": "common:legal-about",
+   "chars": 21691,
+   "words": 3638,
+   "strings": 277,
+   "uniq": {
+    "chars": 20730,
+    "words": 3496,
+    "strings": 251
+   }
+  },
+  {
+   "group": "common:other",
+   "chars": 1783,
+   "words": 282,
+   "strings": 80,
+   "uniq": {
+    "chars": 1578,
+    "words": 249,
+    "strings": 75
+   }
+  },
+  {
+   "group": "common:shared-components",
+   "chars": 8955,
+   "words": 1628,
+   "strings": 297,
+   "uniq": {
+    "chars": 8467,
+    "words": 1537,
+    "strings": 248
+   }
+  },
+  {
+   "group": "common:nav-footer",
+   "chars": 1210,
+   "words": 205,
+   "strings": 75,
+   "uniq": {
+    "chars": 1087,
+    "words": 184,
+    "strings": 71
+   }
+  },
+  {
+   "group": "common:account",
+   "chars": 4270,
+   "words": 727,
+   "strings": 109,
+   "uniq": {
+    "chars": 2726,
+    "words": 471,
+    "strings": 73
+   }
+  },
+  {
+   "group": "common:home-layout",
+   "chars": 8422,
+   "words": 1088,
+   "strings": 146,
+   "uniq": {
+    "chars": 8218,
+    "words": 1058,
+    "strings": 134
+   }
+  },
+  {
+   "group": "common:shared-lib-messages",
+   "chars": 36166,
+   "words": 6556,
+   "strings": 1065,
+   "uniq": {
+    "chars": 33701,
+    "words": 6052,
+    "strings": 940
+   }
+  },
+  {
+   "group": "common:category-pages:ai-tools",
+   "chars": 4653,
+   "words": 843,
+   "strings": 78,
+   "uniq": {
+    "chars": 4245,
+    "words": 775,
+    "strings": 64
+   }
+  },
+  {
+   "group": "common:category-pages:audio-tools",
+   "chars": 4178,
+   "words": 745,
+   "strings": 51,
+   "uniq": {
+    "chars": 3976,
+    "words": 713,
+    "strings": 49
+   }
+  },
+  {
+   "group": "common:category-pages:converter-tools",
+   "chars": 3198,
+   "words": 563,
+   "strings": 37,
+   "uniq": {
+    "chars": 2996,
+    "words": 529,
+    "strings": 35
+   }
+  },
+  {
+   "group": "common:category-pages:developer-tools",
+   "chars": 7108,
+   "words": 1237,
+   "strings": 195,
+   "uniq": {
+    "chars": 6204,
+    "words": 1089,
+    "strings": 149
+   }
+  },
+  {
+   "group": "common:category-pages:file-tools",
+   "chars": 3590,
+   "words": 632,
+   "strings": 47,
+   "uniq": {
+    "chars": 3381,
+    "words": 599,
+    "strings": 45
+   }
+  },
+  {
+   "group": "common:category-pages:gif-tools",
+   "chars": 3447,
+   "words": 674,
+   "strings": 51,
+   "uniq": {
+    "chars": 3267,
+    "words": 638,
+    "strings": 49
+   }
+  },
+  {
+   "group": "common:category-pages:image-tools",
+   "chars": 5268,
+   "words": 966,
+   "strings": 128,
+   "uniq": {
+    "chars": 4722,
+    "words": 878,
+    "strings": 104
+   }
+  },
+  {
+   "group": "common:category-pages:math-tools",
+   "chars": 3310,
+   "words": 506,
+   "strings": 41,
+   "uniq": {
+    "chars": 3112,
+    "words": 480,
+    "strings": 39
+   }
+  },
+  {
+   "group": "common:category-pages:pdf-tools",
+   "chars": 5781,
+   "words": 1084,
+   "strings": 127,
+   "uniq": {
+    "chars": 5347,
+    "words": 1001,
+    "strings": 109
+   }
+  },
+  {
+   "group": "common:category-pages:qr-barcodes-tools",
+   "chars": 2851,
+   "words": 551,
+   "strings": 35,
+   "uniq": {
+    "chars": 2659,
+    "words": 515,
+    "strings": 33
+   }
+  },
+  {
+   "group": "common:category-pages:text-tools",
+   "chars": 4060,
+   "words": 690,
+   "strings": 80,
+   "uniq": {
+    "chars": 3641,
+    "words": 619,
+    "strings": 65
+   }
+  },
+  {
+   "group": "common:category-pages:video-tools",
+   "chars": 4558,
+   "words": 800,
+   "strings": 71,
+   "uniq": {
+    "chars": 4221,
+    "words": 741,
+    "strings": 60
+   }
+  }
+ ],
+ "totals": {
+  "toolCount": 225,
+  "tools": {
+   "chars": 869447,
+   "words": 157228,
+   "strings": 11942
+  },
+  "toolsUniq": {
+   "chars": 789076,
+   "words": 142543,
+   "strings": 8934
+  },
+  "common": {
+   "chars": 134499,
+   "words": 23415,
+   "strings": 2990
+  },
+  "commonUniq": {
+   "chars": 118187,
+   "words": 20581,
+   "strings": 2171
+  },
+  "site": {
+   "chars": 1003946,
+   "words": 180643,
+   "strings": 14932
+  },
+  "siteUniq": {
+   "chars": 903121,
+   "words": 162370,
+   "strings": 10784
+  }
+ }
+}
